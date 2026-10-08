@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 #include <boost/container/flat_map.hpp>
 #include <queue>
 #include <xbyak/xbyak.h>
@@ -23,6 +24,7 @@
 #include "shader_recompiler/ir/reg.h"
 #include "shader_recompiler/ir/srt_gvn_table.h"
 #include "shader_recompiler/ir/value.h"
+#include "bbport_toggles.h"
 
 #ifdef ARCH_X86_64
 
@@ -86,6 +88,15 @@ static bool SrtWalkerSignalHandler(void* context, void* fault_address) {
     // bbport: draw-preparation workers run the same walker concurrently. A thread that faulted
     // on the instruction before another one patched it finds the patch here and retries; decoding
     // it as the original MOV would trip the ASSERT below (exit 23).
+    // A failed check below must not leave through a speculative recovery point with the lock
+    // held (common/assert.cpp): it stops the port as before.
+    sigjmp_buf* const recover = std::exchange(runtime_fault_recover, nullptr);
+    struct Restore {
+        sigjmp_buf* recover;
+        ~Restore() {
+            runtime_fault_recover = recover;
+        }
+    } restore{recover};
     static std::mutex patch_mutex;
     std::scoped_lock patch_lock{patch_mutex};
     const u8* bytes = reinterpret_cast<const u8*>(code);

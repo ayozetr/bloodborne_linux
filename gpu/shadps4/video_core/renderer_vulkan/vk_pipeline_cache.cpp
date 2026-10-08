@@ -40,6 +40,8 @@
 #include "game_profile.h"
 #include "bbport_toggles.h"
 
+// bbport: common/assert.cpp calls it before stopping on a failed check (SpeculativeAssertExit).
+extern void (*g_assert_speculative_exit)();
 extern "C" int runtime_memory_vma_info(uintptr_t address, int* prot, int* type, uintptr_t* end);
 extern "C" const uint64_t* runtime_memory_generation(void);
 
@@ -80,6 +82,22 @@ bool ProgramReadable(const Program& pgm) {
         known_generation = generation;
     }
     return true;
+}
+
+// bbport: a check that fails while a speculative read has its recovery point armed (draw
+// preparation ahead of the GPU thread specializing a shader from descriptors the game may still
+// be rewriting) ends that attempt like a fault does, and the GPU thread prepares the draw in
+// order. Anywhere else the assertion still stops.
+void SpeculativeAssertExit() {
+    sigjmp_buf* const recover = runtime_fault_recover;
+    if (!recover) {
+        return;
+    }
+    runtime_fault_recover = nullptr;
+    std::fputs("GPU: speculative draw preparation abandoned after the check above; the GPU "
+               "thread prepares this draw in order\n",
+               stderr);
+    siglongjmp(*recover, 1);
 }
 } // namespace
 
@@ -336,6 +354,7 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
     : instance{instance_}, scheduler{scheduler_}, liverpool{liverpool_},
       desc_heap{instance, scheduler.GetWorkSemaphore(), DescriptorHeapSizes} {
     sel.regs = &liverpool->regs;
+    g_assert_speculative_exit = SpeculativeAssertExit;
     const auto& vk12_props = instance.GetVk12Properties();
     profile = Shader::Profile{
         .max_viewport_width = instance.GetMaxViewportWidth(),
