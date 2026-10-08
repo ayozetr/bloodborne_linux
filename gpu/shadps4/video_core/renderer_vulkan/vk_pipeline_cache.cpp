@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <deque>
@@ -38,6 +39,49 @@
 #include "bbport_settings.h"
 #include "game_profile.h"
 #include "bbport_toggles.h"
+
+extern "C" int runtime_memory_vma_info(uintptr_t address, int* prot, int* type, uintptr_t* end);
+extern "C" const uint64_t* runtime_memory_generation(void);
+
+namespace {
+// bbport: a stage's program address points at readable memory. A malformed command buffer (a
+// register packet whose values are the next packets) set a shader address of 0x4c0012d0000 and
+// reading the program there ended the game; such a draw or dispatch is skipped instead.
+template <typename Program>
+bool ProgramReadable(const Program& pgm) {
+    const auto address = reinterpret_cast<uintptr_t>(pgm.template Address<u32*>());
+    if (!address) {
+        return false;
+    }
+    // Checked for every stage of every draw: the last readable mapping found is remembered for
+    // as long as the mapping table keeps its generation (an odd one is a change in progress).
+    thread_local uintptr_t known_start = 0, known_end = 0;
+    thread_local uint64_t known_generation = 1;
+    const uint64_t generation = __atomic_load_n(runtime_memory_generation(), __ATOMIC_ACQUIRE);
+    if (generation == known_generation && address >= known_start && address < known_end) {
+        return true;
+    }
+    int prot = 0, type = -1;
+    uintptr_t end = 0;
+    if (!runtime_memory_vma_info(address, &prot, &type, &end)) {
+        return true; // not a guest mapping (the executable's image)
+    }
+    if ((prot & 1) == 0) {
+        static std::atomic<int> reports{0};
+        if (reports.fetch_add(1, std::memory_order_relaxed) < 8) {
+            std::fprintf(stderr, "Pipeline: shader program address %#llx is not readable; the draw "
+                                 "is skipped\n", (unsigned long long)address);
+        }
+        return false;
+    }
+    if ((generation & 1) == 0) {
+        known_start = address; // the mapping's start is not known: from here on
+        known_end = end;
+        known_generation = generation;
+    }
+    return true;
+}
+} // namespace
 
 namespace Vulkan {
 
@@ -463,7 +507,7 @@ const GraphicsPipeline* PipelineCache::TryPreparedPipeline(const PreparedDraw& p
     for (u32 i = 0; i < prepared.num_stages; ++i) {
         const auto& stage = prepared.stages[i];
         const auto* pgm = regs.ProgramForStage(static_cast<u32>(stage.hw_stage));
-        if (!pgm || !pgm->Address<u32*>()) {
+        if (!pgm || !ProgramReadable(*pgm)) {
             return nullptr;
         }
         const auto params = AmdGpu::GetParams(*pgm);
@@ -914,7 +958,7 @@ bool PipelineCache::RefreshGraphicsStages(PipelineSelection& sel) {
         }
 
         const auto* pgm = regs.ProgramForStage(stage_in_idx);
-        if (!pgm || !pgm->Address<u32*>()) {
+        if (!pgm || !ProgramReadable(*pgm)) {
             key.stage_hashes[stage_out_idx] = 0;
             sel.infos[stage_out_idx] = nullptr;
             return false;
@@ -1025,6 +1069,9 @@ bool PipelineCache::RefreshGraphicsStages(PipelineSelection& sel) {
 bool PipelineCache::RefreshComputeKey() {
     Shader::Backend::Bindings binding{};
     const auto& cs_pgm = liverpool->GetCsRegs();
+    if (!ProgramReadable(cs_pgm)) {
+        return false;
+    }
     const auto cs_params = AmdGpu::GetParams(cs_pgm);
     std::tie(sel.infos[0], sel.modules[0], sel.fetch_shader, compute_key.value) =
         GetProgram(sel, HwStage::Compute, SwStage::Compute, cs_params, binding);
