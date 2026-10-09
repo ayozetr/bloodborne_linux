@@ -80,7 +80,8 @@ def entry(name, exe, start_dir, icon, options=''):
 
 
 def add_shortcut(vdf_path, name, exe, start_dir, icon, options=''):
-    """Adds the shortcut to one shortcuts.vdf, or updates the entry that starts the same exe.
+    """Adds the shortcut to one shortcuts.vdf, or updates the entry that starts the same exe or
+    has the same name and options (this port from another place: a checkout, then the AppImage).
     Returns 'added' or 'updated'. A copy of the old file is kept as shortcuts.vdf.bak."""
     vdf_path = Path(vdf_path)
     data = vdf_path.read_bytes() if vdf_path.exists() else b''
@@ -93,7 +94,8 @@ def add_shortcut(vdf_path, name, exe, start_dir, icon, options=''):
     target = f'"{exe}"'.lower()
     for index, (kind, key, value) in enumerate(shortcuts):
         fields = {k.lower(): v for _t, k, v in value} if kind == MAP else {}
-        if str(fields.get('exe', '')).lower() == target:
+        same_port = fields.get('appname') == name and fields.get('launchoptions') == options and options
+        if str(fields.get('exe', '')).lower() == target or same_port:
             # Keep what Steam or the player added (play time, tags).
             kept = {k.lower() for k in ('LastPlayTime', 'tags')}
             old = {k.lower(): (t, k, v) for t, k, v in value}
@@ -156,7 +158,10 @@ if __name__ == '__main__':  # self-test on a temporary file
         print(add_shortcut(vdf, 'Bloodborne', '/games/bb/launcher/bb-launcher.sh', '/games/bb', 'x.png', '--play'))
         print(add_shortcut(vdf, 'Other', '/other/o', '/other', ''))
         print(add_shortcut(vdf, 'Bloodborne', '/games/bb/launcher/bb-launcher.sh', '/games/bb', 'y.png', '--play'))
+        print(add_shortcut(vdf, 'Bloodborne', '/apps/Bloodborne.AppImage', '/apps', 'y.png', '--play'))
+        print(add_shortcut(vdf, 'Bloodborne', '/shadps4/shadps4', '/shadps4', '', 'CUSA03173'))
         root = parse(vdf.read_bytes())[0]
-        print([[f for f in e[2] if f[1] in ('AppName', 'icon', 'appid')] for e in root[0][2]])
+        print([[f for f in e[2] if f[1] in ('AppName', 'Exe')] for e in root[0][2]])
+        assert len(root[0][2]) == 3
         assert dump(root) + bytes([END]) == vdf.read_bytes()
     print(os.path.basename(__file__), 'ok')
