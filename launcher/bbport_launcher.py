@@ -14,6 +14,7 @@ import re
 import signal
 import subprocess
 import sys
+import threading
 from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, tr
@@ -30,6 +31,7 @@ PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the packag
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
 from mods import discover as discover_mods  # noqa: E402
 import game_check  # noqa: E402
+import online  # noqa: E402
 from patches import external_patches  # noqa: E402
 # Packaged (AppImage): generated files, saves and bbport.ini live in BB_DATA_DIR.
 PACKAGED = bool(os.environ.get("BB_PREBUILT"))
@@ -158,6 +160,14 @@ DEFAULTS = {
     "gpu_profile": False,
     "vk_validation": False,
     "extra_env": "",
+    # Co-op (Online page): off by default; shadPS4's public shadNet server and The Hunter's Dream.
+    "online": False,
+    "online_community": online.COMMUNITY_SERVER,
+    "online_server": online.SHADNET_SERVER,
+    "online_webapi": "",
+    "online_npid": "",
+    "online_password": "",
+    "online_upnp": True,
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -187,6 +197,8 @@ def load_settings():
 
 def save_settings(settings):
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_FILE.touch(mode=0o600)
+    CONFIG_FILE.chmod(0o600)  # it holds the shadNet password
     CONFIG_FILE.write_text(json.dumps(settings, indent=2, ensure_ascii=False))
 
 
@@ -309,6 +321,16 @@ def game_environment(s):
         env["BB_GPU_PROFILE"] = "1"
     if s["vk_validation"]:
         env["BB_VK_VALIDATION"] = "1"
+    if s.get("online"):
+        server = s["online_server"].strip() or online.SHADNET_SERVER
+        community = online.community_address(s["online_community"])
+        env["BB_ONLINE"] = "1"
+        env["BB_SHADNET_SERVER"] = server
+        env["BB_SHADNET_WEBAPI"] = online.webapi_setting(s["online_webapi"], server, community)
+        env["BB_SHADNET_NPID"] = s["online_npid"].strip()
+        env["BB_SHADNET_PASSWORD"] = s["online_password"]
+        env["BB_UPNP"] = "1" if s["online_upnp"] else "0"
+        env["BB_COMMUNITY_SERVER"] = community
     for item in s["extra_env"].split():
         if "=" in item:
             key, value = item.split("=", 1)
@@ -445,6 +467,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             *self.log_view.get_buffer().get_bounds(), False) if hasattr(self, "log_view") else ""
         self.stack.add_titled_with_icon(self.build_settings_page(), "settings", tr("Настройки"),
                                         "preferences-system-symbolic")
+        self.stack.add_titled_with_icon(self.build_online_page(), "online", tr("Онлайн"),
+                                        "network-workgroup-symbolic")
         self.stack.add_titled_with_icon(self.build_cheats_page(), "cheats", tr("Читы"),
                                         "applications-games-symbolic")
         self.stack.add_titled_with_icon(self.build_log_page(), "log", tr("Журнал"),
@@ -927,6 +951,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["vk_validation"] = self.validation_row.get_active()
         s["extra_env"] = self.extra_row.get_text().strip()
         s["mods_enabled"] = self.mods_enabled_row.get_active()
+        s["online"] = self.online_row.get_active()
+        s["online_community"] = self.community_row.get_text().strip()
+        s["online_server"] = self.server_row.get_text().strip()
+        s["online_webapi"] = self.webapi_row.get_text().strip()
+        s["online_npid"] = self.npid_row.get_text().strip()
+        s["online_password"] = self.password_row.get_text()
+        s["online_upnp"] = self.upnp_row.get_active()
         self.save_mod_profile()
         self.save_patch_profile()
         save_settings(s)
@@ -1117,6 +1148,97 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.choose_folder(tr("Папка патчей"), patches_dir(self.settings), chosen)
 
     # --- log page ------------------------------------------------------------------------
+
+    # --- online page ---------------------------------------------------------------------
+
+    def build_online_page(self):
+        s = self.settings
+        page = Adw.PreferencesPage()
+        play = Adw.PreferencesGroup(description=tr(
+            "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы "
+            "идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия "
+            "игры 1.09 и тот же сервер"))
+        self.online_row = Adw.SwitchRow(title=tr("Играть онлайн"),
+                                        subtitle=tr("Выключено: игра остаётся офлайн, как раньше"),
+                                        active=s["online"])
+        play.add(self.online_row)
+        page.add(play)
+
+        game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
+        self.community_row = Adw.EntryRow(title=tr("Игровой сервер"), text=s["online_community"])
+        game.add(self.community_row)
+        page.add(game)
+
+        coop = Adw.PreferencesGroup(
+            title=tr("Сервер кооператива (колокола и призывы)"),
+            description=tr("srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера "
+                           "укажите host:port от его владельца. WebAPI: оставьте пустым, тогда "
+                           "берётся адрес сервера с портом 31315"))
+        self.server_row = Adw.EntryRow(title=tr("Адрес сервера"), text=s["online_server"])
+        self.webapi_row = Adw.EntryRow(title=tr("Адрес WebAPI"), text=s["online_webapi"])
+        coop.add(self.server_row)
+        coop.add(self.webapi_row)
+        page.add(coop)
+
+        account = Adw.PreferencesGroup(
+            title=tr("Учётная запись"),
+            description=tr("Имя учётной записи shadNet, не email. Зарегистрируйтесь на "
+                           "shadnet.shadps4.net или спросите владельца частного сервера. Пароль "
+                           "хранится на этом компьютере вместе с настройками лаунчера"))
+        self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=s["online_npid"])
+        self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=s["online_password"])
+        account.add(self.npid_row)
+        account.add(self.password_row)
+        page.add(account)
+
+        connection = Adw.PreferencesGroup(
+            title=tr("Соединение"),
+            description=tr("У всех в сессии должны быть одна версия игры (1.09) и один сервер. "
+                           "Читы меняют игру и для других игроков: выключайте их при совместной игре"))
+        self.upnp_row = Adw.SwitchRow(title=tr("UPnP (открыть порт на роутере автоматически)"),
+                                      subtitle=tr("Выключите при Tailscale или другом VPN"),
+                                      active=s["online_upnp"])
+        connection.add(self.upnp_row)
+        test = Adw.ActionRow(title=tr("Проверить соединение"))
+        self.test_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
+        self.test_button.connect("clicked", self.on_test_connection)
+        test.add_suffix(self.test_button)
+        connection.add(test)
+        self.test_rows = []
+        self.connection_group = connection
+        page.add(connection)
+        return page
+
+    def online_addresses(self):
+        server = self.server_row.get_text().strip() or online.SHADNET_SERVER
+        community = online.community_address(self.community_row.get_text())
+        webapi = online.webapi_setting(self.webapi_row.get_text(), server, community)
+        return server, webapi, community
+
+    def on_test_connection(self, _button):
+        server, webapi, community = self.online_addresses()
+        names = {"game": tr("Игровой сервер"), "shadnet": tr("Сервер shadNet"), "webapi": "WebAPI"}
+        for row in self.test_rows:
+            self.connection_group.remove(row)
+        self.test_rows = []
+        self.test_button.set_sensitive(False)
+        self.test_button.set_label(tr("Проверка…"))
+
+        def show(results):
+            for name, address, ok, detail in results:
+                row = Adw.ActionRow(title=f"{names[name]}: {address}",
+                                    subtitle=tr("доступен") if ok else f'{tr("недоступен")} ({detail})')
+                row.add_prefix(Gtk.Image(icon_name="emblem-ok-symbolic" if ok else "dialog-error-symbolic"))
+                self.connection_group.add(row)
+                self.test_rows.append(row)
+            self.test_button.set_sensitive(True)
+            self.test_button.set_label(tr("Проверить"))
+            return False
+
+        def work():
+            results = online.check(server, webapi, community)
+            GLib.idle_add(show, results)
+        threading.Thread(target=work, daemon=True).start()
 
     # --- cheats page ---------------------------------------------------------------------
 

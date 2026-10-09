@@ -172,6 +172,12 @@ else
     bash build.sh
     probe=${BB_PROBE:-out/bb-probe}  # BB_PROBE: a wrapper (gdb) around it
 fi
+# Co-op (BB_ONLINE=1, launcher: Online co-op): the game's own server goes to the community
+# server, summon signs to the shadNet WebAPI (scripts/online.py).
+if [[ ${BB_ONLINE:-0} == 1 ]]; then
+    SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}")
+    export SHADPS4_HTTP_HOST_OVERRIDES_JSON
+fi
 probe_args=("$out/boot-linked.bin" --content-profile "$out/content.bin" --patches "$out/patches.bin" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
 if [[ -n ${mod_game:-} ]]; then
     "$probe" "${probe_args[@]}" &
