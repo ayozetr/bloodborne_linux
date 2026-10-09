@@ -7,6 +7,12 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    "Папка DLC": "DLC folder",
+    "Выбрать папку DLC": "Choose the DLC folder",
+    "Не использовать DLC": "Don't use DLC",
+    "Найдено DLC: {}": "DLC found: {}",
+    "Не используется": "Not used",
+    "Нет DLC этой игры в папке": "No DLC of this game in the folder",
     # Window, pages, buttons
     "Запустить": "Play",
     "Остановить": "Stop",
@@ -328,6 +334,12 @@ EN = {
 }
 
 PT_BR = {
+    "Папка DLC": "Pasta de DLC",
+    "Выбрать папку DLC": "Escolher a pasta de DLC",
+    "Не использовать DLC": "Não usar DLC",
+    "Найдено DLC: {}": "DLC encontradas: {}",
+    "Не используется": "Não usada",
+    "Нет DLC этой игры в папке": "Nenhuma DLC deste jogo na pasta",
     # Window, pages, buttons
     "Запустить": "Jogar",
     "Остановить": "Parar",
@@ -605,6 +617,12 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    "Папка DLC": "Carpeta de DLC",
+    "Выбрать папку DLC": "Elegir la carpeta de DLC",
+    "Не использовать DLC": "No usar DLC",
+    "Найдено DLC: {}": "DLC encontrados: {}",
+    "Не используется": "Sin usar",
+    "Нет DLC этой игры в папке": "No hay DLC de este juego en la carpeta",
     "Запустить": "Jugar",
     "Остановить": "Detener",
     "Настройки": "Ajustes",
@@ -879,6 +897,12 @@ ES = {
 
 # Italian.
 IT = {
+    "Папка DLC": "Cartella dei DLC",
+    "Выбрать папку DLC": "Scegli la cartella dei DLC",
+    "Не использовать DLC": "Non usare i DLC",
+    "Найдено DLC: {}": "DLC trovati: {}",
+    "Не используется": "Non usata",
+    "Нет DLC этой игры в папке": "Nessun DLC di questo gioco nella cartella",
     "Запустить": "Gioca",
     "Остановить": "Ferma",
     "Настройки": "Impostazioni",
@@ -1153,6 +1177,12 @@ IT = {
 
 # French.
 FR = {
+    "Папка DLC": "Dossier des DLC",
+    "Выбрать папку DLC": "Choisir le dossier des DLC",
+    "Не использовать DLC": "Ne pas utiliser de DLC",
+    "Найдено DLC: {}": "DLC trouvés : {}",
+    "Не используется": "Non utilisé",
+    "Нет DLC этой игры в папке": "Aucun DLC de ce jeu dans le dossier",
     "Запустить": "Jouer",
     "Остановить": "Arrêter",
     "Настройки": "Paramètres",
@@ -1427,6 +1457,12 @@ FR = {
 
 # German.
 DE = {
+    "Папка DLC": "DLC-Ordner",
+    "Выбрать папку DLC": "DLC-Ordner wählen",
+    "Не использовать DLC": "Keine DLC verwenden",
+    "Найдено DLC: {}": "Gefundene DLC: {}",
+    "Не используется": "Nicht verwendet",
+    "Нет DLC этой игры в папке": "Keine DLC dieses Spiels im Ordner",
     "Запустить": "Spielen",
     "Остановить": "Stoppen",
     "Настройки": "Einstellungen",

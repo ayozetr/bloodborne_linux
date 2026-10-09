@@ -159,6 +159,12 @@ launcher (*Controls*). The character name is typed on the keyboard in a box over
 The touchpad: its left half (Tab, Back/Select) opens the gestures, the right half (Backspace)
 the key items.
 
+Add-ons: `BB_DLC_DIR=/path/to/dlc` (the launcher's *DLC folder*) holds the dumped add-ons of
+the game, one folder each (`SPEXPANSIONDLC03/sce_sys/param.sfo`, ...). Their data ships with
+the 1.09 update, so a folder with only `sce_sys` is enough: `scripts/content_profile.py` lists
+the add-ons of this title into `out/content.bin` and `sceAppContentGetAddcontInfoList` reports
+them to the game. The GOTY edition (CUSA03173) needs none.
+
 **Resolution and preset changes:** for outputs other than 1080p (720p on the Steam Deck,
 1440p, 4K) the whole game renders at the preset's resolution, set by a patch at start — the
 fastest path. Changing the output or the preset in the in-game menu then needs *Apply and

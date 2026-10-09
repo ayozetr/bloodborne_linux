@@ -1,5 +1,6 @@
 /* Offline AppContent provider for the configured base-game profile.
- * No package/DLC mounting, downloads, entitlement or license emulation. */
+ * Add-ons are reported from the profile (the dumped DLC folders); nothing is
+ * mounted, downloaded or license-checked. */
 #include "runtime.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,11 +12,23 @@
 static unsigned refs, initialized, configured;
 static uint32_t parameters[5];
 static unsigned queries, lists;
+static RuntimeAddon addons[RUNTIME_MAX_ADDONS];
+static uint32_t addon_count;
 void runtime_content_configure(const uint32_t values[5]) {
     if (refs || initialized || (values[0]!=1 && values[0]!=3)) {
         fputs("ERROR: invalid or late content profile\n",stderr); exit(1);
     }
     memcpy(parameters,values,sizeof(parameters)); configured=1;
+}
+void runtime_content_configure_addons(const RuntimeAddon *list,uint32_t count) {
+    if (refs || initialized || count>RUNTIME_MAX_ADDONS) {
+        fputs("ERROR: invalid or late add-on list\n",stderr); exit(1);
+    }
+    for (uint32_t i=0;i<count;++i) {
+        addons[i]=list[i]; addons[i].label[16]=0;
+        printf("Runtime: AppContent add-on %s (status %u)\n",addons[i].label,addons[i].status);
+    }
+    addon_count=count;
 }
 static void require_provider(void) {
     if (!configured) { fputs("STOP: AppContent needs --content-profile\n",stderr); exit(21); }
@@ -55,7 +68,7 @@ static ABI int32_t content_init(const unsigned char *init,unsigned char *boot) {
     /* Only the reserved-zero init profile is implemented. */
     for (unsigned i=0;i<32;++i) if (init[i]) return PARAMETER;
     memset(boot,0,40); initialized=1;
-    puts("Runtime: AppContent initialized; offline base-game profile, no mounted add-ons");
+    printf("Runtime: AppContent initialized; offline base-game profile, %u add-ons\n",addon_count);
     return 0;
 }
 static void require_initialized(void) {
@@ -73,9 +86,16 @@ static ABI int32_t addon_list(uint32_t service,void *list,uint32_t capacity,uint
     require_initialized();
     if (service) { fputs("STOP: nonzero AppContent service label unsupported\n",stderr); exit(21); }
     if ((!capacity || !list) && !hits) return PARAMETER;
-    /* No add-ons are mounted by this provider. Never touch unused list slots. */
-    if (hits) *hits=0;
-    ++lists; return 0;
+    /* SceAppContentAddcontInfo: 17-byte entitlement label, 3 padding bytes,
+       download status. Never touch unused list slots. */
+    uint32_t n=0;
+    if (list) for (;n<capacity && n<addon_count;++n) {
+        unsigned char *e=(unsigned char *)list+n*24;
+        memset(e,0,20); memcpy(e,addons[n].label,16); memcpy(e+20,&addons[n].status,4);
+    }
+    if (hits) *hits=list ? n : addon_count;
+    if (!lists++) printf("Runtime: AppContent add-on list queried; %u reported\n",hits ? *hits : n);
+    return 0;
 }
 uintptr_t runtime_content_resolve(const char *name) {
     if (!strcmp(name,"g8cM39EUZ6o#M#N")) return (uintptr_t)module_load;

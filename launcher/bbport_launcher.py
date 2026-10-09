@@ -30,6 +30,7 @@ from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
 from mods import discover as discover_mods  # noqa: E402
+import content_profile  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
 from patches import external_patches  # noqa: E402
@@ -137,6 +138,7 @@ DEFAULTS = {
     "ui_language": "",
     "game_dir": "" if PACKAGED else str(PORT_DIR.parent / "CUSA03173"),
     "user_dir": "",
+    "dlc_dir": "",
     "mods_dir": "",
     "mods_enabled": True,
     "patches_dir": "",
@@ -290,6 +292,8 @@ def game_environment(s):
     env["BB_GAME_DIR"] = str(Path(s["game_dir"]).expanduser())
     if s["user_dir"]:
         env["BB_USER_DIR"] = s["user_dir"]
+    if s.get("dlc_dir"):
+        env["BB_DLC_DIR"] = str(Path(s["dlc_dir"]).expanduser())
     env["BB_MODS_DIR"] = str(Path(s.get("mods_dir") or DATA_DIR / "mods").expanduser())
     env["BB_MODS_CONFIG"] = str(DATA_DIR / "mods.json")
     env["BB_MODS_ENABLED"] = "1" if s.get("mods_enabled", True) else "0"
@@ -491,6 +495,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_launch_button()
         self.update_game_status()
         self.update_user_status()
+        self.update_dlc_status()
         self.update_upscaler_status()
 
     def update_launch_button(self):
@@ -539,6 +544,15 @@ class LauncherWindow(Adw.ApplicationWindow):
                                       self.on_reset_user)
         self.user_row.add_suffix(self.user_reset)
         game.add(self.user_row)
+        # Dumped add-ons (one folder each); their data ships with the 1.09 update.
+        self.dlc_row = Adw.ActionRow(title=tr("Папка DLC"))
+        self.dlc_status = Gtk.Image()
+        self.dlc_row.add_suffix(self.dlc_status)
+        self.dlc_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку DLC"),
+                                            self.on_choose_dlc))
+        self.dlc_reset = flat_button("edit-undo-symbolic", tr("Не использовать DLC"), self.on_reset_dlc)
+        self.dlc_row.add_suffix(self.dlc_reset)
+        game.add(self.dlc_row)
         self.language_row = combo_row(tr("Язык системы"), None, LANGUAGES, self.settings["language"])
         game.add(self.language_row)
         steam = Adw.ActionRow(title=tr("Добавить в Steam"),
@@ -800,6 +814,35 @@ class LauncherWindow(Adw.ApplicationWindow):
                                           else tr("Сохранений пока нет: игра создаст их здесь"))
         self.user_reset.set_sensitive(custom)
 
+    def update_dlc_status(self):
+        path = self.settings.get("dlc_dir", "")
+        found = []
+        if path:
+            try:
+                info = content_profile.sfo((self.game_dir() / "sce_sys/param.sfo").read_bytes())
+                found = content_profile.addons(Path(path).expanduser(), info.get("TITLE_ID"))
+            except (OSError, ValueError, IndexError):
+                pass
+        self.dlc_row.set_subtitle(f"{path}\n{tr('Найдено DLC: {}').format(len(found))}" if path
+                                  else tr("Не используется"))
+        self.dlc_status.set_from_icon_name("object-select-symbolic" if found else
+                                           "dialog-warning-symbolic" if path else None)
+        self.dlc_status.set_tooltip_text(", ".join(label for label, _status in found)
+                                         or (tr("Нет DLC этой игры в папке") if path else None))
+        self.dlc_reset.set_sensitive(bool(path))
+
+    def on_choose_dlc(self, _button):
+        def chosen(path):
+            self.settings["dlc_dir"] = path
+            self.update_dlc_status()
+            self.store()
+        self.choose_folder(tr("Папка DLC"), self.settings.get("dlc_dir") or self.game_dir(), chosen)
+
+    def on_reset_dlc(self, _button):
+        self.settings["dlc_dir"] = ""
+        self.update_dlc_status()
+        self.store()
+
     def choose_folder(self, title, current, done):
         dialog = Gtk.FileDialog(title=title)
         if Path(current).is_dir():
@@ -887,6 +930,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         def chosen(path):
             self.settings["game_dir"] = path
             self.update_game_status()
+            self.update_dlc_status()
             self.store()
         self.choose_folder(tr("Папка игры (с eboot.bin)"), self.game_dir(), chosen)
 

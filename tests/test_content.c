@@ -20,6 +20,22 @@ int main(int argc,char **argv) {
     if (argc>1 && !strcmp(argv[1],"--missing")) { load(0xb4); return 99; }
     const uint32_t profile[]={1,13,0x80000000,0,7};
     runtime_content_configure(profile);
+    if (argc>1 && !strcmp(argv[1],"--addons")) {
+        const RuntimeAddon dlc[]={{"SPEXPANSIONDLC03",0},{"SPDLCMESSENGER00",4}};
+        runtime_content_configure_addons(dlc,2);
+        unsigned char initial[32]={0}, boot[40];
+        assert(load(0xb4)==0 && init(initial,boot)==0);
+        uint32_t hits=99;
+        assert(list(0,NULL,0,&hits)==0 && hits==2);
+        unsigned char entries[3*24]; memset(entries,0xaa,sizeof(entries));
+        assert(list(0,entries,1,&hits)==0 && hits==1);
+        assert(!memcmp(entries,"SPEXPANSIONDLC03\0\0\0\0\0\0\0\0",24));
+        for (unsigned i=24;i<sizeof(entries);++i) assert(entries[i]==0xaa);
+        assert(list(0,entries,3,&hits)==0 && hits==2);
+        assert(!memcmp(entries+24,"SPDLCMESSENGER00\0\0\0\0\4\0\0\0",24));
+        for (unsigned i=48;i<sizeof(entries);++i) assert(entries[i]==0xaa);
+        puts("PASS: AppContent add-on list"); return 0;
+    }
     if (argc>1 && !strcmp(argv[1],"--unknown")) {
         /* Other system modules are host-provided: reference counted, independent. */
         assert((uint32_t)loaded(0xb5)==0x805a1001);

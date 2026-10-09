@@ -77,6 +77,14 @@ On a PC with a GeForce RTX, run `bash tools/build_dlss.sh` once after `build.sh`
 what it needs from the NVIDIA DLSS SDK and builds the bridge. Then choose **DLSS** as the
 upscaler.
 
+### DLC
+
+The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. With the base game,
+dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`, `SPDLCMESSENGER00`…) with only
+`sce_sys` inside, because their data ships with the 1.09 update. Put them in one folder and pick
+it in the launcher (**Game → DLC folder**), or set `BB_DLC_DIR=/path/to/dlc` for `run.sh`. The
+launcher shows how many it found.
+
 ## Credits
 
 - [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc): **bbport**, the
