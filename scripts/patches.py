@@ -39,6 +39,17 @@ EFFECTS={
     'skip_intro':(None,'Skip Intro'),
     'debug_camera':(None,'Restore Debug Camera'),
     'debug_menu':(None,'Restore Debug Menu (READ NOTES)'),
+    # Cheats and gameplay tweaks (launcher "Cheats" page).
+    'cheat_no_death':(None,'Player No Dead (Read note)'),
+    'cheat_stealth':(None,'Player Stealth (Read note)'),
+    'cheat_silent':(None,'Player Silent (Read note)'),
+    'cheat_rally_no_decay':(None,'No Rally Decay'),
+    'cheat_enemy_control':(None,'Enemy Control'),
+    'tweak_no_rally':(None,'Disable Rally (HP Regain)'),
+    'tweak_camera_distance':(None,'Increased camera distance'),
+    'tweak_no_camera_rotation':(None,'Disable Camera Auto Rotation via Movement'),
+    'tweak_easy_run':(None,'Sensitive Analog Input (easier to run)'),
+    'tweak_ragdoll':(None,'DS1-like physics'),
 }
 # Intel CPUs: the game's tone mapping turns black (DLC areas most; reported as darker than on the
 # PS4): the game code runs natively, and Intel's approximate float instructions differ from the
@@ -83,6 +94,13 @@ def effect_patches(settings):
         if key not in settings: continue
         name=on if settings[key]=='1' else off
         if name: names.append(name)
+    # Enemy Control and the free camera use the same buttons: the free camera wins.
+    if 'Enemy Control' in names and 'Restore Debug Camera' in names:
+        names.remove('Enemy Control')
+        print('Patches: Enemy Control skipped (it conflicts with the free camera)')
+    # Rally that never decays means nothing without Rally.
+    if 'No Rally Decay' in names and 'Disable Rally (HP Regain)' in names:
+        names.remove('No Rally Decay')
     lod=MODEL_LOD.get(settings.get('model_lod','0'))
     if lod: names.append(lod)
     return names

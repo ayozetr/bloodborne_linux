@@ -93,6 +93,24 @@ EFFECTS = [
     ("debug_camera", "Свободная камера (Cross + L3 / Space + Z)", False),
     ("debug_menu", "Debug menu (левый touchpad / Tab; нужны шрифты)", False),
 ]
+# Cheats and gameplay tweaks (community patches for 1.09, applied at start): bbport.ini key, title,
+# subtitle. All off by default.
+CHEATS = [
+    ("cheat_no_death", "Бессмертие", "Урон проходит, но здоровье не опускается ниже 1"),
+    ("cheat_stealth", "Невидимость", "Враги не видят вас и не реагируют, пока вы не атакуете"),
+    ("cheat_silent", "Бесшумность", "Враги не слышат вас, но видят"),
+    ("cheat_rally_no_decay", "Rally не угасает", "Здоровье для Rally не исчезает со временем"),
+    ("cheat_enemy_control", "Управление врагом", "R3: управлять целью, L3: вернуться. "
+                                                  "Не вместе со свободной камерой"),
+]
+TWEAKS = [
+    ("tweak_no_rally", "Без Rally", "Атаки не возвращают здоровье"),
+    ("tweak_camera_distance", "Камера дальше", "Камера дальше от персонажа"),
+    ("tweak_no_camera_rotation", "Без автоповорота камеры",
+     "Камера не поворачивается сама при движении; ручное управление и захват цели работают"),
+    ("tweak_easy_run", "Бег с меньшим наклоном стика", "Бег примерно с 70% наклона стика вместо 90%"),
+    ("tweak_ragdoll", "Физика тел как в Dark Souls", "Тела и предметы разлетаются от ударов"),
+]
 MODEL_LOD = [("Как в игре", "0"), ("Максимальная (-2)", "-2"), ("Ниже (1)", "1"),
              ("Минимальная (2)", "2")]
 FPS_MODES = [("Без ограничения (патч)", "uncap"), ("60", "60"), ("90", "90"),
@@ -152,6 +170,7 @@ INI_DEFAULTS = {
     "model_lod": "0",
     "live_resolution": "0",
     **{key: "1" if default else "0" for key, _, default in EFFECTS},
+    **{key: "0" for key, _, _ in CHEATS + TWEAKS},
 }
 
 
@@ -424,6 +443,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             *self.log_view.get_buffer().get_bounds(), False) if hasattr(self, "log_view") else ""
         self.stack.add_titled_with_icon(self.build_settings_page(), "settings", tr("Настройки"),
                                         "preferences-system-symbolic")
+        self.stack.add_titled_with_icon(self.build_cheats_page(), "cheats", tr("Читы"),
+                                        "applications-games-symbolic")
         self.stack.add_titled_with_icon(self.build_log_page(), "log", tr("Журнал"),
                                         "utilities-terminal-symbolic")
         self.log_view.get_buffer().set_text(log_text)
@@ -911,6 +932,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "model_lod": combo_value(self.lod_row),
             "live_resolution": combo_value(self.live_row),
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
+            **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
         })
         save_ini(self.ini, self.ini_lines)
         self.ini, self.ini_lines = load_ini()
@@ -1028,6 +1050,28 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.choose_folder(tr("Папка патчей"), patches_dir(self.settings), chosen)
 
     # --- log page ------------------------------------------------------------------------
+
+    # --- cheats page ---------------------------------------------------------------------
+
+    def build_cheats_page(self):
+        page = Adw.PreferencesPage()
+        self.cheat_rows = {}
+        for title, description, items in (
+                (tr("Читы"), tr("Патчи игры версии 1.09, применяются при запуске. Для обычного "
+                                "прохождения и игры по сети оставьте их выключенными"), CHEATS),
+                (tr("Изменения игрового процесса"), None, TWEAKS)):
+            group = Adw.PreferencesGroup(title=title, description=description)
+            for key, name, subtitle in items:
+                row = Adw.SwitchRow(title=tr(name), subtitle=tr(subtitle),
+                                    active=self.ini.get(key, "0") == "1")
+                self.cheat_rows[key] = row
+                group.add(row)
+            page.add(group)
+        # Enemy control and the free camera use the same buttons: one at a time.
+        control, camera = self.cheat_rows["cheat_enemy_control"], self.effect_rows["debug_camera"]
+        control.connect("notify::active", lambda row, _p: row.get_active() and camera.set_active(False))
+        camera.connect("notify::active", lambda row, _p: row.get_active() and control.set_active(False))
+        return page
 
     def build_log_page(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)

@@ -253,6 +253,33 @@ EN = {
     "Слои валидации Vulkan": "Vulkan validation layers",
     "Сильно замедляет": "Much slower",
     "Доп. переменные (ИМЯ=значение через пробел)": "Extra variables (NAME=value, space-separated)",
+    # Cheats page
+    "Читы": "Cheats",
+    "Патчи игры версии 1.09, применяются при запуске. Для обычного прохождения и игры по сети оставьте их выключенными":
+        "Game patches for version 1.09, applied at start. Leave them off for a normal play-through and online play",
+    "Изменения игрового процесса": "Gameplay tweaks",
+    "Бессмертие": "Never die",
+    "Урон проходит, но здоровье не опускается ниже 1": "You take damage but never drop below 1 HP",
+    "Невидимость": "Stealth",
+    "Враги не видят вас и не реагируют, пока вы не атакуете": "Enemies do not see or react to you until you attack",
+    "Бесшумность": "Silent footsteps",
+    "Враги не слышат вас, но видят": "Enemies do not hear you but can still see you",
+    "Rally не угасает": "Rally never fades",
+    "Здоровье для Rally не исчезает со временем": "Health you can regain with Rally does not fade over time",
+    "Управление врагом": "Enemy control",
+    "R3: управлять целью, L3: вернуться. Не вместе со свободной камерой":
+        "R3: control the targeted enemy, L3: back. Not together with the free camera",
+    "Без Rally": "No Rally",
+    "Атаки не возвращают здоровье": "Attacks do not regain health",
+    "Камера дальше": "Camera further away",
+    "Камера дальше от персонажа": "The camera stays further from the character",
+    "Без автоповорота камеры": "No camera auto-rotation",
+    "Камера не поворачивается сама при движении; ручное управление и захват цели работают":
+        "The camera does not turn by itself when you move; manual camera and lock-on still work",
+    "Бег с меньшим наклоном стика": "Easier running",
+    "Бег примерно с 70% наклона стика вместо 90%": "Run from about 70% stick tilt instead of 90%",
+    "Физика тел как в Dark Souls": "Dark Souls ragdoll physics",
+    "Тела и предметы разлетаются от ударов": "Corpses and objects fly around when hit",
 }
 
 PT_BR = {
@@ -456,6 +483,33 @@ PT_BR = {
     "Слои валидации Vulkan": "Camadas de validação do Vulkan",
     "Сильно замедляет": "Muito mais lento",
     "Доп. переменные (ИМЯ=значение через пробел)": "Variáveis extras (NOME=valor, separadas por espaço)",
+    # Cheats page
+    "Читы": "Trapaças",
+    "Патчи игры версии 1.09, применяются при запуске. Для обычного прохождения и игры по сети оставьте их выключенными":
+        "Patches do jogo para a versão 1.09, aplicados ao iniciar. Deixe-os desligados para jogar normalmente e online",
+    "Изменения игрового процесса": "Ajustes de jogabilidade",
+    "Бессмертие": "Nunca morrer",
+    "Урон проходит, но здоровье не опускается ниже 1": "Você leva dano, mas a vida nunca fica abaixo de 1",
+    "Невидимость": "Furtividade",
+    "Враги не видят вас и не реагируют, пока вы не атакуете": "Os inimigos não veem nem reagem a você até você atacar",
+    "Бесшумность": "Passos silenciosos",
+    "Враги не слышат вас, но видят": "Os inimigos não ouvem você, mas ainda podem vê-lo",
+    "Rally не угасает": "Rally não desaparece",
+    "Здоровье для Rally не исчезает со временем": "A vida recuperável com Rally não desaparece com o tempo",
+    "Управление врагом": "Controlar inimigo",
+    "R3: управлять целью, L3: вернуться. Не вместе со свободной камерой":
+        "R3: controlar o inimigo travado, L3: voltar. Não junto com a câmera livre",
+    "Без Rally": "Sem Rally",
+    "Атаки не возвращают здоровье": "Ataques não recuperam vida",
+    "Камера дальше": "Câmera mais distante",
+    "Камера дальше от персонажа": "A câmera fica mais longe do personagem",
+    "Без автоповорота камеры": "Sem rotação automática da câmera",
+    "Камера не поворачивается сама при движении; ручное управление и захват цели работают":
+        "A câmera não gira sozinha ao se mover; o controle manual e a trava de alvo continuam funcionando",
+    "Бег с меньшим наклоном стика": "Correr com menos inclinação",
+    "Бег примерно с 70% наклона стика вместо 90%": "Corre com cerca de 70% de inclinação do analógico em vez de 90%",
+    "Физика тел как в Dark Souls": "Física de corpos como em Dark Souls",
+    "Тела и предметы разлетаются от ударов": "Corpos e objetos voam ao serem atingidos",
 }
 
 

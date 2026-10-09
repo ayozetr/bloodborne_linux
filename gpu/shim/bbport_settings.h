@@ -38,6 +38,17 @@ inline constexpr Effect Effects[] = {
     {"skip_intro", "Skip startup intros", "Пропуск заставок при запуске", false},
     {"debug_camera", "Free camera (Cross + L3)", "Свободная камера (Cross + L3)", false},
     {"debug_menu", "Debug menu (requires font files)", "Debug menu (нужны файлы шрифтов)", false},
+    // Cheats and gameplay tweaks (launcher "Cheats" page).
+    {"cheat_no_death", "Cheat: never die (not below 1 HP)", "Чит: бессмертие (не ниже 1 HP)", false},
+    {"cheat_stealth", "Cheat: enemies do not see you", "Чит: враги не замечают", false},
+    {"cheat_silent", "Cheat: enemies do not hear you", "Чит: враги не слышат", false},
+    {"cheat_rally_no_decay", "Cheat: Rally never fades", "Чит: Rally не угасает", false},
+    {"cheat_enemy_control", "Cheat: enemy control (R3 / L3)", "Чит: управление врагом (R3 / L3)", false},
+    {"tweak_no_rally", "No Rally (health regain)", "Без Rally (возврата HP)", false},
+    {"tweak_camera_distance", "Camera further away", "Камера дальше", false},
+    {"tweak_no_camera_rotation", "No camera auto-rotation", "Без автоповорота камеры", false},
+    {"tweak_easy_run", "Run with less stick tilt", "Бег с меньшим наклоном стика", false},
+    {"tweak_ragdoll", "Dark Souls ragdoll physics", "Физика тел как в Dark Souls", false},
 };
 inline constexpr int EffectCount = int(sizeof(Effects) / sizeof(Effects[0]));
 /// Live output resolutions: the upscaler's output and the UI host targets.
