@@ -74,7 +74,8 @@ FSR411_BUILD_ERRORS = {
 }
 
 # Choices: (label, value). The first entry is the default. Labels are translated when shown.
-UI_LANGUAGES = [("Как в системе", ""), ("Русский", "ru"), ("English", "en"), ("Português (Brasil)", "pt_BR")]
+UI_LANGUAGES = [("Как в системе", ""), ("Русский", "ru"), ("English", "en"), ("Português (Brasil)", "pt_BR"),
+                ("Español", "es"), ("Italiano", "it"), ("Français", "fr"), ("Deutsch", "de")]
 UPSCALERS = [("FSR 4", "fsr4"), ("FSR 4.1.1", "fsr411"), ("FSR 3", "fsr3"),
              ("TAA (нативное сглаживание)", "taa"), ("Выключен", "off")]
 PRESETS = [("Native AA", 0), ("Quality (x1.5)", 1), ("Balanced (x1.7)", 2),
