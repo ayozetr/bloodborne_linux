@@ -55,6 +55,9 @@ sed -e 's|@LAUNCHER@|bloodborne|' -e 's|@ICON@|bloodborne|' \
     launcher/io.github.bbport.Launcher.desktop.in > "$work/bloodborne.desktop"
 
 # GTK, libadwaita and their typelibs are loaded by PyGObject at run time (not linked): named here.
+# So are Python's ssl and hashlib modules, which quick-sharun leaves out by default: the launcher's
+# connection test and scripts/online.py talk HTTPS to the co-op servers.
+pydyn=$(python3 -c 'import sysconfig; print(sysconfig.get_path("platstdlib"))')/lib-dynload
 cd "$work"
 export APPDIR=$appdir TMPDIR=$work/tmp OUTPATH=$work
 export MAIN_BIN=bloodborne DESKTOP=$work/bloodborne.desktop ICON=$root/launcher/bloodborne.png
@@ -65,7 +68,8 @@ export OUTPUT_APPIMAGE=1
 "$quick" \
     "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
-    /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so*
+    /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
+    "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so
 
 mkdir -p "$root/dist"
 mv -f "$work"/*.AppImage "$root/dist/Bloodborne-bbport-x86_64.AppImage"
