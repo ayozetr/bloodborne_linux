@@ -316,6 +316,9 @@ EN = {
     "Проверка…": "Checking…",
     "доступен": "reachable",
     "недоступен": "not reachable",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "An online account is filled in, but “Play online” is off",
+    "Играть офлайн": "Play offline",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "The Online ID is the account name (NPID) you registered on the server, not your email address",
 }
 
 PT_BR = {
@@ -582,6 +585,9 @@ PT_BR = {
     "Проверка…": "Verificando…",
     "доступен": "acessível",
     "недоступен": "inacessível",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Há uma conta online preenchida, mas “Jogar online” está desligado",
+    "Играть офлайн": "Jogar offline",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "O Online ID é o nome da conta (NPID) registrado no servidor, não o seu e-mail",
 }
 
 
@@ -847,6 +853,9 @@ ES = {
     "Проверка…": "Comprobando…",
     "доступен": "accesible",
     "недоступен": "no accesible",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Hay una cuenta online puesta, pero «Jugar online» está desactivado",
+    "Играть офлайн": "Jugar sin conexión",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "El Online ID es el nombre de cuenta (NPID) que registraste en el servidor, no tu correo",
 }
 
 
@@ -1112,6 +1121,9 @@ IT = {
     "Проверка…": "Verifica…",
     "доступен": "raggiungibile",
     "недоступен": "non raggiungibile",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "È impostato un account online, ma “Gioca online” è disattivato",
+    "Играть офлайн": "Gioca offline",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID è il nome dell'account (NPID) registrato sul server, non il tuo indirizzo email",
 }
 
 
@@ -1377,6 +1389,9 @@ FR = {
     "Проверка…": "Vérification…",
     "доступен": "accessible",
     "недоступен": "inaccessible",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Un compte en ligne est renseigné, mais « Jouer en ligne » est désactivé",
+    "Играть офлайн": "Jouer hors ligne",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID est le nom du compte (NPID) enregistré sur le serveur, pas votre adresse e-mail",
 }
 
 
@@ -1642,6 +1657,9 @@ DE = {
     "Проверка…": "Prüfe…",
     "доступен": "erreichbar",
     "недоступен": "nicht erreichbar",
+    "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Ein Online-Konto ist eingetragen, aber „Online spielen“ ist aus",
+    "Играть офлайн": "Offline spielen",
+    "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "Die Online-ID ist der auf dem Server registrierte Kontoname (NPID), nicht deine E-Mail-Adresse",
 }
 
 

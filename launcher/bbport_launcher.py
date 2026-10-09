@@ -1289,6 +1289,30 @@ class LauncherWindow(Adw.ApplicationWindow):
         if self.process:
             self.stop_game()
             return
+        npid = self.npid_row.get_text().strip()
+        if not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog"):
+            dialog = Adw.AlertDialog(heading="Bloodborne", body=tr(
+                "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено"))
+            dialog.add_response("cancel", tr("Отмена"))
+            dialog.add_response("offline", tr("Играть офлайн"))
+            dialog.add_response("online", tr("Играть онлайн"))
+            dialog.set_response_appearance("online", Adw.ResponseAppearance.SUGGESTED)
+
+            def on_response(_dialog, response):
+                if response != "cancel":
+                    self.online_row.set_active(response == "online")
+                    self.start_game()
+            dialog.connect("response", on_response)
+            dialog.present(self)
+            return
+        self.start_game()
+
+    def start_game(self):
+        if self.online_row.get_active() and "@" in self.npid_row.get_text():
+            self.alert("Bloodborne", tr("Online ID — это имя учётной записи (NPID), "
+                                        "зарегистрированное на сервере, а не адрес email"))
+            self.stack.set_visible_child_name("online")
+            return
         self.store()
         self.log_view.get_buffer().set_text("")
         launcher = Gio.SubprocessLauncher.new(
