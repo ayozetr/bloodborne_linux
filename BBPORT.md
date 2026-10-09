@@ -191,6 +191,10 @@ The original game is preserved; later mods override conflicting files.
 switched on and off in the launcher. See [mods and patches](docs/MODS.md).
 
 **Launcher language:** Russian, English or Brazilian Portuguese (follows the system language by default).
+**Game language:** the PS4 system language, *System language* in the launcher; by default it
+follows the desktop's locale (Japanese, English, French, Spanish, German, Italian or Russian,
+English for the rest). `run.sh` takes it as `BB_LANGUAGE` (PS4 code: 0 Japanese, 1 English,
+2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; 1 when unset).
 
 **Free camera and game debug menu** (v1.09): enable the corresponding switches in the
 launcher or in-game menu and restart. Free camera uses Lance McDonald's

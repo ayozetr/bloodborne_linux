@@ -1741,16 +1741,30 @@ TRANSLATIONS = {"en": EN, "pt_BR": PT_BR, "es": ES, "it": IT, "fr": FR, "de": DE
 LANGUAGES = ("ru", *TRANSLATIONS)
 
 
-def system_language():
+def system_locale(env=os.environ):
+    """The desktop's locale, lower case with underscores ("es_es.utf_8"), or ""."""
     for key in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
-        value = os.environ.get(key, "")
+        value = env.get(key, "")
         if value:
-            locale = value.lower().replace("-", "_")
-            if locale.startswith("pt_br"):
-                return "pt_BR"
-            short = locale[:2]
-            return short if short in LANGUAGES else "en"
-    return "en"
+            return value.lower().replace("-", "_")
+    return ""
+
+
+def system_language():
+    locale = system_locale()
+    if locale.startswith("pt_br"):
+        return "pt_BR"
+    short = locale[:2]
+    return short if short in LANGUAGES else "en"
+
+
+# The PS4 system language (sceSystemServiceParamGetInt) the game picks its text and voices by,
+# for the languages the game has; anything else gets English.
+GAME_LANGUAGES = {"ja": 0, "en": 1, "fr": 2, "es": 3, "de": 4, "it": 5, "ru": 8}
+
+
+def system_game_language(env=os.environ):
+    return GAME_LANGUAGES.get(system_locale(env)[:2], 1)
 
 
 _language = "ru"

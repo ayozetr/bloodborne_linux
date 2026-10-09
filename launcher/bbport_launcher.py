@@ -17,7 +17,7 @@ import sys
 import threading
 from pathlib import Path
 from bbport_assets import fsr411_problem
-from bbport_i18n import language, set_language, tr
+from bbport_i18n import language, set_language, system_game_language, tr
 import bbport_steam
 from bbport_vulkan import amd_gpu
 
@@ -126,7 +126,8 @@ PRESENT_MODES = [("Mailbox", "Mailbox"), ("FIFO (VSync)", "Fifo"),
 # choice labels stay short, so the selected one is shown in full.
 DRAW_PIPE = [("Авто", "", "Включён при 8 и более потоках процессора"), ("Включён", "1"),
              ("Выключен", "0", "Стабильнее, но медленнее")]
-LANGUAGES = [("Английский", "1"), ("Русский", "8"), ("Японский", "0"), ("Французский", "2"),
+# The game's language: the PS4 system language ("": from the desktop's locale).
+LANGUAGES = [("Как в системе", ""), ("Английский", "1"), ("Русский", "8"), ("Японский", "0"), ("Французский", "2"),
              ("Испанский", "3"), ("Немецкий", "4"), ("Итальянский", "5")]
 LIVE_RESOLUTION = [("Авто (по видеокарте)", "auto"), ("Выключена (быстрее)", "0"), ("Включена", "1")]
 READBACKS = [("Relaxed", "", "По умолчанию"), ("Выключены", "0"), ("Precise", "2")]
@@ -142,7 +143,7 @@ DEFAULTS = {
     "mods_dir": "",
     "mods_enabled": True,
     "patches_dir": "",
-    "language": "1",
+    "language": "",
     "fullscreen": False,
     "hdr": False,
     "present_mode": "Mailbox",
@@ -299,7 +300,7 @@ def game_environment(s):
     env["BB_MODS_ENABLED"] = "1" if s.get("mods_enabled", True) else "0"
     env["BB_PATCHES_DIR"] = str(patches_dir(s))
     env["BB_PATCHES_CONFIG"] = str(DATA_DIR / "patches.json")
-    env["BB_LANGUAGE"] = s["language"]
+    env["BB_LANGUAGE"] = s["language"] or str(system_game_language())
     # The in-game menu speaks the launcher's language until one is chosen in it (menu_language).
     env["BB_MENU_LANGUAGE"] = language()
     env["BB_FULLSCREEN"] = "1" if s["fullscreen"] else "0"
