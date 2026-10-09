@@ -2,7 +2,10 @@
 
 # bbport — нативный порт Bloodborne для Linux
 
-[English](README.md) · **Русский**
+> README оригинального проекта (deadinside28/bloodborne_pc), сохранён ради технических
+> подробностей. README этого форка — [README.md](README.md) (на английском).
+
+[English](BBPORT.md) · **Русский**
 
 bbport — это аналог Wine + DXVK, только для одной игры: *Bloodborne* для PlayStation 4
 (CUSA03173, версия игры 1.09) на ПК с Linux x86-64. Оригинальный исполняемый файл игры
