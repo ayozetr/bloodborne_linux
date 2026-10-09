@@ -322,6 +322,9 @@ EN = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Needs an NVIDIA RTX graphics card and the proprietary driver; otherwise FSR 3.1 is used",
     "Нет файлов DLSS: tools/build_dlss.sh": "No DLSS files: tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Discord status",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Playing Bloodborne” on your Discord profile, online or offline",
 }
 
 PT_BR = {
@@ -594,6 +597,9 @@ PT_BR = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Requer uma placa NVIDIA RTX e o driver proprietário; caso contrário, é usado o FSR 3.1",
     "Нет файлов DLSS: tools/build_dlss.sh": "Sem arquivos do DLSS: tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Status no Discord",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Jogando Bloodborne” no seu perfil do Discord, online ou offline",
 }
 
 
@@ -865,6 +871,9 @@ ES = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Necesita una gráfica NVIDIA RTX y el driver propietario; si no, se usa FSR 3.1",
     "Нет файлов DLSS: tools/build_dlss.sh": "No están los archivos de DLSS: tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Estado en Discord",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "«Jugando a Bloodborne» en tu perfil de Discord, online o sin conexión",
 }
 
 
@@ -1136,6 +1145,9 @@ IT = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Richiede una scheda NVIDIA RTX e il driver proprietario; altrimenti si usa FSR 3.1",
     "Нет файлов DLSS: tools/build_dlss.sh": "File DLSS mancanti: tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Stato su Discord",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Sta giocando a Bloodborne” sul tuo profilo Discord, online o offline",
 }
 
 
@@ -1407,6 +1419,9 @@ FR = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Nécessite une carte NVIDIA RTX et le pilote propriétaire ; sinon FSR 3.1 est utilisé",
     "Нет файлов DLSS: tools/build_dlss.sh": "Fichiers DLSS absents : tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Statut Discord",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "« Joue à Bloodborne » sur votre profil Discord, en ligne ou hors ligne",
 }
 
 
@@ -1678,6 +1693,9 @@ DE = {
     # DLSS
     "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Benötigt eine NVIDIA-RTX-Grafikkarte und den proprietären Treiber; sonst wird FSR 3.1 verwendet",
     "Нет файлов DLSS: tools/build_dlss.sh": "Keine DLSS-Dateien: tools/build_dlss.sh",
+    # Discord
+    "Статус в Discord": "Discord-Status",
+    "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "„Spielt Bloodborne“ in deinem Discord-Profil, online oder offline",
 }
 
 

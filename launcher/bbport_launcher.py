@@ -160,6 +160,7 @@ DEFAULTS = {
     "gpu_profile": False,
     "vk_validation": False,
     "extra_env": "",
+    "discord": True,
     # Co-op (Online page): off by default; shadPS4's public shadNet server and The Hunter's Dream.
     "online": False,
     "online_community": online.COMMUNITY_SERVER,
@@ -333,6 +334,7 @@ def game_environment(s):
         env["BB_GPU_PROFILE"] = "1"
     if s["vk_validation"]:
         env["BB_VK_VALIDATION"] = "1"
+    env["BB_DISCORD"] = "1" if s.get("discord", True) else "0"
     if s.get("online"):
         server = s["online_server"].strip() or online.SHADNET_SERVER
         community = online.community_address(s["online_community"])
@@ -546,6 +548,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         steam_button.connect("clicked", self.on_add_to_steam)
         steam.add_suffix(steam_button)
         game.add(steam)
+        self.discord_row = Adw.SwitchRow(title=tr("Статус в Discord"),
+                                         subtitle=tr("«Играет в Bloodborne» в профиле Discord, онлайн или офлайн"),
+                                         active=self.settings.get("discord", True))
+        game.add(self.discord_row)
         page.add(game)
 
         # Off: the memory model of 0.3 (with the fixes made since); on: the new one.
@@ -966,6 +972,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["vk_validation"] = self.validation_row.get_active()
         s["extra_env"] = self.extra_row.get_text().strip()
         s["mods_enabled"] = self.mods_enabled_row.get_active()
+        s["discord"] = self.discord_row.get_active()
         s["online"] = self.online_row.get_active()
         s["online_community"] = self.community_row.get_text().strip()
         s["online_server"] = self.server_row.get_text().strip()

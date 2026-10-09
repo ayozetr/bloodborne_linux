@@ -178,6 +178,13 @@ if [[ ${BB_ONLINE:-0} == 1 ]]; then
     SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}")
     export SHADPS4_HTTP_HOST_OVERRIDES_JSON
 fi
+# Discord Rich Presence (launcher: Discord; BB_DISCORD=0 turns it off): $$ becomes the game
+# below (exec), and the helper ends with it.
+if [[ ${BB_DISCORD:-1} != 0 ]]; then
+    presence=(--pid $$)
+    [[ ${BB_ONLINE:-0} == 1 ]] && presence+=(--online)
+    "$PYTHON" scripts/discord_presence.py "${presence[@]}" </dev/null &
+fi
 probe_args=("$out/boot-linked.bin" --content-profile "$out/content.bin" --patches "$out/patches.bin" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
 if [[ -n ${mod_game:-} ]]; then
     "$probe" "${probe_args[@]}" &
