@@ -319,6 +319,9 @@ EN = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "An online account is filled in, but “Play online” is off",
     "Играть офлайн": "Play offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "The Online ID is the account name (NPID) you registered on the server, not your email address",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Needs an NVIDIA RTX graphics card and the proprietary driver; otherwise FSR 3.1 is used",
+    "Нет файлов DLSS: tools/build_dlss.sh": "No DLSS files: tools/build_dlss.sh",
 }
 
 PT_BR = {
@@ -588,6 +591,9 @@ PT_BR = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Há uma conta online preenchida, mas “Jogar online” está desligado",
     "Играть офлайн": "Jogar offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "O Online ID é o nome da conta (NPID) registrado no servidor, não o seu e-mail",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Requer uma placa NVIDIA RTX e o driver proprietário; caso contrário, é usado o FSR 3.1",
+    "Нет файлов DLSS: tools/build_dlss.sh": "Sem arquivos do DLSS: tools/build_dlss.sh",
 }
 
 
@@ -856,6 +862,9 @@ ES = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Hay una cuenta online puesta, pero «Jugar online» está desactivado",
     "Играть офлайн": "Jugar sin conexión",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "El Online ID es el nombre de cuenta (NPID) que registraste en el servidor, no tu correo",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Necesita una gráfica NVIDIA RTX y el driver propietario; si no, se usa FSR 3.1",
+    "Нет файлов DLSS: tools/build_dlss.sh": "No están los archivos de DLSS: tools/build_dlss.sh",
 }
 
 
@@ -1124,6 +1133,9 @@ IT = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "È impostato un account online, ma “Gioca online” è disattivato",
     "Играть офлайн": "Gioca offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID è il nome dell'account (NPID) registrato sul server, non il tuo indirizzo email",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Richiede una scheda NVIDIA RTX e il driver proprietario; altrimenti si usa FSR 3.1",
+    "Нет файлов DLSS: tools/build_dlss.sh": "File DLSS mancanti: tools/build_dlss.sh",
 }
 
 
@@ -1392,6 +1404,9 @@ FR = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Un compte en ligne est renseigné, mais « Jouer en ligne » est désactivé",
     "Играть офлайн": "Jouer hors ligne",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID est le nom du compte (NPID) enregistré sur le serveur, pas votre adresse e-mail",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Nécessite une carte NVIDIA RTX et le pilote propriétaire ; sinon FSR 3.1 est utilisé",
+    "Нет файлов DLSS: tools/build_dlss.sh": "Fichiers DLSS absents : tools/build_dlss.sh",
 }
 
 
@@ -1660,6 +1675,9 @@ DE = {
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Ein Online-Konto ist eingetragen, aber „Online spielen“ ist aus",
     "Играть офлайн": "Offline spielen",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "Die Online-ID ist der auf dem Server registrierte Kontoname (NPID), nicht deine E-Mail-Adresse",
+    # DLSS
+    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Benötigt eine NVIDIA-RTX-Grafikkarte und den proprietären Treiber; sonst wird FSR 3.1 verwendet",
+    "Нет файлов DLSS: tools/build_dlss.sh": "Keine DLSS-Dateien: tools/build_dlss.sh",
 }
 
 

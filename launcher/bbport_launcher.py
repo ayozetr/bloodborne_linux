@@ -80,7 +80,7 @@ FSR411_BUILD_ERRORS = {
 UI_LANGUAGES = [("Как в системе", ""), ("Русский", "ru"), ("English", "en"), ("Português (Brasil)", "pt_BR"),
                 ("Español", "es"), ("Italiano", "it"), ("Français", "fr"), ("Deutsch", "de")]
 UPSCALERS = [("FSR 4", "fsr4"), ("FSR 4.1.1", "fsr411"), ("FSR 3", "fsr3"),
-             ("TAA (нативное сглаживание)", "taa"), ("Выключен", "off")]
+             ("DLSS (NVIDIA RTX)", "dlss"), ("TAA (нативное сглаживание)", "taa"), ("Выключен", "off")]
 PRESETS = [("Native AA", 0), ("Quality (x1.5)", 1), ("Balanced (x1.7)", 2),
            ("Performance (x2)", 3), ("Ultra Performance (x3)", 4)]
 OUTPUT_RES = [("1280×720 (Steam Deck)", "1280x720"), ("1920×1080", "1920x1080"), ("2560×1440", "2560x1440"), ("3840×2160", "3840x2160")]
@@ -244,6 +244,18 @@ def save_ini(values, lines):
 
 def patches_dir(settings):
     return Path(settings.get("patches_dir") or DATA_DIR / "patches").expanduser()
+
+
+def dlss_dir():
+    """The DLSS bridge and NVIDIA's library (tools/build_dlss.sh; the AppImage's copy)."""
+    if os.environ.get("BB_DLSS_DIR"):
+        return Path(os.environ["BB_DLSS_DIR"])
+    return PORT_DIR / "dlss" if PACKAGED else PORT_DIR / "out" / "gpu"
+
+
+def dlss_ready():
+    d = dlss_dir()
+    return (d / "libbbport_dlss.so").is_file() and any(d.glob("libnvidia-ngx-dlss.so.*"))
 
 
 def fsr411_dir():
@@ -819,6 +831,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                                      int(combo_value(self.preset_row)))
             hint = tr("Ассеты для выбранного режима найдены") if not problem else (
                 tr("{}. Соберите FSR 4.1.1 из своей DLL кнопкой «Выбрать DLL…» ниже").format(problem))
+        elif value == "dlss":
+            hint = (tr("Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1")
+                    if dlss_ready() else tr("Нет файлов DLSS: tools/build_dlss.sh"))
         else:
             hint = tr("Сглаживание в разрешении вывода без модели FSR") if value == "taa" else None
         self.preset_row.set_sensitive(value not in ("taa", "off"))

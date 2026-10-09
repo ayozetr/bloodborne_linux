@@ -38,6 +38,11 @@ mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
+# DLSS (NVIDIA RTX), when tools/build_dlss.sh has built the bridge: it and NVIDIA's library.
+if [[ -f out/gpu/libbbport_dlss.so ]]; then
+    mkdir -p "$d/dlss"
+    cp out/gpu/libbbport_dlss.so out/gpu/libnvidia-ngx-dlss.so.* out/gpu/NVIDIA-DLSS-LICENSE.txt "$d/dlss/"
+fi
 
 # The AppImage's main program: the launcher (or, with --play, the game alone).
 cat > "$appdir/bin/bloodborne" <<'EOF'
@@ -46,6 +51,7 @@ cat > "$appdir/bin/bloodborne" <<'EOF'
 export BB_PREBUILT=1
 export PYTHON="$APPDIR/bin/python3"
 export BB_VULKANINFO="$APPDIR/bin/vulkaninfo"
+export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 exec "$APPDIR/bin/python3" "$APPDIR/share/bbport/launcher/bbport_launcher.py" "$@"
