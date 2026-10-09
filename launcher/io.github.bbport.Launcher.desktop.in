@@ -5,3 +5,4 @@ Comment=Native Bloodborne port launcher
 Exec=@LAUNCHER@
 Icon=@ICON@
 Categories=Game;
+StartupWMClass=io.github.bbport.Launcher
