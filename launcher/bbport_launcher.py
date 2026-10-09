@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, tr
+import bbport_steam
 from bbport_vulkan import amd_gpu
 
 import gi
@@ -502,6 +503,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         game.add(self.user_row)
         self.language_row = combo_row(tr("Язык системы"), None, LANGUAGES, self.settings["language"])
         game.add(self.language_row)
+        steam = Adw.ActionRow(title=tr("Добавить в Steam"),
+                              subtitle=tr("Игра в библиотеке Steam запускается сразу, с настройками "
+                                          "этого лаунчера"))
+        steam_button = Gtk.Button(label=tr("Добавить"), valign=Gtk.Align.CENTER)
+        steam_button.connect("clicked", self.on_add_to_steam)
+        steam.add_suffix(steam_button)
+        game.add(steam)
         page.add(game)
 
         # Off: the memory model of 0.3 (with the fixes made since); on: the new one.
@@ -941,6 +949,64 @@ class LauncherWindow(Adw.ApplicationWindow):
     def environment(self):
         return game_environment(self.settings)
 
+    # --- Steam ---------------------------------------------------------------------------
+
+    def on_add_to_steam(self, _button):
+        """Bloodborne in the Steam library: a non-Steam game that runs --play (no window)."""
+        steam = bbport_steam.steam_folder()
+        configs = bbport_steam.user_configs(steam) if steam else []
+        if not configs or not bbport_steam.steam_command():
+            self.alert("Steam", tr("Steam не найден (или в него ещё никто не входил)"))
+            return
+        self.store()  # --play starts the game with the saved settings
+        if not bbport_steam.steam_running():
+            self.add_to_steam(configs, restart=False)
+            return
+        if not hasattr(Adw, "AlertDialog"):
+            self.alert("Steam", tr("Закройте Steam и нажмите «Добавить» ещё раз"))
+            return
+        dialog = Adw.AlertDialog(heading="Steam", body=tr(
+            "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?"))
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("close", tr("Закрыть Steam"))
+        dialog.set_response_appearance("close", Adw.ResponseAppearance.SUGGESTED)
+
+        def on_response(_dialog, response):
+            if response == "close":
+                bbport_steam.shutdown_steam()
+                self.wait_for_steam(configs, tries=60)
+        dialog.connect("response", on_response)
+        dialog.present(self)
+
+    def wait_for_steam(self, configs, tries):
+        """Polls until Steam has exited (it writes its files as it goes), then adds the game."""
+        def poll():
+            nonlocal tries
+            if bbport_steam.steam_running():
+                tries -= 1
+                if tries == 0:
+                    self.alert("Steam", tr("Steam не закрылся. Закройте его сами и попробуйте ещё раз"))
+                    return False
+                return True
+            GLib.timeout_add(1000, lambda: self.add_to_steam(configs, restart=True) and False)
+            return False
+        GLib.timeout_add(500, poll)
+
+    def add_to_steam(self, configs, restart):
+        # Packaged: the AppImage itself; from a checkout: the launcher script.
+        exe = os.environ.get("APPIMAGE") or str(PORT_DIR / "launcher" / "bb-launcher.sh")
+        icon = str(PORT_DIR / "launcher" / "bloodborne.png")
+        try:
+            for config in configs:
+                bbport_steam.add_shortcut(config / "shortcuts.vdf", "Bloodborne", exe,
+                                          str(PORT_DIR), icon, "--play")
+        except (OSError, ValueError) as error:
+            self.alert("Steam", tr("Не удалось добавить игру в Steam: {}").format(error))
+            return
+        if restart:
+            bbport_steam.start_steam()
+        self.toasts.add_toast(Adw.Toast(title=tr("Bloodborne добавлен в библиотеку Steam"), timeout=6))
+
     # --- mods ----------------------------------------------------------------------------
 
     def mods_dir(self):
@@ -1356,7 +1422,12 @@ def play():
         print("bbport: choose the game folder in the launcher first", file=sys.stderr)
         return 1
     os.chdir(PORT_DIR)
-    os.execvpe("bash", ["bash", str(PORT_DIR / "run.sh")], game_environment(settings))
+    env = game_environment(settings)
+    # Started by Steam: its runtime's libraries are first in LD_LIBRARY_PATH; the port is built
+    # against the system's. Steam keeps the original in SYSTEM_LD_LIBRARY_PATH.
+    if "SYSTEM_LD_LIBRARY_PATH" in env:
+        env["LD_LIBRARY_PATH"] = env["SYSTEM_LD_LIBRARY_PATH"]
+    os.execvpe("bash", ["bash", str(PORT_DIR / "run.sh")], env)
 
 
 def build_fsr411(arguments):

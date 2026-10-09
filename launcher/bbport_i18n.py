@@ -280,6 +280,18 @@ EN = {
     "Бег примерно с 70% наклона стика вместо 90%": "Run from about 70% stick tilt instead of 90%",
     "Физика тел как в Dark Souls": "Dark Souls ragdoll physics",
     "Тела и предметы разлетаются от ударов": "Corpses and objects fly around when hit",
+    # Add to Steam
+    "Добавить в Steam": "Add to Steam",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "From the Steam library the game starts straight away, with this launcher's settings",
+    "Добавить": "Add",
+    "Steam не найден (или в него ещё никто не входил)": "Steam was not found (or nobody has signed in to it yet)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Close Steam and press Add again",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "Steam has to close while the game is added; it starts again afterwards. Close Steam?",
+    "Отмена": "Cancel",
+    "Закрыть Steam": "Close Steam",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam did not close. Close it yourself and try again",
+    "Не удалось добавить игру в Steam: {}": "Could not add the game to Steam: {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne was added to your Steam library",
 }
 
 PT_BR = {
@@ -510,6 +522,18 @@ PT_BR = {
     "Бег примерно с 70% наклона стика вместо 90%": "Corre com cerca de 70% de inclinação do analógico em vez de 90%",
     "Физика тел как в Dark Souls": "Física de corpos como em Dark Souls",
     "Тела и предметы разлетаются от ударов": "Corpos e objetos voam ao serem atingidos",
+    # Add to Steam
+    "Добавить в Steam": "Adicionar ao Steam",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "Na biblioteca do Steam o jogo inicia direto, com as configurações deste launcher",
+    "Добавить": "Adicionar",
+    "Steam не найден (или в него ещё никто не входил)": "O Steam não foi encontrado (ou ninguém entrou nele ainda)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Feche o Steam e clique em Adicionar de novo",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "O Steam precisa fechar enquanto o jogo é adicionado; depois ele abre de novo. Fechar o Steam?",
+    "Отмена": "Cancelar",
+    "Закрыть Steam": "Fechar o Steam",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "O Steam não fechou. Feche-o você mesmo e tente de novo",
+    "Не удалось добавить игру в Steam: {}": "Não foi possível adicionar o jogo ao Steam: {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne foi adicionado à sua biblioteca do Steam",
 }
 
 
@@ -739,6 +763,18 @@ ES = {
     "Бег примерно с 70% наклона стика вместо 90%": "Correr a partir de un 70 % de inclinación del stick en lugar del 90 %",
     "Физика тел как в Dark Souls": "Física ragdoll de Dark Souls",
     "Тела и предметы разлетаются от ударов": "Los cadáveres y los objetos salen volando al recibir golpes",
+    # Add to Steam
+    "Добавить в Steam": "Añadir a Steam",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "Desde la biblioteca de Steam el juego arranca directamente, con los ajustes de este launcher",
+    "Добавить": "Añadir",
+    "Steam не найден (или в него ещё никто не входил)": "No se ha encontrado Steam (o nadie ha iniciado sesión todavía)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Cierra Steam y vuelve a pulsar Añadir",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "Steam tiene que cerrarse mientras se añade el juego; después se vuelve a abrir. ¿Cerrar Steam?",
+    "Отмена": "Cancelar",
+    "Закрыть Steam": "Cerrar Steam",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam no se ha cerrado. Ciérralo tú y vuelve a intentarlo",
+    "Не удалось добавить игру в Steam: {}": "No se pudo añadir el juego a Steam: {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne se ha añadido a tu biblioteca de Steam",
 }
 
 
@@ -968,6 +1004,18 @@ IT = {
     "Бег примерно с 70% наклона стика вместо 90%": "Corri inclinando lo stick di circa il 70% invece del 90%",
     "Физика тел как в Dark Souls": "Fisica ragdoll di Dark Souls",
     "Тела и предметы разлетаются от ударов": "Cadaveri e oggetti volano via quando vengono colpiti",
+    # Add to Steam
+    "Добавить в Steam": "Aggiungi a Steam",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "Dalla libreria di Steam il gioco si avvia subito, con le impostazioni di questo launcher",
+    "Добавить": "Aggiungi",
+    "Steam не найден (или в него ещё никто не входил)": "Steam non trovato (o nessuno vi ha ancora effettuato l'accesso)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Chiudi Steam e premi di nuovo Aggiungi",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "Steam deve chiudersi mentre il gioco viene aggiunto; poi si riavvia. Chiudere Steam?",
+    "Отмена": "Annulla",
+    "Закрыть Steam": "Chiudi Steam",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam non si è chiuso. Chiudilo tu e riprova",
+    "Не удалось добавить игру в Steam: {}": "Impossibile aggiungere il gioco a Steam: {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne è stato aggiunto alla tua libreria di Steam",
 }
 
 
@@ -1197,6 +1245,18 @@ FR = {
     "Бег примерно с 70% наклона стика вместо 90%": "Courir à partir d'environ 70 % d'inclinaison du stick au lieu de 90 %",
     "Физика тел как в Dark Souls": "Physique ragdoll de Dark Souls",
     "Тела и предметы разлетаются от ударов": "Les cadavres et les objets sont projetés quand on les frappe",
+    # Add to Steam
+    "Добавить в Steam": "Ajouter à Steam",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "Depuis la bibliothèque Steam, le jeu démarre directement avec les réglages de ce launcher",
+    "Добавить": "Ajouter",
+    "Steam не найден (или в него ещё никто не входил)": "Steam est introuvable (ou personne ne s'y est encore connecté)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Fermez Steam et cliquez à nouveau sur Ajouter",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "Steam doit être fermé pendant l'ajout du jeu ; il redémarre ensuite. Fermer Steam ?",
+    "Отмена": "Annuler",
+    "Закрыть Steam": "Fermer Steam",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam ne s'est pas fermé. Fermez-le vous-même et réessayez",
+    "Не удалось добавить игру в Steam: {}": "Impossible d'ajouter le jeu à Steam : {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne a été ajouté à votre bibliothèque Steam",
 }
 
 
@@ -1426,6 +1486,18 @@ DE = {
     "Бег примерно с 70% наклона стика вместо 90%": "Rennen ab etwa 70 % Stick-Neigung statt 90 %",
     "Физика тел как в Dark Souls": "Ragdoll-Physik wie in Dark Souls",
     "Тела и предметы разлетаются от ударов": "Leichen und Objekte fliegen bei Treffern umher",
+    # Add to Steam
+    "Добавить в Steam": "Zu Steam hinzufügen",
+    "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "Aus der Steam-Bibliothek startet das Spiel direkt, mit den Einstellungen dieses Launchers",
+    "Добавить": "Hinzufügen",
+    "Steam не найден (или в него ещё никто не входил)": "Steam wurde nicht gefunden (oder es hat sich noch niemand angemeldet)",
+    "Закройте Steam и нажмите «Добавить» ещё раз": "Schließe Steam und klicke erneut auf Hinzufügen",
+    "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "Steam muss geschlossen werden, während das Spiel hinzugefügt wird; danach startet es wieder. Steam schließen?",
+    "Отмена": "Abbrechen",
+    "Закрыть Steam": "Steam schließen",
+    "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam wurde nicht geschlossen. Schließe es selbst und versuche es erneut",
+    "Не удалось добавить игру в Steam: {}": "Spiel konnte nicht zu Steam hinzugefügt werden: {}",
+    "Bloodborne добавлен в библиотеку Steam": "Bloodborne wurde deiner Steam-Bibliothek hinzugefügt",
 }
 
 
