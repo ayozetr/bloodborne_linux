@@ -194,11 +194,10 @@ void Menu() {
         }
     }
     // Always readable, even when the rest of the menu is in Russian.
-    static const char* languages[] = {"English", "Русский"};
-    int language = s.menu_language == BbSettings::MenuLanguage::Russian ? 1 : 0;
-    if (ImGui::Combo("Language", &language, languages, 2)) {
-        s.menu_language =
-            language == 1 ? BbSettings::MenuLanguage::Russian : BbSettings::MenuLanguage::English;
+    int language = int(s.menu_language.load());
+    if (ImGui::Combo("Language", &language, BbSettings::MenuLanguageNames,
+                     int(BbSettings::MenuLanguage::Count))) {
+        s.menu_language = BbSettings::MenuLanguage(language);
         BbSettings::Save();
     }
     ImGui::Text(BbSettings::MenuText("%.0f FPS  (%.1f ms)", "%.0f FPS  (%.1f мс)"),

@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "bbport_settings.h"
+#include "bbport_menu_i18n.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -27,9 +30,13 @@ void Set(Values& v, const std::string& key, const std::string& value) {
     const float f = float(std::atof(value.c_str()));
     const int i = std::atoi(value.c_str());
     if (key == "menu_language") {
-        if (value == "en") v.menu_language = MenuLanguage::English;
-        else if (value == "ru") v.menu_language = MenuLanguage::Russian;
-        else std::printf("Settings: unknown menu_language '%s' (expected en or ru)\n", value.c_str());
+        const auto it = std::find(std::begin(MenuLanguageCodes), std::end(MenuLanguageCodes), value);
+        if (it != std::end(MenuLanguageCodes)) {
+            v.menu_language = MenuLanguage(it - std::begin(MenuLanguageCodes));
+        } else {
+            std::printf("Settings: unknown menu_language '%s' (expected en, ru, es, it, fr, de or pt_BR)\n",
+                        value.c_str());
+        }
     } else if (key == "upscaler") {
         for (int u = 0; u < UpscalerCount; ++u) {
             if (value == UpscalerName(u)) {
@@ -96,7 +103,26 @@ Values& Get() {
 }
 
 const char* MenuText(const char* english, const char* russian) {
-    return Get().menu_language == MenuLanguage::Russian ? russian : english;
+    switch (const MenuLanguage language = Get().menu_language) {
+    case MenuLanguage::English:
+        return english;
+    case MenuLanguage::Russian:
+        return russian;
+    default:
+        return MenuTranslation(language, english);
+    }
+}
+
+MenuLanguage MenuLanguageFromCode(const char* code) {
+    if (code && code[0] && code[1]) {
+        for (int l = 0; l < int(MenuLanguage::Count); ++l) {
+            if (std::tolower(code[0]) == MenuLanguageCodes[l][0] &&
+                std::tolower(code[1]) == MenuLanguageCodes[l][1]) {
+                return MenuLanguage(l);
+            }
+        }
+    }
+    return MenuLanguage::English;
 }
 
 void Load() {
@@ -116,9 +142,7 @@ void Load() {
                 }
             }
         }
-        v.menu_language = lang && (lang[0] == 'r' || lang[0] == 'R') && (lang[1] == 'u' || lang[1] == 'U')
-                              ? MenuLanguage::Russian
-                              : MenuLanguage::English;
+        v.menu_language = MenuLanguageFromCode(lang);
     }
     if (FILE* file = std::fopen(Path(), "r")) {
         char line[256];
@@ -222,7 +246,7 @@ void Save() {
         return std::string(text);
     };
     const auto flag = [](bool value) { return std::string(value ? "1" : "0"); };
-    put("menu_language", v.menu_language == MenuLanguage::Russian ? "ru" : "en");
+    put("menu_language", MenuLanguageCodes[int(v.menu_language.load())]);
     put("upscaler", UpscalerName(v.upscaler));
     put("preset", std::to_string(v.preset.load()));
     put("sharpen", flag(v.sharpen));
