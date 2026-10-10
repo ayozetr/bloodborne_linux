@@ -19,6 +19,17 @@ data=${BB_DATA_DIR:-.}
 out=$data/out
 mkdir -p "$out"
 export BB_CONFIG=${BB_CONFIG:-$data/bbport.ini}
+# GPU paths are initialized when libbbgpu is loaded, before bbgpu_init receives --user.
+# Select the same user directory now, including for an AppImage or a separate save profile.
+export BB_GPU_USER_DIR=${BB_GPU_USER_DIR:-${BB_USER_DIR:-$data/user}}
+# The drivers' own shader caches keep compiled pipelines between sessions (the port's cache gives
+# them the shaders again at startup): NVIDIA's without its cleanup and with room for the game's
+# pipelines (as Steam sets it), Mesa's with more room than its default.
+export __GL_SHADER_DISK_CACHE=${__GL_SHADER_DISK_CACHE:-1}
+export __GL_SHADER_DISK_CACHE_SKIP_CLEANUP=${__GL_SHADER_DISK_CACHE_SKIP_CLEANUP:-1}
+export __GL_SHADER_DISK_CACHE_SIZE=${__GL_SHADER_DISK_CACHE_SIZE:-10737418240}
+export MESA_SHADER_CACHE_MAX_SIZE=${MESA_SHADER_CACHE_MAX_SIZE:-4G}
+mkdir -p "$BB_GPU_USER_DIR"
 # FSR 4.1.1 assets (tools/fsr4cap/build_assets.sh): next to run.sh or in the data directory.
 if [[ -z ${BB_FSR411_DIR:-} && ! -d fsr4_411 && -d $data/fsr4_411 ]]; then
     export BB_FSR411_DIR=$data/fsr4_411
@@ -68,10 +79,19 @@ fi
 "$PYTHON" scripts/prepare.py "$game" --out "$out"
 "$PYTHON" scripts/link_libc.py "$game" --out "$out"
 "$PYTHON" scripts/link_modules.py "$game" --out "$out"
-# BB_DLC_DIR: the dumped add-ons of this title (one folder each, e.g. CUSA00900/SPEXPANSIONDLC03);
-# the game sees them as purchased. Their data ships with the 1.09 update.
-"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" \
-    ${BB_DLC_DIR:+--dlc "$BB_DLC_DIR"}
+# BB_DLC_DIR (the launcher's DLC folder): the dumped add-ons of this title, one folder each (e.g.
+# SPEXPANSIONDLC03). The runtime reports <user>/addcont/<title id>/<label> as installed (shadPS4's
+# layout), so the folder is linked there; a real folder already in its place is left alone.
+if [[ -n ${BB_DLC_DIR:-} && -d $BB_DLC_DIR ]]; then
+    title=$("$PYTHON" -c 'import sys; sys.path.insert(0, "scripts"); from prepare import sfo
+print(sfo(open(sys.argv[1] + "/sce_sys/param.sfo", "rb").read()).get("TITLE_ID", ""))' "$game" 2>/dev/null) || title=
+    addcont=${BB_USER_DIR:-$data/user}/addcont
+    if [[ $title =~ ^[A-Z]{4}[0-9]{5}$ && ( ! -e $addcont/$title || -L $addcont/$title ) ]]; then
+        mkdir -p "$addcont"
+        ln -sfn "$(realpath "$BB_DLC_DIR")" "$addcont/$title"
+    fi
+fi
+"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}"
 # Sizes chosen below for the previous launch are recomputed after an in-game restart.
 if [[ ${BB_AUTO_RENDER_RES:-} == 1 ]]; then
     unset BB_RENDER_RES BB_OUTPUT_RES BB_AUTO_RENDER_RES
@@ -127,10 +147,11 @@ export BB_PREUPLOAD=${BB_PREUPLOAD:-1}
 # experimental, off by default) selects how a PC release would work: the GPU uses the game's
 # memory where it is (GPU-visible system memory) and keeps the data it reads often in VRAM, the
 # command processor's work is translated rather than emulated (BB_GUEST_IN_PLACE=1 and what
-# depends on it). AMD GPUs only for now: on others the GPU library keeps it off
-# (BB_PC_MODEL_ANY_GPU=1: try it anyway; NVIDIA, whose dma-buf maps at offset 0 only, gets one
-# chunk per direct memory allocation). 0 (default): the model of 0.3 (VRAM copies of the game's
-# memory, write tracking), with the fixes made since. BB_GUEST_IN_PLACE set by hand overrides it.
+# depends on it). AMD GPUs keep the game's memory in a sparse arena; others (NVIDIA: its sparse
+# binding stalls the GPU for seconds) get the layer's memory module, which binds the game's memory
+# in place and keeps VRAM copies without sparse binding (BB_LAYER_MEMORY=1/0 chooses by hand).
+# 0 (default): the model of 0.3 (VRAM copies of the game's memory, write tracking), with the fixes
+# made since. BB_GUEST_IN_PLACE set by hand overrides it.
 # BB_AS_0_3=1 (the launcher's developer switch "Synchronisation as in 0.3"): what changed since the
 # 0.3 release is reverted for comparisons: the 0.3 memory model, WRITE_DATA/DMA waiting for every
 # host copy, the scheduler's concurrent recording check.
@@ -147,11 +168,27 @@ if [[ ${MANGOHUD:-0} == 1 ]]; then
         echo "MangoHud: Steam's performance overlay is on; the in-game MangoHud stays off"
         unset MANGOHUD
         export DISABLE_MANGOHUD=1
-    elif grep -qs '"VK_LAYER_MANGOHUD' /usr/share/vulkan/implicit_layer.d/*.json \
-            /etc/vulkan/implicit_layer.d/*.json \
-            "${XDG_DATA_HOME:-$HOME/.local/share}"/vulkan/implicit_layer.d/*.json; then
-        # The system's own MangoHud (and its config) is used; the bundled one is skipped.
-        export VK_LOADER_LAYERS_DISABLE=${VK_LOADER_LAYERS_DISABLE:+$VK_LOADER_LAYERS_DISABLE,}VK_LAYER_MANGOHUD_overlay_64_x86_64
+    else
+        # The system's own MangoHud (and its config) is used when there is one: the bundled one
+        # (the AppImage's, /nix/store/...-mangohud-.../share on XDG_DATA_DIRS) is taken off the
+        # layer search path. Disabling it by layer name (0.3, 0.4) also disabled the system's one,
+        # which usually has the same name: no MangoHud at all (issue #66). Bash builtins only.
+        bundled=() others=()
+        IFS=: read -r -a data_dirs <<< "${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+        for dir in "${data_dirs[@]}"; do
+            if [[ $dir == */nix/store/*-mangohud-*/share ]]; then bundled+=("$dir"); else others+=("$dir"); fi
+        done
+        system_mangohud=0
+        for dir in "${XDG_DATA_HOME:-$HOME/.local/share}" /etc/xdg /etc "${others[@]}"; do
+            for manifest in "$dir"/vulkan/implicit_layer.d/*.json; do
+                [[ -f $manifest && $(< "$manifest") == *'"VK_LAYER_MANGOHUD'* ]] && system_mangohud=1
+            done
+        done
+        if [[ ${#bundled[@]} -gt 0 && $system_mangohud == 1 ]]; then
+            echo "MangoHud: the system's MangoHud is used"
+            export XDG_DATA_DIRS=$(IFS=:; echo "${others[*]}")
+        fi
+        unset bundled others data_dirs dir manifest system_mangohud
     fi
 fi
 # Write tracking with userfaultfd write-protection instead of mprotect (no address-space write lock:

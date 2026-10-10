@@ -85,7 +85,9 @@ The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. Wit
 (such as the EU `CUSA00900`), dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`,
 `SPDLCMESSENGER00`…) with only `sce_sys` inside, because their data ships with the 1.09 update.
 Put them in one folder and pick it in the launcher (**Game → DLC folder**), or set
-`BB_DLC_DIR=/path/to/dlc` for `run.sh`. The launcher shows how many it found.
+`BB_DLC_DIR=/path/to/dlc` for `run.sh`; the launcher shows how many it found. Each folder must
+keep the add-on's name (its entitlement label, such as `SPEXPANSIONDLC03`). Copying them to
+`user/addcont/<title id>/`, shadPS4's layout, works too.
 
 ### Button prompts
 

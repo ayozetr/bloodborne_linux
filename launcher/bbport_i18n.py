@@ -19,6 +19,12 @@ EN = {
     "Настройки": "Settings",
     "Журнал": "Log",
     "Не удалось запустить: {}": "Could not start: {}",
+    "Копировать": "Copy",
+    "Экспорт журнала…": "Export log…",
+    "Экспорт журнала": "Export log",
+    "Журнал скопирован": "Log copied",
+    "Журнал сохранён: {}": "Log saved: {}",
+    "Не удалось сохранить журнал: {}": "Could not save the log: {}",
     "\n— игра завершилась (код {}) —\n": "\n— the game exited (code {}) —\n",
     # Launcher language
     "Язык лаунчера": "Launcher language",
@@ -71,16 +77,24 @@ EN = {
     "Выбранный берётся, как только подключится": "The chosen one is used as soon as it connects",
     "Первый подключённый": "First connected",
     "{} (не подключён)": "{} (not connected)",
+    "Монитор": "Monitor",
+    "Пропускать выбор «по сети / вне сети»": "Skip the \u201cplay online / offline\u201d choice",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "The game opens the main menu offline at once (a game patch)",
+    "Основной": "Primary",
+    ", основной": ", primary",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})":
         "The 1.09 update is needed: copy the dumped 1.09 update into the game folder, replacing files (found version {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "eboot.bin is not from 1.09: copy eboot.bin from the dumped 1.09 update into the game folder, replacing it",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "This eboot.bin has Lance McDonald's 60 fps patch baked in, which crashes the game in the gestures menu: copy a clean eboot.bin from the dumped 1.09 update into the game folder, replacing it",
-    "Поддерживаются только CUSA03173 (США) и CUSA00900 (Европа) с обновлением 1.09 (найдено {})":
-        "Only CUSA03173 (US) and CUSA00900 (EU) with update 1.09 are supported (found {})",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})":
+        "Only CUSA03173 (US), CUSA00900 (EU) and CUSA03023 (Asia) with update 1.09 are supported (found {})",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
         "eboot.bin cannot be read as a decrypted PS4 executable: dump the game again",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "The game files were damaged when extracted: the shaders do not unpack and the game would hang while loading. Extract the game and the 1.09 update again with a fixed tool (issue #81)",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, version 1.09",
     "Папка игры (с eboot.bin)": "Game folder (with eboot.bin)",
     # Languages
@@ -209,8 +223,8 @@ EN = {
     "Пропуск заставок при запуске": "Skip the intro videos",
     "Свободная камера (Cross + L3 / Space + Z)": "Free camera (Cross + L3 / Space + Z)",
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Debug menu (left touchpad / Tab; needs fonts)",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253":
-        "Install DbgFont14h.ccm and DbgFont14h.tpf into dvdroot_ps4/font from Nexus mod #253",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Needs the adhoc folder from Nexus mod #253 (fonts in adhoc/font), in the game's dvdroot_ps4 or as a mod; without it the patch is not applied",
     # Frame rate
     "Частота кадров": "Frame rate",
     "Режим": "Mode",
@@ -239,10 +253,8 @@ EN = {
     # Mode
     "Режим работы": "Mode",
     "Новая модель памяти и трансляции": "New memory and translation model",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями":
-        "Experimental, AMD GPUs only. The GPU works with the game's memory directly, as in a PC game, and graphics commands are translated rather than emulated; errors are possible. Off: the old memory model, as in 0.3, with all the fixes",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями":
-        "AMD GPUs only, and this computer has none. The old memory model is used, as in 0.3, with all the fixes",
+    "Эксперимент. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. На NVIDIA и других видеокартах, кроме AMD, — через модуль памяти прослойки. Если драйвер не проходит проверку при запуске — старая модель. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями":
+        "Experimental. The GPU works with the game's memory directly, as in a PC game, and graphics commands are translated rather than emulated; errors are possible. On NVIDIA and other non-AMD GPUs it goes through the layer's memory module. If the driver fails the startup check, the old model is used. Off: the old memory model, as in 0.3, with all the fixes",
     "Синхронизация как в 0.3": "Synchronisation as in 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3":
         "For finding regressions: the old memory model and copy waits as released in 0.3",
@@ -354,6 +366,12 @@ PT_BR = {
     "Настройки": "Configurações",
     "Журнал": "Log",
     "Не удалось запустить: {}": "Não foi possível iniciar: {}",
+    "Копировать": "Copiar",
+    "Экспорт журнала…": "Exportar log…",
+    "Экспорт журнала": "Exportar log",
+    "Журнал скопирован": "Log copiado",
+    "Журнал сохранён: {}": "Log salvo: {}",
+    "Не удалось сохранить журнал: {}": "Não foi possível salvar o log: {}",
     "\n— игра завершилась (код {}) —\n": "\n— o jogo foi encerrado (código {}) —\n",
     # Launcher language
     "Язык лаунчера": "Idioma do launcher",
@@ -511,8 +529,8 @@ PT_BR = {
     "Пропуск заставок при запуске": "Pular vídeos de introdução",
     "Свободная камера (Cross + L3 / Space + Z)": "Câmera livre (Cross + L3 / Space + Z)",
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Menu de depuração (touchpad esquerdo / Tab; requer fontes)",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253":
-        "Instale DbgFont14h.ccm e DbgFont14h.tpf em dvdroot_ps4/font a partir do mod #253 do Nexus",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Requer a pasta adhoc do mod #253 do Nexus (fontes em adhoc/font), no dvdroot_ps4 do jogo ou como mod; sem ela o patch não é aplicado",
     # Frame rate
     "Частота кадров": "Taxa de quadros",
     "Режим": "Modo",
@@ -536,10 +554,8 @@ PT_BR = {
     "Для разработчика": "Desenvolvedor",
     "Режим работы": "Modo",
     "Новая модель памяти и трансляции": "Novo modelo de memória e tradução",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями":
-        "Experimental, só GPUs AMD. A GPU usa a memória do jogo diretamente, como em um jogo de PC, e os comandos gráficos são traduzidos em vez de emulados; podem ocorrer erros. Desligado: o modelo de memória antigo, como na 0.3, com todas as correções",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями":
-        "Só para GPUs AMD, e este computador não tem uma. É usado o modelo de memória antigo, como na 0.3, com todas as correções",
+    "Эксперимент. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. На NVIDIA и других видеокартах, кроме AMD, — через модуль памяти прослойки. Если драйвер не проходит проверку при запуске — старая модель. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями":
+        "Experimental. A GPU usa a memória do jogo diretamente, como em um jogo de PC, e os comandos gráficos são traduzidos em vez de emulados; podem ocorrer erros. Na NVIDIA e em outras GPUs que não são AMD, isso passa pelo módulo de memória da camada. Se o driver falhar na verificação inicial, é usado o modelo antigo. Desligado: o modelo de memória antigo, como na 0.3, com todas as correções",
     "Синхронизация как в 0.3": "Sincronização como na 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3":
         "Para encontrar regressões: o modelo de memória antigo e as esperas de cópias como na versão 0.3",
@@ -695,7 +711,7 @@ ES = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Se necesita la actualización 1.09: copia la actualización 1.09 volcada en la carpeta del juego, reemplazando los archivos (versión encontrada: {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin no es de la 1.09: copia eboot.bin de la actualización 1.09 volcada en la carpeta del juego, reemplazándolo",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Este eboot.bin trae integrado el parche de 60 FPS de Lance McDonald, que cierra el juego al abrir el menú de gestos: copia un eboot.bin limpio de la actualización 1.09 volcada en la carpeta del juego, reemplazándolo",
-    "Поддерживаются только CUSA03173 (США) и CUSA00900 (Европа) с обновлением 1.09 (найдено {})": "Solo se admiten CUSA03173 (EE. UU.) y CUSA00900 (Europa) con la actualización 1.09 (encontrada: {})",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Solo se admiten CUSA03173 (EE. UU.), CUSA00900 (Europa) y CUSA03023 (Asia) con la actualización 1.09 (encontrada: {})",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "No se puede leer eboot.bin como ejecutable de PS4 descifrado: vuelve a volcar el juego",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, versión 1.09",
     "Папка игры (с eboot.bin)": "Carpeta del juego (con eboot.bin)",
@@ -982,7 +998,7 @@ IT = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Serve l'aggiornamento 1.09: copia l'aggiornamento 1.09 estratto nella cartella del gioco, sostituendo i file (versione trovata {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin non è della 1.09: copia eboot.bin dall'aggiornamento 1.09 estratto nella cartella del gioco, sostituendolo",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Questo eboot.bin contiene la patch a 60 FPS di Lance McDonald, che fa chiudere il gioco nel menu dei gesti: copia un eboot.bin pulito dall'aggiornamento 1.09 estratto nella cartella del gioco, sostituendolo",
-    "Поддерживаются только CUSA03173 (США) и CUSA00900 (Европа) с обновлением 1.09 (найдено {})": "Sono supportati solo CUSA03173 (USA) e CUSA00900 (Europa) con l'aggiornamento 1.09 (trovato {})",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Sono supportati solo CUSA03173 (USA), CUSA00900 (Europa) e CUSA03023 (Asia) con l'aggiornamento 1.09 (trovato {})",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "eboot.bin non può essere letto come eseguibile PS4 decriptato: estrai di nuovo il gioco",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, versione 1.09",
     "Папка игры (с eboot.bin)": "Cartella del gioco (con eboot.bin)",
@@ -1269,7 +1285,7 @@ FR = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "La mise à jour 1.09 est nécessaire : copiez la mise à jour 1.09 extraite dans le dossier du jeu, en remplaçant les fichiers (version trouvée : {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin n'est pas celui de la 1.09 : copiez eboot.bin de la mise à jour 1.09 extraite dans le dossier du jeu, en le remplaçant",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Cet eboot.bin intègre le patch 60 FPS de Lance McDonald, qui fait planter le jeu dans le menu des gestes : copiez un eboot.bin propre de la mise à jour 1.09 extraite dans le dossier du jeu, en le remplaçant",
-    "Поддерживаются только CUSA03173 (США) и CUSA00900 (Европа) с обновлением 1.09 (найдено {})": "Seuls CUSA03173 (États-Unis) et CUSA00900 (Europe) avec la mise à jour 1.09 sont pris en charge (trouvé : {})",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Seuls CUSA03173 (États-Unis), CUSA00900 (Europe) et CUSA03023 (Asie) avec la mise à jour 1.09 sont pris en charge (trouvé : {})",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "eboot.bin ne peut pas être lu comme un exécutable PS4 déchiffré : extrayez de nouveau le jeu",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, version 1.09",
     "Папка игры (с eboot.bin)": "Dossier du jeu (avec eboot.bin)",
@@ -1556,7 +1572,7 @@ DE = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Das Update 1.09 wird benötigt: Kopiere das extrahierte Update 1.09 in den Spielordner und ersetze dabei die Dateien (gefundene Version {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Die eboot.bin ist nicht von 1.09: Kopiere die eboot.bin aus dem extrahierten Update 1.09 in den Spielordner und ersetze sie",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Diese eboot.bin enthält den 60-FPS-Patch von Lance McDonald, durch den das Spiel im Gestenmenü abstürzt: Kopiere eine saubere eboot.bin aus dem extrahierten Update 1.09 in den Spielordner und ersetze sie",
-    "Поддерживаются только CUSA03173 (США) и CUSA00900 (Европа) с обновлением 1.09 (найдено {})": "Nur CUSA03173 (USA) und CUSA00900 (Europa) mit Update 1.09 werden unterstützt (gefunden: {})",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Nur CUSA03173 (USA), CUSA00900 (Europa) und CUSA03023 (Asien) mit Update 1.09 werden unterstützt (gefunden: {})",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "Die eboot.bin lässt sich nicht als entschlüsselte PS4-Programmdatei lesen: Erstelle den Dump des Spiels erneut",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, Version 1.09",
     "Папка игры (с eboot.bin)": "Spielordner (mit eboot.bin)",
@@ -1778,9 +1794,263 @@ DE = {
 }
 
 
+# Simplified Chinese.
+ZH_CN = {
+    # Window, pages, buttons
+    "Запустить": "启动",
+    "Остановить": "停止",
+    "Настройки": "设置",
+    "Журнал": "日志",
+    "Не удалось запустить: {}": "无法启动：{}",
+    "\n— игра завершилась (код {}) —\n": "\n— 游戏已退出（代码 {}）—\n",
+    # Launcher language
+    "Язык лаунчера": "启动器语言",
+    "Как в системе": "跟随系统",
+    "Применится после перезапуска лаунчера, пока игра запущена":
+        "游戏运行期间更改语言，需要重启启动器后才会生效",
+    # Game
+    "Игра": "游戏",
+    "Папка игры (CUSA03173)": "游戏文件夹（CUSA03173）",
+    "Выбрать папку с eboot.bin": "选择包含 eboot.bin 的文件夹",
+    "Открыть в файловом менеджере": "在文件管理器中打开",
+    "Папка сохранений": "存档文件夹",
+    "Выбрать папку сохранений": "选择存档文件夹",
+    "Вернуть папку по умолчанию": "恢复默认文件夹",
+    "Язык системы": "系统语言",
+    "По умолчанию: {}": "默认：{}",
+    "Найдены сохранения": "已找到存档",
+    "Сохранений пока нет: игра создаст их здесь": "暂无存档：游戏会在此创建",
+    "не выбрана": "未选择",
+    "Найден eboot.bin": "已找到 eboot.bin",
+    "Нет eboot.bin в папке": "文件夹中没有 eboot.bin",
+    "Управление": "操作设置",
+    "Клавиатура": "键盘",
+    "Геймпад": "手柄",
+    "Назначение кнопок; применяется при запуске игры": "按键绑定；在游戏启动时生效",
+    "Назначить": "绑定",
+    "Сбросить": "重置",
+    "{} (по умолчанию)": "{}（默认）",
+    "не назначено": "未绑定",
+    "Нажмите клавишу или кнопку… (Esc — отмена)": "按下一个按键或手柄按钮…（按 Esc 取消）",
+    "Крест": "叉键",
+    "Круг": "圆圈键",
+    "Квадрат": "方块键",
+    "Треугольник": "三角键",
+    "Тачпад, левая половина (жесты)": "触摸板左侧（手势）",
+    "Тачпад, правая половина (личные вещи)": "触摸板右侧（重要物品）",
+    "Крестовина вверх": "方向键上",
+    "Крестовина вниз": "方向键下",
+    "Крестовина влево": "方向键左",
+    "Крестовина вправо": "方向键右",
+    "Движение вперёд": "向前移动",
+    "Движение назад": "向后移动",
+    "Движение влево": "向左移动",
+    "Движение вправо": "向右移动",
+    "Камера вверх": "镜头向上",
+    "Камера вниз": "镜头向下",
+    "Камера влево": "镜头向左",
+    "Камера вправо": "镜头向右",
+    "Контроллер": "控制器",
+    "Выбранный берётся, как только подключится": "所选手柄一旦连接即会被使用",
+    "Первый подключённый": "第一个已连接的手柄",
+    "{} (не подключён)": "{}（未连接）",
+    "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})":
+        "需要 1.09 更新：请将转储出的 1.09 更新文件复制到游戏文件夹并覆盖（当前检测到版本 {}）",
+    "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой":
+        "eboot.bin 不是 1.09 版本：请将 1.09 更新转储中的 eboot.bin 复制到游戏文件夹并覆盖",
+    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})":
+        "仅支持已安装 1.09 更新的 CUSA03173（美版）、CUSA00900（欧版）和 CUSA03023（亚洲版）（当前检测到 {}）",
+    "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
+        "此 eboot.bin 内置了 Lance McDonald 的 60 FPS 补丁，会导致游戏在打开手势菜单时崩溃：请将 1.09 更新转储中干净的 eboot.bin 复制到游戏文件夹并覆盖",
+    "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
+        "无法将 eboot.bin 识别为已解密的 PS4 可执行文件：请重新转储游戏",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "游戏文件在解包时已损坏：着色器无法解压，游戏会在加载时卡住。请使用修复后的工具重新解包游戏和 1.09 更新（issue #81）",
+    "Bloodborne CUSA03173, версия 1.09": "血源诅咒 CUSA03173，版本 1.09",
+    "Папка игры (с eboot.bin)": "游戏文件夹（含 eboot.bin）",
+    # Languages
+    "Английский": "英语",
+    "Русский": "俄语",
+    "Японский": "日语",
+    "Французский": "法语",
+    "Испанский": "西班牙语",
+    "Немецкий": "德语",
+    "Итальянский": "意大利语",
+    "English": "英语",
+    # Mods
+    "Моды": "模组",
+    "Распакуйте каждый мод в отдельную папку (с dvdroot_ps4 или сразу с chr/, parts/ и т. п.). "
+    "При совпадении файлов побеждает мод ниже в списке. Применяется при запуске.":
+        "将每个模组解压到独立的文件夹中（文件夹内可以是 dvdroot_ps4，也可以直接是 chr/、parts/ 等）。"
+        "文件冲突时，列表中靠下的模组优先。设置会在游戏启动时生效。",
+    "Загружать моды": "加载模组",
+    "Папка модов": "模组文件夹",
+    "Выбрать папку модов": "选择模组文件夹",
+    "Открыть папку модов": "打开模组文件夹",
+    "Обновить список": "刷新列表",
+    "Загрузить раньше": "提前加载",
+    "Загрузить позже": "延后加载",
+    "Модов нет": "没有模组",
+    # Patches
+    "Сторонние патчи": "第三方补丁",
+    "XML-патчи в формате shadPS4 для версии 01.09 из папки патчей. Применяются при запуске.":
+        "补丁文件夹中、shadPS4 格式、适用于 01.09 版本的 XML 补丁。会在游戏启动时生效。",
+    "Папка патчей": "补丁文件夹",
+    "Выбрать папку патчей": "选择补丁文件夹",
+    "Открыть папку патчей": "打开补丁文件夹",
+    "Патчей нет": "没有补丁",
+    "Автор: {}": "作者：{}",
+    # Screen
+    "Экран": "显示",
+    "Разрешение вывода": "输出分辨率",
+    "Апскейлер дорисовывает кадр; Steam Deck — 720p": "超分辨率会将画面放大到此分辨率；Steam Deck 建议 720p",
+    "Полноэкранный режим": "全屏模式",
+    "Смена разрешения на лету": "实时切换分辨率",
+    "Без перезапуска, но медленнее на Steam Deck и старых GPU":
+        "无需重启，但在 Steam Deck 和较旧的显卡上速度更慢",
+    "Авто (по видеокарте)": "自动（根据显卡）",
+    "Выключена (быстрее)": "关闭（更快）",
+    "Включена": "开启",
+    "Режим показа кадров": "呈现模式",
+    "Разрешить HDR": "允许 HDR",
+    # Upscaler
+    "Апскейлер": "超分辨率",
+    "Хранится в bbport.ini; в игре меняется через меню (Insert или L3+R3)":
+        "保存在 bbport.ini 中；游戏内可通过菜单切换（Insert 或 L3+R3）",
+    "TAA (нативное сглаживание)": "TAA（原生抗锯齿）",
+    "Выключен": "关闭",
+    "Пресет": "预设",
+    "Резкость (RCAS)": "锐化（RCAS）",
+    "Сила резкости": "锐化强度",
+    "Векторы движения объектов": "物体运动矢量",
+    "Меньше гостинга на персонажах; стоит около 10% FPS": "减少角色拖影；大约损失 10% 帧率",
+    "Показывать FPS": "显示帧率",
+    "Ассеты найдены": "已找到资源文件",
+    "Нет ассетов: tools/fetch_fsr4_assets.sh": "缺少资源文件：请运行 tools/fetch_fsr4_assets.sh",
+    "Ассеты для выбранного режима найдены": "已找到所选模式对应的资源文件",
+    "{}. Соберите FSR 4.1.1 из своей DLL кнопкой «Выбрать DLL…» ниже":
+        "{}。请用下方的「选择 DLL…」按钮，从你自己的 DLL 构建 FSR 4.1.1",
+    "FSR 4.1.1 из своей DLL AMD": "用你自己的 AMD DLL 构建 FSR 4.1.1",
+    "Отменить": "取消",
+    "Выбрать DLL…": "选择 DLL…",
+    "DLL апскейлера AMD (amd_fidelityfx_upscaler_dx12.dll)": "AMD 超分辨率 DLL（amd_fidelityfx_upscaler_dx12.dll）",
+    "нет": "无",
+    "Эта DLL не подходит": "此 DLL 不适用",
+    "{}: версия {}, модели FSR 4: {}.\n\nbbport повторяет только официальную FSR 4.1.x от AMD (модель v07_fp8_no_scale): например, FSR4_LATEST из OptiScaler или amd_fidelityfx_upscaler_dx12.dll из игры с FSR 4.1. Сборки сообщества (4.0.2b и подобные) устроены иначе и пока не поддерживаются.":
+        "{}：版本 {}，FSR 4 模型：{}。\n\nbbport 仅支持复现 AMD 官方的 FSR 4.1.x（v07_fp8_no_scale 模型）：例如 OptiScaler 中的 FSR4_LATEST，或来自支持 FSR 4.1 的游戏的 amd_fidelityfx_upscaler_dx12.dll。社区构建版本（如 4.0.2b 等）结构不同，暂不支持。",
+    "Загрузчик не подходит": "此加载器不适用",
+    "Загрузчик FidelityFX (amd_fidelityfx_loader_dx12.dll или amd_fidelityfx_dx12.dll)":
+        "FidelityFX 加载器（amd_fidelityfx_loader_dx12.dll 或 amd_fidelityfx_dx12.dll）",
+    "\n— сборка FSR 4.1.1 из {} —\n": "\n— 正在从 {} 构建 FSR 4.1.1 —\n",
+    "Подготовка…": "准备中…",
+    "Запись проходов DLL под Proton: {} из {}": "正在 Proton 下录制 DLL 渲染通道：第 {} / {} 个",
+    "Перевод проходов в SPIR-V…": "正在将渲染通道转换为 SPIR-V…",
+    "— сборка FSR 4.1.1 завершилась (код {}) —\n": "— FSR 4.1.1 构建已完成（代码 {}）—\n",
+    "FSR 4.1.1 собран и выбран": "FSR 4.1.1 已构建并选用",
+    "Сборка FSR 4.1.1 отменена": "FSR 4.1.1 构建已取消",
+    "FSR 4.1.1 не собран": "FSR 4.1.1 尚未构建",
+    "DLL не подходит: подробности в журнале": "DLL 不适用：详情见日志",
+    "Не хватает программ для сборки: список в журнале": "缺少构建所需的程序：清单见日志",
+    "Записанные проходы не совпали с тем, что повторяет bbport (другая версия DLL или новая видеокарта?): подробности в журнале":
+        "录制的渲染通道与 bbport 复现的内容不一致（可能是 DLL 版本不同，或显卡型号较新？）：详情见日志",
+    "Не найден загрузчик FidelityFX 2.x": "未找到 FidelityFX 2.x 加载器",
+    "Не найден подходящий Proton: установите GE-Proton 10 или новее (ProtonUp-Qt) или Proton Experimental / Proton-CachyOS в Steam. Если они есть — запустите в Steam любую игру с этим Proton, чтобы Steam поставил его рантайм":
+        "未找到合适的 Proton：请安装 GE-Proton 10 或更高版本（可用 ProtonUp-Qt），或在 Steam 中使用 Proton Experimental / Proton-CachyOS。如果已经安装，请在 Steam 中用该 Proton 启动任意游戏，让 Steam 安装它的运行时",
+    "Ни один Proton не запустил FSR 4.1 из этой DLL. Либо они слишком старые (подходят GE-Proton 10+, Proton Experimental, Proton-CachyOS 11), либо DLL не включает FSR 4.1 на этой видеокарте (Steam Deck?): тогда соберите на ПК с Radeon RX 7000/9000 и скопируйте папку fsr4_411. Подробности в журнале":
+        "没有任何 Proton 能从此 DLL 启动 FSR 4.1。要么是 Proton 版本太旧（需要 GE-Proton 10+、Proton Experimental 或 Proton-CachyOS 11），要么是这块显卡无法启用 FSR 4.1（例如 Steam Deck？）：这种情况下，请在装有 Radeon RX 7000/9000 的电脑上构建，再把 fsr4_411 文件夹复制过来。详情见日志",
+    "На NixOS запись идёт на самой системе (systemd --user) через umu-launcher из nix-shell, а здесь их не нашлось: установите umu-launcher или Nix. Подробности в журнале":
+        "在 NixOS 上，录制通过 nix-shell 中的 umu-launcher 在系统本身（systemd --user）上进行，但未能找到它们：请安装 umu-launcher 或 Nix。详情见日志",
+    "{}: FSR {}. Это официальная FSR 4.0.x от AMD: она включается только на видеокартах RDNA4 (RX 9000), а под Proton на других видеокартах не запускается, поэтому записать её нельзя.\n\nНужна FSR 4.1.x: например, FSR4_LATEST из OptiScaler или DLL из игры с FSR 4.1.":
+        "{}：FSR {}。这是 AMD 官方的 FSR 4.0.x：仅在 RDNA4 显卡（RX 9000）上启用，在其他显卡上通过 Proton 无法运行，因此无法录制。\n\n需要 FSR 4.1.x：例如 OptiScaler 中的 FSR4_LATEST，或来自支持 FSR 4.1 的游戏的 DLL。",
+    "{}: в этой DLL нет FSR 4. Нужна amd_fidelityfx_upscaler_dx12.dll версии 4.1.x.":
+        "{}：此 DLL 中不包含 FSR 4。需要版本为 4.1.x 的 amd_fidelityfx_upscaler_dx12.dll。",
+    "Это не загрузчик":
+        "这不是加载器",
+    "{} — это DLL апскейлера. Загрузчик называется amd_fidelityfx_loader_dx12.dll (у OptiScaler — amd_fidelityfx_dx12.dll) и лежит в той же папке игры, что и DLL апскейлера.":
+        "{} 是超分辨率 DLL。加载器名为 amd_fidelityfx_loader_dx12.dll（在 OptiScaler 中为 amd_fidelityfx_dx12.dll），与超分辨率 DLL 位于同一个游戏文件夹中。",
+    "{}: версия {}. Нужен загрузчик FidelityFX 2.x — из той же игры, что и DLL апскейлера.":
+        "{}：版本 {}。需要来自同一游戏、与超分辨率 DLL 配套的 FidelityFX 2.x 加载器。",
+    "Рядом с DLL нет загрузчика: выберите amd_fidelityfx_loader_dx12.dll из папки игры":
+        "DLL 旁边没有加载器：请从游戏文件夹中选择 amd_fidelityfx_loader_dx12.dll",
+    "Собрать FSR 4.1.1 из amd_fidelityfx_upscaler_dx12.dll 4.1.x (OptiScaler: папка FSR4_LATEST, или из игры с FSR 4.1). Нужен GE-Proton 10+, Proton Experimental или Proton-CachyOS; 2–5 минут (RDNA4: вдвое дольше, ещё и вариант FP8)":
+        "从 amd_fidelityfx_upscaler_dx12.dll 4.1.x 构建 FSR 4.1.1（OptiScaler：FSR4_LATEST 文件夹，或来自支持 FSR 4.1 的游戏）。需要 GE-Proton 10+、Proton Experimental 或 Proton-CachyOS；耗时 2–5 分钟（RDNA4：耗时加倍，并额外构建 FP8 版本）",
+    "Сборка не удалась (код {}): подробности в журнале": "构建失败（代码 {}）：详情见日志",
+    "Сглаживание в разрешении вывода без модели FSR": "在输出分辨率下进行抗锯齿，不使用 FSR 模型",
+    "Нет или повреждён файл {}": "文件 {} 缺失或已损坏",
+    # Effects
+    "Эффекты игры": "游戏效果",
+    "Патчи игры, применяются при запуске": "游戏补丁，会在启动时生效",
+    "Детализация моделей": "模型细节",
+    "Как в игре": "游戏默认",
+    "Максимальная (-2)": "最高（-2）",
+    "Ниже (1)": "较低（1）",
+    "Минимальная (2)": "最低（2）",
+    "Хроматическая аберрация": "色差",
+    "Глубина резкости (DoF)": "景深（DoF）",
+    "Размытие в движении": "动态模糊",
+    "Затенение SSAO": "SSAO 环境光遮蔽",
+    "Собственное сглаживание игры": "游戏自带抗锯齿",
+    "Тени от динамических источников": "动态光源阴影",
+    "Отражения SSR (не было в игре)": "SSR 反射（原版游戏中没有）",
+    "Пропуск заставок при запуске": "跳过开场动画",
+    "Свободная камера (Cross + L3 / Space + Z)": "自由镜头（叉键 + L3 / 空格 + Z）",
+    "Debug menu (левый touchpad / Tab; нужны шрифты)": "调试菜单（左触摸板 / Tab；需要字体文件）",
+    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253":
+        "请从 Nexus 模组 #253 中，将 DbgFont14h.ccm 和 DbgFont14h.tpf 安装到 dvdroot_ps4/font",
+    # Frame rate
+    "Частота кадров": "帧率",
+    "Режим": "模式",
+    "Какой патч частоты кадров применить к игре": "对游戏应用哪种帧率补丁",
+    "Без ограничения (патч)": "不限制（补丁解锁）",
+    "30 (как на PS4)": "30（与 PS4 一致）",
+    "Ограничение FPS": "帧率上限",
+    "0 — без ограничения; укажите число, чтобы ограничить FPS":
+        "0 表示不限制；填写一个数字可限制帧率",
+    # Performance
+    "Производительность": "性能",
+    "Двухстадийный конвейер GPU": "双阶段 GPU 管线",
+    "Быстрее на 20–30%; при нестабильности выключите": "可提速 20–30%；如不稳定请关闭",
+    "Авто": "自动",
+    "Включён при 8 и более потоках процессора": "处理器有 8 个或以上线程时自动开启",
+    "Включён": "开启",
+    "Стабильнее, но медленнее": "更稳定，但速度更慢",
+    "Чтение данных GPU процессором": "由 CPU 读取 GPU 数据（readback）",
+    "По умолчанию": "默认",
+    "Фоновая загрузка в видеопамять": "后台预加载至显存",
+    "Меньше рывков при подгрузке зон": "区域加载时卡顿更少",
+    "Обычная": "普通",
+    "Без лишней видеопамяти": "不占用额外显存",
+    "Полная": "完整",
+    "Около 3 ГБ видеопамяти сверху": "额外占用约 3 GB 显存",
+    # Mode
+    "Режим работы": "工作模式",
+    "Новая модель памяти и трансляции": "新内存与指令转译模型",
+    "Эксперимент. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. На NVIDIA и других видеокартах, кроме AMD, — через модуль памяти прослойки. Если драйвер не проходит проверку при запуске — старая модель. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями":
+        "实验性功能。显卡会像 PC 游戏那样直接读写游戏内存，图形指令被转译而非模拟；可能出现问题。在 NVIDIA 及其他非 AMD 显卡上，通过转换层的内存模块实现。如果驱动未通过启动检查，则使用旧模型。关闭时使用旧的内存模型（与 0.3 版相同），包含所有修复",
+    "Синхронизация как в 0.3": "与 0.3 版相同的同步方式",
+    "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3":
+        "用于排查回归问题：采用与 0.3 版发布时相同的旧内存模型与复制等待方式",
+    "Выключена": "关闭",
+    "Выключены": "关闭",
+    # Developer
+    "Для разработчика": "开发者选项",
+    "Статистика кадров в журнале": "在日志中记录帧统计",
+    "Сохранять журнал и статистику в файл": "将日志和统计信息保存到文件",
+    "Диагностика вылетов": "崩溃诊断",
+    "Проверяет кучу игры и записывает записи в её память; немного медленнее":
+        "检查游戏堆内存并记录对其的写入操作；速度会略有下降",
+    "В папку logs в каталоге данных: для разбора рывков и вылетов":
+        "保存到数据目录下的 logs 文件夹：便于排查卡顿和崩溃问题",
+    "Профиль GPU в журнале": "在日志中记录 GPU 性能剖析",
+    "Слои валидации Vulkan": "Vulkan 验证层",
+    "Сильно замедляет": "会大幅降低速度",
+    "Доп. переменные (ИМЯ=значение через пробел)": "附加环境变量（用空格分隔的 名称=值）",
+}
+
 # Translations by language code; Russian is the key itself. Strings missing in a translation
 # fall back to English, not to the Russian key.
-TRANSLATIONS = {"en": EN, "pt_BR": PT_BR, "es": ES, "it": IT, "fr": FR, "de": DE}
+TRANSLATIONS = {"en": EN, "pt_BR": PT_BR, "es": ES, "it": IT, "fr": FR, "de": DE,
+                "zh_CN": ZH_CN}
 LANGUAGES = ("ru", *TRANSLATIONS)
 
 
@@ -1797,6 +2067,8 @@ def system_language():
     locale = system_locale()
     if locale.startswith("pt_br"):
         return "pt_BR"
+    if locale.startswith("zh"):
+        return "zh_CN"
     short = locale[:2]
     return short if short in LANGUAGES else "en"
 

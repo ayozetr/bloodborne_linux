@@ -48,10 +48,6 @@ void runtime_sema_report(void);
 unsigned runtime_sema_waiters(uint32_t id);
 uintptr_t runtime_time_resolve(const char *name);
 void runtime_content_configure(const uint32_t values[5]);
-/* Status 0: entitlement only (no extra data); 4: installed with extra data. */
-#define RUNTIME_MAX_ADDONS 32
-typedef struct { char label[17]; uint32_t status; } RuntimeAddon;
-void runtime_content_configure_addons(const RuntimeAddon *addons, uint32_t count);
 uintptr_t runtime_content_resolve(const char *name);
 void runtime_content_report(void);
 typedef struct { const char *name; void *function; } RuntimeExport;

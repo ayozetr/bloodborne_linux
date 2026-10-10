@@ -43,9 +43,9 @@ cp -r tools/fsr4cap "$d/tools/"
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
 # DLSS (NVIDIA RTX), when tools/build_dlss.sh has built the bridge: it and NVIDIA's library.
-if [[ -f out/gpu/libbbport_dlss.so ]]; then
+if [[ -f out/libbbport_dlss.so ]]; then
     mkdir -p "$d/dlss"
-    cp out/gpu/libbbport_dlss.so out/gpu/libnvidia-ngx-dlss.so.* out/gpu/NVIDIA-DLSS-LICENSE.txt "$d/dlss/"
+    cp out/libbbport_dlss.so out/libnvidia-ngx-dlss.so.* out/NVIDIA-DLSS-LICENSE.txt "$d/dlss/"
 fi
 
 # The AppImage's main program: the launcher (or, with --play, the game alone).

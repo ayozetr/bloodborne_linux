@@ -2,7 +2,8 @@
 # DLSS for NVIDIA RTX on Linux: fetches the files of the NVIDIA DLSS SDK it needs (headers, the
 # static NGX loader and the DLSS library, ~60 MB, once into ~/.cache/bbport), builds the bridge
 # (gpu/dlss_bridge, the only code that uses the SDK) and puts it with NVIDIA's DLSS library and
-# license next to the GPU library (out/gpu), where the port looks for them. Without these files
+# license next to bb-probe (out/), where the port looks for them, as build.sh does with
+# DLSS_SDK_ROOT. Without these files
 # the port keeps its other upscalers. Needs the proprietary NVIDIA driver at run time.
 set -euo pipefail
 cd -- "$(dirname -- "$0")/.."
@@ -31,8 +32,8 @@ fetch "$dlss"
 cmake -S gpu/dlss_bridge -B out/dlss-bridge -G Ninja -DCMAKE_BUILD_TYPE=Release \
     -DDLSS_SDK_ROOT="$sdk" > /dev/null
 ninja -C out/dlss-bridge > /dev/null
-mkdir -p out/gpu
-install -m755 out/dlss-bridge/libbbport_dlss.so out/gpu/
-install -m755 "$sdk/$dlss" out/gpu/
-install -m644 "$sdk/LICENSE.txt" out/gpu/NVIDIA-DLSS-LICENSE.txt
-echo "DLSS ready: out/gpu/libbbport_dlss.so, out/gpu/${dlss##*/}"
+rm -f out/libnvidia-ngx-dlss.so.* out/gpu/libbbport_dlss.so out/gpu/libnvidia-ngx-dlss.so.*
+install -m755 out/dlss-bridge/libbbport_dlss.so out/
+install -m755 "$sdk/$dlss" out/
+install -m644 "$sdk/LICENSE.txt" out/NVIDIA-DLSS-LICENSE.txt
+echo "DLSS ready: out/libbbport_dlss.so, out/${dlss##*/}"

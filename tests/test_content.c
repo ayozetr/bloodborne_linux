@@ -3,12 +3,19 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+/* The user folder add-ons are listed from (runtime_file.c in the game): a temporary one here. */
+static char user_dir[64]="/tmp/bbport-content-test-XXXXXX";
+const char *runtime_file_user_dir(void) { return user_dir; }
 typedef int32_t (ABI *Module)(uint16_t);
 typedef int32_t (ABI *Init)(const void *,void *);
 typedef int32_t (ABI *Param)(uint32_t,int32_t *);
 typedef int32_t (ABI *List)(uint32_t,void *,uint32_t,uint32_t *);
 #define GET(t,n) ((t)runtime_content_resolve(n))
 int main(int argc,char **argv) {
+    assert(mkdtemp(user_dir));
     Module load=GET(Module,"g8cM39EUZ6o#M#N");
     Module loaded=GET(Module,"fMP5NHUOaMk#M#N");
     Module unload=GET(Module,"eR2bZFAAU0Q#M#N");
@@ -20,22 +27,6 @@ int main(int argc,char **argv) {
     if (argc>1 && !strcmp(argv[1],"--missing")) { load(0xb4); return 99; }
     const uint32_t profile[]={1,13,0x80000000,0,7};
     runtime_content_configure(profile);
-    if (argc>1 && !strcmp(argv[1],"--addons")) {
-        const RuntimeAddon dlc[]={{"SPEXPANSIONDLC03",0},{"SPDLCMESSENGER00",4}};
-        runtime_content_configure_addons(dlc,2);
-        unsigned char initial[32]={0}, boot[40];
-        assert(load(0xb4)==0 && init(initial,boot)==0);
-        uint32_t hits=99;
-        assert(list(0,NULL,0,&hits)==0 && hits==2);
-        unsigned char entries[3*24]; memset(entries,0xaa,sizeof(entries));
-        assert(list(0,entries,1,&hits)==0 && hits==1);
-        assert(!memcmp(entries,"SPEXPANSIONDLC03\0\0\0\0\0\0\0\0",24));
-        for (unsigned i=24;i<sizeof(entries);++i) assert(entries[i]==0xaa);
-        assert(list(0,entries,3,&hits)==0 && hits==2);
-        assert(!memcmp(entries+24,"SPDLCMESSENGER00\0\0\0\0\4\0\0\0",24));
-        for (unsigned i=48;i<sizeof(entries);++i) assert(entries[i]==0xaa);
-        puts("PASS: AppContent add-on list"); return 0;
-    }
     if (argc>1 && !strcmp(argv[1],"--unknown")) {
         /* Other system modules are host-provided: reference counted, independent. */
         assert((uint32_t)loaded(0xb5)==0x805a1001);
@@ -70,10 +61,25 @@ int main(int argc,char **argv) {
     assert(list(0,entries,2,&h.hits)==0 && h.hits==0);
     for (unsigned i=0;i<sizeof(entries);++i) assert(entries[i]==0xaa);
     assert((uint32_t)list(0,NULL,0,NULL)==0x80d90002);
+    /* <user>/addcont/<title>/<label>: reported installed (The Old Hunters' entitlement). */
+    char path[160];
+    snprintf(path,sizeof(path),"%s/addcont",user_dir); assert(!mkdir(path,0755));
+    snprintf(path,sizeof(path),"%s/addcont/CUSA00900",user_dir); assert(!mkdir(path,0755));
+    snprintf(path,sizeof(path),"%s/addcont/CUSA00900/SPEXPANSIONDLC03",user_dir); assert(!mkdir(path,0755));
+    assert(list(0,NULL,0,&h.hits)==0 && h.hits==1);
+    memset(entries,0xaa,sizeof(entries));
+    assert(list(0,entries,2,&h.hits)==0 && h.hits==1);
+    assert(!strcmp((const char *)entries,"SPEXPANSIONDLC03"));
+    uint32_t status; memcpy(&status,entries+20,4); assert(status==4);
+    for (unsigned i=24;i<sizeof(entries);++i) assert(entries[i]==0xaa);
+    rmdir(path);
+    snprintf(path,sizeof(path),"%s/addcont/CUSA00900",user_dir); rmdir(path);
+    snprintf(path,sizeof(path),"%s/addcont",user_dir); rmdir(path);
+    rmdir(user_dir);
     assert(unload(0xb4)==0 && loaded(0xb4)==0);
     assert((uint32_t)init(initial,b.boot)==0x80d90003);
     assert(unload(0xb4)==0 && (uint32_t)loaded(0xb4)==0x805a1001);
     assert(load(0xb4)==0 && init(initial,b.boot)==0 && unload(0xb4)==0);
-    puts("PASS: AppContent lifecycle, profile and output boundaries");
+    puts("PASS: AppContent lifecycle, profile, add-on folders and output boundaries");
     return 0;
 }

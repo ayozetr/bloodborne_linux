@@ -104,20 +104,34 @@ class PackagedVulkanTests(unittest.TestCase):
         vulkan.configure(self.env, (self.icds,), ())
         self.assertIn("nvidia_icd.json", self.env["VK_DRIVER_FILES"])
 
-    def drm_card(self, name, vendor):
-        device = self.root / "drm" / name / "device"
-        device.mkdir(parents=True)
-        (device / "vendor").write_text(vendor + "\n")
+    def test_nvidia_report_names_libraries_searched_and_not_loaded(self):
+        # Issue #107: the driver loads but gives no vkCreateInstance; the report says what the
+        # dynamic linker looked for inside the package and did not load.
+        driver = self.library("libGLX_nvidia.so.615.1")
+        self.library("libnvidia-glcore.so.615.1")
+        self.manifest(str(driver))
+        self.configure()
+        cache = Path(self.env["LD_LIBRARY_PATH"].split(":")[0])
+        trace = "\n".join([
+            "   101:\tfind library=libGLdispatch.so.0 [0]; searching",
+            "   101:\tcalling init: /bundled/lib/libGLdispatch.so.0",
+            "   101:\tfind library=libnvidia-glcore.so.615.1 [0]; searching",
+            f"   101:\tcalling init: {cache}/libnvidia-glcore.so.615.1",
+            "   101:\tfind library=libnvidia-gpucomp.so.615.1 [0]; searching",
+            "   101:\tfind library=libm.so.6 [0]; searching",
+        ])
+        calls = []
 
-    def test_new_memory_model_offered_with_an_amd_gpu(self):
-        self.drm_card("card0", "0x8086")
-        self.drm_card("card1", "0x1002")
-        self.assertIs(vulkan.amd_gpu(self.root / "drm"), True)
+        def run(args, **kwargs):
+            calls.append(kwargs["env"].get("LD_DEBUG"))
+            return type("Result", (), {"stderr": trace})()
 
-    def test_new_memory_model_not_offered_without_an_amd_gpu(self):
-        self.drm_card("card0", "0x10de")
-        self.assertIs(vulkan.amd_gpu(self.root / "drm"), False)
+        lines = vulkan.nvidia_report(self.env, "vulkaninfo", run)
+        self.assertEqual(calls, ["libs"])
+        self.assertTrue(any(line.strip().startswith("libnvidia-glcore.so.615.1 ->") for line in lines))
+        self.assertIn("Dynamic linker: 3 NVIDIA/glvnd libraries searched, not loaded: "
+                      "libnvidia-gpucomp.so.615.1", lines)
 
-    def test_unknown_gpu_leaves_the_choice_to_the_game(self):
-        (self.root / "drm").mkdir()
-        self.assertIsNone(vulkan.amd_gpu(self.root / "drm"))
+    def test_nvidia_report_is_empty_without_the_host_driver(self):
+        self.configure()
+        self.assertEqual(vulkan.nvidia_report(self.env, "vulkaninfo", None), [])

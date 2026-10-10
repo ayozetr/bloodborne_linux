@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "bbport_settings.h"
-#include "bbport_menu_i18n.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iterator>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -30,13 +27,9 @@ void Set(Values& v, const std::string& key, const std::string& value) {
     const float f = float(std::atof(value.c_str()));
     const int i = std::atoi(value.c_str());
     if (key == "menu_language") {
-        const auto it = std::find(std::begin(MenuLanguageCodes), std::end(MenuLanguageCodes), value);
-        if (it != std::end(MenuLanguageCodes)) {
-            v.menu_language = MenuLanguage(it - std::begin(MenuLanguageCodes));
-        } else {
-            std::printf("Settings: unknown menu_language '%s' (expected en, ru, es, it, fr, de or pt_BR)\n",
-                        value.c_str());
-        }
+        if (value == "en") v.menu_language = MenuLanguage::English;
+        else if (value == "ru") v.menu_language = MenuLanguage::Russian;
+        else std::printf("Settings: unknown menu_language '%s' (expected en or ru)\n", value.c_str());
     } else if (key == "upscaler") {
         for (int u = 0; u < UpscalerCount; ++u) {
             if (value == UpscalerName(u)) {
@@ -103,26 +96,7 @@ Values& Get() {
 }
 
 const char* MenuText(const char* english, const char* russian) {
-    switch (const MenuLanguage language = Get().menu_language) {
-    case MenuLanguage::English:
-        return english;
-    case MenuLanguage::Russian:
-        return russian;
-    default:
-        return MenuTranslation(language, english);
-    }
-}
-
-MenuLanguage MenuLanguageFromCode(const char* code) {
-    if (code && code[0] && code[1]) {
-        for (int l = 0; l < int(MenuLanguage::Count); ++l) {
-            if (std::tolower(code[0]) == MenuLanguageCodes[l][0] &&
-                std::tolower(code[1]) == MenuLanguageCodes[l][1]) {
-                return MenuLanguage(l);
-            }
-        }
-    }
-    return MenuLanguage::English;
+    return Get().menu_language == MenuLanguage::Russian ? russian : english;
 }
 
 void Load() {
@@ -142,7 +116,9 @@ void Load() {
                 }
             }
         }
-        v.menu_language = MenuLanguageFromCode(lang);
+        v.menu_language = lang && (lang[0] == 'r' || lang[0] == 'R') && (lang[1] == 'u' || lang[1] == 'U')
+                              ? MenuLanguage::Russian
+                              : MenuLanguage::English;
     }
     if (FILE* file = std::fopen(Path(), "r")) {
         char line[256];
@@ -209,7 +185,7 @@ void ConfigureDlssSupport(bool available, const char* problem) {
     v.dlss_problem = available || kept.empty() ? nullptr : kept.c_str();
     if (v.upscaler == UpscalerDlss && !available) {
         std::printf("Upscaler: DLSS unavailable (%s); falling back to FSR 3.1\n",
-                    kept.empty() ? "bbport_dlss.dll or nvngx_dlss.dll missing" : kept.c_str());
+                    kept.empty() ? "the DLSS bridge or NVIDIA's DLSS library is missing" : kept.c_str());
         v.upscaler = UpscalerFsr3;
     }
 }
@@ -246,7 +222,7 @@ void Save() {
         return std::string(text);
     };
     const auto flag = [](bool value) { return std::string(value ? "1" : "0"); };
-    put("menu_language", MenuLanguageCodes[int(v.menu_language.load())]);
+    put("menu_language", v.menu_language == MenuLanguage::Russian ? "ru" : "en");
     put("upscaler", UpscalerName(v.upscaler));
     put("preset", std::to_string(v.preset.load()));
     put("sharpen", flag(v.sharpen));

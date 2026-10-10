@@ -17,14 +17,7 @@ inline bool IsFsr4(int upscaler) {
 }
 enum Preset : int { NativeAA = 0, Quality, Balanced, Performance, UltraPerformance, PresetCount };
 enum DebugView : int { DebugNone = 0, DebugReactive = 1, DebugMotion = 2, DebugViewCount };
-/// Overlay languages, in the order of the menu's Language selector.
-enum class MenuLanguage { English, Russian, Spanish, Italian, French, German, PortugueseBrazil, Count };
-/// bbport.ini / BB_MENU_LANGUAGE codes, indexed by MenuLanguage.
-inline constexpr const char* MenuLanguageCodes[] = {"en", "ru", "es", "it", "fr", "de", "pt_BR"};
-/// Each language's own name, for the selector.
-inline constexpr const char* MenuLanguageNames[] = {"English", "Русский", "Español",
-                                                    "Italiano", "Français", "Deutsch",
-                                                    "Português (Brasil)"};
+enum class MenuLanguage { English, Russian };
 
 /// Game effects switched by the community patches at start (patches.py EFFECTS): ini key,
 /// menu label, default (the game's own behaviour).
@@ -45,17 +38,6 @@ inline constexpr Effect Effects[] = {
     {"skip_intro", "Skip startup intros", "Пропуск заставок при запуске", false},
     {"debug_camera", "Free camera (Cross + L3)", "Свободная камера (Cross + L3)", false},
     {"debug_menu", "Debug menu (requires font files)", "Debug menu (нужны файлы шрифтов)", false},
-    // Cheats and gameplay tweaks (launcher "Cheats" page).
-    {"cheat_no_death", "Cheat: never die (not below 1 HP)", "Чит: бессмертие (не ниже 1 HP)", false},
-    {"cheat_stealth", "Cheat: enemies do not see you", "Чит: враги не замечают", false},
-    {"cheat_silent", "Cheat: enemies do not hear you", "Чит: враги не слышат", false},
-    {"cheat_rally_no_decay", "Cheat: Rally never fades", "Чит: Rally не угасает", false},
-    {"cheat_enemy_control", "Cheat: enemy control (R3 / L3)", "Чит: управление врагом (R3 / L3)", false},
-    {"tweak_no_rally", "No Rally (health regain)", "Без Rally (возврата HP)", false},
-    {"tweak_camera_distance", "Camera further away", "Камера дальше", false},
-    {"tweak_no_camera_rotation", "No camera auto-rotation", "Без автоповорота камеры", false},
-    {"tweak_easy_run", "Run with less stick tilt", "Бег с меньшим наклоном стика", false},
-    {"tweak_ragdoll", "Dark Souls ragdoll physics", "Физика тел как в Dark Souls", false},
 };
 inline constexpr int EffectCount = int(sizeof(Effects) / sizeof(Effects[0]));
 /// Live output resolutions: the upscaler's output and the UI host targets.
@@ -94,7 +76,7 @@ struct Values {
     /// Why FSR 4 cannot run (assets, device features), or null. Set by the renderer.
     std::atomic<const char*> fsr4_problem{nullptr};
     std::atomic<bool> fsr4_supported{false}, fsr411_supported{false};
-    /// DLSS (bbport_dlss.dll, NVIDIA RTX) is ready, or why not (null before the device exists).
+    /// DLSS (gpu/dlss_bridge, NVIDIA RTX) is ready, or why not (null before the device exists).
     std::atomic<bool> dlss_supported{false};
     std::atomic<const char*> dlss_problem{nullptr};
 
@@ -109,11 +91,8 @@ struct Values {
 };
 
 Values& Get();
-/// Localized overlay text; the Language selector itself stays in English. Languages other than
-/// English and Russian look the English text up in bbport_menu_i18n.h (English when missing).
+/// Localized overlay text; the Language selector itself stays in English.
 const char* MenuText(const char* english, const char* russian);
-/// MenuLanguage for a code or locale ("es", "fr_FR.UTF-8"); English when unknown.
-MenuLanguage MenuLanguageFromCode(const char* code);
 
 /// Reads the file, then the environment overrides. Called once at start.
 void Load();

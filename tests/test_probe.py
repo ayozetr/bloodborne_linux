@@ -46,23 +46,6 @@ class LoaderTests(unittest.TestCase):
                     self.assertEqual(r.returncode,1,r.stdout+r.stderr)
                     self.assertIn('content profile',r.stderr)
 
-    def test_content_profile_with_addons(self):
-        head=struct.pack('<8s5I',b'BBCONT02',3,0,0,0,0)
-        dlc=struct.pack('<16sI',b'SPEXPANSIONDLC03',0)
-        with tempfile.TemporaryDirectory() as tmp:
-            path=Path(tmp)/'content.bin'
-            path.write_bytes(head+struct.pack('<I',1)+dlc)
-            r=self.run_image(package(b'\xc3'),'--content-profile',str(path))
-            self.assertNotIn('content profile',r.stderr)
-            self.assertIn('add-on SPEXPANSIONDLC03 (status 0)',r.stdout)
-            for data in (head+struct.pack('<I',2)+dlc, head+struct.pack('<I',33),
-                         head+struct.pack('<I',1)+dlc+b'x'):
-                with self.subTest(data=data):
-                    path.write_bytes(data)
-                    r=self.run_image(package(b'\xc3'),'--content-profile',str(path))
-                    self.assertEqual(r.returncode,1,r.stdout+r.stderr)
-                    self.assertIn('content profile',r.stderr)
-
     def run_image(self, data, *options):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'boot.bin'

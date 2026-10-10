@@ -357,32 +357,17 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (content_profile) {
-        /* BBCONT01: SKU and four user parameters. BBCONT02 adds a count and that
-           many add-ons (16-byte entitlement label, status). */
         FILE *profile=fopen(content_profile,"rb");
-        unsigned char data[32+RUNTIME_MAX_ADDONS*20];
+        unsigned char data[28];
         if (!profile) fail("cannot open content profile");
-        size_t size=fread(data,1,sizeof(data),profile);
-        int extra=fgetc(profile)!=EOF;
+        if (fread(data,1,sizeof(data),profile)!=sizeof(data) || fgetc(profile)!=EOF || memcmp(data,"BBCONT01",8)) fail("invalid content profile");
         fclose(profile);
-        int v2=size>=32 && !memcmp(data,"BBCONT02",8);
-        if (extra || (!v2 && (size!=28 || memcmp(data,"BBCONT01",8)))) fail("invalid content profile");
-        uint32_t values[6];
-        for (unsigned i=0;i<(v2?6u:5u);++i) {
+        uint32_t values[5];
+        for (unsigned i=0;i<5;++i) {
             unsigned char *p=data+8+i*4;
             values[i]=(uint32_t)p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|(uint32_t)p[3]<<24;
         }
         runtime_content_configure(values);
-        if (v2) {
-            if (values[5]>RUNTIME_MAX_ADDONS || size!=32+values[5]*20) fail("invalid content profile");
-            RuntimeAddon addons[RUNTIME_MAX_ADDONS];
-            for (uint32_t i=0;i<values[5];++i) {
-                unsigned char *p=data+32+i*20;
-                memcpy(addons[i].label,p,16); addons[i].label[16]=0;
-                addons[i].status=(uint32_t)p[16]|(uint32_t)p[17]<<8|(uint32_t)p[18]<<16|(uint32_t)p[19]<<24;
-            }
-            runtime_content_configure_addons(addons,values[5]);
-        }
     }
     if (app0) {
         runtime_file_configure(app0, user_dir ? user_dir : "user");
@@ -390,11 +375,6 @@ int main(int argc, char **argv) {
         snprintf(sfo,sizeof(sfo),"%s/sce_sys/param.sfo",app0);
         if (sfo_value(sfo,"INSTALL_DIR_SAVEDATA",id,sizeof(id),NULL) || sfo_value(sfo,"TITLE_ID",id,sizeof(id),NULL))
             runtime_savedata_configure(id);
-        char serial[16]="", title[128]="", version[16]="";
-        sfo_value(sfo,"TITLE_ID",serial,sizeof(serial),NULL);
-        sfo_value(sfo,"TITLE",title,sizeof(title),NULL);
-        sfo_value(sfo,"APP_VER",version,sizeof(version),NULL);
-        bbnet_configure(app0,serial,title,version);
     }
     bbgpu_register_kernel();
 #ifdef _WIN32
