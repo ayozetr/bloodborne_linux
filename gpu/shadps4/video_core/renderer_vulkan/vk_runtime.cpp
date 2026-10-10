@@ -17,6 +17,17 @@
 
 namespace Vulkan {
 
+/// bbport: records `regions` as one command per slice. A deferred command's data shares a
+/// recording chunk with it (128 KiB), and a download of the buffer cache can carry far more
+/// regions than that (178563 copies, 4.3 MB, loading an area on NVIDIA in 0.5).
+template <typename T, typename Record>
+static void RecordInSlices(Scheduler& scheduler, std::span<const T> regions, Record&& record) {
+    constexpr std::size_t PerCommand = 64 * 1024 / sizeof(T);
+    for (std::size_t at = 0; at < regions.size(); at += PerCommand) {
+        record(scheduler.RecordData(regions.subspan(at, std::min(PerCommand, regions.size() - at))));
+    }
+}
+
 static vk::ImageType ConvertImageType(AmdGpu::ImageType type) noexcept {
     switch (type) {
     case AmdGpu::ImageType::Color1D:
@@ -142,9 +153,11 @@ void Runtime::CopyBuffer(const VideoCore::Buffer* src, const VideoCore::Buffer* 
         FlushBarriers();
     }
 
-    scheduler.Record([src_handle = src->Handle(), dst_handle = dst->Handle(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBuffer(src_handle, dst_handle, regions.size(), regions.data());
+    RecordInSlices(scheduler, copies, [&](std::span<const vk::BufferCopy> regions) {
+        scheduler.Record([src_handle = src->Handle(), dst_handle = dst->Handle(),
+                          regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBuffer(src_handle, dst_handle, regions.size(), regions.data());
+        });
     });
 
     if (bounded) {
@@ -190,9 +203,10 @@ void Runtime::CopyFromGuestChunk(vk::Buffer src, const VideoCore::Buffer* dst,
     if (needs_flush) {
         FlushBarriers();
     }
-    scheduler.Record([src, dst_handle = dst->Handle(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBuffer(src, dst_handle, regions.size(), regions.data());
+    RecordInSlices(scheduler, copies, [&](std::span<const vk::BufferCopy> regions) {
+        scheduler.Record([src, dst_handle = dst->Handle(), regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBuffer(src, dst_handle, regions.size(), regions.data());
+        });
     });
     for (const auto& copy : copies) {
         AccessBuffer(dst, copy.dstOffset, copy.size, vk::PipelineStageFlagBits2::eCopy,
@@ -286,10 +300,13 @@ void Runtime::UploadImage(VideoCore::Image* dst, const VideoCore::Buffer* src,
         FlushBarriers();
     }
 
-    scheduler.Record([src_handle = src->Handle(), image = dst->GetImage(),
-                      regions = scheduler.RecordData(upload_copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBufferToImage(src_handle, image, vk::ImageLayout::eTransferDstOptimal,
-                                 regions.size(), regions.data());
+    RecordInSlices(scheduler, std::span<const vk::BufferImageCopy>{upload_copies},
+                   [&](std::span<const vk::BufferImageCopy> regions) {
+        scheduler.Record([src_handle = src->Handle(), image = dst->GetImage(),
+                          regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBufferToImage(src_handle, image, vk::ImageLayout::eTransferDstOptimal,
+                                     regions.size(), regions.data());
+        });
     });
 
     for (const auto& copy : upload_copies) {
