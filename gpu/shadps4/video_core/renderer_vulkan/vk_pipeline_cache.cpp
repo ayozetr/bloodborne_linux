@@ -36,6 +36,7 @@
 #include "video_core/buffer_cache/buffer_cache.h"
 #include "bbport_guest_memory.h"
 #include "bbport_settings.h"
+#include "game_profile.h"
 #include "bbport_toggles.h"
 
 namespace Vulkan {
@@ -355,6 +356,8 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
         .supports_shader_stencil_export = instance_.IsShaderStencilExportSupported(),
         // bbport BB_LAYER_MEMORY: buffers over nearly all memory go through the page table.
         .paged_buffers = VideoCore::BufferCache::LayerPagedActive(),
+        // The game's buffer copy shader, from its profile (games/).
+        .buffer_copy_shader_hash = Game::BufferCopyShader(),
     };
     WarmUp();
 
@@ -522,7 +525,8 @@ void NoteDrawTarget(const AmdGpu::Regs& regs) {
 } // namespace
 
 const GraphicsPipeline* PipelineCache::GetGraphicsPipeline(const DrawIndirectParams params,
-                                                           const PreparedDraw* prepared) {
+                                                           const PreparedDraw* prepared,
+                                                           bool indirect) {
     used_prepared = nullptr;
     NoteDrawTarget(liverpool->regs);
     if (prepared) {
@@ -539,7 +543,7 @@ const GraphicsPipeline* PipelineCache::GetGraphicsPipeline(const DrawIndirectPar
         return found->second.get();
     }
     // bbport BB_ASYNC_PIPELINES: being compiled on a worker, or to be.
-    const bool skippable = AsyncSkippable(sel);
+    const bool skippable = AsyncSkippable(sel, indirect);
     if (const auto pending = pending_graphics.find(sel.graphics_key); pending != pending_graphics.end()) {
         const std::shared_ptr<PendingPipeline> job = pending->second;
         {
@@ -636,7 +640,7 @@ const GraphicsPipeline* PipelineCache::FinishPipeline(const GraphicsPipelineKey&
     return slot.get();
 }
 
-bool PipelineCache::AsyncSkippable(const PipelineSelection& selection) {
+bool PipelineCache::AsyncSkippable(const PipelineSelection& selection, bool indirect) {
     // Only a pass drawn every frame may go without a draw for a frame or two (its render target
     // drawn to in each of the last frames, below). A one-time render compiles at once, as during
     // loading screens (a frame of fewer than 300 draws before this one). The pipeline must not
@@ -669,6 +673,13 @@ bool PipelineCache::AsyncSkippable(const PipelineSelection& selection) {
         }
     }
     if (last_frame_draws < 300) {
+        return false;
+    }
+    // A full-screen pass (one triangle or quad: lighting, fog, post-processing) waits for its
+    // pipeline: going without one for a frame left whole frames grey. So does an indirect draw
+    // (its size unknown here). What may go without is geometry, which shows a frame later.
+    constexpr u32 FullScreenIndices = 12;
+    if (indirect || selection.regs->num_indices <= FullScreenIndices) {
         return false;
     }
     // A pass drawn every frame: its render target drawn to in each of the last 8 frames (the
