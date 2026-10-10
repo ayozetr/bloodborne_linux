@@ -53,9 +53,13 @@ if [[ -z ${PYTHON:-} ]]; then echo 'Install Python 3 or set PYTHON.' >&2; exit 1
 game=${BB_GAME_DIR:-../CUSA03173}
 if [[ ! -f $game/eboot.bin ]]; then echo "No eboot.bin in $game (set BB_GAME_DIR)." >&2; exit 1; fi
 original_game=$game
+# BB_PROMPTS (playstation, xbox, switch, keyboard) and BB_GESTURES_NO_MOTION=1: the menu's button
+# prompts and the gestures menu, made from the game's files (scripts/menu_prompts.py).
+ui_mods=$("$PYTHON" scripts/menu_prompts.py "$game" --out "$out" --prompts "${BB_PROMPTS:-playstation}" \
+    --gestures "${BB_GESTURES_NO_MOTION:-0}" --config "$BB_CONFIG")
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
-    --enabled "${BB_MODS_ENABLED:-1}")
+    --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods")
 # A private merged view lasts for this launch, including restarts. Cleanup only our own view.
 if [[ $game != "$(realpath "$original_game")" ]]; then
     mod_game=$game

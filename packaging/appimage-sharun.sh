@@ -33,7 +33,11 @@ chmod +x "$quick"
 # share/bbport/{run.sh,scripts,...,bin/bb-probe}; bin/ is the AppImage's own bin directory.
 d=$appdir/share/bbport
 cp run.sh "$d/"
-cp -r scripts patches fsr4_shaders launcher "$d/"
+cp -r scripts patches fsr4_shaders launcher assets "$d/"
+# The keyboard's button prompts (scripts/menu_prompts.py) are drawn with Pillow in this font.
+font=$(fc-match -f '%{file}' 'DejaVu Sans:bold')
+[[ $font == */DejaVuSans-Bold.ttf ]] || { echo 'DejaVu Sans Bold not found (ttf-dejavu).' >&2; exit 1; }
+install -Dm644 "$font" "$d/fonts/DejaVuSans-Bold.ttf"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
@@ -62,8 +66,10 @@ sed -e 's|@LAUNCHER@|bloodborne|' -e 's|@ICON@|bloodborne|' \
 
 # GTK, libadwaita and their typelibs are loaded by PyGObject at run time (not linked): named here.
 # So are Python's ssl and hashlib modules, which quick-sharun leaves out by default: the launcher's
-# connection test and scripts/online.py talk HTTPS to the co-op servers.
+# connection test and scripts/online.py talk HTTPS to the co-op servers. Pillow (in site-packages,
+# copied with Python) is named too, for the libraries its modules link (keyboard prompts).
 pydyn=$(python3 -c 'import sysconfig; print(sysconfig.get_path("platstdlib"))')/lib-dynload
+pil=$(python3 -c 'import os, PIL; print(os.path.dirname(PIL.__file__))')
 cd "$work"
 export APPDIR=$appdir TMPDIR=$work/tmp OUTPATH=$work
 export MAIN_BIN=bloodborne DESKTOP=$work/bloodborne.desktop ICON=$root/launcher/bloodborne.png
@@ -75,7 +81,7 @@ export OUTPUT_APPIMAGE=1
     "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
-    "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so
+    "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
 
 mkdir -p "$root/dist"
 mv -f "$work"/*.AppImage "$root/dist/Bloodborne-bbport-x86_64.AppImage"

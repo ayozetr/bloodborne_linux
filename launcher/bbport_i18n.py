@@ -333,6 +333,12 @@ EN = {
     # Discord
     "Статус в Discord": "Discord status",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Playing Bloodborne” on your Discord profile, online or offline",
+    # Button prompts (scripts/menu_prompts.py)
+    "Применяется при запуске игры": "Applies when the game starts",
+    "Иконки кнопок": "Button prompts",
+    "Автоматически (по контроллеру)": "Automatic (by controller)",
+    "PlayStation (оригинал)": "PlayStation (original)",
+    "Меню жестов без значков управления движением": "Gestures menu without motion-control icons",
 }
 
 PT_BR = {
@@ -614,6 +620,13 @@ PT_BR = {
     # Discord
     "Статус в Discord": "Status no Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Jogando Bloodborne” no seu perfil do Discord, online ou offline",
+    # Button prompts (scripts/menu_prompts.py)
+    "Клавиатура": "Teclado",
+    "Применяется при запуске игры": "Aplicado ao iniciar o jogo",
+    "Иконки кнопок": "Ícones dos botões",
+    "Автоматически (по контроллеру)": "Automático (pelo controle)",
+    "PlayStation (оригинал)": "PlayStation (original)",
+    "Меню жестов без значков управления движением": "Menu de gestos sem ícones de controle por movimento",
 }
 
 
@@ -895,6 +908,12 @@ ES = {
     # Discord
     "Статус в Discord": "Estado en Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "«Jugando a Bloodborne» en tu perfil de Discord, online o sin conexión",
+    # Button prompts (scripts/menu_prompts.py)
+    "Применяется при запуске игры": "Se aplica al iniciar el juego",
+    "Иконки кнопок": "Iconos de botones",
+    "Автоматически (по контроллеру)": "Automático (según el mando)",
+    "PlayStation (оригинал)": "PlayStation (original)",
+    "Меню жестов без значков управления движением": "Menú de gestos sin iconos de control por movimiento",
 }
 
 
@@ -1176,6 +1195,12 @@ IT = {
     # Discord
     "Статус в Discord": "Stato su Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Sta giocando a Bloodborne” sul tuo profilo Discord, online o offline",
+    # Button prompts (scripts/menu_prompts.py)
+    "Применяется при запуске игры": "Si applica all'avvio del gioco",
+    "Иконки кнопок": "Icone dei pulsanti",
+    "Автоматически (по контроллеру)": "Automatico (in base al controller)",
+    "PlayStation (оригинал)": "PlayStation (originale)",
+    "Меню жестов без значков управления движением": "Menu dei gesti senza icone del controllo di movimento",
 }
 
 
@@ -1457,6 +1482,12 @@ FR = {
     # Discord
     "Статус в Discord": "Statut Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "« Joue à Bloodborne » sur votre profil Discord, en ligne ou hors ligne",
+    # Button prompts (scripts/menu_prompts.py)
+    "Применяется при запуске игры": "S'applique au lancement du jeu",
+    "Иконки кнопок": "Icônes des boutons",
+    "Автоматически (по контроллеру)": "Automatique (selon la manette)",
+    'PlayStation (оригинал)': "PlayStation (d'origine)",
+    "Меню жестов без значков управления движением": "Menu des gestes sans icônes de détection de mouvement",
 }
 
 
@@ -1738,6 +1769,12 @@ DE = {
     # Discord
     "Статус в Discord": "Discord-Status",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "„Spielt Bloodborne“ in deinem Discord-Profil, online oder offline",
+    # Button prompts (scripts/menu_prompts.py)
+    "Применяется при запуске игры": "Wird beim Spielstart übernommen",
+    "Иконки кнопок": "Tastensymbole",
+    "Автоматически (по контроллеру)": "Automatisch (nach Controller)",
+    "PlayStation (оригинал)": "PlayStation (Original)",
+    "Меню жестов без значков управления движением": "Gestenmenü ohne Symbole der Bewegungssteuerung",
 }
 
 

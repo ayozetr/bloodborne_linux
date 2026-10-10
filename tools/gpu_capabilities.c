@@ -1,7 +1,8 @@
 /* Check whether native-size depth/stencil images can be blitted to reduced
  * renderer targets. The renderer needs both directions for live presets.
- * --gamepads: the connected gamepads, "GUID<tab>name" per line (the launcher's controller list,
- * BB_GAMEPAD). --read-input: one key or button for the launcher's controls (below). */
+ * --gamepads: the connected gamepads, "GUID<tab>name<tab>type" per line (the launcher's
+ * controller list, BB_GAMEPAD; type is SDL's: xbox360, xboxone, ps4, switchpro, ..., empty for
+ * a generic gamepad, for the button prompts). --read-input: one key or button for the launcher's controls (below). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,7 +84,8 @@ static int list_gamepads(void) {
         char guid[33];
         SDL_GUIDToString(SDL_GetGamepadGUIDForID(ids[i]), guid, sizeof guid);
         const char *name = SDL_GetGamepadNameForID(ids[i]);
-        printf("%s\t%s\n", guid, name ? name : "?");
+        const char *type = SDL_GetGamepadStringForType(SDL_GetGamepadTypeForID(ids[i]));
+        printf("%s\t%s\t%s\n", guid, name ? name : "?", type ? type : "");
     }
     SDL_free(ids);
     SDL_Quit();

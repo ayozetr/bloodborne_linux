@@ -20,7 +20,9 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
 - **Unlocked frame rate**, capped at your display's refresh rate up to 120 FPS (above that the
   game's own movement timing breaks), or 30/60/90 FPS. Output from 720p to 4K.
 - **Launcher** with every setting in one window, in English, Spanish, Italian, French, German,
-  Portuguese and Russian. The in-game menu (Insert or L3+R3) speaks all of them but Portuguese.
+  Portuguese and Russian, like the in-game menu (Insert or L3+R3).
+- **Xbox, Switch and keyboard button prompts**, picked by the controller in use, and a gestures
+  menu without the motion-control icons.
 - **Cheats and gameplay tweaks:** never die, stealth, silent steps, enemy control, camera
   distance, ragdoll physics and more.
 - **Game effects** on and off, **mods** and community **patches**, loaded without changing the
@@ -50,7 +52,7 @@ On Arch Linux (or CachyOS, Manjaro…):
 ```bash
 sudo pacman -S --needed base-devel cmake ninja python python-gobject gtk4 libadwaita sdl3 \
     vulkan-headers vulkan-icd-loader glslang spirv-headers spirv-cross ffmpeg boost fmt \
-    robin-map xxhash zydis miniz protobuf nlohmann-json openssl miniupnpc
+    robin-map xxhash zydis miniz protobuf nlohmann-json openssl miniupnpc python-pillow ttf-dejavu
 paru -S magic_enum vulkan-memory-allocator xbyak   # from the AUR
 
 git clone --recursive https://github.com/ayozetr/bloodborne_linux
@@ -85,6 +87,15 @@ The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. Wit
 Put them in one folder and pick it in the launcher (**Game → DLC folder**), or set
 `BB_DLC_DIR=/path/to/dlc` for `run.sh`. The launcher shows how many it found.
 
+### Button prompts
+
+The game shows PlayStation buttons. In the launcher, **Controls → Button prompts** switches them to
+Xbox, Nintendo Switch or keyboard ones; *Automatic* follows the controller in use, and the
+keyboard's when none is connected. Keyboard prompts show the keys bound in **Controls →
+Keyboard**. **Gestures menu without motion-control icons** cleans up the gestures menu. The
+prompts are put into your own game's menu files at each start, and nothing in the game folder
+changes.
+
 ## Credits
 
 - [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc): **bbport**, the
@@ -99,6 +110,10 @@ Put them in one folder and pick it in the launcher (**Game → DLC folder**), or
 - [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR):
   the DLSS bridge, and the [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS).
 - [FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) by FireBurn and the AMD FidelityFX SDK.
+- **Dommo**: the Xbox and Switch button prompts (*DS3 Style - Modern Xbox prompts*, *DS3 Style -
+  Nintendo Switch prompts*) and the *Stripped down gesture menu*, from
+  [Nexus Mods (Bloodborne, mod 30)](https://www.nexusmods.com/bloodborne/mods/30), uploaded by
+  goomab. Only their drawn prompts are in this repository ([assets/menu_prompts](assets/menu_prompts)).
 - [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages) for the AppImage.
 - Game patches by Kyo, Lance McDonald, auser1337, illusion, emoose and the Bloodborne community.
 

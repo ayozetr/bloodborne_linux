@@ -29,6 +29,7 @@ from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
+from menu_prompts import prompts_for  # noqa: E402
 from mods import discover as discover_mods  # noqa: E402
 import content_profile  # noqa: E402
 import game_check  # noqa: E402
@@ -126,6 +127,10 @@ PRESENT_MODES = [("Mailbox", "Mailbox"), ("FIFO (VSync)", "Fifo"),
 # choice labels stay short, so the selected one is shown in full.
 DRAW_PIPE = [("Авто", "", "Включён при 8 и более потоках процессора"), ("Включён", "1"),
              ("Выключен", "0", "Стабильнее, но медленнее")]
+# The button prompts (scripts/menu_prompts.py): automatic follows the controller in use, the
+# keyboard without one.
+PROMPT_CHOICES = [("Автоматически (по контроллеру)", ""), ("PlayStation (оригинал)", "playstation"),
+                  ("Xbox", "xbox"), ("Nintendo Switch", "switch"), ("Клавиатура", "keyboard")]
 # The game's language: the PS4 system language ("": from the desktop's locale).
 LANGUAGES = [("Как в системе", ""), ("Английский", "1"), ("Русский", "8"), ("Японский", "0"), ("Французский", "2"),
              ("Испанский", "3"), ("Немецкий", "4"), ("Итальянский", "5")]
@@ -149,6 +154,8 @@ DEFAULTS = {
     "present_mode": "Mailbox",
     "gamepad": "",
     "gamepad_name": "",
+    "prompts": "",
+    "gestures_no_motion": False,
     "fps_mode": "uncap",
     "fps_limit": 0,
     "draw_pipe": "",
@@ -298,6 +305,9 @@ def game_environment(s):
     env["BB_MODS_DIR"] = str(Path(s.get("mods_dir") or DATA_DIR / "mods").expanduser())
     env["BB_MODS_CONFIG"] = str(DATA_DIR / "mods.json")
     env["BB_MODS_ENABLED"] = "1" if s.get("mods_enabled", True) else "0"
+    # Button prompts (scripts/menu_prompts.py): automatic follows the controller in use.
+    env["BB_PROMPTS"] = s.get("prompts") or prompts_for(gamepad_type(s))
+    env["BB_GESTURES_NO_MOTION"] = "1" if s.get("gestures_no_motion") else "0"
     env["BB_PATCHES_DIR"] = str(patches_dir(s))
     env["BB_PATCHES_CONFIG"] = str(DATA_DIR / "patches.json")
     env["BB_LANGUAGE"] = s["language"] or str(system_game_language())
@@ -425,14 +435,25 @@ CONTROLS = [
 ]
 
 
-def connected_gamepads():
-    """(GUID, name) of the connected gamepads (bb-gpu-capabilities --gamepads), [] if unknown."""
+def connected_gamepads(types=False):
+    """(GUID, name) of the connected gamepads (bb-gpu-capabilities --gamepads), [] if unknown;
+    with `types`, (GUID, name, SDL type) ("" for a generic gamepad)."""
     tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
     try:
         run = subprocess.run([str(tool), "--gamepads"], capture_output=True, text=True, timeout=5)
     except (OSError, subprocess.SubprocessError):
         return []
-    return [tuple(line.split("\t", 1)) for line in run.stdout.splitlines() if "\t" in line]
+    pads = [(line.split("\t") + [""])[:3] for line in run.stdout.splitlines() if "\t" in line]
+    return [tuple(pad if types else pad[:2]) for pad in pads]
+
+
+def gamepad_type(s):
+    """SDL type of the gamepad the game will use (the chosen one when connected, else the first
+    one); None without a gamepad."""
+    pads = connected_gamepads(types=True)
+    want = s.get("gamepad", "").casefold()
+    chosen = [pad for pad in pads if want and (want == pad[0].casefold() or want in pad[1].casefold())]
+    return (chosen or pads or [(None, None, None)])[0][2]
 
 
 class FolderList:
@@ -644,6 +665,14 @@ class LauncherWindow(Adw.ApplicationWindow):
                                                 lambda _button: self.fill_gamepads()))
         self.fill_gamepads()
         controls.add(self.gamepad_row)
+        # Xbox / Switch prompts and the gestures menu: Dommo's mods (Nexus, Bloodborne mod 30);
+        # keyboard prompts show the keys bound below.
+        self.prompts_row = combo_row(tr("Иконки кнопок"), tr("Применяется при запуске игры"),
+                                     PROMPT_CHOICES, self.settings["prompts"])
+        controls.add(self.prompts_row)
+        self.gestures_row = Adw.SwitchRow(title=tr("Меню жестов без значков управления движением"),
+                                          active=self.settings["gestures_no_motion"])
+        controls.add(self.gestures_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура"), "input-keyboard-symbolic"),
@@ -998,6 +1027,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         s = self.settings
         s["gamepad"] = combo_value(self.gamepad_row)
         s["gamepad_name"] = self.gamepad_row.names[self.gamepad_row.get_selected()]
+        s["prompts"] = combo_value(self.prompts_row)
+        s["gestures_no_motion"] = self.gestures_row.get_active()
         s["language"] = combo_value(self.language_row)
         s["fullscreen"] = self.fullscreen_row.get_active()
         s["present_mode"] = combo_value(self.present_row)
