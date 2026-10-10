@@ -372,6 +372,12 @@ EN = {
         "Europe",
     "Америка":
         "The Americas",
+    "Включён брандмауэр: {}":
+        "Firewall on: {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "Co-op takes incoming UDP connections. Pin the port (SHADPS4_P2P_PORT={} in “{}”) and open it: {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "UPnP needs the router's answers: {}",
 }
 
 PT_BR = {
@@ -801,6 +807,12 @@ PT_BR = {
         "Europa",
     "Америка":
         "Américas",
+    "Включён брандмауэр: {}":
+        "Firewall ativo: {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "O cooperativo recebe conexões UDP de entrada. Fixe a porta (SHADPS4_P2P_PORT={} em “{}”) e abra-a: {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "O UPnP precisa das respostas do roteador: {}",
 }
 
 
@@ -1141,6 +1153,12 @@ ES = {
         "Europa",
     "Америка":
         "América",
+    "Включён брандмауэр: {}":
+        "Cortafuegos activado: {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "El cooperativo recibe conexiones UDP entrantes. Fija el puerto (SHADPS4_P2P_PORT={} en «{}») y ábrelo: {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "El UPnP necesita las respuestas del router: {}",
 }
 
 
@@ -1481,6 +1499,12 @@ IT = {
         "Europa",
     "Америка":
         "America",
+    "Включён брандмауэр: {}":
+        "Firewall attivo: {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "La cooperativa riceve connessioni UDP in entrata. Fissa la porta (SHADPS4_P2P_PORT={} in «{}») e aprila: {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "L'UPnP ha bisogno delle risposte del router: {}",
 }
 
 
@@ -1821,6 +1845,12 @@ FR = {
         "Europe",
     "Америка":
         "Amériques",
+    "Включён брандмауэр: {}":
+        "Pare-feu actif : {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "La coopération reçoit des connexions UDP entrantes. Fixez le port (SHADPS4_P2P_PORT={} dans « {} ») et ouvrez-le : {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "L'UPnP a besoin des réponses du routeur : {}",
 }
 
 
@@ -2161,6 +2191,12 @@ DE = {
         "Europa",
     "Америка":
         "Amerika",
+    "Включён брандмауэр: {}":
+        "Firewall aktiv: {}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "Der Koop empfängt eingehende UDP-Verbindungen. Lege den Port fest (SHADPS4_P2P_PORT={} in „{}“) und öffne ihn: {}",
+    "Для UPnP нужны ответы роутера: {}":
+        "UPnP braucht die Antworten des Routers: {}",
 }
 
 
@@ -2436,6 +2472,12 @@ ZH_CN = {
         "欧洲",
     "Америка":
         "美洲",
+    "Включён брандмауэр: {}":
+        "防火墙已开启：{}",
+    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
+        "合作模式需要接收 UDP 入站连接。请固定端口（在“{1}”中填写 SHADPS4_P2P_PORT={0}）并开放它：{2}",
+    "Для UPnP нужны ответы роутера: {}":
+        "UPnP 需要接收路由器的应答：{}",
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

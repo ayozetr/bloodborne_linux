@@ -15,7 +15,9 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import socket
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -88,6 +90,51 @@ def write_overrides(user_dir, community, webapi):
     path = user_dir / 'host_overrides.json'
     path.write_text(json.dumps(overrides, indent=2) + '\n', encoding='utf-8')
     return path
+
+
+# The co-op port the launcher suggests pinning (SHADPS4_P2P_PORT) and opening.
+P2P_PORT = 3658
+
+
+def active_firewalls(ufw_conf=Path('/etc/ufw/ufw.conf'), systemctl='/usr/bin/systemctl'):
+    """Firewalls that drop unrequested incoming UDP by default, read without root: ufw when its
+    configuration enables it, firewalld when its service runs. The host's systemctl runs without
+    the AppImage's library paths."""
+    found = []
+    try:
+        if re.search(r'^\s*ENABLED\s*=\s*yes', ufw_conf.read_text(errors='replace'), re.M):
+            found.append('ufw')
+    except OSError:
+        pass
+    try:
+        env = {k: v for k, v in os.environ.items() if k not in ('LD_LIBRARY_PATH', 'LD_PRELOAD')}
+        if subprocess.run([systemctl, 'is-active', '--quiet', 'firewalld'], env=env,
+                          timeout=3).returncode == 0:
+            found.append('firewalld')
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return found
+
+
+def default_gateway(route=Path('/proc/net/route')):
+    """The IPv4 default gateway (the router, which answers UPnP), or None."""
+    try:
+        for line in route.read_text().splitlines()[1:]:
+            fields = line.split()
+            if len(fields) > 2 and fields[1] == '00000000' and fields[2] != '00000000':
+                return socket.inet_ntoa(int(fields[2], 16).to_bytes(4, 'little'))
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def firewall_commands(firewall, gateway=None):
+    """(open the co-op port, let the router's UPnP replies in or None) for a firewall."""
+    if firewall == 'ufw':
+        return (f'sudo ufw allow {P2P_PORT}/udp',
+                f'sudo ufw allow from {gateway} proto udp' if gateway else None)
+    return (f'sudo firewall-cmd --permanent --add-port={P2P_PORT}/udp && sudo firewall-cmd --reload',
+            None)
 
 
 def check(server, webapi, community):

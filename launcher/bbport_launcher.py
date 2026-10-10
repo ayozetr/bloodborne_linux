@@ -1406,6 +1406,18 @@ class LauncherWindow(Adw.ApplicationWindow):
                                       subtitle=tr("Выключите при Tailscale или другом VPN"),
                                       active=s["online_upnp"])
         connection.add(self.upnp_row)
+        # ufw and firewalld drop the peers' packets and, for UPnP, the router's answers.
+        for firewall in online.active_firewalls():
+            port_rule, router_rule = online.firewall_commands(firewall, online.default_gateway())
+            lines = [tr("Кооператив принимает входящие соединения по UDP. Закрепите порт "
+                        "(SHADPS4_P2P_PORT={} в «{}») и откройте его: {}").format(
+                         online.P2P_PORT, tr("Доп. переменные (ИМЯ=значение через пробел)"), port_rule)]
+            if router_rule:
+                lines.append(tr("Для UPnP нужны ответы роутера: {}").format(router_rule))
+            warning = Adw.ActionRow(title=tr("Включён брандмауэр: {}").format(firewall),
+                                    subtitle="\n".join(lines), subtitle_selectable=True)
+            warning.add_prefix(Gtk.Image(icon_name="dialog-warning-symbolic"))
+            connection.add(warning)
         test = Adw.ActionRow(title=tr("Проверить соединение"))
         self.test_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
         self.test_button.connect("clicked", self.on_test_connection)

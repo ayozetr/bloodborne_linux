@@ -77,6 +77,11 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency from `shell
 Everyone in a session needs game version 1.09 and the same servers. Turn cheats off when you
 play with others.
 
+Co-op connects the players directly over UDP. With ufw or firewalld on, the launcher's **Online**
+page says so and gives the commands: pin the port with `SHADPS4_P2P_PORT=3658` in the extra
+variables, open it (`sudo ufw allow 3658/udp`), and for UPnP let the router's answers in
+(`sudo ufw allow from <router> proto udp`).
+
 ### DLSS
 
 On a PC with a GeForce RTX, run `bash tools/build_dlss.sh` once after `build.sh`. It downloads
