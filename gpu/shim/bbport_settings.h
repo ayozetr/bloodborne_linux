@@ -18,12 +18,13 @@ inline bool IsFsr4(int upscaler) {
 enum Preset : int { NativeAA = 0, Quality, Balanced, Performance, UltraPerformance, PresetCount };
 enum DebugView : int { DebugNone = 0, DebugReactive = 1, DebugMotion = 2, DebugViewCount };
 /// Overlay languages, in the order of the menu's Language selector.
-enum class MenuLanguage { English, Russian, Spanish, Italian, French, German, Count };
+enum class MenuLanguage { English, Russian, Spanish, Italian, French, German, PortugueseBrazil, Count };
 /// bbport.ini / BB_MENU_LANGUAGE codes, indexed by MenuLanguage.
-inline constexpr const char* MenuLanguageCodes[] = {"en", "ru", "es", "it", "fr", "de"};
+inline constexpr const char* MenuLanguageCodes[] = {"en", "ru", "es", "it", "fr", "de", "pt_BR"};
 /// Each language's own name, for the selector.
 inline constexpr const char* MenuLanguageNames[] = {"English", "Русский", "Español",
-                                                    "Italiano", "Français", "Deutsch"};
+                                                    "Italiano", "Français", "Deutsch",
+                                                    "Português (Brasil)"};
 
 /// Game effects switched by the community patches at start (patches.py EFFECTS): ini key,
 /// menu label, default (the game's own behaviour).
