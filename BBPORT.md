@@ -130,6 +130,7 @@ neither has nor includes.
   `VK_VALVE_shader_mixed_float_dot_product`. Unsupported choices fall back to FSR 3.1
   before the first frame and are disabled in the in-game menu.
 - Your decrypted game dump: the `CUSA03173` folder (eboot.bin, sce_module, ...), version 1.09.
+  The EU release (`CUSA00900`) runs too: its 1.09 executable is the same as the US one.
   A dumped update is a separate folder: copy it over the base game, replacing files. The base
   game alone (1.00) crashes at start (guest offset 0x20348b8); the launcher and `run.sh` check
   the executable and say what is missing (`BB_SKIP_GAME_CHECK=1` skips the check). Some dumps
@@ -196,7 +197,7 @@ switched on and off in the launcher. See [mods and patches](docs/MODS.md).
 **Game language:** the PS4 system language, *System language* in the launcher; by default it
 follows the desktop's locale (Japanese, English, French, Spanish, German, Italian or Russian,
 English for the rest). `run.sh` takes it as `BB_LANGUAGE` (PS4 code: 0 Japanese, 1 English,
-2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; 1 when unset).
+2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; without it, the desktop's locale as above).
 
 **Free camera and game debug menu** (v1.09): enable the corresponding switches in the
 launcher or in-game menu and restart. Free camera uses Lance McDonald's

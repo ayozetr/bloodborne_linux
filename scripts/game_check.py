@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""The game files bbport runs: Bloodborne CUSA03173 with the 1.09 update merged in.
+"""The game files bbport runs: Bloodborne CUSA03173 (US) or CUSA00900 (EU) with the 1.09 update
+merged in; both regions run the same 1.09 executable.
 
 Other versions start and then fail inside the game's code (the base game 1.00 faults at guest
 offset 0x20348b8): hooks and patches use the addresses of this one executable. The check compares
@@ -10,7 +11,7 @@ import hashlib
 import os
 from pathlib import Path
 
-SUPPORTED_TITLE = 'CUSA03173'
+SUPPORTED_TITLES = ('CUSA03173', 'CUSA00900')
 SUPPORTED_VERSION = '01.09'
 SUPPORTED_IMAGE = '071df19c8880086d97182dbc057bc8cb37badaca57d9112683836b24a0444c0a'
 # The 1.09 executable with Lance McDonald's 60 fps patch applied to it, as some dumps ship it
@@ -51,7 +52,7 @@ def problem(game, image_hash=None):
         return None
     if image_hash == LANCE_60FPS_IMAGE:
         return 'patched_eboot', title, version
-    if title != SUPPORTED_TITLE:
+    if title not in SUPPORTED_TITLES:
         return 'other_title', title, version
     if version != SUPPORTED_VERSION:
         return 'missing_update', title, version
@@ -71,8 +72,9 @@ def explain(kind, title, version):
                          'to it, which crashes the game when the gestures menu opens (bbport has its '
                          'own 60 fps): copy eboot.bin from a clean dump of the 1.09 update into the '
                          'game folder, replacing this one.',
-        'other_title': f'{found} Only Bloodborne {SUPPORTED_TITLE} with update 1.09 is supported '
-                       'for now; other editions and regions have a different executable.',
+        'other_title': f'{found} Only Bloodborne CUSA03173 (US) or CUSA00900 (EU) with update 1.09 '
+                       'is supported for now; other editions and regions have a different '
+                       'executable.',
         'unreadable': f'{found} eboot.bin could not be read as a decrypted PS4 executable: dump '
                       'the game and the 1.09 update again.',
     }[kind]

@@ -48,6 +48,9 @@ class GameCheckTests(unittest.TestCase):
     def test_update_metadata_with_an_old_executable(self):
         self.assertEqual(game_check.problem(self.game('CUSA03173', '01.09'))[0], 'wrong_eboot')
 
+    def test_eu_base_game_without_the_update(self):
+        self.assertEqual(game_check.problem(self.game('CUSA00900', '01.00'))[0], 'missing_update')
+
     def test_other_edition(self):
         self.assertEqual(game_check.problem(self.game('CUSA00207', '01.09'))[0], 'other_title')
 
