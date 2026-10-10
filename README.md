@@ -7,9 +7,9 @@ This fork builds on [bbport](https://github.com/deadinside28/bloodborne_pc), the
 by deadinside28. It adds the features of [Supermedo's Windows port](https://github.com/Supermedo/bloodborne_pc)
 (online play, DLSS, cheats) brought to Linux, plus a few of its own.
 
-> **No game files are included.** You need your own decrypted dump of Bloodborne, US
-> (`CUSA03173`) or EU (`CUSA00900`), game version **1.09**. This project is not affiliated with
-> Sony Interactive Entertainment or FromSoftware.
+> **No game files are included.** You need your own decrypted dump of Bloodborne 1.09: the
+> European Game of the Year edition (`CUSA03173`) or the US release (`CUSA00900`). This project is
+> not affiliated with Sony Interactive Entertainment or FromSoftware.
 
 ## Features
 
@@ -82,7 +82,7 @@ upscaler.
 ### DLC
 
 The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. With the base game
-(such as the EU `CUSA00900`), dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`,
+(such as the US `CUSA00900`), dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`,
 `SPDLCMESSENGER00`…) with only `sce_sys` inside, because their data ships with the 1.09 update.
 Put them in one folder and pick it in the launcher (**Game → DLC folder**), or set
 `BB_DLC_DIR=/path/to/dlc` for `run.sh`; the launcher shows how many it found. Each folder must

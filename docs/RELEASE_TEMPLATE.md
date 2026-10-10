@@ -11,8 +11,9 @@ changes since the previous release. Third-party work is credited in the line tha
 ```markdown
 <One or two sentences: what this release is and which upstream bbport it is based on.>
 
-**Requirements:** your own decrypted dump of Bloodborne 1.09, US (`CUSA03173`) or EU
-(`CUSA00900`). No game files are included. Linux x86-64 and a Vulkan 1.3 GPU.
+**Requirements:** your own decrypted dump of Bloodborne with update 1.09, any retail release (US,
+Europe, UK, Japan, Asia, and the editions with The Old Hunters). No game files are included.
+Linux x86-64 and a Vulkan 1.3 GPU.
 
 ## Download
 

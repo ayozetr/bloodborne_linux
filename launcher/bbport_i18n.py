@@ -89,8 +89,8 @@ EN = {
         "eboot.bin is not from 1.09: copy eboot.bin from the dumped 1.09 update into the game folder, replacing it",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "This eboot.bin has Lance McDonald's 60 fps patch baked in, which crashes the game in the gestures menu: copy a clean eboot.bin from the dumped 1.09 update into the game folder, replacing it",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})":
-        "Only CUSA03173 (US), CUSA00900 (EU) and CUSA03023 (Asia) with update 1.09 are supported (found {})",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09":
+        "Not a retail release of Bloodborne (found {}): Bloodborne from any region with update 1.09 is needed",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
         "eboot.bin cannot be read as a decrypted PS4 executable: dump the game again",
     "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
@@ -733,7 +733,7 @@ ES = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Se necesita la actualización 1.09: copia la actualización 1.09 volcada en la carpeta del juego, reemplazando los archivos (versión encontrada: {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin no es de la 1.09: copia eboot.bin de la actualización 1.09 volcada en la carpeta del juego, reemplazándolo",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Este eboot.bin trae integrado el parche de 60 FPS de Lance McDonald, que cierra el juego al abrir el menú de gestos: copia un eboot.bin limpio de la actualización 1.09 volcada en la carpeta del juego, reemplazándolo",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Solo se admiten CUSA03173 (EE. UU.), CUSA00900 (Europa) y CUSA03023 (Asia) con la actualización 1.09 (encontrada: {})",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09": "No es una edición comercial de Bloodborne (encontrada: {}): hace falta Bloodborne de cualquier región con la actualización 1.09",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "No se puede leer eboot.bin como ejecutable de PS4 descifrado: vuelve a volcar el juego",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, versión 1.09",
     "Папка игры (с eboot.bin)": "Carpeta del juego (con eboot.bin)",
@@ -1027,7 +1027,7 @@ IT = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Serve l'aggiornamento 1.09: copia l'aggiornamento 1.09 estratto nella cartella del gioco, sostituendo i file (versione trovata {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin non è della 1.09: copia eboot.bin dall'aggiornamento 1.09 estratto nella cartella del gioco, sostituendolo",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Questo eboot.bin contiene la patch a 60 FPS di Lance McDonald, che fa chiudere il gioco nel menu dei gesti: copia un eboot.bin pulito dall'aggiornamento 1.09 estratto nella cartella del gioco, sostituendolo",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Sono supportati solo CUSA03173 (USA), CUSA00900 (Europa) e CUSA03023 (Asia) con l'aggiornamento 1.09 (trovato {})",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09": "Non è un'edizione commerciale di Bloodborne (trovato {}): serve Bloodborne di qualsiasi regione con l'aggiornamento 1.09",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "eboot.bin non può essere letto come eseguibile PS4 decriptato: estrai di nuovo il gioco",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, versione 1.09",
     "Папка игры (с eboot.bin)": "Cartella del gioco (con eboot.bin)",
@@ -1321,7 +1321,7 @@ FR = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "La mise à jour 1.09 est nécessaire : copiez la mise à jour 1.09 extraite dans le dossier du jeu, en remplaçant les fichiers (version trouvée : {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin n'est pas celui de la 1.09 : copiez eboot.bin de la mise à jour 1.09 extraite dans le dossier du jeu, en le remplaçant",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Cet eboot.bin intègre le patch 60 FPS de Lance McDonald, qui fait planter le jeu dans le menu des gestes : copiez un eboot.bin propre de la mise à jour 1.09 extraite dans le dossier du jeu, en le remplaçant",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Seuls CUSA03173 (États-Unis), CUSA00900 (Europe) et CUSA03023 (Asie) avec la mise à jour 1.09 sont pris en charge (trouvé : {})",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09": "Ce n'est pas une édition commerciale de Bloodborne (trouvé : {}) : il faut Bloodborne de n'importe quelle région avec la mise à jour 1.09",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "eboot.bin ne peut pas être lu comme un exécutable PS4 déchiffré : extrayez de nouveau le jeu",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, version 1.09",
     "Папка игры (с eboot.bin)": "Dossier du jeu (avec eboot.bin)",
@@ -1615,7 +1615,7 @@ DE = {
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Das Update 1.09 wird benötigt: Kopiere das extrahierte Update 1.09 in den Spielordner und ersetze dabei die Dateien (gefundene Version {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Die eboot.bin ist nicht von 1.09: Kopiere die eboot.bin aus dem extrahierten Update 1.09 in den Spielordner und ersetze sie",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Diese eboot.bin enthält den 60-FPS-Patch von Lance McDonald, durch den das Spiel im Gestenmenü abstürzt: Kopiere eine saubere eboot.bin aus dem extrahierten Update 1.09 in den Spielordner und ersetze sie",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})": "Nur CUSA03173 (USA), CUSA00900 (Europa) und CUSA03023 (Asien) mit Update 1.09 werden unterstützt (gefunden: {})",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09": "Keine Verkaufsversion von Bloodborne (gefunden: {}): Bloodborne aus beliebiger Region mit Update 1.09 wird benötigt",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново": "Die eboot.bin lässt sich nicht als entschlüsselte PS4-Programmdatei lesen: Erstelle den Dump des Spiels erneut",
     "Bloodborne CUSA03173, версия 1.09": "Bloodborne CUSA03173, Version 1.09",
     "Папка игры (с eboot.bin)": "Spielordner (mit eboot.bin)",
@@ -1908,8 +1908,8 @@ ZH_CN = {
         "需要 1.09 更新：请将转储出的 1.09 更新文件复制到游戏文件夹并覆盖（当前检测到版本 {}）",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "eboot.bin 不是 1.09 版本：请将 1.09 更新转储中的 eboot.bin 复制到游戏文件夹并覆盖",
-    "Поддерживаются только CUSA03173 (США), CUSA00900 (Европа) и CUSA03023 (Азия) с обновлением 1.09 (найдено {})":
-        "仅支持已安装 1.09 更新的 CUSA03173（美版）、CUSA00900（欧版）和 CUSA03023（亚洲版）（当前检测到 {}）",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09":
+        "这不是 Bloodborne 的零售版本（找到 {}）：需要任意地区的 Bloodborne 并安装 1.09 更新",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "此 eboot.bin 内置了 Lance McDonald 的 60 FPS 补丁，会导致游戏在打开手势菜单时崩溃：请将 1.09 更新转储中干净的 eboot.bin 复制到游戏文件夹并覆盖",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
