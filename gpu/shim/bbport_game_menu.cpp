@@ -54,8 +54,9 @@ F Game(u64 va) {
 
 // ---- Texts: ids from IdBase up, looked up by the game like its own messages. ----
 constexpr u32 IdBase = 0x7f0000;
+/// A text in every menu language, as the game's UTF-16.
 struct Text {
-    std::u16string english, russian;
+    std::array<std::u16string, int(BbSettings::MenuLanguage::Count)> languages;
 };
 std::vector<Text> texts;
 
@@ -84,21 +85,47 @@ std::u16string Utf16(const char* utf8) {
     return out;
 }
 u32 AddText(const char* english, const char* russian) {
-    texts.push_back({Utf16(english), Utf16(russian)});
+    Text text;
+    for (int l = 0; l < int(BbSettings::MenuLanguage::Count); ++l) {
+        text.languages[l] = Utf16(BbSettings::MenuTextIn(BbSettings::MenuLanguage(l), english, russian));
+    }
+    texts.push_back(std::move(text));
     return IdBase + u32(texts.size() - 1);
 }
-/// The game's own language decides (its "Screen/Sound" text in Cyrillic: Russian, else English);
-/// the port's menu language until the game has looked that text up.
-enum class GameLanguage { Unknown, English, Russian };
-std::atomic<GameLanguage> game_language{GameLanguage::Unknown};
+/// The game's language as the runtime gives it to the game (SystemService: BB_LANGUAGE, else the
+/// desktop's locale), as a menu language; English for the languages the menu does not have.
+BbSettings::MenuLanguage LanguageOfTheGame() {
+    using BbSettings::MenuLanguage;
+    int id = 1;
+    if (const char* v = std::getenv("BB_LANGUAGE"); v && *v) {
+        id = std::atoi(v);
+    } else {
+        for (const char* key : {"LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"}) {
+            if (const char* locale = std::getenv(key); locale && *locale) {
+                const MenuLanguage l = BbSettings::MenuLanguageFromCode(locale);
+                return l == MenuLanguage::PortugueseBrazil ? MenuLanguage::English : l;
+            }
+        }
+    }
+    switch (id) {
+    case 2: return MenuLanguage::French;
+    case 3: return MenuLanguage::Spanish;
+    case 4: return MenuLanguage::German;
+    case 5: return MenuLanguage::Italian;
+    case 8: return MenuLanguage::Russian;
+    default: return MenuLanguage::English;
+    }
+}
+/// The game's own language decides (its "Screen/Sound" text in Cyrillic: Russian, else the
+/// language the runtime gave the game); the port's menu language until the game has looked that
+/// text up. -1: not known yet.
+std::atomic<int> game_language{-1};
 
 const char16_t* TextOf(u32 id) {
     const Text& t = texts[id - IdBase];
-    const GameLanguage game = game_language.load();
-    const bool russian = game == GameLanguage::Unknown
-                             ? BbSettings::Get().menu_language == BbSettings::MenuLanguage::Russian
-                             : game == GameLanguage::Russian;
-    return russian ? t.russian.c_str() : t.english.c_str();
+    const int game = game_language.load();
+    const int language = game < 0 ? int(BbSettings::Get().menu_language.load()) : game;
+    return t.languages[language].c_str();
 }
 
 // ---- The port's values the game's rows edit (ints: the list rows bind ints). ----
@@ -463,7 +490,7 @@ const char16_t* LookupHook(void* repository, u32 table, u32 category, u32 id) {
         for (const char16_t* c = text; *c; ++c) {
             cyrillic = cyrillic || (*c >= 0x400 && *c < 0x500);
         }
-        game_language = cyrillic ? GameLanguage::Russian : GameLanguage::English;
+        game_language = int(cyrillic ? BbSettings::MenuLanguage::Russian : LanguageOfTheGame());
     }
     return text;
 }

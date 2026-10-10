@@ -665,6 +665,122 @@ PT_BR = {
         'Conceder permissão',
     'Не удалось выдать право Steam: {}':
         'Não foi possível conceder a permissão ao Steam: {}',
+    "Управление":
+        "Controles",
+    "Геймпад":
+        "Gamepad",
+    "Назначение кнопок; применяется при запуске игры":
+        "Atribuição de botões; aplicada quando o jogo inicia",
+    "Назначить":
+        "Atribuir",
+    "Сбросить":
+        "Redefinir",
+    "{} (по умолчанию)":
+        "{} (padrão)",
+    "не назначено":
+        "não atribuído",
+    "Нажмите клавишу или кнопку… (Esc — отмена)":
+        "Pressione uma tecla ou um botão… (Esc cancela)",
+    "Крест":
+        "Xis",
+    "Круг":
+        "Círculo",
+    "Квадрат":
+        "Quadrado",
+    "Треугольник":
+        "Triângulo",
+    "Тачпад, левая половина (жесты)":
+        "Touchpad, metade esquerda (gestos)",
+    "Тачпад, правая половина (личные вещи)":
+        "Touchpad, metade direita (itens-chave)",
+    "Крестовина вверх":
+        "Direcional para cima",
+    "Крестовина вниз":
+        "Direcional para baixo",
+    "Крестовина влево":
+        "Direcional para a esquerda",
+    "Крестовина вправо":
+        "Direcional para a direita",
+    "Движение вперёд":
+        "Andar para frente",
+    "Движение назад":
+        "Andar para trás",
+    "Движение влево":
+        "Andar para a esquerda",
+    "Движение вправо":
+        "Andar para a direita",
+    "Камера вверх":
+        "Câmera para cima",
+    "Камера вниз":
+        "Câmera para baixo",
+    "Камера влево":
+        "Câmera para a esquerda",
+    "Камера вправо":
+        "Câmera para a direita",
+    "Контроллер":
+        "Controle",
+    "Выбранный берётся, как только подключится":
+        "O escolhido é usado assim que se conectar",
+    "Первый подключённый":
+        "O primeiro conectado",
+    "{} (не подключён)":
+        "{} (não conectado)",
+    "Монитор":
+        "Monitor",
+    "Пропускать выбор «по сети / вне сети»":
+        "Pular a escolha “jogar online / offline”",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "O jogo abre o menu principal offline direto (um patch do jogo)",
+    "Основной":
+        "Principal",
+    ", основной":
+        ", principal",
+    "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})":
+        "É preciso a atualização 1.09: copie o dump da atualização 1.09 para a pasta do jogo, substituindo os arquivos (versão encontrada: {})",
+    "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой":
+        "O eboot.bin não é da 1.09: copie o eboot.bin do dump da atualização 1.09 para a pasta do jogo, substituindo-o",
+    "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
+        "Este eboot.bin já vem com o patch de 60 fps de Lance McDonald, que faz o jogo travar no menu de gestos: copie um eboot.bin limpo do dump da atualização 1.09 para a pasta do jogo, substituindo-o",
+    "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09":
+        "Não é uma edição comercial de Bloodborne (encontrado: {}): é preciso Bloodborne de qualquer região com a atualização 1.09",
+    "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
+        "O eboot.bin não pode ser lido como um executável de PS4 descriptografado: faça o dump do jogo de novo",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "Os arquivos do jogo foram danificados na extração: os shaders não descompactam e o jogo travaria ao carregar. Extraia o jogo e a atualização 1.09 de novo com uma ferramenta corrigida (issue #81)",
+    "Bloodborne CUSA03173, версия 1.09":
+        "Bloodborne CUSA03173, versão 1.09",
+    "0 — без ограничения; укажите число, чтобы ограничить FPS":
+        "0: sem limite; defina um número para limitar a taxa de quadros",
+    "Авто":
+        "Automático",
+    "Включён при 8 и более потоках процессора":
+        "Ligado com 8 ou mais threads de CPU",
+    "Стабильнее, но медленнее":
+        "Mais estável, porém mais lento",
+    "По умолчанию":
+        "Padrão",
+    "Фоновая загрузка в видеопамять":
+        "Pré-carregamento na VRAM em segundo plano",
+    "Меньше рывков при подгрузке зон":
+        "Menos travadas ao carregar as áreas",
+    "Обычная":
+        "Normal",
+    "Без лишней видеопамяти":
+        "Sem VRAM extra",
+    "Полная":
+        "Completo",
+    "Около 3 ГБ видеопамяти сверху":
+        "Cerca de 3 GB a mais de VRAM",
+    "Выключена":
+        "Desligado",
+    "Сохранять журнал и статистику в файл":
+        "Salvar o registro e as estatísticas em um arquivo",
+    "Диагностика вылетов":
+        "Diagnóstico de travamentos",
+    "Проверяет кучу игры и записывает записи в её память; немного медленнее":
+        "Verifica o heap do jogo e registra as escritas na memória dele; um pouco mais lento",
+    "В папку logs в каталоге данных: для разбора рывков и вылетов":
+        "Na pasta logs do diretório de dados: para investigar engasgos e travamentos",
 }
 
 
@@ -959,6 +1075,42 @@ ES = {
         'Conceder permiso',
     'Не удалось выдать право Steam: {}':
         'No se pudo conceder el permiso a Steam: {}',
+    "Копировать":
+        "Copiar",
+    "Экспорт журнала…":
+        "Exportar registro…",
+    "Экспорт журнала":
+        "Exportar registro",
+    "Журнал скопирован":
+        "Registro copiado",
+    "Журнал сохранён: {}":
+        "Registro guardado: {}",
+    "Не удалось сохранить журнал: {}":
+        "No se pudo guardar el registro: {}",
+    "Монитор":
+        "Monitor",
+    "Пропускать выбор «по сети / вне сети»":
+        "Saltar la elección «jugar en línea / sin conexión»",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "El juego abre el menú principal sin conexión directamente (un parche del juego)",
+    "Основной":
+        "Principal",
+    ", основной":
+        ", principal",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "Los archivos del juego se dañaron al extraerlos: los shaders no se descomprimen y el juego se quedaría colgado al cargar. Vuelve a extraer el juego y la actualización 1.09 con una herramienta corregida (issue #81)",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Necesita la carpeta adhoc del mod #253 de Nexus (fuentes en adhoc/font), en dvdroot_ps4 del juego o como mod; sin ella el parche no se aplica",
+    "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
+        "El nuevo: la tarjeta gráfica trabaja directamente con la memoria del juego, como en un juego de PC, y los comandos gráficos se traducen en vez de emularse. El antiguo: el modelo de memoria de la 0.3 con todas las correcciones. Si el controlador no pasa la comprobación al arrancar, el antiguo",
+    "Модель памяти и трансляции":
+        "Modelo de memoria y traducción",
+    "Авто: новая на AMD, старая на других":
+        "Automático: nuevo en AMD, antiguo en las demás",
+    "Новая":
+        "Nuevo",
+    "Старая (как в 0.3)":
+        "Antiguo (como en la 0.3)",
 }
 
 
@@ -1253,6 +1405,42 @@ IT = {
         'Concedi il permesso',
     'Не удалось выдать право Steam: {}':
         'Impossibile concedere il permesso a Steam: {}',
+    "Копировать":
+        "Copia",
+    "Экспорт журнала…":
+        "Esporta registro…",
+    "Экспорт журнала":
+        "Esporta registro",
+    "Журнал скопирован":
+        "Registro copiato",
+    "Журнал сохранён: {}":
+        "Registro salvato: {}",
+    "Не удалось сохранить журнал: {}":
+        "Impossibile salvare il registro: {}",
+    "Монитор":
+        "Monitor",
+    "Пропускать выбор «по сети / вне сети»":
+        "Salta la scelta «gioca online / offline»",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "Il gioco apre subito il menu principale offline (una patch del gioco)",
+    "Основной":
+        "Principale",
+    ", основной":
+        ", principale",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "I file del gioco si sono danneggiati durante l'estrazione: gli shader non si decomprimono e il gioco si bloccherebbe durante il caricamento. Estrai di nuovo il gioco e l'aggiornamento 1.09 con uno strumento corretto (issue #81)",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Serve la cartella adhoc della mod #253 di Nexus (font in adhoc/font), in dvdroot_ps4 del gioco o come mod; senza di essa la patch non viene applicata",
+    "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
+        "Il nuovo: la scheda video lavora direttamente con la memoria del gioco, come in un gioco per PC, e i comandi grafici vengono tradotti invece che emulati. Il vecchio: il modello di memoria della 0.3 con tutte le correzioni. Se il driver non supera il controllo all'avvio, il vecchio",
+    "Модель памяти и трансляции":
+        "Modello di memoria e traduzione",
+    "Авто: новая на AMD, старая на других":
+        "Automatico: nuovo su AMD, vecchio sulle altre",
+    "Новая":
+        "Nuovo",
+    "Старая (как в 0.3)":
+        "Vecchio (come nella 0.3)",
 }
 
 
@@ -1547,6 +1735,42 @@ FR = {
         "Accorder l'autorisation",
     'Не удалось выдать право Steam: {}':
         "Impossible d'accorder l'autorisation à Steam : {}",
+    "Копировать":
+        "Copier",
+    "Экспорт журнала…":
+        "Exporter le journal…",
+    "Экспорт журнала":
+        "Exporter le journal",
+    "Журнал скопирован":
+        "Journal copié",
+    "Журнал сохранён: {}":
+        "Journal enregistré : {}",
+    "Не удалось сохранить журнал: {}":
+        "Impossible d'enregistrer le journal : {}",
+    "Монитор":
+        "Écran",
+    "Пропускать выбор «по сети / вне сети»":
+        "Passer le choix « jouer en ligne / hors ligne »",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "Le jeu ouvre directement le menu principal hors ligne (un patch du jeu)",
+    "Основной":
+        "Principal",
+    ", основной":
+        ", principal",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "Les fichiers du jeu ont été endommagés à l'extraction : les shaders ne se décompressent pas et le jeu se bloquerait au chargement. Extrayez à nouveau le jeu et la mise à jour 1.09 avec un outil corrigé (issue #81)",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Nécessite le dossier adhoc du mod Nexus #253 (polices dans adhoc/font), dans dvdroot_ps4 du jeu ou en tant que mod ; sans lui, le patch n'est pas appliqué",
+    "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
+        "Le nouveau : la carte graphique travaille directement avec la mémoire du jeu, comme dans un jeu PC, et les commandes graphiques sont traduites au lieu d'être émulées. L'ancien : le modèle mémoire de la 0.3 avec toutes les corrections. Si le pilote échoue à la vérification au démarrage, l'ancien",
+    "Модель памяти и трансляции":
+        "Modèle de mémoire et de traduction",
+    "Авто: новая на AMD, старая на других":
+        "Auto : nouveau sur AMD, ancien sur les autres",
+    "Новая":
+        "Nouveau",
+    "Старая (как в 0.3)":
+        "Ancien (comme dans la 0.3)",
 }
 
 
@@ -1841,6 +2065,42 @@ DE = {
         'Berechtigung erteilen',
     'Не удалось выдать право Steam: {}':
         'Steam konnte die Berechtigung nicht erteilt werden: {}',
+    "Копировать":
+        "Kopieren",
+    "Экспорт журнала…":
+        "Protokoll exportieren…",
+    "Экспорт журнала":
+        "Protokoll exportieren",
+    "Журнал скопирован":
+        "Protokoll kopiert",
+    "Журнал сохранён: {}":
+        "Protokoll gespeichert: {}",
+    "Не удалось сохранить журнал: {}":
+        "Protokoll konnte nicht gespeichert werden: {}",
+    "Монитор":
+        "Monitor",
+    "Пропускать выбор «по сети / вне сети»":
+        "Die Auswahl „online / offline spielen“ überspringen",
+    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
+        "Das Spiel öffnet das Hauptmenü sofort offline (ein Spiel-Patch)",
+    "Основной":
+        "Hauptmonitor",
+    ", основной":
+        ", Hauptmonitor",
+    "Файлы игры повреждены при распаковке: шейдеры не распаковываются, игра зависнет на загрузке. Распакуйте игру и обновление 1.09 заново исправленным инструментом (issue #81)":
+        "Die Spieldateien wurden beim Entpacken beschädigt: Die Shader lassen sich nicht entpacken und das Spiel würde beim Laden hängen bleiben. Entpacke das Spiel und das Update 1.09 erneut mit einem korrigierten Werkzeug (Issue #81)",
+    "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется":
+        "Benötigt den Ordner adhoc aus der Nexus-Mod #253 (Schriften in adhoc/font), im dvdroot_ps4 des Spiels oder als Mod; ohne ihn wird der Patch nicht angewendet",
+    "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
+        "Das neue: Die Grafikkarte arbeitet direkt mit dem Speicher des Spiels, wie bei einem PC-Spiel, und Grafikbefehle werden übersetzt statt emuliert. Das alte: das Speichermodell von 0.3 mit allen Korrekturen. Besteht der Treiber die Prüfung beim Start nicht, das alte",
+    "Модель памяти и трансляции":
+        "Speicher- und Übersetzungsmodell",
+    "Авто: новая на AMD, старая на других":
+        "Automatisch: neu auf AMD, alt auf anderen",
+    "Новая":
+        "Neu",
+    "Старая (как в 0.3)":
+        "Alt (wie in 0.3)",
 }
 
 

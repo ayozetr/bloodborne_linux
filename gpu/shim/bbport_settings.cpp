@@ -103,7 +103,11 @@ Values& Get() {
 }
 
 const char* MenuText(const char* english, const char* russian) {
-    switch (const MenuLanguage language = Get().menu_language) {
+    return MenuTextIn(Get().menu_language, english, russian);
+}
+
+const char* MenuTextIn(MenuLanguage language, const char* english, const char* russian) {
+    switch (language) {
     case MenuLanguage::English:
         return english;
     case MenuLanguage::Russian:

@@ -21,6 +21,10 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
   game's own movement timing breaks), or 30/60/90 FPS. Output from 720p to 4K.
 - **Launcher** with every setting in one window, in English, Spanish, Italian, French, German,
   Portuguese and Russian, like the in-game menu (Insert or L3+R3).
+- **Settings in the game's own System menu** as well (Display and Effects pages), in the game's
+  language.
+- **Two memory models:** the new one, where the GPU works with the game's memory as in a PC game
+  (the default on AMD), and the one of 0.3 (the default elsewhere); the launcher switches them.
 - **Xbox, Switch and keyboard button prompts**, picked by the controller in use, and a gestures
   menu without the motion-control icons.
 - **Cheats and gameplay tweaks:** never die, stealth, silent steps, enemy control, camera

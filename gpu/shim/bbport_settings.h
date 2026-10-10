@@ -112,6 +112,8 @@ Values& Get();
 /// Localized overlay text; the Language selector itself stays in English. Languages other than
 /// English and Russian look the English text up in bbport_menu_i18n.h (English when missing).
 const char* MenuText(const char* english, const char* russian);
+/// The same text in a given language (the game's own System menu follows the game's language).
+const char* MenuTextIn(MenuLanguage language, const char* english, const char* russian);
 /// MenuLanguage for a code or locale ("es", "fr_FR.UTF-8"); English when unknown.
 MenuLanguage MenuLanguageFromCode(const char* code);
 
