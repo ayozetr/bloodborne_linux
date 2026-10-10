@@ -168,6 +168,15 @@ class ExternalPatchTests(unittest.TestCase):
             writes = compile_external(external_selection(found, config), SEGMENTS)
             self.assertEqual(writes, [(0x2000, (0x12345678).to_bytes(4, 'little'))])
 
+    def test_a_file_for_any_retail_release_applies(self):
+        import game_check
+        self.assertEqual(patches.BLOODBORNE_IDS, set(game_check.SUPPORTED_TITLES))
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / 'japan.xml').write_text(EXTERNAL.replace('<ID>CUSA03173</ID><ID>CUSA00207</ID>',
+                                                               '<ID>CUSA00299</ID>'))
+            self.assertEqual(len(external_patches(folder)), 3)
+
     def test_built_in_file_is_not_external(self):
         self.assertEqual(external_patches(XML.parent), [])
 

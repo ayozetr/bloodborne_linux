@@ -113,6 +113,12 @@ class ModTests(unittest.TestCase):
         (self.moddir / 'Wrapped/app0/dvdroot_ps4').mkdir(parents=True)
         self.assertEqual(mods.discover(self.moddir), ['Wrapped'])
 
+    def test_title_id_wrapped_mod_discovered(self):
+        self.moddir.mkdir()
+        for name, title in (('Europe', 'CUSA03173'), ('US', 'CUSA00900')):
+            (self.moddir / name / title / 'dvdroot_ps4').mkdir(parents=True)
+        self.assertEqual(mods.discover(self.moddir), ['Europe', 'US'])
+
     def test_other_case_replaces_the_game_file(self):
         root = self.moddir / 'Upper'
         (root / 'DVDROOT_PS4/Chr').mkdir(parents=True)

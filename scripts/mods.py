@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -29,13 +30,16 @@ def child(folder, name):
 def content_root(folder):
     """(root, prefix): where a mod's files are and the game path they go to, or None.
 
-    Accepted layouts: <mod>/dvdroot_ps4, <mod>/app0/dvdroot_ps4, <mod>/CUSA03173/dvdroot_ps4,
-    one wrapper folder around any of these (an archive extracted into a folder of its name), and
-    the game's folders without dvdroot_ps4 (<mod>/chr, <mod>/parts, ...)."""
+    Accepted layouts: <mod>/dvdroot_ps4, <mod>/app0/dvdroot_ps4, <mod>/<title ID>/dvdroot_ps4
+    (CUSA03173, CUSA00900, ... whichever release the mod was made with), one wrapper folder
+    around any of these (an archive extracted into a folder of its name), and the game's folders
+    without dvdroot_ps4 (<mod>/chr, <mod>/parts, ...)."""
     folder = Path(folder)
     if not folder.is_dir():
         return None
-    for wrapper in ('', 'app0', 'CUSA03173'):
+    title_ids = sorted(e.name for e in folder.iterdir()
+                       if e.is_dir() and re.fullmatch(r'[A-Za-z]{4}\d{5}', e.name))
+    for wrapper in ('', 'app0', *title_ids):
         base = child(folder, wrapper) if wrapper else folder
         dvdroot = child(base, 'dvdroot_ps4')
         if dvdroot.is_dir():

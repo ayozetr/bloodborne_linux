@@ -30,7 +30,7 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
 - **Cheats and gameplay tweaks:** never die, stealth, silent steps, enemy control, camera
   distance, ragdoll physics and more.
 - **Game effects** on and off, **mods** and community **patches**, loaded without changing the
-  game files.
+  game files ([how](docs/MODS.en.md)).
 - **Add to Steam** in one click (native or Flatpak Steam), and **Discord Rich Presence**.
 - **AppImage:** one file with everything inside, for any distribution and the Steam Deck. It
   updates itself: the launcher's **About** page checks this repository's releases and installs

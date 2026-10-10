@@ -4,7 +4,7 @@
 
 - [COMPATIBILITY.md](COMPATIBILITY.md): which releases of Bloodborne run, and which have been
   checked.
-- [MODS.md](MODS.md): file mods (Russian).
+- [MODS.en.md](MODS.en.md): file mods and third-party patches.
 
 ## For this fork
 
@@ -32,5 +32,6 @@ a Russian title).
   [DEPTH_ADAPTIVE_TAA.md](DEPTH_ADAPTIVE_TAA.md),
   [TEMPORAL_REVIEW_2026-10-01.md](TEMPORAL_REVIEW_2026-10-01.md),
   [motion_vectors.md](motion_vectors.md).
+- **Mods, patches and TAA sharpness** (the original of MODS.en.md): [MODS.md](MODS.md).
 - **The first experiments:** [DEVELOPMENT_LOG.ru.md](DEVELOPMENT_LOG.ru.md), and the session
   notes in [history/](history/).
