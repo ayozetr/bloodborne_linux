@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""The game files bbport runs: Bloodborne CUSA03173 (the European Game of the Year edition) or
-CUSA00900 (US) with the 1.09 update merged in; both run the same 1.09 executable.
+"""The game files bbport runs: Bloodborne with the 1.09 update merged in. The retail releases (the
+US CUSA00900, the European Game of the Year edition CUSA03173, the Asian The Old Hunters Edition
+CUSA03023, ...) share the same 1.09 executable.
 
 Other versions start and then fail inside the game's code (the base game 1.00 faults at guest
 offset 0x20348b8): hooks and patches use the addresses of this one executable. The check compares
@@ -11,7 +12,10 @@ import hashlib
 import os
 from pathlib import Path
 
-SUPPORTED_TITLES = ('CUSA03173', 'CUSA00900')
+# The retail releases (content IDs listed in deadinside28/bloodborne_pc PR #117): Bloodborne, then
+# the editions with The Old Hunters. The executable decides in the end: SUPPORTED_IMAGE.
+SUPPORTED_TITLES = ('CUSA00900', 'CUSA00207', 'CUSA00208', 'CUSA00299', 'CUSA01363',  # US EU UK JP AS
+                    'CUSA03179', 'CUSA03173', 'CUSA03014', 'CUSA03023')  # US EU JP AS
 SUPPORTED_VERSION = '01.09'
 SUPPORTED_IMAGE = '071df19c8880086d97182dbc057bc8cb37badaca57d9112683836b24a0444c0a'
 # The 1.09 executable with Lance McDonald's 60 fps patch applied to it, as some dumps ship it
@@ -72,9 +76,8 @@ def explain(kind, title, version):
                          'to it, which crashes the game when the gestures menu opens (bbport has its '
                          'own 60 fps): copy eboot.bin from a clean dump of the 1.09 update into the '
                          'game folder, replacing this one.',
-        'other_title': f'{found} Only Bloodborne CUSA03173 (Europe, Game of the Year) or CUSA00900 '
-                       '(US) with update 1.09 is supported for now; other editions and regions '
-                       'have a different executable.',
+        'other_title': f'{found} This is not a retail release of Bloodborne: bbport runs Bloodborne '
+                       '(any region, The Old Hunters editions too) with update 1.09.',
         'unreadable': f'{found} eboot.bin could not be read as a decrypted PS4 executable: dump '
                       'the game and the 1.09 update again.',
     }[kind]
