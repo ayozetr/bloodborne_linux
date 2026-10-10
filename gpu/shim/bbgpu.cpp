@@ -303,13 +303,11 @@ extern "C" int bbgpu_init(const BbGpuConfig* config) {
 }
 
 namespace Libraries::Kernel { void StartKernelService(); }
-extern "C" void bbnet_register(void); // bbnet/bbnet_glue.cpp: network and PSN (co-op)
 extern "C" void bbgpu_register_kernel(void) {
     Libraries::Kernel::StartKernelService();
     Core::Loader::SymbolsResolver resolver;
     Libraries::Kernel::RegisterEventQueue(&resolver);
     Libraries::AvPlayer::RegisterLib(&resolver);
-    bbnet_register();
 }
 
 extern "C" uintptr_t bbgpu_resolve(const char* scoped_nid) {
@@ -398,6 +396,26 @@ ScreenshotRequests ConsumeScreenshotRequests() { return {}; }
 
 extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
+}
+
+extern "C" void bbgpu_mouse_take(double* dx, double* dy, int* wheel_up, int* wheel_down) {
+    double x = 0, y = 0;
+    int up = 0, down = 0;
+    if (g_window) {
+        g_window->TakeMouse(x, y, up, down);
+    }
+    *dx = x;
+    *dy = y;
+    *wheel_up = up;
+    *wheel_down = down;
+}
+
+extern "C" int bbgpu_mouse_captured(void) {
+    return g_window && g_window->MouseCaptured() ? 1 : 0;
+}
+
+extern "C" void bbgpu_mouse_look_enable(int enabled) {
+    Frontend::WindowSDL::EnableMouseLook(enabled != 0);
 }
 
 extern "C" int bbgpu_text_input_begin(const char* initial, const char* prompt) {

@@ -10,6 +10,7 @@ text is the key).
 """
 
 import json
+import shutil
 import os
 import re
 import signal
@@ -203,6 +204,9 @@ INI_DEFAULTS = {
     "output_res": "1920x1080",
     "model_lod": "0",
     "live_resolution": "0",
+    "mouse_look": "1",
+    "mouse_sensitivity": "1.00",
+    "mouse_invert_y": "0",
     **{key: "1" if default else "0" for key, _, default in EFFECTS},
     **{key: "0" for key, _, _ in CHEATS + TWEAKS},
 }
@@ -284,16 +288,32 @@ def dlc_addons(dlc, title_id):
     return found
 
 
+# DLSS (vk_dlss.cpp): the bridge (libbbport_dlss.so) and NVIDIA's runtime library
+# libnvidia-ngx-dlss.so.<version>, beside bb-probe (the package, a build with DLSS_SDK_ROOT) or the
+# player's own in <user>/dlss, which the game prefers. Linux needs the .so from NVIDIA's DLSS SDK
+# (github.com/NVIDIA/DLSS, lib/Linux_x86_64/rel); a game's nvngx_dlss.dll is Windows-only.
+NGX_PREFIX = "libnvidia-ngx-dlss.so."
+DLSS_SDK_URL = "https://github.com/NVIDIA/DLSS/tree/main/lib/Linux_x86_64/rel"
+
+
+def binaries_dir():
+    return PORT_DIR / ("bin" if PACKAGED else "out")
+
+
 def dlss_dir():
-    """The DLSS bridge and NVIDIA's library (tools/build_dlss.sh; the AppImage's copy)."""
-    if os.environ.get("BB_DLSS_DIR"):
-        return Path(os.environ["BB_DLSS_DIR"])
-    return PORT_DIR / "dlss" if PACKAGED else PORT_DIR / "out"
+    """Where the game looks for the bridge and NVIDIA's library: BB_DLSS_DIR (the AppImage's
+    copy, tools/build_dlss.sh), else beside bb-probe."""
+    return Path(os.environ["BB_DLSS_DIR"]) if os.environ.get("BB_DLSS_DIR") else binaries_dir()
 
 
-def dlss_ready():
-    d = dlss_dir()
-    return (d / "libbbport_dlss.so").is_file() and any(d.glob("libnvidia-ngx-dlss.so.*"))
+def ngx_libraries(directory):
+    """NVIDIA's DLSS runtime libraries in directory, newest version last."""
+    def version(path):
+        return tuple(int(p) if p.isdigit() else 0 for p in path.name[len(NGX_PREFIX):].split("."))
+    try:
+        return sorted((p for p in Path(directory).iterdir() if p.name.startswith(NGX_PREFIX)), key=version)
+    except OSError:
+        return []
 
 
 def fsr411_dir():
@@ -319,6 +339,14 @@ def fsr411_build_command(upscaler, loader=None):
         (DATA_DIR if PACKAGED else PORT_DIR) / "fsr4_411")
     command = ["bash", str(FSR4CAP_DIR / "build_assets.sh"), str(upscaler)]
     return command + ([str(loader)] if loader else []), env
+
+
+def online_module():
+    """The online module beside the GPU library (gpu/bbnet; a build without its libraries has none),
+    or BB_NET_MODULE (the AppImage's copy)."""
+    if os.environ.get("BB_NET_MODULE"):
+        return Path(os.environ["BB_NET_MODULE"]).is_file()
+    return (binaries_dir() / "gpu" / "libbbnet.so").is_file()
 
 
 def game_environment(s):
@@ -384,7 +412,7 @@ def game_environment(s):
     if s["vk_validation"]:
         env["BB_VK_VALIDATION"] = "1"
     env["BB_DISCORD"] = "1" if s.get("discord", True) else "0"
-    if s.get("online"):
+    if s.get("online") and online_module():
         server = s["online_server"].strip() or online.SHADNET_SERVER
         community = online.community_address(s["online_community"])
         env["BB_ONLINE"] = "1"
@@ -439,23 +467,24 @@ def combo_value(row):
 
 
 # Controls (runtime_pad.c): input, label, default keyboard keys, default gamepad buttons (SDL names).
-# bbport.ini key.<input>= / pad.<input>= replace a default; no line keeps it.
+# bbport.ini key.<input>= / pad.<input>= replace a default; no line keeps it. Mouse buttons and the
+# wheel are keys ("Mouse Left", "Wheel Down"); they act while the game holds the mouse.
 CONTROLS = [
     ("cross", "Крест", "Space", "a"),
     ("circle", "Круг", "Left Shift", "b"),
     ("square", "Квадрат", "E", "x"),
     ("triangle", "Треугольник", "Q", "y"),
-    ("l1", "L1", "1", "leftshoulder"),
-    ("r1", "R1", "3", "rightshoulder"),
-    ("l2", "L2", "R", "lefttrigger"),
-    ("r2", "R2", "F", "righttrigger"),
+    ("l1", "L1", "1, Mouse X2", "leftshoulder"),
+    ("r1", "R1", "3, Mouse Left", "rightshoulder"),
+    ("l2", "L2", "R, Mouse Right", "lefttrigger"),
+    ("r2", "R2", "F, Mouse X1", "righttrigger"),
     ("l3", "L3", "Z", "leftstick"),
-    ("r3", "R3", "C", "rightstick"),
+    ("r3", "R3", "C, Mouse Middle", "rightstick"),
     ("options", "Options", "Return", "start"),
     ("touchpad", "Тачпад, левая половина (жесты)", "Tab", "back, touchpad"),
     ("touchpad_right", "Тачпад, правая половина (личные вещи)", "Backspace", ""),
-    ("up", "Крестовина вверх", "I", "dpup"),
-    ("down", "Крестовина вниз", "K", "dpdown"),
+    ("up", "Крестовина вверх", "I, Wheel Up", "dpup"),
+    ("down", "Крестовина вниз", "K, Wheel Down", "dpdown"),
     ("left", "Крестовина влево", "J", "dpleft"),
     ("right", "Крестовина вправо", "L", "dpright"),
     ("move_up", "Движение вперёд", "W", None),
@@ -739,7 +768,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         controls.add(self.gestures_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
-        for kind, title, icon in (("key", tr("Клавиатура"), "input-keyboard-symbolic"),
+        for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
                                   ("pad", tr("Геймпад"), "input-gaming-symbolic")):
             expander = Adw.ExpanderRow(title=title,
                                        subtitle=tr("Назначение кнопок; применяется при запуске игры"))
@@ -756,6 +785,25 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.control_rows[(kind, name)] = (row, default)
                 self.show_control(kind, name)
             controls.add(expander)
+        # Mouse look (runtime_pad.c): a click in the game takes the mouse, F1 lets it go.
+        self.mouse_look_row = Adw.SwitchRow(
+            title=tr("Камера мышью"),
+            subtitle=tr("Щелчок в окне игры захватывает мышь, F1 — отпускает"),
+            active=self.ini.get("mouse_look", "1") == "1")
+        controls.add(self.mouse_look_row)
+        self.mouse_sensitivity_row = Adw.SpinRow.new_with_range(0.1, 10.0, 0.05)
+        self.mouse_sensitivity_row.set_title(tr("Чувствительность мыши"))
+        self.mouse_sensitivity_row.set_digits(2)
+        self.mouse_sensitivity_row.set_value(float(self.ini.get("mouse_sensitivity", "1.0")))
+        controls.add(self.mouse_sensitivity_row)
+        self.mouse_invert_row = Adw.SwitchRow(title=tr("Инвертировать мышь по вертикали"),
+                                              active=self.ini.get("mouse_invert_y") == "1")
+        controls.add(self.mouse_invert_row)
+        def mouse_rows_sensitive(*_):
+            for row in (self.mouse_sensitivity_row, self.mouse_invert_row):
+                row.set_sensitive(self.mouse_look_row.get_active())
+        self.mouse_look_row.connect("notify::active", mouse_rows_sensitive)
+        mouse_rows_sensitive()
         page.add(controls)
 
         upscaler = Adw.PreferencesGroup(
@@ -772,6 +820,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fsr411_row.set_visible((FSR4CAP_DIR / "build_assets.sh").is_file())
         upscaler.add(self.fsr411_row)
         self.update_fsr411_row()
+        # DLSS: NVIDIA's library, chosen like the FSR 4.1.1 DLL (the package may bring one).
+        self.dlss_row = Adw.ActionRow(title=tr("DLSS: библиотека NVIDIA"))
+        self.dlss_row.add_suffix(flat_button("document-open-symbolic", tr("Выбрать файл…"),
+                                             lambda _b: self.choose_ngx()))
+        self.dlss_reset_button = flat_button("edit-undo-symbolic", tr("Убрать выбранную"),
+                                             lambda _b: self.reset_ngx())
+        self.dlss_row.add_suffix(self.dlss_reset_button)
+        upscaler.add(self.dlss_row)
+        self.update_dlss_row()
         self.preset_row = combo_row(tr("Пресет"), None, PRESETS, int(self.ini.get("preset", "4")))
         self.preset_row.connect("notify::selected", lambda *_: self.update_upscaler_status())
         self.output_row.connect("notify::selected", lambda *_: self.update_upscaler_status())
@@ -981,8 +1038,12 @@ class LauncherWindow(Adw.ApplicationWindow):
             hint = tr("Ассеты для выбранного режима найдены") if not problem else (
                 tr("{}. Соберите FSR 4.1.1 из своей DLL кнопкой «Выбрать DLL…» ниже").format(problem))
         elif value == "dlss":
-            hint = (tr("Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1")
-                    if dlss_ready() else tr("Нет файлов DLSS: tools/build_dlss.sh"))
+            # The bridge and NVIDIA's library (vk_dlss.cpp); without them DLSS falls back to FSR 3.1.
+            binaries = dlss_dir()
+            found = (binaries / "libbbport_dlss.so").is_file() and bool(
+                ngx_libraries(self.user_dir() / "dlss") or ngx_libraries(binaries))
+            hint = tr("DLSS найден (нужна видеокарта NVIDIA RTX)") if found else tr(
+                "DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1")
         else:
             hint = tr("Сглаживание в разрешении вывода без модели FSR") if value == "taa" else None
         self.preset_row.set_sensitive(value not in ("taa", "off"))
@@ -1155,6 +1216,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             "output_res": combo_value(self.output_row),
             "model_lod": combo_value(self.lod_row),
             "live_resolution": combo_value(self.live_row),
+            "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
+            "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
+            "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
         })
@@ -1380,6 +1444,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                                         subtitle=tr("Выключено: игра остаётся офлайн, как раньше"),
                                         active=s["online"])
         play.add(self.online_row)
+        if not online_module():
+            self.online_row.set_sensitive(False)
+            self.online_row.set_subtitle(tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн"))
         page.add(play)
 
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
@@ -1456,9 +1523,11 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def show(results):
             for name, address, ok, detail in results:
-                row = Adw.ActionRow(title=f"{names[name]}: {address}",
-                                    subtitle=tr("доступен") if ok else f'{tr("недоступен")} ({detail})')
-                row.add_prefix(Gtk.Image(icon_name="emblem-ok-symbolic" if ok else "dialog-error-symbolic"))
+                # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
+                row = Adw.ActionRow(title=GLib.markup_escape_text(f"{names[name]}: {address}"),
+                                    subtitle=GLib.markup_escape_text(
+                                        tr("доступен") if ok else f'{tr("недоступен")} ({detail})'))
+                row.add_prefix(Gtk.Image(icon_name="object-select-symbolic" if ok else "dialog-warning-symbolic"))
                 self.connection_group.add(row)
                 self.test_rows.append(row)
             self.test_button.set_sensitive(True)
@@ -1714,7 +1783,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.stop_game()
             return
         npid = self.npid_row.get_text().strip()
-        if not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog"):
+        if online_module() and not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog"):
             dialog = Adw.AlertDialog(heading="Bloodborne", body=tr(
                 "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено"))
             dialog.add_response("cancel", tr("Отмена"))
@@ -1825,6 +1894,79 @@ class LauncherWindow(Adw.ApplicationWindow):
             dialog.present(self)
         else:
             self.toasts.add_toast(Adw.Toast(title=f"{heading}: {body}", timeout=10))
+
+    def update_dlss_row(self):
+        own = ngx_libraries(self.user_dir() / "dlss")
+        bundled = ngx_libraries(dlss_dir())
+        bridge = (dlss_dir() / "libbbport_dlss.so").is_file()
+        if own:
+            text = tr("Своя: {}").format(own[-1].name[len(NGX_PREFIX):])
+        elif bundled:
+            text = tr("Из сборки: {}").format(bundled[-1].name[len(NGX_PREFIX):])
+        else:
+            text = tr("Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})").format(DLSS_SDK_URL)
+        if not bridge:
+            text += "\n" + tr("Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет")
+        self.dlss_row.set_subtitle(text)
+        self.dlss_reset_button.set_sensitive(bool(own))
+        if hasattr(self, "sharpness_row"):  # built after this row
+            self.update_upscaler_status()
+
+    def choose_ngx(self):
+        dialog = Gtk.FileDialog(title=tr("Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)"))
+        files = Gtk.FileFilter()
+        files.set_name("libnvidia-ngx-dlss.so.*, nvngx_dlss.dll")
+        for pattern in ("libnvidia-ngx-dlss.so*", "*.dll", "*.DLL"):
+            files.add_pattern(pattern)
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(files)
+        dialog.set_filters(filters)
+        dialog.set_default_filter(files)
+
+        def finish(dialog, result):
+            try:
+                chosen = dialog.open_finish(result)
+            except GLib.Error:
+                return
+            if chosen and chosen.get_path():
+                self.install_ngx(Path(chosen.get_path()))
+        dialog.open(self, None, finish)
+
+    def install_ngx(self, path):
+        if path.suffix.lower() == ".dll":
+            self.alert(tr("Нужна библиотека для Linux"), tr(
+                "{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна "
+                "libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}").format(path.name, DLSS_SDK_URL))
+            return
+        try:
+            with open(path, "rb") as f:
+                elf = f.read(4) == b"\x7fELF"
+        except OSError as error:
+            self.alert(tr("Не удалось прочитать файл"), str(error))
+            return
+        if not path.name.startswith(NGX_PREFIX) or not elf:
+            self.alert(tr("Это не библиотека DLSS"), tr(
+                "Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}").format(DLSS_SDK_URL))
+            return
+        target = self.user_dir() / "dlss"
+        try:
+            target.mkdir(parents=True, exist_ok=True)
+            for old in ngx_libraries(target):
+                old.unlink()
+            shutil.copy2(path, target / path.name)
+        except OSError as error:
+            self.alert(tr("Не удалось скопировать библиотеку"), str(error))
+            return
+        self.toasts.add_toast(Adw.Toast(title=tr("DLSS {}: готово").format(path.name[len(NGX_PREFIX):])))
+        self.update_dlss_row()
+
+    def reset_ngx(self):
+        for old in ngx_libraries(self.user_dir() / "dlss"):
+            try:
+                old.unlink()
+            except OSError:
+                pass
+        self.update_dlss_row()
 
     def choose_dll(self, title, done):
         dialog = Gtk.FileDialog(title=title)

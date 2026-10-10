@@ -322,8 +322,6 @@ static ABI int32_t posix_create(GuestThread **t,ThreadAttr **a,GuestEntry e,void
 static ABI int32_t posix_create_name(GuestThread **t,ThreadAttr **a,GuestEntry e,void *arg,const char *name) { return posix(create(t,a,e,arg,name)); }
 static ABI int32_t posix_join(GuestThread *t,void **r) { return posix(thread_join(t,r)); }
 
-/* Co-op: guest threads started by host libraries (NP matching/signaling threads call the
- * game's callbacks). Both return 0 or a positive errno value. */
 int32_t runtime_thread_spawn(void **out,void *(ABI *entry)(void *),void *argument,uint64_t stack,const char *name) {
     ThreadAttr *attr=NULL;
     int32_t r=attr_init(&attr);
@@ -333,7 +331,7 @@ int32_t runtime_thread_spawn(void **out,void *(ABI *entry)(void *),void *argumen
     return posix(r);
 }
 int32_t runtime_thread_join_spawned(void *thread,void **result) {
-    return posix(thread_join(thread,result));
+    return posix(thread_join((GuestThread *)thread,result));
 }
 
 uintptr_t runtime_thread_resolve(const char *name) {

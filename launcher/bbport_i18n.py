@@ -204,6 +204,59 @@ EN = {
         "Build FSR 4.1.1 from amd_fidelityfx_upscaler_dx12.dll 4.1.x (OptiScaler: the FSR4_LATEST folder, or from a game with FSR 4.1). Needs GE-Proton 10+, Proton Experimental or Proton-CachyOS; 2–5 minutes (RDNA4: twice as long, with the FP8 variant)",
     "Сборка не удалась (код {}): подробности в журнале": "The build failed (code {}): details in the log",
     "Сглаживание в разрешении вывода без модели FSR": "Anti-aliasing at the output resolution, no FSR model",
+    "DLSS найден (нужна видеокарта NVIDIA RTX)": "DLSS found (needs an NVIDIA RTX GPU)",
+    # Online page (from the Linux co-op fork)
+    "Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн": "This build has no online module (libbbnet.so): offline play only",
+    'Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email': 'The Online ID is the account name (NPID) you registered on the server, not your email address',
+    'UPnP (открыть порт на роутере автоматически)': 'UPnP (open a port on the router automatically)',
+    'srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315': "srv.shadps4.net:31313 is shadPS4's public server. For a private server, enter host:port from the person who runs it. WebAPI: leave it empty to use the server address with port 31315",
+    'Адрес WebAPI': 'WebAPI address',
+    'Адрес сервера': 'Server address',
+    'Выключено: игра остаётся офлайн, как раньше': 'Off: the game stays offline, as before',
+    'Выключите при Tailscale или другом VPN': 'Turn it off with Tailscale or another VPN',
+    'Играть онлайн': 'Play online',
+    'Играть офлайн': 'Play offline',
+    'Игровой сервер': 'Game server',
+    'Игровой сервер (сообщения, пятна крови, призраки)': 'Game server (messages, bloodstains, ghosts)',
+    'Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'Your shadNet account name, not your email. Register at shadnet.shadps4.net or ask the owner of a private server. The password is saved on this computer with the launcher settings',
+    'Онлайн': 'Online',
+    'Отмена': 'Cancel',
+    'Пароль': 'Password',
+    'Проверить': 'Test',
+    'Проверить соединение': 'Test the connection',
+    'Проверка…': 'Checking…',
+    'Сервер shadNet': 'shadNet server',
+    'Сервер кооператива (колокола и призывы)': 'Co-op server (bells and summons)',
+    'Соединение': 'Connection',
+    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Messages, bloodstains and ghosts come from The Hunter's Dream; bells and summons go through a shadNet server. Online play works together with the Windows version: everyone needs game version 1.09 and the same server",
+    'У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре': 'Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together',
+    'Учётная запись': 'Account',
+    'Учётная запись для игры онлайн указана, но «Играть онлайн» выключено': 'An online account is filled in, but “Play online” is off',
+    'доступен': 'reachable',
+    'недоступен': 'not reachable',
+    "DLSS: библиотека NVIDIA": "DLSS: NVIDIA's library",
+    "Выбрать файл…": "Choose a file…",
+    "Убрать выбранную": "Remove the chosen one",
+    "Своя: {}": "Your own: {}",
+    "Из сборки: {}": "From this build: {}",
+    "Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})": "None: choose libnvidia-ngx-dlss.so.* from NVIDIA's DLSS SDK ({})",
+    "Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет": "This build has no DLSS bridge (libbbport_dlss.so): DLSS will not work",
+    "Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)": "NVIDIA's DLSS library (libnvidia-ngx-dlss.so.*)",
+    "Нужна библиотека для Linux": "A Linux library is needed",
+    "{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}":
+        "{} is the Windows DLSS library; NVIDIA's Linux driver does not load it. libnvidia-ngx-dlss.so.<version> from NVIDIA's DLSS SDK is needed: {}",
+    "Не удалось прочитать файл": "Could not read the file",
+    "Это не библиотека DLSS": "This is not the DLSS library",
+    "Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}": "libnvidia-ngx-dlss.so.<version> from NVIDIA's DLSS SDK is needed: {}",
+    "Не удалось скопировать библиотеку": "Could not copy the library",
+    "DLSS {}: готово": "DLSS {}: ready",
+    "Клавиатура и мышь": "Keyboard and mouse",
+    "Камера мышью": "Mouse look",
+    "Щелчок в окне игры захватывает мышь, F1 — отпускает": "A click in the game window takes the mouse, F1 releases it",
+    "Чувствительность мыши": "Mouse sensitivity",
+    "Инвертировать мышь по вертикали": "Invert mouse Y axis",
+    "DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1":
+        "DLSS not found: choose NVIDIA's library below (a build with the DLSS bridge is needed too). The game will use FSR 3.1",
     "Нет или повреждён файл {}": "Missing or damaged file {}",
     # Effects
     "Эффекты игры": "Game effects",
@@ -921,6 +974,53 @@ PT_BR = {
         "GNU GPL v2 ou posterior. Não inclui arquivos do jogo: Bloodborne pertence à Sony Interactive Entertainment e à FromSoftware",
     "Проверить сейчас":
         "Verificar agora",
+    # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
+    'DLSS {}: готово':
+        'DLSS {}: pronto',
+    'DLSS найден (нужна видеокарта NVIDIA RTX)':
+        'DLSS encontrado (requer uma GPU NVIDIA RTX)',
+    'DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1':
+        'DLSS não encontrado: escolha a biblioteca da NVIDIA abaixo (também é preciso uma build com a ponte do DLSS). O jogo usará FSR 3.1',
+    'DLSS: библиотека NVIDIA':
+        'DLSS: biblioteca da NVIDIA',
+    '{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        '{} é a biblioteca do DLSS para Windows; o driver da NVIDIA para Linux não a carrega. É preciso libnvidia-ngx-dlss.so.<versão> do DLSS SDK da NVIDIA: {}',
+    'Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)':
+        'Biblioteca DLSS da NVIDIA (libnvidia-ngx-dlss.so.*)',
+    'Выбрать файл…':
+        'Escolher arquivo…',
+    'Из сборки: {}':
+        'Desta build: {}',
+    'Инвертировать мышь по вертикали':
+        'Inverter o eixo Y do mouse',
+    'Камера мышью':
+        'Câmera com o mouse',
+    'Клавиатура и мышь':
+        'Teclado e mouse',
+    'Не удалось прочитать файл':
+        'Não foi possível ler o arquivo',
+    'Не удалось скопировать библиотеку':
+        'Não foi possível copiar a biblioteca',
+    'Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})':
+        'Nenhuma: escolha libnvidia-ngx-dlss.so.* do DLSS SDK da NVIDIA ({})',
+    'Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        'É preciso libnvidia-ngx-dlss.so.<versão> do DLSS SDK da NVIDIA: {}',
+    'Нужна библиотека для Linux':
+        'É preciso uma biblioteca para Linux',
+    'Своя: {}':
+        'A sua: {}',
+    'Убрать выбранную':
+        'Remover a escolhida',
+    'Чувствительность мыши':
+        'Sensibilidade do mouse',
+    'Щелчок в окне игры захватывает мышь, F1 — отпускает':
+        'Um clique na janela do jogo captura o mouse; F1 o libera',
+    'Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн':
+        'Esta build não tem o módulo online (libbbnet.so): só é possível jogar offline',
+    'Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет':
+        'Esta build não tem a ponte do DLSS (libbbport_dlss.so): o DLSS não vai funcionar',
+    'Это не библиотека DLSS':
+        'Esta não é a biblioteca do DLSS',
 }
 
 
@@ -1321,6 +1421,53 @@ ES = {
         "GNU GPL v2 o posterior. No incluye archivos del juego: Bloodborne pertenece a Sony Interactive Entertainment y FromSoftware",
     "Проверить сейчас":
         "Comprobar ahora",
+    # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
+    'DLSS {}: готово':
+        'DLSS {}: listo',
+    'DLSS найден (нужна видеокарта NVIDIA RTX)':
+        'DLSS encontrado (necesita una GPU NVIDIA RTX)',
+    'DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1':
+        'DLSS no encontrado: elige la biblioteca de NVIDIA abajo (también hace falta una compilación con el puente de DLSS). El juego usará FSR 3.1',
+    'DLSS: библиотека NVIDIA':
+        'DLSS: biblioteca de NVIDIA',
+    '{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        '{} es la biblioteca de DLSS para Windows; el controlador de NVIDIA para Linux no la carga. Hace falta libnvidia-ngx-dlss.so.<versión> del DLSS SDK de NVIDIA: {}',
+    'Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)':
+        'Biblioteca DLSS de NVIDIA (libnvidia-ngx-dlss.so.*)',
+    'Выбрать файл…':
+        'Elegir archivo…',
+    'Из сборки: {}':
+        'De esta compilación: {}',
+    'Инвертировать мышь по вертикали':
+        'Invertir el eje Y del ratón',
+    'Камера мышью':
+        'Cámara con el ratón',
+    'Клавиатура и мышь':
+        'Teclado y ratón',
+    'Не удалось прочитать файл':
+        'No se pudo leer el archivo',
+    'Не удалось скопировать библиотеку':
+        'No se pudo copiar la biblioteca',
+    'Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})':
+        'Ninguna: elige libnvidia-ngx-dlss.so.* del DLSS SDK de NVIDIA ({})',
+    'Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        'Hace falta libnvidia-ngx-dlss.so.<versión> del DLSS SDK de NVIDIA: {}',
+    'Нужна библиотека для Linux':
+        'Hace falta una biblioteca para Linux',
+    'Своя: {}':
+        'La tuya: {}',
+    'Убрать выбранную':
+        'Quitar la elegida',
+    'Чувствительность мыши':
+        'Sensibilidad del ratón',
+    'Щелчок в окне игры захватывает мышь, F1 — отпускает':
+        'Un clic en la ventana del juego captura el ratón; F1 lo suelta',
+    'Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн':
+        'Esta compilación no tiene el módulo online (libbbnet.so): solo se puede jugar sin conexión',
+    'Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет':
+        'Esta compilación no tiene el puente de DLSS (libbbport_dlss.so): DLSS no funcionará',
+    'Это не библиотека DLSS':
+        'No es la biblioteca de DLSS',
 }
 
 
@@ -1721,6 +1868,53 @@ IT = {
         "GNU GPL v2 o successiva. Nessun file del gioco incluso: Bloodborne appartiene a Sony Interactive Entertainment e FromSoftware",
     "Проверить сейчас":
         "Controlla ora",
+    # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
+    'DLSS {}: готово':
+        'DLSS {}: pronto',
+    'DLSS найден (нужна видеокарта NVIDIA RTX)':
+        'DLSS trovato (serve una GPU NVIDIA RTX)',
+    'DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1':
+        'DLSS non trovato: scegli la libreria NVIDIA qui sotto (serve anche una build con il bridge DLSS). Il gioco userà FSR 3.1',
+    'DLSS: библиотека NVIDIA':
+        'DLSS: libreria NVIDIA',
+    '{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        '{} è la libreria DLSS per Windows; il driver NVIDIA per Linux non la carica. Serve libnvidia-ngx-dlss.so.<versione> dal DLSS SDK di NVIDIA: {}',
+    'Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)':
+        'Libreria DLSS di NVIDIA (libnvidia-ngx-dlss.so.*)',
+    'Выбрать файл…':
+        'Scegli file…',
+    'Из сборки: {}':
+        'Da questa build: {}',
+    'Инвертировать мышь по вертикали':
+        "Inverti l'asse Y del mouse",
+    'Камера мышью':
+        'Visuale con il mouse',
+    'Клавиатура и мышь':
+        'Tastiera e mouse',
+    'Не удалось прочитать файл':
+        'Impossibile leggere il file',
+    'Не удалось скопировать библиотеку':
+        'Impossibile copiare la libreria',
+    'Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})':
+        'Nessuna: scegli libnvidia-ngx-dlss.so.* dal DLSS SDK di NVIDIA ({})',
+    'Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        'Serve libnvidia-ngx-dlss.so.<versione> dal DLSS SDK di NVIDIA: {}',
+    'Нужна библиотека для Linux':
+        'Serve una libreria per Linux',
+    'Своя: {}':
+        'La tua: {}',
+    'Убрать выбранную':
+        'Rimuovi quella scelta',
+    'Чувствительность мыши':
+        'Sensibilità del mouse',
+    'Щелчок в окне игры захватывает мышь, F1 — отпускает':
+        'Un clic nella finestra del gioco cattura il mouse, F1 lo rilascia',
+    'Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн':
+        'Questa build non ha il modulo online (libbbnet.so): solo gioco offline',
+    'Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет':
+        'Questa build non ha il bridge DLSS (libbbport_dlss.so): DLSS non funzionerà',
+    'Это не библиотека DLSS':
+        'Non è la libreria DLSS',
 }
 
 
@@ -2121,6 +2315,53 @@ FR = {
         "GNU GPL v2 ou ultérieure. Aucun fichier du jeu inclus : Bloodborne appartient à Sony Interactive Entertainment et FromSoftware",
     "Проверить сейчас":
         "Vérifier maintenant",
+    # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
+    'DLSS {}: готово':
+        'DLSS {} : prêt',
+    'DLSS найден (нужна видеокарта NVIDIA RTX)':
+        'DLSS trouvé (nécessite un GPU NVIDIA RTX)',
+    'DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1':
+        'DLSS introuvable : choisissez la bibliothèque NVIDIA ci-dessous (une version avec le pont DLSS est aussi nécessaire). Le jeu utilisera FSR 3.1',
+    'DLSS: библиотека NVIDIA':
+        'DLSS : bibliothèque NVIDIA',
+    '{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        '{} est la bibliothèque DLSS pour Windows ; le pilote NVIDIA pour Linux ne la charge pas. Il faut libnvidia-ngx-dlss.so.<version> du DLSS SDK de NVIDIA : {}',
+    'Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)':
+        'Bibliothèque DLSS de NVIDIA (libnvidia-ngx-dlss.so.*)',
+    'Выбрать файл…':
+        'Choisir un fichier…',
+    'Из сборки: {}':
+        'De cette version : {}',
+    'Инвертировать мышь по вертикали':
+        "Inverser l'axe Y de la souris",
+    'Камера мышью':
+        'Caméra à la souris',
+    'Клавиатура и мышь':
+        'Clavier et souris',
+    'Не удалось прочитать файл':
+        'Impossible de lire le fichier',
+    'Не удалось скопировать библиотеку':
+        'Impossible de copier la bibliothèque',
+    'Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})':
+        'Aucune : choisissez libnvidia-ngx-dlss.so.* du DLSS SDK de NVIDIA ({})',
+    'Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        'Il faut libnvidia-ngx-dlss.so.<version> du DLSS SDK de NVIDIA : {}',
+    'Нужна библиотека для Linux':
+        'Une bibliothèque pour Linux est nécessaire',
+    'Своя: {}':
+        'La vôtre : {}',
+    'Убрать выбранную':
+        'Retirer celle choisie',
+    'Чувствительность мыши':
+        'Sensibilité de la souris',
+    'Щелчок в окне игры захватывает мышь, F1 — отпускает':
+        'Un clic dans la fenêtre du jeu capture la souris, F1 la libère',
+    'Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн':
+        "Cette version n'a pas le module en ligne (libbbnet.so) : jeu hors ligne uniquement",
+    'Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет':
+        "Cette version n'a pas le pont DLSS (libbbport_dlss.so) : DLSS ne fonctionnera pas",
+    'Это не библиотека DLSS':
+        "Ce n'est pas la bibliothèque DLSS",
 }
 
 
@@ -2521,6 +2762,53 @@ DE = {
         "GNU GPL v2 oder neuer. Keine Spieldateien enthalten: Bloodborne gehört Sony Interactive Entertainment und FromSoftware",
     "Проверить сейчас":
         "Jetzt prüfen",
+    # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
+    'DLSS {}: готово':
+        'DLSS {}: bereit',
+    'DLSS найден (нужна видеокарта NVIDIA RTX)':
+        'DLSS gefunden (benötigt eine NVIDIA-RTX-Grafikkarte)',
+    'DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1':
+        'DLSS nicht gefunden: Wähle unten die NVIDIA-Bibliothek (außerdem ist ein Build mit der DLSS-Brücke nötig). Das Spiel verwendet FSR 3.1',
+    'DLSS: библиотека NVIDIA':
+        'DLSS: NVIDIA-Bibliothek',
+    '{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        '{} ist die DLSS-Bibliothek für Windows; NVIDIAs Linux-Treiber lädt sie nicht. Benötigt wird libnvidia-ngx-dlss.so.<Version> aus NVIDIAs DLSS SDK: {}',
+    'Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)':
+        'NVIDIAs DLSS-Bibliothek (libnvidia-ngx-dlss.so.*)',
+    'Выбрать файл…':
+        'Datei wählen…',
+    'Из сборки: {}':
+        'Aus diesem Build: {}',
+    'Инвертировать мышь по вертикали':
+        'Maus-Y-Achse umkehren',
+    'Камера мышью':
+        'Kamera mit der Maus',
+    'Клавиатура и мышь':
+        'Tastatur und Maus',
+    'Не удалось прочитать файл':
+        'Die Datei konnte nicht gelesen werden',
+    'Не удалось скопировать библиотеку':
+        'Die Bibliothek konnte nicht kopiert werden',
+    'Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})':
+        'Keine: Wähle libnvidia-ngx-dlss.so.* aus NVIDIAs DLSS SDK ({})',
+    'Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}':
+        'Benötigt wird libnvidia-ngx-dlss.so.<Version> aus NVIDIAs DLSS SDK: {}',
+    'Нужна библиотека для Linux':
+        'Eine Linux-Bibliothek wird benötigt',
+    'Своя: {}':
+        'Eigene: {}',
+    'Убрать выбранную':
+        'Gewählte entfernen',
+    'Чувствительность мыши':
+        'Mausempfindlichkeit',
+    'Щелчок в окне игры захватывает мышь, F1 — отпускает':
+        'Ein Klick ins Spielfenster fängt die Maus, F1 gibt sie frei',
+    'Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн':
+        'Dieser Build hat kein Online-Modul (libbbnet.so): nur Offline-Spiel',
+    'Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет':
+        'Dieser Build hat keine DLSS-Brücke (libbbport_dlss.so): DLSS funktioniert nicht',
+    'Это не библиотека DLSS':
+        'Das ist nicht die DLSS-Bibliothek',
 }
 
 
@@ -2589,7 +2877,7 @@ ZH_CN = {
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "eboot.bin 不是 1.09 版本：请将 1.09 更新转储中的 eboot.bin 复制到游戏文件夹并覆盖",
     "Это не магазинное издание Bloodborne (найдено {}): нужен Bloodborne любого региона с обновлением 1.09":
-        "这不是 Bloodborne 的零售版本（找到 {}）：需要任意地区的 Bloodborne 并安装 1.09 更新",
+        "这不是 Bloodborne 的正式发行版（当前检测到 {}）：需要任意地区已安装 1.09 更新的 Bloodborne",
     "eboot.bin с вшитым патчем 60 FPS от Lance McDonald: из-за него игра падает в меню жестов. Скопируйте чистый eboot.bin из дампа обновления 1.09 в папку игры с заменой":
         "此 eboot.bin 内置了 Lance McDonald 的 60 FPS 补丁，会导致游戏在打开手势菜单时崩溃：请将 1.09 更新转储中干净的 eboot.bin 复制到游戏文件夹并覆盖",
     "eboot.bin не читается как расшифрованный исполняемый файл PS4: сделайте дамп заново":
@@ -2706,6 +2994,30 @@ ZH_CN = {
         "从 amd_fidelityfx_upscaler_dx12.dll 4.1.x 构建 FSR 4.1.1（OptiScaler：FSR4_LATEST 文件夹，或来自支持 FSR 4.1 的游戏）。需要 GE-Proton 10+、Proton Experimental 或 Proton-CachyOS；耗时 2–5 分钟（RDNA4：耗时加倍，并额外构建 FP8 版本）",
     "Сборка не удалась (код {}): подробности в журнале": "构建失败（代码 {}）：详情见日志",
     "Сглаживание в разрешении вывода без модели FSR": "在输出分辨率下进行抗锯齿，不使用 FSR 模型",
+    "DLSS найден (нужна видеокарта NVIDIA RTX)": "已找到 DLSS（需要 NVIDIA RTX 显卡）",
+    "DLSS: библиотека NVIDIA": "DLSS：NVIDIA 库",
+    "Выбрать файл…": "选择文件…",
+    "Убрать выбранную": "移除所选",
+    "Своя: {}": "自选：{}",
+    "Из сборки: {}": "随版本附带：{}",
+    "Нет: выберите libnvidia-ngx-dlss.so.* из DLSS SDK NVIDIA ({})": "无：请选择 NVIDIA DLSS SDK 中的 libnvidia-ngx-dlss.so.*（{}）",
+    "Эта сборка без моста DLSS (libbbport_dlss.so): DLSS работать не будет": "此版本没有 DLSS 桥接（libbbport_dlss.so）：DLSS 无法工作",
+    "Библиотека DLSS NVIDIA (libnvidia-ngx-dlss.so.*)": "NVIDIA DLSS 库（libnvidia-ngx-dlss.so.*）",
+    "Нужна библиотека для Linux": "需要 Linux 版本的库",
+    "{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}":
+        "{} 是 Windows 版 DLSS 库，NVIDIA 的 Linux 驱动不会加载它。需要 NVIDIA DLSS SDK 中的 libnvidia-ngx-dlss.so.<版本>：{}",
+    "Не удалось прочитать файл": "无法读取文件",
+    "Это не библиотека DLSS": "这不是 DLSS 库",
+    "Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}": "需要 NVIDIA DLSS SDK 中的 libnvidia-ngx-dlss.so.<版本>：{}",
+    "Не удалось скопировать библиотеку": "无法复制该库",
+    "DLSS {}: готово": "DLSS {}：已就绪",
+    "Клавиатура и мышь": "键盘和鼠标",
+    "Камера мышью": "鼠标控制视角",
+    "Щелчок в окне игры захватывает мышь, F1 — отпускает": "在游戏窗口中单击以捕获鼠标，按 F1 释放",
+    "Чувствительность мыши": "鼠标灵敏度",
+    "Инвертировать мышь по вертикали": "反转鼠标纵轴",
+    "DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1":
+        "未找到 DLSS：请在下方选择 NVIDIA 的库（还需要带 DLSS 桥接的版本）。游戏将改用 FSR 3.1",
     "Нет или повреждён файл {}": "文件 {} 缺失或已损坏",
     # Effects
     "Эффекты игры": "游戏效果",

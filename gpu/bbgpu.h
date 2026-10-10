@@ -16,8 +16,6 @@ typedef struct {
 } BbGpuConfig;
 /* Registers kernel event queues (needed with or without graphics). */
 void bbgpu_register_kernel(void);
-/* Co-op: the game folder and param.sfo identity for the network and PSN libraries. */
-void bbnet_configure(const char *app0, const char *serial, const char *title, const char *app_ver);
 /* Creates window, Vulkan device, presenter and GPU command processor. */
 int bbgpu_init(const BbGpuConfig *config);
 /* Function for an imported NID ("NID#lib#mod"), or 0 when the GPU library does not provide it. */
@@ -32,6 +30,13 @@ int bbgpu_text_input_begin(const char *initial_utf8, const char *prompt_utf8);
 int bbgpu_text_input_poll(char *out_utf8, uint64_t size);
 /* 1 while the in-game settings menu is open: the game's pad input is held neutral. */
 int bbgpu_overlay_captures_input(void);
+/* Mouse look (runtime_pad.c): the window takes the mouse when it is clicked (relative mode) and
+ * lets it go on F1, losing focus or the menu opening. take: motion (pixels) and wheel notches
+ * since the last call, reset; captured: 1 while the window holds it; enable: mouse_look=0 in
+ * bbport.ini keeps the window from taking it. */
+void bbgpu_mouse_take(double *dx, double *dy, int *wheel_up, int *wheel_down);
+int bbgpu_mouse_captured(void);
+void bbgpu_mouse_look_enable(int enabled);
 /* Patches the loaded image before the game runs (image still writable): libGnm entry hooks. */
 void bbgpu_patch_image(unsigned char *image, uint64_t size);
 /* Number of symbols registered by the vendored libraries (diagnostics). */

@@ -67,24 +67,7 @@ static ABI int32_t user_event(int32_t *event) {
 }
 
 /* ---- SystemService ---- */
-/* BB_LANGUAGE (the launcher sets it), else the desktop's locale as the launcher maps it
- * (bbport_i18n.GAME_LANGUAGES): runs without the launcher speak the desktop's language too. */
-static int language(void) {
-    const char *v=getenv("BB_LANGUAGE");
-    if (v && *v) return atoi(v);
-    static const char *const keys[]={"LC_ALL","LC_MESSAGES","LANG","LANGUAGE"};
-    static const struct { char code[3]; int id; } locales[]={
-        {"ja",0}, {"en",1}, {"fr",2}, {"es",3}, {"de",4}, {"it",5}, {"ru",8},
-    };
-    for (size_t k=0;k<sizeof(keys)/sizeof(*keys);++k) {
-        const char *locale=getenv(keys[k]);
-        if (!locale || !*locale) continue;
-        for (size_t i=0;i<sizeof(locales)/sizeof(*locales);++i)
-            if ((locale[0]|32)==locales[i].code[0] && (locale[1]|32)==locales[i].code[1]) return locales[i].id;
-        return 1;
-    }
-    return 1;
-}
+static int language(void) { const char *v=getenv("BB_LANGUAGE"); return v ? atoi(v) : 1; }
 static ABI int32_t system_param(int32_t id,int32_t *value) {
     if (!value) return SYSTEM_PARAMETER;
     switch (id) {
@@ -484,30 +467,9 @@ static const RuntimeExport exports[]={
     {"sceDiscMapIsRequestOnHDD",discmap_on_hdd}, {"sceDiscMap_8A828CAEE7EDD5E9",discmap_8a82},
     {"sceVoiceInit",ok_void}, {"sceVoiceEnd",ok_void},
 };
-/* Co-op (BB_ONLINE=1): network and PSN calls go to the shadNet libraries in bbgpu when they
- * implement them. Trophies, voice and the store/profile dialogs stay here. */
-static int online_symbol(const char *symbol) {
-    static const char *const online[]={"sceNet","sceNp","sceHttp","sceSsl"};
-    static const char *const local[]={"sceNpTrophy","sceNpCommerce","sceNpProfileDialog"};
-    int match=0;
-    for (size_t i=0;i<sizeof(online)/sizeof(*online);++i)
-        if (!strncmp(symbol,online[i],strlen(online[i]))) match=1;
-    for (size_t i=0;i<sizeof(local)/sizeof(*local);++i)
-        if (!strncmp(symbol,local[i],strlen(local[i]))) match=0;
-    return match;
-}
 uintptr_t runtime_services_resolve(const char *name) {
-    static int online=-1;
-    if (online<0) { const char *v=getenv("BB_ONLINE"); online=v && v[0]=='1'; }
-    if (online) {
-        const char *symbol=runtime_symbol(name);
-        if (symbol && online_symbol(symbol)) {
-            uintptr_t address=bbgpu_resolve(name);
-            if (address) return address;
-            printf("Co-op: %s has no online version; using the offline one\n",symbol);
-        }
-    }
-    return RUNTIME_LOOKUP(exports,name);
+    const uintptr_t online=runtime_net_resolve(name); /* BB_ONLINE=1: the online module first */
+    return online ? online : RUNTIME_LOOKUP(exports,name);
 }
 #else
 uintptr_t runtime_services_resolve(const char *name) { (void)name; return 0; }

@@ -379,7 +379,7 @@ int main(int argc, char **argv) {
         sfo_value(sfo,"TITLE_ID",serial,sizeof(serial),NULL);
         sfo_value(sfo,"TITLE",title,sizeof(title),NULL);
         sfo_value(sfo,"APP_VER",version,sizeof(version),NULL);
-        bbnet_configure(app0,serial,title,version);
+        runtime_net_configure(app0,serial,title,version);
     }
     bbgpu_register_kernel();
 #ifdef _WIN32

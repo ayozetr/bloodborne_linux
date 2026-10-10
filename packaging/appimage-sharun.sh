@@ -51,6 +51,7 @@ export BB_PREBUILT=1
 export PYTHON="$APPDIR/bin/python3"
 export BB_VULKANINFO="$APPDIR/bin/vulkaninfo"
 export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
+export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet.so"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 exec "$APPDIR/bin/python3" "$APPDIR/share/bbport/launcher/bbport_launcher.py" "$@"
@@ -73,8 +74,11 @@ export DEPLOY_PYTHON=1 DEPLOY_GTK=1 GTK_DIR=gtk-4.0 DEPLOY_SDL=1 DEPLOY_VULKAN=1
 export STRACE_MODE=0
 # The AppDir first, the AppImage once the build host's NVIDIA driver is out of it (below).
 export OUTPUT_APPIMAGE=0
+# The online module (gpu/bbnet), when the build has it: named so that its libraries (protobuf,
+# OpenSSL, miniupnpc) come along; the runtime dlopens it at BB_NET_MODULE (below).
+net=$(ls "$root/out/gpu/libbbnet.so" 2>/dev/null || true)
 "$quick" \
-    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" \
+    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
@@ -100,6 +104,12 @@ if [[ -f $root/out/libbbport_dlss.so ]]; then
     mkdir -p "$appdir/share/bbport/dlss"
     cp "$root"/out/libbbport_dlss.so "$root"/out/libnvidia-ngx-dlss.so.* \
         "$root"/out/NVIDIA-DLSS-LICENSE.txt "$appdir/share/bbport/dlss/"
+fi
+if [[ -n $net ]]; then
+    module=$(find "$appdir/lib" -name libbbnet.so -print -quit)
+    [[ -n $module ]] || { echo 'libbbnet.so is missing from the AppDir' >&2; exit 1; }
+    mkdir -p "$d/net"
+    ln -sf "$(realpath --relative-to="$d/net" "$module")" "$d/net/libbbnet.so"
 fi
 "$quick" --make-appimage
 

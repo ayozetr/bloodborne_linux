@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// bbport co-op: what the network and NP libraries from shadp2p need from the rest of
-// shadPS4, implemented on top of the bbport runtime, and their registration.
+// bbport online module (libbbnet.so): what the network and NP libraries from shadp2p need
+// from the rest of shadPS4, on top of the bbport runtime (BbNetHost), their registration and the
+// module's C interface (bbnet.h). From the Linux co-op fork of bbport, which took it from the
+// Windows port; the libraries are shadp2p's (a shadPS4 fork, GPL-2.0).
 
 #include <chrono>
 #include <condition_variable>
@@ -59,11 +61,12 @@
 #include "core/libraries/np/np_web_api/np_web_api.h"
 #include "core/libraries/np/np_web_api2/np_web_api2.h"
 
-extern "C" {
-int32_t runtime_thread_spawn(void** out, void* PS4_SYSV_ABI (*entry)(void*), void* argument,
-                             uint64_t stack, const char* name);
-int32_t runtime_thread_join_spawned(void* thread, void** result);
-}
+#include "bbnet.h"
+
+namespace {
+/// The runtime's side (bbnet_init).
+BbNetHost g_host{};
+} // namespace
 
 // ---- Kernel ---------------------------------------------------------------------------------
 
@@ -278,10 +281,10 @@ int posix_pthread_create_name_np(PthreadT* thread, const PthreadAttrT* attr,
                                  PthreadEntryFunc start, void* arg, const char* name) {
     if (!thread || !start) return 22;
     const u64 stack = attr && *attr ? (*attr)->stack : 0;
-    return runtime_thread_spawn(thread, start, arg, stack, name ? name : "np");
+    return g_host.thread_spawn(thread, start, arg, stack, name ? name : "np");
 }
 int posix_pthread_join(PthreadT thread, void** ret) {
-    return runtime_thread_join_spawned(thread, ret);
+    return g_host.thread_join(thread, ret);
 }
 
 } // namespace Libraries::Kernel
@@ -442,18 +445,52 @@ private:
 };
 } // namespace Core
 
-extern "C" void bbnet_configure(const char* app0, const char* serial, const char* title,
-                                const char* app_ver) {
+namespace {
+void Configure(const char* app0, const char* serial, const char* title, const char* app_ver) {
     Core::Emulator::SetGame(app0, serial, title, app_ver);
     const auto& ids = Common::ElfInfo::Instance().GetNpCommIds();
     std::printf("Co-op: %s, NP communication id %s%s\n", serial ? serial : "?",
                 ids.empty() ? "missing" : ids.front().c_str(),
                 EmulatorSettings.IsShadNetEnabled() ? "; online play on" : "");
 }
+} // namespace
 
-// ---- Registration ------------------------------------------------------------------------------
+// ---- Registration and the C interface ------------------------------------------------------------
 
-extern "C" void bbnet_register(void) {
+// The module's own table (the port's libbbgpu keeps another one: this library's symbols are its
+// own, -Bsymbolic).
+namespace {
+struct Symbol {
+    std::string nid;
+    u64 address;
+};
+std::vector<Symbol> g_symbols;
+} // namespace
+
+namespace Core::Loader {
+void SymbolsResolver::AddSymbol(const char* nid, const char*, const char*, SymbolType, u64 address) {
+    g_symbols.push_back({nid, address});
+}
+} // namespace Core::Loader
+
+extern "C" __attribute__((visibility("default"))) uintptr_t bbnet_resolve(const char* scoped_nid) {
+    const char* hash = std::strchr(scoped_nid, '#');
+    const size_t length = hash ? size_t(hash - scoped_nid) : std::strlen(scoped_nid);
+    for (const auto& symbol : g_symbols) {
+        if (symbol.nid.size() == length && !std::memcmp(symbol.nid.data(), scoped_nid, length)) {
+            return uintptr_t(symbol.address);
+        }
+    }
+    return 0;
+}
+
+extern "C" __attribute__((visibility("default"))) int bbnet_init(const BbNetHost* host) {
+    if (!host || host->abi != BBNET_ABI_VERSION || !host->thread_spawn || !host->thread_join) {
+        std::printf("Online: the runtime and the online module are from different versions\n");
+        return -1;
+    }
+    g_host = *host;
+    Configure(host->app0, host->serial, host->title, host->app_ver);
     Core::Loader::SymbolsResolver resolver;
     Core::Loader::SymbolsResolver* sym = &resolver;
     Libraries::Net::RegisterLib(sym);
@@ -473,4 +510,6 @@ extern "C" void bbnet_register(void) {
     Libraries::Np::NpTus::RegisterLib(sym);
     Libraries::Np::NpWebApi::RegisterLib(sym);
     Libraries::Np::NpWebApi2::RegisterLib(sym);
+    std::printf("Online: %zu network and PSN functions\n", g_symbols.size());
+    return 0;
 }

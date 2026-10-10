@@ -23,6 +23,8 @@
 #include "common/logging/log.h"
 #include "common/singleton.h"
 #include "core/libraries/kernel/kernel.h"
+#include "core/libraries/network/net_upnp.h"
+#include "core/emulator_settings.h"
 #include "core/libraries/network/net_util.h"
 #include "net.h"
 #include "net_error.h"
@@ -217,6 +219,19 @@ public:
         LOG_INFO(Lib_Net,
                  "P2P transport ready: UDP physical_port={} (set SHADPS4_P2P_PORT to pin it)",
                  physical_port);
+        // bbport: open the port on the router (UPnP, BB_UPNP). Discovery runs in the background,
+        // so the mapping waits for it (issue #121: the port was never mapped, and summons from
+        // behind a NAT without a manual forward could not reach this player).
+        if (EmulatorSettings.IsUPnPEnabled()) {
+            const u16 port = physical_port;
+            std::thread([port] {
+                auto& upnp = UPnPClient::Instance();
+                upnp.Start();
+                if (upnp.WaitReady(10000)) {
+                    upnp.AddMapping(port);
+                }
+            }).detach();
+        }
         return true;
 #endif
     }
@@ -233,6 +248,9 @@ public:
         }
 
         CloseSocket(host_socket);
+        if (EmulatorSettings.IsUPnPEnabled() && physical_port != 0) {
+            UPnPClient::Instance().RemoveMapping(physical_port);
+        }
         physical_port = 0;
 #endif
     }
