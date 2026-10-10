@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""The game files bbport runs: Bloodborne CUSA03173 (US) or CUSA00900 (EU) with the 1.09 update
-merged in; both regions run the same 1.09 executable.
+"""The game files bbport runs: Bloodborne CUSA03173 (the European Game of the Year edition) or
+CUSA00900 (US) with the 1.09 update merged in; both run the same 1.09 executable.
 
 Other versions start and then fail inside the game's code (the base game 1.00 faults at guest
 offset 0x20348b8): hooks and patches use the addresses of this one executable. The check compares
@@ -15,7 +15,7 @@ SUPPORTED_TITLES = ('CUSA03173', 'CUSA00900')
 SUPPORTED_VERSION = '01.09'
 SUPPORTED_IMAGE = '071df19c8880086d97182dbc057bc8cb37badaca57d9112683836b24a0444c0a'
 # The 1.09 executable with Lance McDonald's 60 fps patch applied to it, as some dumps ship it
-# (seen on EU CUSA00900): one of its edits inverts a branch in the menu code (+0xf6d90d) and the
+# (seen on US CUSA00900): one of its edits inverts a branch in the menu code (+0xf6d90d) and the
 # gestures menu crashes the game. bbport has its own 60 fps; the clean 1.09 eboot.bin is needed.
 LANCE_60FPS_IMAGE = 'bbc91f4dff6bc3118b039464289e39878a8fdfc802a07fab9d5fe84d935a676f'
 
@@ -72,9 +72,9 @@ def explain(kind, title, version):
                          'to it, which crashes the game when the gestures menu opens (bbport has its '
                          'own 60 fps): copy eboot.bin from a clean dump of the 1.09 update into the '
                          'game folder, replacing this one.',
-        'other_title': f'{found} Only Bloodborne CUSA03173 (US) or CUSA00900 (EU) with update 1.09 '
-                       'is supported for now; other editions and regions have a different '
-                       'executable.',
+        'other_title': f'{found} Only Bloodborne CUSA03173 (Europe, Game of the Year) or CUSA00900 '
+                       '(US) with update 1.09 is supported for now; other editions and regions '
+                       'have a different executable.',
         'unreadable': f'{found} eboot.bin could not be read as a decrypted PS4 executable: dump '
                       'the game and the 1.09 update again.',
     }[kind]

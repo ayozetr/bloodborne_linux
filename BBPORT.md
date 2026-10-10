@@ -130,7 +130,8 @@ neither has nor includes.
   `VK_VALVE_shader_mixed_float_dot_product`. Unsupported choices fall back to FSR 3.1
   before the first frame and are disabled in the in-game menu.
 - Your decrypted game dump: the `CUSA03173` folder (eboot.bin, sce_module, ...), version 1.09.
-  The EU release (`CUSA00900`) runs too: its 1.09 executable is the same as the US one.
+  The US release (`CUSA00900`) runs too: its 1.09 executable is the same as this European
+  Game of the Year edition's.
   A dumped update is a separate folder: copy it over the base game, replacing files. The base
   game alone (1.00) crashes at start (guest offset 0x20348b8); the launcher and `run.sh` check
   the executable and say what is missing (`BB_SKIP_GAME_CHECK=1` skips the check). Some dumps
