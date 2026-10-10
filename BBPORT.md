@@ -132,7 +132,9 @@ neither has nor includes.
 - Your decrypted game dump: the `CUSA03173` folder (eboot.bin, sce_module, ...), version 1.09.
   A dumped update is a separate folder: copy it over the base game, replacing files. The base
   game alone (1.00) crashes at start (guest offset 0x20348b8); the launcher and `run.sh` check
-  the executable and say what is missing (`BB_SKIP_GAME_CHECK=1` skips the check).
+  the executable and say what is missing (`BB_SKIP_GAME_CHECK=1` skips the check). Some dumps
+  ship the 1.09 eboot.bin with Lance McDonald's 60 fps patch baked in; that one crashes when the
+  gestures menu opens, and the check asks for a clean eboot.bin (bbport has its own 60 fps).
 - To build: GCC, CMake, Ninja, Python 3, glslang, SDL3, Vulkan headers and the libraries in
   `shell.nix`. With [Nix](https://nixos.org) everything comes from `shell.nix` automatically.
 

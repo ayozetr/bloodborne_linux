@@ -13,6 +13,10 @@ from pathlib import Path
 SUPPORTED_TITLE = 'CUSA03173'
 SUPPORTED_VERSION = '01.09'
 SUPPORTED_IMAGE = '071df19c8880086d97182dbc057bc8cb37badaca57d9112683836b24a0444c0a'
+# The 1.09 executable with Lance McDonald's 60 fps patch applied to it, as some dumps ship it
+# (seen on EU CUSA00900): one of its edits inverts a branch in the menu code (+0xf6d90d) and the
+# gestures menu crashes the game. bbport has its own 60 fps; the clean 1.09 eboot.bin is needed.
+LANCE_60FPS_IMAGE = 'bbc91f4dff6bc3118b039464289e39878a8fdfc802a07fab9d5fe84d935a676f'
 
 
 def image_sha256(game):
@@ -29,7 +33,8 @@ def image_sha256(game):
 def problem(game, image_hash=None):
     """None for the supported game, else (kind, title, version): kind is 'missing_update' (base
     game or an older update), 'wrong_eboot' (param.sfo says 1.09, eboot.bin is another version),
-    'other_title' (another edition or region) or 'unreadable'."""
+    'patched_eboot' (the 1.09 eboot.bin with a 60 fps patch baked in), 'other_title' (another
+    edition or region) or 'unreadable'."""
     if os.environ.get('BB_SKIP_GAME_CHECK') == '1':
         return None
     from prepare import sfo
@@ -39,10 +44,13 @@ def problem(game, image_hash=None):
         info = {}
     title, version = info.get('TITLE_ID', '?'), info.get('APP_VER', '?')
     try:
-        if (image_hash or image_sha256(game)) == SUPPORTED_IMAGE:
-            return None
+        image_hash = image_hash or image_sha256(game)
     except (OSError, ValueError, IndexError, StopIteration, KeyError):
         return 'unreadable', title, version
+    if image_hash == SUPPORTED_IMAGE:
+        return None
+    if image_hash == LANCE_60FPS_IMAGE:
+        return 'patched_eboot', title, version
     if title != SUPPORTED_TITLE:
         return 'other_title', title, version
     if version != SUPPORTED_VERSION:
@@ -59,6 +67,10 @@ def explain(kind, title, version):
                           'game folder, replacing files (eboot.bin and sce_sys too).',
         'wrong_eboot': f'{found} param.sfo is from 1.09 but eboot.bin is not: copy eboot.bin from '
                        'the dumped 1.09 update into the game folder, replacing the old one.',
+        'patched_eboot': f'{found} This eboot.bin has the 60 fps patch by Lance McDonald applied '
+                         'to it, which crashes the game when the gestures menu opens (bbport has its '
+                         'own 60 fps): copy eboot.bin from a clean dump of the 1.09 update into the '
+                         'game folder, replacing this one.',
         'other_title': f'{found} Only Bloodborne {SUPPORTED_TITLE} with update 1.09 is supported '
                        'for now; other editions and regions have a different executable.',
         'unreadable': f'{found} eboot.bin could not be read as a decrypted PS4 executable: dump '
