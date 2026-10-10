@@ -81,7 +81,8 @@ def entry(name, exe, start_dir, icon, options=''):
 
 def add_shortcut(vdf_path, name, exe, start_dir, icon, options=''):
     """Adds the shortcut to one shortcuts.vdf, or updates the entry that starts the same exe or
-    has the same name and options (this port from another place: a checkout, then the AppImage).
+    has the same name and options (this port from another place: a checkout, then the AppImage);
+    through flatpak-spawn (Flathub's Steam), only an entry of the same name that runs --play.
     Returns 'added' or 'updated'. A copy of the old file is kept as shortcuts.vdf.bak."""
     vdf_path = Path(vdf_path)
     data = vdf_path.read_bytes() if vdf_path.exists() else b''
@@ -95,7 +96,12 @@ def add_shortcut(vdf_path, name, exe, start_dir, icon, options=''):
     for index, (kind, key, value) in enumerate(shortcuts):
         fields = {k.lower(): v for _t, k, v in value} if kind == MAP else {}
         same_port = fields.get('appname') == name and fields.get('launchoptions') == options and options
-        if str(fields.get('exe', '')).lower() == target or same_port:
+        same_exe = str(fields.get('exe', '')).lower() == target
+        if exe == SPAWN:
+            # flatpak-spawn starts other launchers' games too: only this port's entry is ours.
+            same_exe = same_exe and fields.get('appname') == name and \
+                str(fields.get('launchoptions', '')).endswith('--play')
+        if same_exe or same_port:
             # Keep what Steam or the player added (play time, tags).
             kept = {k.lower() for k in ('LastPlayTime', 'tags')}
             old = {k.lower(): (t, k, v) for t, k, v in value}
@@ -113,14 +119,30 @@ def add_shortcut(vdf_path, name, exe, start_dir, icon, options=''):
     return result
 
 
-def steam_folder():
-    """Steam's data folder (the native package's; ~/.steam/steam links to it), or None."""
-    home = Path.home()
-    for path in (Path(os.environ.get('XDG_DATA_HOME', home / '.local/share')) / 'Steam',
-                 home / '.steam/steam', home / '.steam/root'):
+FLATPAK_ID = 'com.valvesoftware.Steam'
+
+
+def flatpak_data(home=None):
+    """The data folder of Flathub's Steam (inside its sandbox's home)."""
+    return Path(home or Path.home()) / '.var/app' / FLATPAK_ID / '.local/share/Steam'
+
+
+def steam_folder(home=None):
+    """Steam's data folder: the native package's (~/.steam/steam links to it), else Flathub's
+    Steam's; None without either."""
+    home = Path(home or Path.home())
+    data = Path(os.environ.get('XDG_DATA_HOME', home / '.local/share')) if home == Path.home() \
+        else home / '.local/share'
+    for path in (data / 'Steam', home / '.steam/steam', home / '.steam/root', flatpak_data(home),
+                 home / '.var/app' / FLATPAK_ID / '.steam/steam'):
         if (path / 'userdata').is_dir():
             return path.resolve()
     return None
+
+
+def is_flatpak(steam):
+    """Whether a Steam data folder is Flathub's Steam's."""
+    return f'/.var/app/{FLATPAK_ID}/' in str(Path(steam).resolve()) + '/'
 
 
 def user_configs(steam):
@@ -134,21 +156,53 @@ def steam_running():
     return subprocess.run(['pgrep', '-x', 'steam'], capture_output=True).returncode == 0
 
 
-def steam_command():
-    """The command that starts Steam, or None."""
-    return shutil.which('steam')
+def steam_command(flatpak=False):
+    """The command that starts Steam (a list), or None."""
+    if flatpak:
+        return ['flatpak', 'run', FLATPAK_ID] if shutil.which('flatpak') else None
+    return [shutil.which('steam')] if shutil.which('steam') else None
 
 
-def shutdown_steam():
+def shutdown_steam(flatpak=False):
     """Asks Steam to exit (it writes shortcuts.vdf as it goes, so it must be closed first)."""
-    subprocess.Popen([steam_command(), '-shutdown'], stdout=subprocess.DEVNULL,
+    subprocess.Popen([*steam_command(flatpak), '-shutdown'], stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, start_new_session=True)
 
 
-def start_steam():
+def start_steam(flatpak=False):
     """Starts Steam on its library, detached from the launcher."""
-    subprocess.Popen([steam_command(), 'steam://open/games'], stdout=subprocess.DEVNULL,
+    subprocess.Popen([*steam_command(flatpak), 'steam://open/games'], stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+# Flathub's Steam starts non-Steam games inside its sandbox, which sees neither the game folder
+# nor the host's drivers and cannot mount an AppImage: the shortcut runs flatpak-spawn --host,
+# which needs Steam to be allowed to talk to org.freedesktop.Flatpak.
+SPAWN = '/usr/bin/flatpak-spawn'
+SPAWN_PERMISSION = 'org.freedesktop.Flatpak'
+
+
+def flatpak_can_spawn(run=subprocess.run):
+    """Whether Flathub's Steam may start programs on the host (flatpak-spawn --host)."""
+    try:
+        info = run(['flatpak', 'info', '--show-permissions', FLATPAK_ID], capture_output=True, text=True)
+    except OSError:
+        return False
+    return any(line.strip() == f'{SPAWN_PERMISSION}=talk' for line in info.stdout.splitlines())
+
+
+def allow_flatpak_spawn(run=subprocess.run):
+    """Gives Flathub's Steam that permission for this user (flatpak override --user)."""
+    run(['flatpak', 'override', '--user', f'--talk-name={SPAWN_PERMISSION}', FLATPAK_ID],
+        capture_output=True, text=True, check=True)
+
+
+def shortcut_command(exe, start_dir, options, steam):
+    """(exe, start dir, launch options) of the shortcut that runs `exe options` in start_dir for
+    this Steam: through flatpak-spawn --host for Flathub's Steam."""
+    if is_flatpak(steam):
+        return SPAWN, str(Path(steam).parent), f'--host --directory="{start_dir}" "{exe}" {options}'.strip()
+    return exe, start_dir, options
 
 
 if __name__ == '__main__':  # self-test on a temporary file

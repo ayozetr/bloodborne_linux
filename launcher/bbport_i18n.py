@@ -351,6 +351,13 @@ EN = {
     "Автоматически (по контроллеру)": "Automatic (by controller)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Gestures menu without motion-control icons",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'Flatpak Steam runs games inside its sandbox, which has neither the game folder nor the drivers: the shortcut has to start the game outside it (flatpak-spawn --host). For that, Steam needs the org.freedesktop.Flatpak permission, which lets it start programs on your system. Grant it?',
+    'Выдать право':
+        'Grant permission',
+    'Не удалось выдать право Steam: {}':
+        'Could not grant Steam the permission: {}',
 }
 
 PT_BR = {
@@ -643,6 +650,13 @@ PT_BR = {
     "Автоматически (по контроллеру)": "Automático (pelo controle)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menu de gestos sem ícones de controle por movimento",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'O Steam do Flatpak roda os jogos dentro da sua sandbox, que não tem a pasta do jogo nem os drivers: o atalho precisa iniciar o jogo fora dela (flatpak-spawn --host). Para isso, o Steam precisa da permissão org.freedesktop.Flatpak, que permite iniciar programas no seu sistema. Conceder?',
+    'Выдать право':
+        'Conceder permissão',
+    'Не удалось выдать право Steam: {}':
+        'Não foi possível conceder a permissão ao Steam: {}',
 }
 
 
@@ -930,6 +944,13 @@ ES = {
     "Автоматически (по контроллеру)": "Automático (según el mando)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menú de gestos sin iconos de control por movimiento",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'El Steam de Flatpak ejecuta los juegos dentro de su sandbox, donde no están ni la carpeta del juego ni los drivers: el atajo tiene que arrancar el juego fuera de ella (flatpak-spawn --host). Para eso Steam necesita el permiso org.freedesktop.Flatpak, que le permite ejecutar programas en tu sistema. ¿Concederlo?',
+    'Выдать право':
+        'Conceder permiso',
+    'Не удалось выдать право Steam: {}':
+        'No se pudo conceder el permiso a Steam: {}',
 }
 
 
@@ -1217,6 +1238,13 @@ IT = {
     "Автоматически (по контроллеру)": "Automatico (in base al controller)",
     "PlayStation (оригинал)": "PlayStation (originale)",
     "Меню жестов без значков управления движением": "Menu dei gesti senza icone del controllo di movimento",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'Steam da Flatpak avvia i giochi nella sua sandbox, dove non ci sono né la cartella del gioco né i driver: il collegamento deve avviare il gioco fuori da essa (flatpak-spawn --host). Per questo Steam ha bisogno del permesso org.freedesktop.Flatpak, che gli consente di avviare programmi sul tuo sistema. Concederlo?',
+    'Выдать право':
+        'Concedi il permesso',
+    'Не удалось выдать право Steam: {}':
+        'Impossibile concedere il permesso a Steam: {}',
 }
 
 
@@ -1504,6 +1532,13 @@ FR = {
     "Автоматически (по контроллеру)": "Automatique (selon la manette)",
     'PlayStation (оригинал)': "PlayStation (d'origine)",
     "Меню жестов без значков управления движением": "Menu des gestes sans icônes de détection de mouvement",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        "Steam en Flatpak lance les jeux dans son bac à sable, qui n'a ni le dossier du jeu ni les pilotes : le raccourci doit lancer le jeu en dehors (flatpak-spawn --host). Pour cela, Steam a besoin de l'autorisation org.freedesktop.Flatpak, qui lui permet de lancer des programmes sur votre système. L'accorder ?",
+    'Выдать право':
+        "Accorder l'autorisation",
+    'Не удалось выдать право Steam: {}':
+        "Impossible d'accorder l'autorisation à Steam : {}",
 }
 
 
@@ -1791,6 +1826,13 @@ DE = {
     "Автоматически (по контроллеру)": "Automatisch (nach Controller)",
     "PlayStation (оригинал)": "PlayStation (Original)",
     "Меню жестов без значков управления движением": "Gestenmenü ohne Symbole der Bewegungssteuerung",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'Steam aus Flatpak startet Spiele in seiner Sandbox, in der weder der Spielordner noch die Treiber sind: Die Verknüpfung muss das Spiel außerhalb davon starten (flatpak-spawn --host). Dafür braucht Steam die Berechtigung org.freedesktop.Flatpak, mit der es Programme auf deinem System starten kann. Erteilen?',
+    'Выдать право':
+        'Berechtigung erteilen',
+    'Не удалось выдать право Steam: {}':
+        'Steam konnte die Berechtigung nicht erteilt werden: {}',
 }
 
 
@@ -2045,6 +2087,13 @@ ZH_CN = {
     "Слои валидации Vulkan": "Vulkan 验证层",
     "Сильно замедляет": "会大幅降低速度",
     "Доп. переменные (ИМЯ=значение через пробел)": "附加环境变量（用空格分隔的 名称=值）",
+    # Add to Steam with Flathub's Steam
+    'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
+        'Flatpak 版 Steam 在其沙盒中运行游戏，沙盒里既没有游戏文件夹也没有驱动：快捷方式需要在沙盒外启动游戏（flatpak-spawn --host）。为此 Steam 需要 org.freedesktop.Flatpak 权限，该权限允许它在你的系统上启动程序。是否授予？',
+    'Выдать право':
+        '授予权限',
+    'Не удалось выдать право Steam: {}':
+        '无法为 Steam 授予权限：{}',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

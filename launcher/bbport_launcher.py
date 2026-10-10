@@ -1145,12 +1145,45 @@ class LauncherWindow(Adw.ApplicationWindow):
         """Bloodborne in the Steam library: a non-Steam game that runs --play (no window)."""
         steam = bbport_steam.steam_folder()
         configs = bbport_steam.user_configs(steam) if steam else []
-        if not configs or not bbport_steam.steam_command():
+        flatpak = bool(steam) and bbport_steam.is_flatpak(steam)
+        if not configs or not bbport_steam.steam_command(flatpak):
             self.alert("Steam", tr("Steam не найден (или в него ещё никто не входил)"))
             return
         self.store()  # --play starts the game with the saved settings
+        if flatpak and not bbport_steam.flatpak_can_spawn():
+            self.ask_flatpak_spawn(steam, configs)
+            return
+        self.close_steam_then_add(steam, configs)
+
+    def ask_flatpak_spawn(self, steam, configs):
+        """Flathub's Steam runs its games in its sandbox: the shortcut needs flatpak-spawn --host."""
+        body = tr("Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: "
+                  "ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право "
+                  "org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?")
+        if not hasattr(Adw, "AlertDialog"):
+            self.alert("Steam", body)
+            return
+        dialog = Adw.AlertDialog(heading="Steam (Flatpak)", body=body)
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("allow", tr("Выдать право"))
+        dialog.set_response_appearance("allow", Adw.ResponseAppearance.SUGGESTED)
+
+        def on_response(_dialog, response):
+            if response != "allow":
+                return
+            try:
+                bbport_steam.allow_flatpak_spawn()
+            except (OSError, subprocess.CalledProcessError) as error:
+                detail = getattr(error, "stderr", "") or str(error)
+                self.alert("Steam", tr("Не удалось выдать право Steam: {}").format(detail.strip()))
+                return
+            self.close_steam_then_add(steam, configs)
+        dialog.connect("response", on_response)
+        dialog.present(self)
+
+    def close_steam_then_add(self, steam, configs):
         if not bbport_steam.steam_running():
-            self.add_to_steam(configs, restart=False)
+            self.add_to_steam(steam, configs, restart=False)
             return
         if not hasattr(Adw, "AlertDialog"):
             self.alert("Steam", tr("Закройте Steam и нажмите «Добавить» ещё раз"))
@@ -1163,12 +1196,12 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def on_response(_dialog, response):
             if response == "close":
-                bbport_steam.shutdown_steam()
-                self.wait_for_steam(configs, tries=60)
+                bbport_steam.shutdown_steam(bbport_steam.is_flatpak(steam))
+                self.wait_for_steam(steam, configs, tries=60)
         dialog.connect("response", on_response)
         dialog.present(self)
 
-    def wait_for_steam(self, configs, tries):
+    def wait_for_steam(self, steam, configs, tries):
         """Polls until Steam has exited (it writes its files as it goes), then adds the game."""
         def poll():
             nonlocal tries
@@ -1178,23 +1211,24 @@ class LauncherWindow(Adw.ApplicationWindow):
                     self.alert("Steam", tr("Steam не закрылся. Закройте его сами и попробуйте ещё раз"))
                     return False
                 return True
-            GLib.timeout_add(1000, lambda: self.add_to_steam(configs, restart=True) and False)
+            GLib.timeout_add(1000, lambda: self.add_to_steam(steam, configs, restart=True) and False)
             return False
         GLib.timeout_add(500, poll)
 
-    def add_to_steam(self, configs, restart):
+    def add_to_steam(self, steam, configs, restart):
         # Packaged: the AppImage itself; from a checkout: the launcher script.
-        exe = os.environ.get("APPIMAGE") or str(PORT_DIR / "launcher" / "bb-launcher.sh")
+        target = os.environ.get("APPIMAGE") or str(PORT_DIR / "launcher" / "bb-launcher.sh")
+        exe, start_dir, options = bbport_steam.shortcut_command(target, str(PORT_DIR), "--play", steam)
         icon = str(PORT_DIR / "launcher" / "bloodborne.png")
         try:
             for config in configs:
                 bbport_steam.add_shortcut(config / "shortcuts.vdf", "Bloodborne", exe,
-                                          str(PORT_DIR), icon, "--play")
+                                          start_dir, icon, options)
         except (OSError, ValueError) as error:
             self.alert("Steam", tr("Не удалось добавить игру в Steam: {}").format(error))
             return
         if restart:
-            bbport_steam.start_steam()
+            bbport_steam.start_steam(bbport_steam.is_flatpak(steam))
         self.toasts.add_toast(Adw.Toast(title=tr("Bloodborne добавлен в библиотеку Steam"), timeout=6))
 
     # --- mods ----------------------------------------------------------------------------

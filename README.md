@@ -27,7 +27,7 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
   distance, ragdoll physics and more.
 - **Game effects** on and off, **mods** and community **patches**, loaded without changing the
   game files.
-- **Add to Steam** in one click, and **Discord Rich Presence**.
+- **Add to Steam** in one click (native or Flatpak Steam), and **Discord Rich Presence**.
 - **AppImage:** one file with everything inside, for any distribution and the Steam Deck.
 
 ## Requirements
@@ -88,6 +88,15 @@ Put them in one folder and pick it in the launcher (**Game → DLC folder**), or
 `BB_DLC_DIR=/path/to/dlc` for `run.sh`; the launcher shows how many it found. Each folder must
 keep the add-on's name (its entitlement label, such as `SPEXPANSIONDLC03`). Copying them to
 `user/addcont/<title id>/`, shadPS4's layout, works too.
+
+### Add to Steam
+
+**Game → Add to Steam** puts Bloodborne in your Steam library; it starts with the launcher's
+settings. Steam has to be closed while the game is added, and the launcher offers to do that.
+Flatpak Steam runs games inside its sandbox, which has neither the game nor your drivers, so
+the shortcut starts the game outside it with `flatpak-spawn --host`. That needs the
+`org.freedesktop.Flatpak` permission for Steam, which the launcher asks for once: it lets Steam
+start programs on your system.
 
 ### Button prompts
 
