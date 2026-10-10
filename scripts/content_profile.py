@@ -1,16 +1,24 @@
-"""Prepare explicit offline AppContent metadata; SKU is a probe setting, not a license check."""
+"""Prepare explicit offline AppContent metadata; SKU is a probe setting, not a license check.
+
+USER_DEFINED_PARAM_1 is Bloodborne's region: 2 the Americas (msg/na: Latin American Spanish), 13
+Europe (msg/eu: Spanish from Spain). --region eu|na sets it for this launch (BB_REGION, the
+launcher's Region), whatever the dump's param.sfo says."""
 import argparse
 import json
 import struct
 from pathlib import Path
 from prepare import sfo
 
+REGIONS={'na':2,'eu':13}
 
-def prepare(game, out, sku='full'):
+
+def prepare(game, out, sku='full', region=''):
     values=sfo((game/'sce_sys/param.sfo').read_bytes())
     params=[values.get(f'USER_DEFINED_PARAM_{i}',0) for i in range(1,5)]
     if any(type(v) is not int or not 0<=v<=0xffffffff for v in params):
         raise ValueError('invalid user-defined parameter')
+    if region:
+        params[0]=REGIONS[region]
     profile=dict(title_id=values.get('TITLE_ID'),sku=sku,sku_source='explicit probe setting',
                  user_params=params, mounted_addons=[],boot_attr=0)
     out.mkdir(parents=True,exist_ok=True)
@@ -23,4 +31,5 @@ if __name__=='__main__':
     p.add_argument('game',type=Path)
     p.add_argument('--out',type=Path,default=Path(__file__).resolve().parent.parent/'out')
     p.add_argument('--sku',choices=['full','trial'],default='full')
-    a=p.parse_args();prepare(a.game,a.out,a.sku)
+    p.add_argument('--region',choices=['','eu','na'],default='')
+    a=p.parse_args();prepare(a.game,a.out,a.sku,a.region)

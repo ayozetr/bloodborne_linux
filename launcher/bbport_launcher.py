@@ -137,6 +137,9 @@ PROMPT_CHOICES = [("Автоматически (по контроллеру)", "
 # The game's language: the PS4 system language ("": from the desktop's locale).
 LANGUAGES = [("Как в системе", ""), ("Английский", "1"), ("Русский", "8"), ("Японский", "0"), ("Французский", "2"),
              ("Испанский", "3"), ("Немецкий", "4"), ("Итальянский", "5")]
+# The game's region (BB_REGION; scripts/content_profile.py): the regional text of a language, such
+# as Spanish from Spain (Europe) or Latin American Spanish (the Americas). "": the dump's param.sfo.
+REGIONS = [("Как в дампе игры", ""), ("Европа", "eu"), ("Америка", "na")]
 LIVE_RESOLUTION = [("Авто (по видеокарте)", "auto"), ("Выключена (быстрее)", "0"), ("Включена", "1")]
 READBACKS = [("Relaxed", "", "По умолчанию"), ("Выключены", "0"), ("Precise", "2")]
 # Background pre-upload of the game's GPU memory into VRAM (BB_PREUPLOAD): auto = on with a discrete GPU.
@@ -152,6 +155,7 @@ DEFAULTS = {
     "mods_enabled": True,
     "patches_dir": "",
     "language": "",
+    "region": "",
     "fullscreen": False,
     "hdr": False,
     "present_mode": "Mailbox",
@@ -332,6 +336,7 @@ def game_environment(s):
     env["BB_PATCHES_DIR"] = str(patches_dir(s))
     env["BB_PATCHES_CONFIG"] = str(DATA_DIR / "patches.json")
     env["BB_LANGUAGE"] = s["language"] or str(system_game_language())
+    env["BB_REGION"] = s.get("region", "")
     # The in-game menu speaks the launcher's language until one is chosen in it (menu_language).
     env["BB_MENU_LANGUAGE"] = language()
     env["BB_FULLSCREEN"] = "1" if s["fullscreen"] else "0"
@@ -618,6 +623,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         game.add(self.dlc_row)
         self.language_row = combo_row(tr("Язык системы"), None, LANGUAGES, self.settings["language"])
         game.add(self.language_row)
+        self.region_row = combo_row(
+            tr("Регион игры"),
+            tr("Вариант текста у языков с региональными версиями: испанский Испании (Европа) или "
+               "Латинской Америки (Америка)"),
+            REGIONS, self.settings.get("region", ""))
+        game.add(self.region_row)
         steam = Adw.ActionRow(title=tr("Добавить в Steam"),
                               subtitle=tr("Игра в библиотеке Steam запускается сразу, с настройками "
                                           "этого лаунчера"))
@@ -1093,6 +1104,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["display"] = combo_value(self.display_row)
         s["skip_network_choice"] = self.skip_network_row.get_active()
         s["language"] = combo_value(self.language_row)
+        s["region"] = combo_value(self.region_row)
         s["fullscreen"] = self.fullscreen_row.get_active()
         s["present_mode"] = combo_value(self.present_row)
         s["hdr"] = self.hdr_row.get_active()

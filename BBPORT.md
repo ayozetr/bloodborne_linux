@@ -223,6 +223,10 @@ reported to the game as an installed add-on.
 follows the desktop's locale (Japanese, English, French, Spanish, German, Italian or Russian,
 English for the rest). `run.sh` takes it as `BB_LANGUAGE` (PS4 code: 0 Japanese, 1 English,
 2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; without it, the desktop's locale as above).
+**Game region:** *Game region* in the launcher, `BB_REGION=eu|na` for `run.sh`: the regional text
+of a language, such as Spanish from Spain (`eu`) or Latin American Spanish (`na`). It sets the
+game's `USER_DEFINED_PARAM_1` (13 Europe, 2 the Americas) for the launch; by default the dump's
+`param.sfo` decides.
 
 **Free camera and game debug menu** (v1.09): enable the corresponding switches in the
 launcher or in-game menu and restart. Free camera uses Lance McDonald's

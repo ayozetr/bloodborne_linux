@@ -91,7 +91,9 @@ print(sfo(open(sys.argv[1] + "/sce_sys/param.sfo", "rb").read()).get("TITLE_ID",
         ln -sfn "$(realpath "$BB_DLC_DIR")" "$addcont/$title"
     fi
 fi
-"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}"
+# BB_REGION=eu|na (the launcher's Region): the game's region for this launch, whatever the dump's
+# param.sfo says; it picks the regional text (Spanish from Spain or Latin American).
+"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" --region "${BB_REGION:-}"
 # Sizes chosen below for the previous launch are recomputed after an in-game restart.
 if [[ ${BB_AUTO_RENDER_RES:-} == 1 ]]; then
     unset BB_RENDER_RES BB_OUTPUT_RES BB_AUTO_RENDER_RES

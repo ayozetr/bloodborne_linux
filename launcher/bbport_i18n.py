@@ -362,6 +362,16 @@ EN = {
         'Grant permission',
     'Не удалось выдать право Steam: {}':
         'Could not grant Steam the permission: {}',
+    "Регион игры":
+        "Game region",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "The regional text of languages that have one: Spanish from Spain (Europe) or Latin American Spanish (the Americas)",
+    "Как в дампе игры":
+        "As in the game dump",
+    "Европа":
+        "Europe",
+    "Америка":
+        "The Americas",
 }
 
 PT_BR = {
@@ -781,6 +791,16 @@ PT_BR = {
         "Verifica o heap do jogo e registra as escritas na memória dele; um pouco mais lento",
     "В папку logs в каталоге данных: для разбора рывков и вылетов":
         "Na pasta logs do diretório de dados: para investigar engasgos e travamentos",
+    "Регион игры":
+        "Região do jogo",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "A variante de texto dos idiomas que têm uma: espanhol da Espanha (Europa) ou da América Latina (Américas)",
+    "Как в дампе игры":
+        "Como no dump do jogo",
+    "Европа":
+        "Europa",
+    "Америка":
+        "Américas",
 }
 
 
@@ -1111,6 +1131,16 @@ ES = {
         "Nuevo",
     "Старая (как в 0.3)":
         "Antiguo (como en la 0.3)",
+    "Регион игры":
+        "Región del juego",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "La variante de texto de los idiomas que la tienen: español de España (Europa) o de Latinoamérica (América)",
+    "Как в дампе игры":
+        "Como en el volcado del juego",
+    "Европа":
+        "Europa",
+    "Америка":
+        "América",
 }
 
 
@@ -1441,6 +1471,16 @@ IT = {
         "Nuovo",
     "Старая (как в 0.3)":
         "Vecchio (come nella 0.3)",
+    "Регион игры":
+        "Regione del gioco",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "La variante del testo delle lingue che ne hanno una: spagnolo di Spagna (Europa) o dell'America Latina (America)",
+    "Как в дампе игры":
+        "Come nel dump del gioco",
+    "Европа":
+        "Europa",
+    "Америка":
+        "America",
 }
 
 
@@ -1771,6 +1811,16 @@ FR = {
         "Nouveau",
     "Старая (как в 0.3)":
         "Ancien (comme dans la 0.3)",
+    "Регион игры":
+        "Région du jeu",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "La variante du texte des langues qui en ont une : espagnol d'Espagne (Europe) ou d'Amérique latine (Amériques)",
+    "Как в дампе игры":
+        "Comme dans le dump du jeu",
+    "Европа":
+        "Europe",
+    "Америка":
+        "Amériques",
 }
 
 
@@ -2101,6 +2151,16 @@ DE = {
         "Neu",
     "Старая (как в 0.3)":
         "Alt (wie in 0.3)",
+    "Регион игры":
+        "Spielregion",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "Die regionale Textvariante von Sprachen, die eine haben: Spanisch aus Spanien (Europa) oder Lateinamerika (Amerika)",
+    "Как в дампе игры":
+        "Wie im Dump des Spiels",
+    "Европа":
+        "Europa",
+    "Америка":
+        "Amerika",
 }
 
 
@@ -2366,6 +2426,16 @@ ZH_CN = {
         '授予权限',
     'Не удалось выдать право Steam: {}':
         '无法为 Steam 授予权限：{}',
+    "Регион игры":
+        "游戏地区",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
+        "有地区版本的语言所用的文本：西班牙的西班牙语（欧洲）或拉丁美洲西班牙语（美洲）",
+    "Как в дампе игры":
+        "与游戏转储相同",
+    "Европа":
+        "欧洲",
+    "Америка":
+        "美洲",
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

@@ -17,6 +17,14 @@ class ProfileTests(unittest.TestCase):
                 content_profile.prepare(p,p,'trial')
             self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes()),(b'BBCONT01',1,13,0,0,0xffffffff))
 
+    def test_region_overrides_the_dumps_parameter(self):
+        for region,value in (('eu',13),('na',2),('',2)):
+            with self.subTest(region=region), tempfile.TemporaryDirectory() as tmp:
+                p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')
+                with patch.object(content_profile,'sfo',return_value={'USER_DEFINED_PARAM_1':2}):
+                    content_profile.prepare(p,p,region=region)
+                self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes())[2],value)
+
     def test_invalid_sfo_parameter_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')
