@@ -42,11 +42,6 @@ mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
-# DLSS (NVIDIA RTX), when tools/build_dlss.sh has built the bridge: it and NVIDIA's library.
-if [[ -f out/libbbport_dlss.so ]]; then
-    mkdir -p "$d/dlss"
-    cp out/libbbport_dlss.so out/libnvidia-ngx-dlss.so.* out/NVIDIA-DLSS-LICENSE.txt "$d/dlss/"
-fi
 
 # The AppImage's main program: the launcher (or, with --play, the game alone).
 cat > "$appdir/bin/bloodborne" <<'EOF'
@@ -76,12 +71,37 @@ export MAIN_BIN=bloodborne DESKTOP=$work/bloodborne.desktop ICON=$root/launcher/
 export DEPLOY_PYTHON=1 DEPLOY_GTK=1 GTK_DIR=gtk-4.0 DEPLOY_SDL=1 DEPLOY_VULKAN=1 DEPLOY_PIPEWIRE=1
 # Strace mode starts the programs to find what they dlopen: the game needs its game files.
 export STRACE_MODE=0
-export OUTPUT_APPIMAGE=1
+# The AppDir first, the AppImage once the build host's NVIDIA driver is out of it (below).
+export OUTPUT_APPIMAGE=0
 "$quick" \
     "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
+
+# quick-sharun's OpenGL and Vulkan deployment copies every libEGL*/libGLX* and every ICD manifest
+# of the build host: on a host with NVIDIA's driver, its user-space libraries (one exact driver
+# version) and manifests went in, and the game loaded them next to the player's own driver
+# (DLSS failed with NGX 0xbad00012; another driver version would not match the kernel module).
+# NVIDIA's driver always comes from the host: launcher/bbport_vulkan.py points Vulkan at it.
+find "$appdir" \( -iname '*nvidia*' \( -name '*.so*' -o -name '*.json' \) -o -name 'libcuda.so*' \
+       -o -name 'libnvcuvid.so*' \) -print -exec rm -f {} +
+# DEPLOY_PYTHON copies the build host's whole site-packages (scipy, Qt bindings, ... 431 MB on
+# the build PC). The launcher imports only PyGObject (gi, with pycairo) and Pillow.
+for site in "$appdir"/lib/python3*/site-packages; do
+    find "$site" -mindepth 1 -maxdepth 1 ! -name gi ! -name cairo ! -name PIL \
+        ! -name 'PyGObject-*.dist-info' ! -name 'pycairo-*.dist-info' ! -name 'pillow-*.dist-info' \
+        -exec rm -rf {} +
+done
+# DLSS (NVIDIA RTX), when tools/build_dlss.sh has built the bridge: it and NVIDIA's library, copied
+# after quick-sharun, which strips and patches every library in the AppDir. NVIDIA's DLSS library
+# is signed: once changed, NGX refused it (0xbad00012) and DLSS was unavailable in the AppImage.
+if [[ -f $root/out/libbbport_dlss.so ]]; then
+    mkdir -p "$appdir/share/bbport/dlss"
+    cp "$root"/out/libbbport_dlss.so "$root"/out/libnvidia-ngx-dlss.so.* \
+        "$root"/out/NVIDIA-DLSS-LICENSE.txt "$appdir/share/bbport/dlss/"
+fi
+"$quick" --make-appimage
 
 mkdir -p "$root/dist"
 mv -f "$work"/*.AppImage "$root/dist/Bloodborne-bbport-x86_64.AppImage"
