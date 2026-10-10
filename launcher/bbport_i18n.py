@@ -378,6 +378,60 @@ EN = {
         "Co-op takes incoming UDP connections. Pin the port (SHADPS4_P2P_PORT={} in “{}”) and open it: {}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP needs the router's answers: {}",
+    "О программе":
+        "About",
+    "Версия {}":
+        "Version {}",
+    "Обновления":
+        "Updates",
+    "Проверять обновления при запуске":
+        "Check for updates at start",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Asks GitHub for the latest release; nothing is downloaded without your say",
+    "Последняя версия":
+        "Latest version",
+    "Загрузка…":
+        "Downloading…",
+    "Обновить":
+        "Update",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Version {} installed: restart the launcher",
+    "Перезапустить":
+        "Restart",
+    "Не удалось проверить: {}":
+        "Could not check: {}",
+    "Установлена версия {}":
+        "Version {} installed",
+    "Установлена последняя версия ({})":
+        "You have the latest version ({})",
+    "Доступна версия {} (установлена {})":
+        "Version {} is out (you have {})",
+    "Открыть страницу":
+        "Open the page",
+    "Доступна версия {}":
+        "Version {} is out",
+    "Подробнее":
+        "Details",
+    "Загрузка… {} %":
+        "Downloading… {} %",
+    "Загрузка… {} МБ":
+        "Downloading… {} MB",
+    "Не удалось обновить: {}":
+        "Could not update: {}",
+    "Сначала закройте игру":
+        "Close the game first",
+    "Этот проект":
+        "This project",
+    "Основано на bbport от deadinside28":
+        "Based on bbport by deadinside28",
+    "Порт для Windows от Supermedo":
+        "Windows port by Supermedo",
+    "Лицензия":
+        "License",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 or later. No game files included: Bloodborne belongs to Sony Interactive Entertainment and FromSoftware",
+    "Проверить сейчас":
+        "Check now",
 }
 
 PT_BR = {
@@ -813,6 +867,60 @@ PT_BR = {
         "O cooperativo recebe conexões UDP de entrada. Fixe a porta (SHADPS4_P2P_PORT={} em “{}”) e abra-a: {}",
     "Для UPnP нужны ответы роутера: {}":
         "O UPnP precisa das respostas do roteador: {}",
+    "О программе":
+        "Sobre",
+    "Версия {}":
+        "Versão {}",
+    "Обновления":
+        "Atualizações",
+    "Проверять обновления при запуске":
+        "Procurar atualizações ao abrir",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Consulta o GitHub pela última versão publicada; nada é baixado sem a sua permissão",
+    "Последняя версия":
+        "Última versão",
+    "Загрузка…":
+        "Baixando…",
+    "Обновить":
+        "Atualizar",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Versão {} instalada: reinicie o launcher",
+    "Перезапустить":
+        "Reiniciar",
+    "Не удалось проверить: {}":
+        "Não foi possível verificar: {}",
+    "Установлена версия {}":
+        "Versão {} instalada",
+    "Установлена последняя версия ({})":
+        "Você tem a última versão ({})",
+    "Доступна версия {} (установлена {})":
+        "Saiu a versão {} (você tem a {})",
+    "Открыть страницу":
+        "Abrir a página",
+    "Доступна версия {}":
+        "Saiu a versão {}",
+    "Подробнее":
+        "Detalhes",
+    "Загрузка… {} %":
+        "Baixando… {} %",
+    "Загрузка… {} МБ":
+        "Baixando… {} MB",
+    "Не удалось обновить: {}":
+        "Não foi possível atualizar: {}",
+    "Сначала закройте игру":
+        "Feche o jogo primeiro",
+    "Этот проект":
+        "Este projeto",
+    "Основано на bbport от deadinside28":
+        "Baseado no bbport de deadinside28",
+    "Порт для Windows от Supermedo":
+        "Port para Windows de Supermedo",
+    "Лицензия":
+        "Licença",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 ou posterior. Não inclui arquivos do jogo: Bloodborne pertence à Sony Interactive Entertainment e à FromSoftware",
+    "Проверить сейчас":
+        "Verificar agora",
 }
 
 
@@ -1159,6 +1267,60 @@ ES = {
         "El cooperativo recibe conexiones UDP entrantes. Fija el puerto (SHADPS4_P2P_PORT={} en «{}») y ábrelo: {}",
     "Для UPnP нужны ответы роутера: {}":
         "El UPnP necesita las respuestas del router: {}",
+    "О программе":
+        "Acerca de",
+    "Версия {}":
+        "Versión {}",
+    "Обновления":
+        "Actualizaciones",
+    "Проверять обновления при запуске":
+        "Buscar actualizaciones al abrir",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Consulta en GitHub la última versión publicada; no se descarga nada sin que lo digas",
+    "Последняя версия":
+        "Última versión",
+    "Загрузка…":
+        "Descargando…",
+    "Обновить":
+        "Actualizar",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Versión {} instalada: reinicia el launcher",
+    "Перезапустить":
+        "Reiniciar",
+    "Не удалось проверить: {}":
+        "No se pudo comprobar: {}",
+    "Установлена версия {}":
+        "Versión {} instalada",
+    "Установлена последняя версия ({})":
+        "Tienes la última versión ({})",
+    "Доступна версия {} (установлена {})":
+        "Ha salido la versión {} (tienes la {})",
+    "Открыть страницу":
+        "Abrir la página",
+    "Доступна версия {}":
+        "Ha salido la versión {}",
+    "Подробнее":
+        "Ver",
+    "Загрузка… {} %":
+        "Descargando… {} %",
+    "Загрузка… {} МБ":
+        "Descargando… {} MB",
+    "Не удалось обновить: {}":
+        "No se pudo actualizar: {}",
+    "Сначала закройте игру":
+        "Cierra el juego primero",
+    "Этот проект":
+        "Este proyecto",
+    "Основано на bbport от deadinside28":
+        "Basado en bbport, de deadinside28",
+    "Порт для Windows от Supermedo":
+        "Port para Windows, de Supermedo",
+    "Лицензия":
+        "Licencia",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 o posterior. No incluye archivos del juego: Bloodborne pertenece a Sony Interactive Entertainment y FromSoftware",
+    "Проверить сейчас":
+        "Comprobar ahora",
 }
 
 
@@ -1505,6 +1667,60 @@ IT = {
         "La cooperativa riceve connessioni UDP in entrata. Fissa la porta (SHADPS4_P2P_PORT={} in «{}») e aprila: {}",
     "Для UPnP нужны ответы роутера: {}":
         "L'UPnP ha bisogno delle risposte del router: {}",
+    "О программе":
+        "Informazioni",
+    "Версия {}":
+        "Versione {}",
+    "Обновления":
+        "Aggiornamenti",
+    "Проверять обновления при запуске":
+        "Cerca aggiornamenti all'avvio",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Chiede a GitHub l'ultima versione pubblicata; non si scarica nulla senza il tuo consenso",
+    "Последняя версия":
+        "Ultima versione",
+    "Загрузка…":
+        "Download…",
+    "Обновить":
+        "Aggiorna",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Versione {} installata: riavvia il launcher",
+    "Перезапустить":
+        "Riavvia",
+    "Не удалось проверить: {}":
+        "Impossibile controllare: {}",
+    "Установлена версия {}":
+        "Versione {} installata",
+    "Установлена последняя версия ({})":
+        "Hai l'ultima versione ({})",
+    "Доступна версия {} (установлена {})":
+        "È uscita la versione {} (hai la {})",
+    "Открыть страницу":
+        "Apri la pagina",
+    "Доступна версия {}":
+        "È uscita la versione {}",
+    "Подробнее":
+        "Dettagli",
+    "Загрузка… {} %":
+        "Download… {} %",
+    "Загрузка… {} МБ":
+        "Download… {} MB",
+    "Не удалось обновить: {}":
+        "Impossibile aggiornare: {}",
+    "Сначала закройте игру":
+        "Chiudi prima il gioco",
+    "Этот проект":
+        "Questo progetto",
+    "Основано на bbport от deadinside28":
+        "Basato su bbport di deadinside28",
+    "Порт для Windows от Supermedo":
+        "Port per Windows di Supermedo",
+    "Лицензия":
+        "Licenza",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 o successiva. Nessun file del gioco incluso: Bloodborne appartiene a Sony Interactive Entertainment e FromSoftware",
+    "Проверить сейчас":
+        "Controlla ora",
 }
 
 
@@ -1851,6 +2067,60 @@ FR = {
         "La coopération reçoit des connexions UDP entrantes. Fixez le port (SHADPS4_P2P_PORT={} dans « {} ») et ouvrez-le : {}",
     "Для UPnP нужны ответы роутера: {}":
         "L'UPnP a besoin des réponses du routeur : {}",
+    "О программе":
+        "À propos",
+    "Версия {}":
+        "Version {}",
+    "Обновления":
+        "Mises à jour",
+    "Проверять обновления при запуске":
+        "Rechercher les mises à jour au démarrage",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Demande à GitHub la dernière version publiée ; rien n'est téléchargé sans votre accord",
+    "Последняя версия":
+        "Dernière version",
+    "Загрузка…":
+        "Téléchargement…",
+    "Обновить":
+        "Mettre à jour",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Version {} installée : redémarrez le launcher",
+    "Перезапустить":
+        "Redémarrer",
+    "Не удалось проверить: {}":
+        "Vérification impossible : {}",
+    "Установлена версия {}":
+        "Version {} installée",
+    "Установлена последняя версия ({})":
+        "Vous avez la dernière version ({})",
+    "Доступна версия {} (установлена {})":
+        "La version {} est sortie (vous avez la {})",
+    "Открыть страницу":
+        "Ouvrir la page",
+    "Доступна версия {}":
+        "La version {} est sortie",
+    "Подробнее":
+        "Détails",
+    "Загрузка… {} %":
+        "Téléchargement… {} %",
+    "Загрузка… {} МБ":
+        "Téléchargement… {} Mo",
+    "Не удалось обновить: {}":
+        "Mise à jour impossible : {}",
+    "Сначала закройте игру":
+        "Fermez d'abord le jeu",
+    "Этот проект":
+        "Ce projet",
+    "Основано на bbport от deadinside28":
+        "Basé sur bbport de deadinside28",
+    "Порт для Windows от Supermedo":
+        "Portage Windows de Supermedo",
+    "Лицензия":
+        "Licence",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 ou ultérieure. Aucun fichier du jeu inclus : Bloodborne appartient à Sony Interactive Entertainment et FromSoftware",
+    "Проверить сейчас":
+        "Vérifier maintenant",
 }
 
 
@@ -2197,6 +2467,60 @@ DE = {
         "Der Koop empfängt eingehende UDP-Verbindungen. Lege den Port fest (SHADPS4_P2P_PORT={} in „{}“) und öffne ihn: {}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP braucht die Antworten des Routers: {}",
+    "О программе":
+        "Über",
+    "Версия {}":
+        "Version {}",
+    "Обновления":
+        "Updates",
+    "Проверять обновления при запуске":
+        "Beim Start nach Updates suchen",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "Fragt GitHub nach der neuesten Version; ohne deine Zustimmung wird nichts heruntergeladen",
+    "Последняя версия":
+        "Neueste Version",
+    "Загрузка…":
+        "Wird heruntergeladen…",
+    "Обновить":
+        "Aktualisieren",
+    "Версия {} установлена: перезапустите лаунчер":
+        "Version {} installiert: Launcher neu starten",
+    "Перезапустить":
+        "Neu starten",
+    "Не удалось проверить: {}":
+        "Prüfung fehlgeschlagen: {}",
+    "Установлена версия {}":
+        "Version {} installiert",
+    "Установлена последняя версия ({})":
+        "Du hast die neueste Version ({})",
+    "Доступна версия {} (установлена {})":
+        "Version {} ist erschienen (du hast {})",
+    "Открыть страницу":
+        "Seite öffnen",
+    "Доступна версия {}":
+        "Version {} ist erschienen",
+    "Подробнее":
+        "Details",
+    "Загрузка… {} %":
+        "Wird heruntergeladen… {} %",
+    "Загрузка… {} МБ":
+        "Wird heruntergeladen… {} MB",
+    "Не удалось обновить: {}":
+        "Aktualisierung fehlgeschlagen: {}",
+    "Сначала закройте игру":
+        "Schließe zuerst das Spiel",
+    "Этот проект":
+        "Dieses Projekt",
+    "Основано на bbport от deadinside28":
+        "Basiert auf bbport von deadinside28",
+    "Порт для Windows от Supermedo":
+        "Windows-Port von Supermedo",
+    "Лицензия":
+        "Lizenz",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 oder neuer. Keine Spieldateien enthalten: Bloodborne gehört Sony Interactive Entertainment und FromSoftware",
+    "Проверить сейчас":
+        "Jetzt prüfen",
 }
 
 
@@ -2478,6 +2802,60 @@ ZH_CN = {
         "合作模式需要接收 UDP 入站连接。请固定端口（在“{1}”中填写 SHADPS4_P2P_PORT={0}）并开放它：{2}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP 需要接收路由器的应答：{}",
+    "О программе":
+        "关于",
+    "Версия {}":
+        "版本 {}",
+    "Обновления":
+        "更新",
+    "Проверять обновления при запуске":
+        "启动时检查更新",
+    "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
+        "向 GitHub 查询最新发布版本；未经你同意不会下载任何内容",
+    "Последняя версия":
+        "最新版本",
+    "Загрузка…":
+        "正在下载…",
+    "Обновить":
+        "更新",
+    "Версия {} установлена: перезапустите лаунчер":
+        "版本 {} 已安装：请重启启动器",
+    "Перезапустить":
+        "重启",
+    "Не удалось проверить: {}":
+        "无法检查：{}",
+    "Установлена версия {}":
+        "已安装版本 {}",
+    "Установлена последняя версия ({})":
+        "已是最新版本（{}）",
+    "Доступна версия {} (установлена {})":
+        "版本 {} 已发布（当前为 {}）",
+    "Открыть страницу":
+        "打开页面",
+    "Доступна версия {}":
+        "版本 {} 已发布",
+    "Подробнее":
+        "详情",
+    "Загрузка… {} %":
+        "正在下载… {} %",
+    "Загрузка… {} МБ":
+        "正在下载… {} MB",
+    "Не удалось обновить: {}":
+        "无法更新：{}",
+    "Сначала закройте игру":
+        "请先关闭游戏",
+    "Этот проект":
+        "本项目",
+    "Основано на bbport от deadinside28":
+        "基于 deadinside28 的 bbport",
+    "Порт для Windows от Supermedo":
+        "Supermedo 的 Windows 移植版",
+    "Лицензия":
+        "许可证",
+    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
+        "GNU GPL v2 或更高版本。不含游戏文件：Bloodborne 归 Sony Interactive Entertainment 和 FromSoftware 所有",
+    "Проверить сейчас":
+        "立即检查",
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

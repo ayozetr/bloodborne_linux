@@ -21,6 +21,7 @@ from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, system_game_language, tr
 import bbport_steam
+import bbport_update
 
 import gi
 
@@ -156,6 +157,7 @@ DEFAULTS = {
     "patches_dir": "",
     "language": "",
     "region": "",
+    "check_updates": True,
     "fullscreen": False,
     "hdr": False,
     "present_mode": "Mailbox",
@@ -530,6 +532,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.process = None
         self.stream = None
         self.fsr411_build = None  # tools/fsr4cap/build_assets.sh while it runs
+        self.latest = None  # bbport_update.latest_release() once checked
+        self.update_state = "idle"  # idle, checking, downloading, installed
         self.build()
         self.connect("close-request", self.on_close)
 
@@ -559,12 +563,18 @@ class LauncherWindow(Adw.ApplicationWindow):
                                         "applications-games-symbolic")
         self.stack.add_titled_with_icon(self.build_log_page(), "log", tr("Журнал"),
                                         "utilities-terminal-symbolic")
+        self.stack.add_titled_with_icon(self.build_about_page(), "about", tr("О программе"),
+                                        "help-about-symbolic")
         self.log_view.get_buffer().set_text(log_text)
         self.update_launch_button()
         self.update_game_status()
         self.update_user_status()
         self.update_dlc_status()
         self.update_upscaler_status()
+        self.show_update_state()
+        if self.settings.get("check_updates", True) and self.latest is None and \
+                self.update_state == "idle":
+            self.on_check_update(None, quiet=True)
 
     def update_launch_button(self):
         running = self.process is not None
@@ -1105,6 +1115,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["skip_network_choice"] = self.skip_network_row.get_active()
         s["language"] = combo_value(self.language_row)
         s["region"] = combo_value(self.region_row)
+        s["check_updates"] = self.check_updates_row.get_active()
         s["fullscreen"] = self.fullscreen_row.get_active()
         s["present_mode"] = combo_value(self.present_row)
         s["hdr"] = self.hdr_row.get_active()
@@ -1458,6 +1469,155 @@ class LauncherWindow(Adw.ApplicationWindow):
             results = online.check(server, webapi, community)
             GLib.idle_add(show, results)
         threading.Thread(target=work, daemon=True).start()
+
+    # --- about page ----------------------------------------------------------------------
+
+    def build_about_page(self):
+        page = Adw.PreferencesPage()
+        about = Adw.PreferencesGroup(title=tr("О программе"))
+        app = Adw.ActionRow(title="bbport Linux",
+                            subtitle=tr("Версия {}").format(bbport_update.VERSION))
+        app.add_prefix(Gtk.Image(file=str(PORT_DIR / "launcher" / "bloodborne.png"), pixel_size=48))
+        about.add(app)
+        for title, subtitle, url in (
+                (tr("Этот проект"), bbport_update.REPOSITORY_URL, bbport_update.REPOSITORY_URL),
+                (tr("Основано на bbport от deadinside28"), bbport_update.UPSTREAM_URL,
+                 bbport_update.UPSTREAM_URL),
+                (tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,
+                 bbport_update.WINDOWS_URL),
+                (tr("Лицензия"), tr("GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит "
+                                    "Sony Interactive Entertainment и FromSoftware"),
+                 bbport_update.LICENSE_URL)):
+            row = Adw.ActionRow(title=title, subtitle=subtitle, activatable=True)
+            row.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
+            row.connect("activated", lambda _row, link=url: self.open_uri(link))
+            about.add(row)
+        page.add(about)
+
+        updates = Adw.PreferencesGroup(title=tr("Обновления"))
+        self.check_updates_row = Adw.SwitchRow(
+            title=tr("Проверять обновления при запуске"),
+            subtitle=tr("Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего "
+                        "согласия"),
+            active=self.settings.get("check_updates", True))
+        self.check_updates_row.connect("notify::active", lambda *_: self.store())
+        updates.add(self.check_updates_row)
+        self.update_row = Adw.ActionRow(title=tr("Последняя версия"))
+        self.update_button = Gtk.Button(valign=Gtk.Align.CENTER)
+        self.update_button.connect("clicked", self.on_update_button)
+        self.update_row.add_suffix(self.update_button)
+        updates.add(self.update_row)
+        page.add(updates)
+        return page
+
+    def open_uri(self, uri):
+        Gtk.UriLauncher.new(uri).launch(self, None, None, None)
+
+    def show_update_state(self, progress=None):
+        """The update row and its button for the current state."""
+        latest, state = self.latest, self.update_state
+        newer = latest is not None and bbport_update.is_newer(latest["tag"])
+        appimage = bbport_update.running_appimage()
+        button, sensitive = tr("Проверить сейчас"), True
+        if state == "checking":
+            subtitle, sensitive = tr("Проверка…"), False
+        elif state == "downloading":
+            subtitle, button, sensitive = progress or tr("Загрузка…"), tr("Обновить"), False
+        elif state == "installed":
+            subtitle, button = tr("Версия {} установлена: перезапустите лаунчер").format(
+                latest["tag"]), tr("Перезапустить")
+        elif isinstance(latest, str):
+            subtitle = tr("Не удалось проверить: {}").format(latest)
+        elif latest is None:
+            subtitle = tr("Установлена версия {}").format(bbport_update.VERSION)
+        elif not newer:
+            subtitle = tr("Установлена последняя версия ({})").format(bbport_update.VERSION)
+        elif appimage and latest["appimage"]:
+            subtitle, button = tr("Доступна версия {} (установлена {})").format(
+                latest["tag"], bbport_update.VERSION), tr("Обновить")
+        else:
+            subtitle, button = tr("Доступна версия {} (установлена {})").format(
+                latest["tag"], bbport_update.VERSION), tr("Открыть страницу")
+        self.update_row.set_subtitle(subtitle)
+        self.update_button.set_label(button)
+        self.update_button.set_sensitive(sensitive)
+        self.update_button.remove_css_class("suggested-action")
+        if button in (tr("Обновить"), tr("Перезапустить")):
+            self.update_button.add_css_class("suggested-action")
+
+    def on_update_button(self, _button):
+        latest = self.latest
+        if self.update_state == "installed":
+            self.restart_launcher()
+        elif isinstance(latest, dict) and bbport_update.is_newer(latest["tag"]):
+            if bbport_update.running_appimage() and latest["appimage"]:
+                self.install_update()
+            else:
+                self.open_uri(latest["url"])
+        else:
+            self.on_check_update(None)
+
+    def on_check_update(self, _button, quiet=False):
+        self.update_state = "checking"
+        self.show_update_state()
+
+        def done(result):
+            self.latest, self.update_state = result, "idle"
+            self.show_update_state()
+            if quiet and isinstance(result, dict) and bbport_update.is_newer(result["tag"]):
+                toast = Adw.Toast(title=tr("Доступна версия {}").format(result["tag"]),
+                                  button_label=tr("Подробнее"), timeout=8)
+                toast.connect("button-clicked", lambda *_: self.stack.set_visible_child_name("about"))
+                self.toasts.add_toast(toast)
+            return False
+
+        def work():
+            try:
+                result = bbport_update.latest_release()
+            except (OSError, ValueError) as error:
+                result = str(getattr(error, "reason", None) or error)
+            GLib.idle_add(done, result)
+        threading.Thread(target=work, daemon=True).start()
+
+    def install_update(self):
+        target = bbport_update.running_appimage()
+        self.update_state = "downloading"
+        self.show_update_state()
+
+        def progress(done, total):
+            text = tr("Загрузка… {} %").format(done * 100 // total) if total else \
+                tr("Загрузка… {} МБ").format(done >> 20)
+            GLib.idle_add(self.show_update_state, text)
+
+        def finished(error):
+            self.update_state = "idle" if error else "installed"
+            self.show_update_state()
+            if error:
+                self.toasts.add_toast(Adw.Toast(title=tr("Не удалось обновить: {}").format(error)))
+            return False
+
+        def work():
+            try:
+                bbport_update.install(self.latest["appimage"], target, progress)
+                error = None
+            except OSError as failure:
+                error = str(getattr(failure, "reason", None) or failure)
+            GLib.idle_add(finished, error)
+        threading.Thread(target=work, daemon=True).start()
+
+    def restart_launcher(self):
+        if self.process is not None:
+            self.toasts.add_toast(Adw.Toast(title=tr("Сначала закройте игру")))
+            return
+        target = bbport_update.running_appimage()
+        env = {k: v for k, v in os.environ.items()
+               if k not in ("APPDIR", "APPIMAGE", "ARGV0", "OWD", "LD_LIBRARY_PATH", "PYTHONHOME",
+                            "PYTHONPATH")}
+        # The new launcher starts once this one has exited: with the same application ID while
+        # this one runs, it would only raise this window and quit.
+        subprocess.Popen(["sh", "-c", 'while kill -0 "$1" 2>/dev/null; do sleep 0.2; done; exec "$2"',
+                          "sh", str(os.getpid()), str(target)], env=env, start_new_session=True)
+        self.close()  # on_close saves the settings
 
     # --- cheats page ---------------------------------------------------------------------
 
