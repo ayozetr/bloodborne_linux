@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""The game files bbport runs: Bloodborne with the 1.09 update merged in. The retail releases (the
-US CUSA00900, the European Game of the Year edition CUSA03173, the Asian The Old Hunters Edition
-CUSA03023, ...) share the same 1.09 executable.
+"""The game files bbport runs: Bloodborne with the 1.09 update merged in. The US release
+(CUSA00900) and the European Game of the Year edition (CUSA03173) have the same 1.09 executable;
+the other retail releases are expected to, and the image hash decides (docs/COMPATIBILITY.md).
 
 Other versions start and then fail inside the game's code (the base game 1.00 faults at guest
 offset 0x20348b8): hooks and patches use the addresses of this one executable. The check compares
