@@ -9,7 +9,8 @@ prints the folders (os.pathsep-separated) that mods.py lays under the mods (--ui
 - Xbox and Switch: the icons of Dommo's "DS3 Style" prompts (Nexus, Bloodborne mod 30) from
   assets/menu_prompts, put into the game's menu/common.tpf.dcx.
 - keyboard: icons drawn for the keys bbport.ini binds (key.<input>=, else the defaults); needs
-  Pillow.
+  Pillow. Which textures to draw (the KG_* icons and three atlas spots) follows Abken's KBM
+  Icons Generator (Nexus, Bloodborne mod 537); nothing of it is used.
 - --gestures 1: Dommo's "Stripped down gesture menu" (no motion-control icons), as edits of the
   game's menu/gesturetop.gfx.
 Only the prompt textures change; every other texture is the game's, untouched. Results are

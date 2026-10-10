@@ -114,6 +114,9 @@ changes.
   Nintendo Switch prompts*) and the *Stripped down gesture menu*, from
   [Nexus Mods (Bloodborne, mod 30)](https://www.nexusmods.com/bloodborne/mods/30), uploaded by
   goomab. Only their drawn prompts are in this repository ([assets/menu_prompts](assets/menu_prompts)).
+- **Abken**: the [KBM Icons Generator](https://www.nexusmods.com/bloodborne/mods/537), which showed
+  which textures keyboard prompts need (after the idea of
+  [mod 460](https://www.nexusmods.com/bloodborne/mods/460)); bbport draws its own.
 - [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages) for the AppImage.
 - Game patches by Kyo, Lance McDonald, auser1337, illusion, emoose and the Bloodborne community.
 
