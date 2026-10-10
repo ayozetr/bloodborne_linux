@@ -1,6 +1,8 @@
 [submodule "gpu/third_party/fsr-vulkan"]
 	path = gpu/third_party/fsr-vulkan
 	url = https://github.com/FireBurn/FSR-Vulkan.git
+	# build.sh applies gpu/patches/fsr-vulkan to its working tree
+	ignore = dirty
 [submodule "gpu/third_party/imgui"]
 	path = gpu/third_party/imgui
 	url = https://github.com/ocornut/imgui.git

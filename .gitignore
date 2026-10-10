@@ -23,6 +23,8 @@ perf.data
 /bloodborne_upscalers_*.md
 mods.json
 patches.json
+# The mods folder of runs from source (the launcher's default, DATA_DIR/mods)
+/mods/
 # Local: game logs, messages and archives from users, internal plans
 /logs/
 /message*.txt
@@ -30,3 +32,10 @@ patches.json
 /docs/ISSUE_ACTION_PLAN_*.md
 # AMD FidelityFX DLLs (FSR 4.1.1 is built from the user's own): never in the repository
 *.dll
+# Game files and dumps: never in the repository
+eboot.bin
+param.sfo
+*.pkg
+*.dcx
+*.7z
+/CUSA*/
