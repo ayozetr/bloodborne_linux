@@ -67,7 +67,24 @@ static ABI int32_t user_event(int32_t *event) {
 }
 
 /* ---- SystemService ---- */
-static int language(void) { const char *v=getenv("BB_LANGUAGE"); return v ? atoi(v) : 1; }
+/* BB_LANGUAGE (the launcher sets it), else the desktop's locale as the launcher maps it
+ * (bbport_i18n.GAME_LANGUAGES): runs without the launcher speak the desktop's language too. */
+static int language(void) {
+    const char *v=getenv("BB_LANGUAGE");
+    if (v && *v) return atoi(v);
+    static const char *const keys[]={"LC_ALL","LC_MESSAGES","LANG","LANGUAGE"};
+    static const struct { char code[3]; int id; } locales[]={
+        {"ja",0}, {"en",1}, {"fr",2}, {"es",3}, {"de",4}, {"it",5}, {"ru",8},
+    };
+    for (size_t k=0;k<sizeof(keys)/sizeof(*keys);++k) {
+        const char *locale=getenv(keys[k]);
+        if (!locale || !*locale) continue;
+        for (size_t i=0;i<sizeof(locales)/sizeof(*locales);++i)
+            if ((locale[0]|32)==locales[i].code[0] && (locale[1]|32)==locales[i].code[1]) return locales[i].id;
+        return 1;
+    }
+    return 1;
+}
 static ABI int32_t system_param(int32_t id,int32_t *value) {
     if (!value) return SYSTEM_PARAMETER;
     switch (id) {
