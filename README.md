@@ -30,6 +30,9 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
   menu without the motion-control icons.
 - **Cheats and gameplay tweaks:** never die, stealth, silent steps, enemy control, camera
   distance, ragdoll physics and more.
+- **Trophies:** a notice in the game, in the style of the PS4's, and a Trophies page in the
+  launcher with every trophy, from your own dump. Their names and descriptions need the PS4's
+  trophy key (shadPS4's TrophyKey), which you enter in the launcher; without it, only the icons.
 - **Game effects** on and off, **mods** and community **patches**, loaded without changing the
   game files ([how](docs/MODS.en.md)).
 - **Add to Steam** in one click (native or Flatpak Steam), and **Discord Rich Presence** with the

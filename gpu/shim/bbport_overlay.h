@@ -6,6 +6,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "common/types.h"
 #include "video_core/renderer_vulkan/vk_common.h"
 
@@ -40,5 +41,9 @@ bool MenuOpen();
 
 /// Window thread: the game's text dialog (ImeDialog) state, drawn as a box over the frame.
 void SetTextPrompt(bool active, const std::string& prompt, const std::string& text);
+
+/// A trophy the game unlocked: a card in the top-left corner for a few seconds (queued while one is
+/// shown). `icon`: `icon_size` x `icon_size` RGBA, or empty for a cup in the grade's colour.
+void TrophyNotice(int id, char grade, std::string name, std::vector<u8> icon, int icon_size);
 
 } // namespace BbOverlay

@@ -267,22 +267,125 @@ static ABI int32_t ime_result(uint32_t *result) {
 }
 static ABI int32_t ime_term(void) { memset(&ime,0,sizeof(ime)); return 0; }
 
-/* ---- Trophies: accepted locally, recorded in the log ---- */
+/* ---- Trophies: recorded in BB_TROPHY_DIR (scripts/trophies.py), shown in the overlay ----
+ * trophies.tsv lists the game's trophies (id, grade, hidden, name, detail), from the dump;
+ * earned.tsv gets "id<TAB>Unix time" for each one the first time the game unlocks it. The
+ * platinum, which the PS4 itself awards, follows once every other trophy is earned. */
+#define TROPHY_MAX 128
+typedef struct { char grade; char name[160]; } TrophyEntry;
+static pthread_mutex_t trophy_lock=PTHREAD_MUTEX_INITIALIZER;
+static TrophyEntry trophy_list[TROPHY_MAX];
+static unsigned char trophy_known[TROPHY_MAX], trophy_earned[TROPHY_MAX];
+static int trophy_loaded;
+static void trophy_load(void) {
+    if (trophy_loaded) return;
+    trophy_loaded=1;
+    const char *dir=getenv("BB_TROPHY_DIR");
+    if (!dir || !dir[0]) return;
+    char path[1024], line[1024];
+    snprintf(path,sizeof(path),"%s/trophies.tsv",dir);
+    FILE *f=fopen(path,"r");
+    while (f && fgets(line,sizeof(line),f)) {
+        char *fields[5]={line}; int n=1;
+        for (char *c=line;*c && n<5;++c) if (*c=='\t') { *c=0; fields[n++]=c+1; }
+        int id=atoi(fields[0]);
+        if (n<4 || id<0 || id>=TROPHY_MAX) continue;
+        fields[3][strcspn(fields[3],"\r\n")]=0;
+        trophy_known[id]=1;
+        trophy_list[id].grade=fields[1][0];
+        snprintf(trophy_list[id].name,sizeof(trophy_list[id].name),"%s",fields[3]);
+    }
+    if (f) fclose(f);
+    snprintf(path,sizeof(path),"%s/earned.tsv",dir);
+    f=fopen(path,"r");
+    while (f && fgets(line,sizeof(line),f)) {
+        int id=atoi(line);
+        if (id>=0 && id<TROPHY_MAX) trophy_earned[id]=1;
+    }
+    if (f) fclose(f);
+}
+/* Records a trophy the first time; true when it was new. Called with trophy_lock held. */
+static int trophy_record(int id) {
+    if (id<0 || id>=TROPHY_MAX || trophy_earned[id]) return 0;
+    trophy_earned[id]=1;
+    const char *dir=getenv("BB_TROPHY_DIR");
+    if (dir && dir[0]) {
+        char path[1024];
+        snprintf(path,sizeof(path),"%s/earned.tsv",dir);
+        FILE *f=fopen(path,"a");
+        if (f) { fprintf(f,"%d\t%lld\n",id,(long long)time(NULL)); fclose(f); }
+    }
+    const char *name=trophy_known[id] && trophy_list[id].name[0] ? trophy_list[id].name : NULL;
+    char fallback[32], icon[1100];
+    if (!name) { snprintf(fallback,sizeof(fallback),"#%d",id); name=fallback; }
+    printf("Runtime: trophy %d unlocked: %s\n",id,name);
+    if (dir && dir[0]) snprintf(icon,sizeof(icon),"%s/icons/TROP%03d.rgba",dir,id);
+    bbgpu_trophy_notice(id,trophy_known[id] ? trophy_list[id].grade : '-',name,dir && dir[0] ? icon : NULL);
+    return 1;
+}
+/* The platinum's id once every other known trophy is earned, else -1. */
+static int trophy_platinum_due(void) {
+    int platinum=-1;
+    for (int i=0;i<TROPHY_MAX;++i) {
+        if (!trophy_known[i]) continue;
+        if (trophy_list[i].grade=='P') platinum=i;
+        else if (!trophy_earned[i]) return -1;
+    }
+    return platinum>=0 && !trophy_earned[platinum] ? platinum : -1;
+}
+/* The game's first trophy call (which one is logged). BB_TROPHY_PREVIEW=<id> then shows that
+ * trophy's notice without recording it, to check how it looks. */
+static void trophy_first_call(const char *function) {
+    static int called;
+    pthread_mutex_lock(&trophy_lock);
+    if (!called) {
+        called=1;
+        trophy_load();
+        printf("Runtime: trophies: first call %s\n",function);
+        const char *preview=getenv("BB_TROPHY_PREVIEW"), *dir=getenv("BB_TROPHY_DIR");
+        const int id=preview && preview[0] ? atoi(preview) : -1;
+        if (id>=0 && id<TROPHY_MAX) {
+            char icon[1100];
+            if (dir && dir[0]) snprintf(icon,sizeof(icon),"%s/icons/TROP%03d.rgba",dir,id);
+            bbgpu_trophy_notice(id,trophy_known[id] ? trophy_list[id].grade : '-',
+                                trophy_known[id] && trophy_list[id].name[0] ? trophy_list[id].name : "Trophy preview",
+                                dir && dir[0] ? icon : NULL);
+        }
+    }
+    pthread_mutex_unlock(&trophy_lock);
+}
 static ABI int32_t trophy_context(int32_t *ctx,int32_t user,uint32_t label,uint64_t options) {
     (void)user; (void)label; (void)options;
+    trophy_first_call("sceNpTrophyCreateContext");
     if (!ctx) return TROPHY_INVALID;
     *ctx=new_id(); return 0;
 }
-static ABI int32_t trophy_handle(int32_t *handle) { if (!handle) return TROPHY_INVALID; *handle=new_id(); return 0; }
-static ABI int32_t trophy_register(int32_t ctx,int32_t handle,uint64_t options) { (void)ctx; (void)handle; (void)options; return 0; }
+static ABI int32_t trophy_handle(int32_t *handle) {
+    trophy_first_call("sceNpTrophyCreateHandle");
+    if (!handle) return TROPHY_INVALID;
+    *handle=new_id(); return 0;
+}
+static ABI int32_t trophy_register(int32_t ctx,int32_t handle,uint64_t options) {
+    (void)ctx; (void)handle; (void)options;
+    trophy_first_call("sceNpTrophyRegisterContext");
+    return 0;
+}
 static ABI int32_t trophy_unlock(int32_t ctx,int32_t handle,int32_t id,int32_t *platinum) {
     (void)ctx; (void)handle;
-    printf("Runtime: trophy %d unlocked\n",id);
-    if (platinum) *platinum=-1;
+    trophy_first_call("sceNpTrophyUnlockTrophy");
+    int awarded=-1;
+    pthread_mutex_lock(&trophy_lock);
+    trophy_load();
+    if (!trophy_record(id)) printf("Runtime: trophy %d unlocked (already earned)\n",id);
+    const int due=trophy_platinum_due();
+    if (due>=0 && trophy_record(due)) awarded=due;
+    pthread_mutex_unlock(&trophy_lock);
+    if (platinum) *platinum=awarded;
     return 0;
 }
 static ABI int32_t trophy_game_info(int32_t ctx,int32_t handle,void *details,void *data) {
     (void)ctx; (void)handle;
+    trophy_first_call("sceNpTrophyGetGameInfo");
     if (details) { uint64_t size; memcpy(&size,details,8); memset((char *)details+8,0,size>8 && size<4096 ? size-8 : 0); }
     if (data) { uint64_t size; memcpy(&size,data,8); memset((char *)data+8,0,size>8 && size<4096 ? size-8 : 0); }
     return 0;

@@ -246,6 +246,12 @@ if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
     SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}") || true
     export SHADPS4_HTTP_HOST_OVERRIDES_JSON
 fi
+# Trophies (scripts/trophies.py): the dump's list and icons in the user directory, for the
+# runtime's notices and the launcher; BB_TROPHY_KEY (the PS4's trophy key) decrypts the names.
+if trophies=$("$PYTHON" scripts/trophies.py prepare --game "$original_game" \
+        --user "${BB_USER_DIR:-$data/user}" --language "${BB_LANGUAGE:-1}") && [[ -n $trophies ]]; then
+    export BB_TROPHY_DIR=$trophies
+fi
 # Discord Rich Presence (launcher: Discord; BB_DISCORD=0 turns it off): $$ becomes the game
 # below (exec), and the helper ends with it. The game writes its area and co-op partners into
 # BB_PRESENCE_DIR (scripts/discord_presence.py), new for each start.

@@ -38,6 +38,7 @@ from prepare import sfo  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
 from patches import external_patches  # noqa: E402
+import trophies  # noqa: E402
 # Packaged (AppImage): generated files, saves and bbport.ini live in BB_DATA_DIR.
 PACKAGED = bool(os.environ.get("BB_PREBUILT"))
 DATA_DIR = Path(os.environ.get("BB_DATA_DIR", PORT_DIR))
@@ -183,6 +184,8 @@ DEFAULTS = {
     "vk_validation": False,
     "extra_env": "",
     "discord": True,
+    # The PS4's trophy key (shadPS4's TrophyKey): the trophies' names (scripts/trophies.py).
+    "trophy_key": "",
     # Co-op (Online page): off by default; shadPS4's public shadNet server and The Hunter's Dream.
     # online_server_kind: "public" or "own" (docs/SERVER.md); unset, online.server_kind decides.
     "online": False,
@@ -345,6 +348,9 @@ def fsr411_build_command(upscaler, loader=None):
     return command + ([str(loader)] if loader else []), env
 
 
+# Trophy grades (scripts/trophies.py) as the Trophies page names them.
+TROPHY_GRADES = {"P": "Платиновый", "G": "Золотой", "S": "Серебряный", "B": "Бронзовый"}
+
 # The Online page's shadNet server choice (online.server_kind).
 SERVER_KINDS = [
     ("Публичный сервер shadPS4", "public", "srv.shadps4.net:31313"),
@@ -424,6 +430,8 @@ def game_environment(s):
     if s["vk_validation"]:
         env["BB_VK_VALIDATION"] = "1"
     env["BB_DISCORD"] = "1" if s.get("discord", True) else "0"
+    if s.get("trophy_key", "").strip():
+        env["BB_TROPHY_KEY"] = s["trophy_key"].strip()
     if s.get("online") and online_module():
         env.update(online.environment(s))
     for item in s["extra_env"].split():
@@ -594,6 +602,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                                         "network-workgroup-symbolic")
         self.stack.add_titled_with_icon(self.build_cheats_page(), "cheats", tr("Читы"),
                                         "applications-games-symbolic")
+        self.stack.add_titled_with_icon(self.build_trophies_page(), "trophies", tr("Трофеи"),
+                                        "starred-symbolic")
+        self.stack.connect("notify::visible-child-name", lambda *_: self.stack.get_visible_child_name()
+                           == "trophies" and self.refresh_trophies())
         self.stack.add_titled_with_icon(self.build_log_page(), "log", tr("Журнал"),
                                         "utilities-terminal-symbolic")
         self.stack.add_titled_with_icon(self.build_about_page(), "about", tr("О программе"),
@@ -1206,6 +1218,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["extra_env"] = self.extra_row.get_text().strip()
         s["mods_enabled"] = self.mods_enabled_row.get_active()
         s["discord"] = self.discord_row.get_active()
+        s["trophy_key"] = self.trophy_key_row.get_text().strip()
         s["online"] = self.online_row.get_active()
         s.update(self.online_settings())
         self.save_mod_profile()
@@ -1748,6 +1761,83 @@ class LauncherWindow(Adw.ApplicationWindow):
         subprocess.Popen(["sh", "-c", 'while kill -0 "$1" 2>/dev/null; do sleep 0.2; done; exec "$2"',
                           "sh", str(os.getpid()), str(target)], env=env, start_new_session=True)
         self.close()  # on_close saves the settings
+
+    # --- trophies page -------------------------------------------------------------------
+
+    def build_trophies_page(self):
+        page = Adw.PreferencesPage()
+        key = Adw.PreferencesGroup(title=tr("Ключ трофеев"), description=tr(
+            "Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны "
+            "названия и описания. Хранится на этом компьютере. Без него видны только значки"))
+        self.trophy_key_row = Adw.PasswordEntryRow(title=tr("Ключ трофеев"),
+                                                   text=self.settings.get("trophy_key", ""),
+                                                   show_apply_button=True)
+        self.trophy_key_row.connect("apply", lambda _row: (self.store(), self.refresh_trophies()))
+        key.add(self.trophy_key_row)
+        page.add(key)
+        self.trophy_group = Adw.PreferencesGroup(title=tr("Трофеи"), description=tr(
+            "Записываются, когда игра их открывает, и показываются в игре"))
+        page.add(self.trophy_group)
+        self.trophy_rows = []
+        return page
+
+    def refresh_trophies(self):
+        game = Path(self.settings.get("game_dir") or "").expanduser()
+        user = self.user_dir()
+        key = trophies.parse_key(self.trophy_key_row.get_text())
+        language = int(self.settings.get("language") or system_game_language())
+
+        def show(directory, problem):
+            for row in self.trophy_rows:
+                self.trophy_group.remove(row)
+            self.trophy_rows = []
+            rows = []
+            if directory is None:
+                rows.append(Adw.ActionRow(title=problem or tr("В дампе игры нет трофеев (sce_sys/trophy)")))
+            else:
+                listed, earned = trophies.read_list(directory), trophies.read_earned(directory)
+                counted = [i for i, t in listed.items() if t["grade"] != "P"] or list(listed)
+                done = sum(1 for i in counted if i in earned)
+                self.trophy_group.set_description(tr("Получено {} из {}").format(done, len(counted)))
+                if problem:
+                    rows.append(Adw.ActionRow(title=problem))
+                for i, t in sorted(listed.items(), key=lambda item: (item[0] not in earned, item[0])):
+                    got = i in earned
+                    name = t["name"] or f"#{i}"
+                    detail = t["detail"]
+                    if t["hidden"] and not got:
+                        name, detail = tr("Скрытый трофей"), ""
+                    when = time.strftime("%Y-%m-%d %H:%M", time.localtime(earned[i])) if got else None
+                    subtitle = "\n".join(x for x in (detail, tr("Получен {}").format(when) if when else None) if x)
+                    row = Adw.ActionRow(title=GLib.markup_escape_text(name),
+                                        subtitle=GLib.markup_escape_text(subtitle))
+                    icon = Path(directory) / "icons" / f"TROP{i:03d}.PNG"
+                    image = Gtk.Image(file=str(icon), pixel_size=48) if icon.is_file() else \
+                        Gtk.Image(icon_name="starred-symbolic", pixel_size=48)
+                    row.add_prefix(image)
+                    grade = TROPHY_GRADES.get(t["grade"])
+                    if grade:
+                        row.add_suffix(Gtk.Label(label=tr(grade), css_classes=["dim-label"]))
+                    if not got:
+                        image.set_opacity(0.35)
+                    rows.append(row)
+            for row in rows:
+                self.trophy_group.add(row)
+                self.trophy_rows.append(row)
+            return False
+
+        def work():
+            problem = None
+            try:
+                directory = trophies.prepare(game, user, key, language)
+            except (OSError, ValueError, trophies.ET.ParseError):
+                problem = tr("Неверный ключ трофеев: названия недоступны")
+                try:
+                    directory = trophies.prepare(game, user, None, language)
+                except (OSError, ValueError):
+                    directory = None
+            GLib.idle_add(show, directory, problem)
+        threading.Thread(target=work, daemon=True).start()
 
     # --- cheats page ---------------------------------------------------------------------
 

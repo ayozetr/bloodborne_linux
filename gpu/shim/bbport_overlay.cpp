@@ -4,18 +4,23 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <deque>
 #include <mutex>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include <SDL3/SDL.h>
 #include "bbport_settings.h"
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
+#include "imgui_internal.h" // RegisterUserTexture: the trophies' icons
 #include "video_core/renderer_vulkan/vk_instance.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 
@@ -54,6 +59,24 @@ std::string prompt_title, prompt_text;
 // Present rate for the FPS counter.
 std::chrono::steady_clock::time_point last_present{};
 float frame_ms_avg = 0.0f;
+
+// Trophy notices (bbgpu_trophy_notice): one card at a time in the top-left corner, in the style
+// of the PS4's, with the trophy's icon (a cup in its grade's colour when it has none).
+struct Notice {
+    int id = 0;
+    char grade = '-';
+    std::string name;
+    std::vector<u8> icon; // RGBA
+    int icon_size = 0;
+};
+std::mutex notice_mutex;
+std::deque<Notice> notices;
+std::atomic<bool> notice_busy{false}; // queued or on screen
+bool notice_shown = false;            // the present thread's (imgui_mutex)
+Notice notice;
+std::chrono::steady_clock::time_point notice_start;
+std::unordered_map<int, ImTextureData*> notice_icons; // kept: one per trophy, 64 KiB each
+constexpr float NoticeIn = 0.35f, NoticeHold = 5.0f, NoticeOut = 0.6f;
 
 float PixelDensity(SDL_WindowID id);
 
@@ -593,6 +616,111 @@ void FpsCounter() {
     ImGui::End();
 }
 
+ImU32 GradeColour(char grade, float alpha) {
+    const int a = int(255.0f * alpha);
+    switch (grade) {
+    case 'P':
+        return IM_COL32(170, 200, 228, a);
+    case 'G':
+        return IM_COL32(226, 186, 72, a);
+    case 'S':
+        return IM_COL32(196, 200, 206, a);
+    case 'B':
+        return IM_COL32(186, 118, 68, a);
+    default:
+        return IM_COL32(200, 200, 200, a);
+    }
+}
+
+// A small cup: bowl, handles, stem and base, `size` high from `top`.
+void DrawCup(ImDrawList* draw, ImVec2 top, float size, ImU32 colour) {
+    const float w = size * 0.8f, x = top.x, y = top.y;
+    draw->PathLineTo(ImVec2(x, y));
+    draw->PathLineTo(ImVec2(x + w, y));
+    draw->PathBezierCubicCurveTo(ImVec2(x + w, y + size * 0.45f), ImVec2(x + w * 0.65f, y + size * 0.6f),
+                                 ImVec2(x + w * 0.5f, y + size * 0.6f));
+    draw->PathBezierCubicCurveTo(ImVec2(x + w * 0.35f, y + size * 0.6f), ImVec2(x, y + size * 0.45f),
+                                 ImVec2(x, y));
+    draw->PathFillConvex(colour);
+    const float handle = size * 0.12f;
+    draw->AddCircle(ImVec2(x - handle * 0.4f, y + size * 0.2f), handle, colour, 12, size * 0.07f);
+    draw->AddCircle(ImVec2(x + w + handle * 0.4f, y + size * 0.2f), handle, colour, 12, size * 0.07f);
+    draw->AddRectFilled(ImVec2(x + w * 0.44f, y + size * 0.58f), ImVec2(x + w * 0.56f, y + size * 0.82f),
+                        colour);
+    draw->AddRectFilled(ImVec2(x + w * 0.22f, y + size * 0.82f), ImVec2(x + w * 0.78f, y + size * 0.95f),
+                        colour, size * 0.04f);
+}
+
+ImTextureData* NoticeIcon(const Notice& n) {
+    if (n.icon_size <= 0) {
+        return nullptr;
+    }
+    auto& texture = notice_icons[n.id];
+    if (texture == nullptr) {
+        texture = new ImTextureData();
+        texture->Create(ImTextureFormat_RGBA32, n.icon_size, n.icon_size);
+        std::memcpy(texture->GetPixels(), n.icon.data(), n.icon.size());
+        ImGui::RegisterUserTexture(texture);
+    }
+    return texture;
+}
+
+void TrophyCard() {
+    const auto now = std::chrono::steady_clock::now();
+    if (!notice_shown) {
+        std::scoped_lock lock{notice_mutex};
+        if (notices.empty()) {
+            notice_busy = false;
+            return;
+        }
+        notice = std::move(notices.front());
+        notices.pop_front();
+        notice_shown = true;
+        notice_start = now;
+    }
+    const float t = std::chrono::duration<float>(now - notice_start).count();
+    if (t > NoticeIn + NoticeHold + NoticeOut) {
+        notice_shown = false;
+        return;
+    }
+    const float in = std::min(t / NoticeIn, 1.0f);
+    const float alpha = t < NoticeIn + NoticeHold ? in : 1.0f - (t - NoticeIn - NoticeHold) / NoticeOut;
+    const float ease = 1.0f - (1.0f - in) * (1.0f - in);
+    const float s = base_scale;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImDrawList* draw = ImGui::GetForegroundDrawList();
+    ImFont* font = ImGui::GetFont();
+    const float text_size = ImGui::GetFontSize();
+    const float pad = 12.0f * s, icon = 72.0f * s, width = 470.0f * s;
+    const float text_x = pad + icon + 16.0f * s, text_w = width - text_x - pad;
+    const char* earned = BbSettings::MenuText("You have earned a trophy.", "Вы получили трофей.");
+    const ImVec2 name_size =
+        font->CalcTextSizeA(text_size * 1.05f, FLT_MAX, text_w, notice.name.c_str());
+    const float height = std::max(icon + 2.0f * pad, pad * 2.0f + text_size * 1.6f + name_size.y);
+    const ImVec2 p0(viewport->WorkPos.x + 36.0f * s - (1.0f - ease) * 48.0f * s,
+                    viewport->WorkPos.y + 36.0f * s);
+    const ImVec2 p1(p0.x + width, p0.y + height);
+    draw->AddRectFilled(ImVec2(p0.x + 3.0f * s, p0.y + 4.0f * s), ImVec2(p1.x + 3.0f * s, p1.y + 4.0f * s),
+                        IM_COL32(0, 0, 0, int(90 * alpha)), 8.0f * s);
+    draw->AddRectFilled(p0, p1, IM_COL32(24, 24, 30, int(232 * alpha)), 8.0f * s);
+    draw->AddRect(p0, p1, IM_COL32(255, 255, 255, int(28 * alpha)), 8.0f * s);
+    const ImVec2 icon0(p0.x + pad, p0.y + (height - icon) * 0.5f);
+    if (ImTextureData* texture = NoticeIcon(notice)) {
+        draw->AddImageRounded(texture->GetTexRef(), icon0, ImVec2(icon0.x + icon, icon0.y + icon),
+                              ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, int(255 * alpha)),
+                              4.0f * s);
+    } else {
+        draw->AddRectFilled(icon0, ImVec2(icon0.x + icon, icon0.y + icon),
+                            IM_COL32(50, 50, 58, int(255 * alpha)), 4.0f * s);
+        DrawCup(draw, ImVec2(icon0.x + icon * 0.28f, icon0.y + icon * 0.22f), icon * 0.56f,
+                GradeColour(notice.grade, alpha));
+    }
+    const ImVec2 line1(p0.x + text_x, p0.y + pad + 2.0f * s);
+    draw->AddText(font, text_size * 0.92f, line1, IM_COL32(205, 205, 212, int(255 * alpha)), earned);
+    draw->AddText(font, text_size * 1.05f, ImVec2(line1.x, line1.y + text_size * 1.45f),
+                  IM_COL32(255, 255, 255, int(255 * alpha)), notice.name.c_str(), nullptr, text_w);
+}
+
 void TextPrompt() {
     std::string title, text;
     {
@@ -847,7 +975,17 @@ bool HandleEvent(const SDL_Event& event) {
 }
 
 bool Visible() {
-    return initialized && (menu_open || prompt_active || BbSettings::Get().show_fps);
+    return initialized && (menu_open || prompt_active || notice_busy || BbSettings::Get().show_fps);
+}
+
+void TrophyNotice(int id, char grade, std::string name, std::vector<u8> icon, int icon_size) {
+    if (icon.size() != size_t(icon_size) * size_t(icon_size) * 4) {
+        icon.clear();
+        icon_size = 0;
+    }
+    std::scoped_lock lock{notice_mutex};
+    notices.push_back(Notice{id, grade, std::move(name), std::move(icon), icon_size});
+    notice_busy = true;
 }
 
 bool MenuOpen() {
@@ -898,6 +1036,9 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
     }
     if (prompt_active && !menu_open) {
         TextPrompt();
+    }
+    if (notice_busy) {
+        TrophyCard();
     }
     ImGui::Render();
 

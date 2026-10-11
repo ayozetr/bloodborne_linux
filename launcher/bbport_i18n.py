@@ -512,6 +512,33 @@ EN = {
     'отвечает; ваш публичный адрес: {}':
         'answers; your public address: {}',
     "Поддержать проект": 'Support this project',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'The game dump has no trophies (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Recorded when the game unlocks them, and shown in the game',
+    'Ключ трофеев':
+        'Trophy key',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        "The PS4's trophy key (TrophyKey in shadPS4), 32 hexadecimal digits: with it, the names and descriptions show. Kept on this computer. Without it, only the icons show",
+    'Неверный ключ трофеев: названия недоступны':
+        'Wrong trophy key: the names are unavailable',
+    'Получен {}':
+        'Earned {}',
+    'Получено {} из {}':
+        '{} of {} earned',
+    'Скрытый трофей':
+        'Hidden trophy',
+    'Трофеи':
+        'Trophies',
+    'Платиновый':
+        'Platinum',
+    'Золотой':
+        'Gold',
+    'Серебряный':
+        'Silver',
+    'Бронзовый':
+        'Bronze',
 }
 
 PT_BR = {
@@ -1078,6 +1105,33 @@ PT_BR = {
     'отвечает; ваш публичный адрес: {}':
         'responde; seu endereço público: {}',
     "Поддержать проект": 'Apoiar este projeto',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'O dump do jogo não tem troféus (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Registrados quando o jogo os desbloqueia, e mostrados no jogo',
+    'Ключ трофеев':
+        'Chave de troféus',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        'A chave de troféus do PS4 (TrophyKey no shadPS4), 32 dígitos hexadecimais: com ela aparecem os nomes e as descrições. Fica neste computador. Sem ela, só aparecem os ícones',
+    'Неверный ключ трофеев: названия недоступны':
+        'Chave de troféus incorreta: os nomes não estão disponíveis',
+    'Получен {}':
+        'Conquistado em {}',
+    'Получено {} из {}':
+        '{} de {} conquistados',
+    'Скрытый трофей':
+        'Troféu oculto',
+    'Трофеи':
+        'Troféus',
+    'Платиновый':
+        'Platina',
+    'Золотой':
+        'Ouro',
+    'Серебряный':
+        'Prata',
+    'Бронзовый':
+        'Bronze',
 }
 
 
@@ -1555,6 +1609,33 @@ ES = {
     'отвечает; ваш публичный адрес: {}':
         'responde; tu dirección pública: {}',
     "Поддержать проект": 'Apoyar este proyecto',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'El volcado del juego no tiene trofeos (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Se guardan cuando el juego los desbloquea, y se muestran en el juego',
+    'Ключ трофеев':
+        'Clave de trofeos',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        'La clave de trofeos de PS4 (TrophyKey en shadPS4), 32 dígitos hexadecimales: con ella se ven los nombres y las descripciones. Se guarda en este equipo. Sin ella solo se ven los iconos',
+    'Неверный ключ трофеев: названия недоступны':
+        'Clave de trofeos incorrecta: los nombres no están disponibles',
+    'Получен {}':
+        'Conseguido el {}',
+    'Получено {} из {}':
+        '{} de {} conseguidos',
+    'Скрытый трофей':
+        'Trofeo oculto',
+    'Трофеи':
+        'Trofeos',
+    'Платиновый':
+        'Platino',
+    'Золотой':
+        'Oro',
+    'Серебряный':
+        'Plata',
+    'Бронзовый':
+        'Bronce',
 }
 
 
@@ -2032,6 +2113,33 @@ IT = {
     'отвечает; ваш публичный адрес: {}':
         'risponde; il tuo indirizzo pubblico: {}',
     "Поддержать проект": 'Sostieni questo progetto',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'Il dump del gioco non ha trofei (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Registrati quando il gioco li sblocca, e mostrati nel gioco',
+    'Ключ трофеев':
+        'Chiave dei trofei',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        'La chiave dei trofei PS4 (TrophyKey in shadPS4), 32 cifre esadecimali: con essa si vedono nomi e descrizioni. Resta su questo computer. Senza, si vedono solo le icone',
+    'Неверный ключ трофеев: названия недоступны':
+        'Chiave dei trofei errata: i nomi non sono disponibili',
+    'Получен {}':
+        'Ottenuto il {}',
+    'Получено {} из {}':
+        '{} di {} ottenuti',
+    'Скрытый трофей':
+        'Trofeo nascosto',
+    'Трофеи':
+        'Trofei',
+    'Платиновый':
+        'Platino',
+    'Золотой':
+        'Oro',
+    'Серебряный':
+        'Argento',
+    'Бронзовый':
+        'Bronzo',
 }
 
 
@@ -2509,6 +2617,33 @@ FR = {
     'отвечает; ваш публичный адрес: {}':
         'répond ; votre adresse publique : {}',
     "Поддержать проект": 'Soutenir ce projet',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'Le dump du jeu n’a pas de trophées (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Enregistrés quand le jeu les débloque, et affichés dans le jeu',
+    'Ключ трофеев':
+        'Clé des trophées',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        'La clé des trophées PS4 (TrophyKey dans shadPS4), 32 chiffres hexadécimaux : avec elle, les noms et descriptions s’affichent. Conservée sur cet ordinateur. Sans elle, seules les icônes s’affichent',
+    'Неверный ключ трофеев: названия недоступны':
+        'Clé des trophées incorrecte : les noms ne sont pas disponibles',
+    'Получен {}':
+        'Obtenu le {}',
+    'Получено {} из {}':
+        '{} sur {} obtenus',
+    'Скрытый трофей':
+        'Trophée caché',
+    'Трофеи':
+        'Trophées',
+    'Платиновый':
+        'Platine',
+    'Золотой':
+        'Or',
+    'Серебряный':
+        'Argent',
+    'Бронзовый':
+        'Bronze',
 }
 
 
@@ -2986,6 +3121,33 @@ DE = {
     'отвечает; ваш публичный адрес: {}':
         'antwortet; deine öffentliche Adresse: {}',
     "Поддержать проект": 'Dieses Projekt unterstützen',
+    # Trophies page
+    'В дампе игры нет трофеев (sce_sys/trophy)':
+        'Der Spiel-Dump hat keine Trophäen (sce_sys/trophy)',
+    'Записываются, когда игра их открывает, и показываются в игре':
+        'Werden gespeichert, wenn das Spiel sie freischaltet, und im Spiel angezeigt',
+    'Ключ трофеев':
+        'Trophäen-Schlüssel',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
+        'Der Trophäen-Schlüssel der PS4 (TrophyKey in shadPS4), 32 Hexadezimalziffern: damit erscheinen Namen und Beschreibungen. Bleibt auf diesem Computer. Ohne ihn erscheinen nur die Symbole',
+    'Неверный ключ трофеев: названия недоступны':
+        'Falscher Trophäen-Schlüssel: die Namen sind nicht verfügbar',
+    'Получен {}':
+        'Erhalten am {}',
+    'Получено {} из {}':
+        '{} von {} erhalten',
+    'Скрытый трофей':
+        'Versteckte Trophäe',
+    'Трофеи':
+        'Trophäen',
+    'Платиновый':
+        'Platin',
+    'Золотой':
+        'Gold',
+    'Серебряный':
+        'Silber',
+    'Бронзовый':
+        'Bronze',
 }
 
 
