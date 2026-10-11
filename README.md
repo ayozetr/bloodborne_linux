@@ -21,7 +21,8 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
 - **Unlocked frame rate**, capped at your display's refresh rate up to 120 FPS (above that the
   game's own movement timing breaks), or 30/60/90 FPS. Output from 720p to 4K.
 - **Launcher** with every setting in one window, in English, Spanish, Italian, French, German,
-  Portuguese and Russian, like the in-game menu (Insert or L3+R3).
+  Portuguese, Russian and Simplified Chinese. The in-game menu (Insert or L3+R3) has the same
+  languages except Chinese.
 - **Settings in the game's own System menu** as well (Display and Effects pages), in the game's
   language.
 - **Two memory models:** the new one, where the GPU works with the game's memory as in a PC game
