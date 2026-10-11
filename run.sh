@@ -247,9 +247,12 @@ if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
     export SHADPS4_HTTP_HOST_OVERRIDES_JSON
 fi
 # Discord Rich Presence (launcher: Discord; BB_DISCORD=0 turns it off): $$ becomes the game
-# below (exec), and the helper ends with it.
+# below (exec), and the helper ends with it. The game writes its area and co-op partners into
+# BB_PRESENCE_DIR (scripts/discord_presence.py), new for each start.
 if [[ ${BB_DISCORD:-1} != 0 ]]; then
-    presence=(--pid $$)
+    BB_PRESENCE_DIR=$(cd -- "$out" && pwd)/presence; export BB_PRESENCE_DIR
+    rm -rf "$BB_PRESENCE_DIR" && mkdir -p "$BB_PRESENCE_DIR"
+    presence=(--pid $$ --presence-dir "$BB_PRESENCE_DIR")
     [[ ${BB_ONLINE:-0} == 1 ]] && presence+=(--online)
     "$PYTHON" scripts/discord_presence.py "${presence[@]}" </dev/null &
 fi

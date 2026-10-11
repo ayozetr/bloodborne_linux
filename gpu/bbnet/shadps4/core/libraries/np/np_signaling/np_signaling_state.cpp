@@ -3,9 +3,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <mutex>
 #include <random>
+#include <set>
+#include <string>
 #include <string_view>
 
 #include "common/logging/log.h"
@@ -236,6 +240,43 @@ s32 AllocateConnectionIdLocked() {
     return -1;
 }
 
+// bbport: Discord Rich Presence (BB_PRESENCE_DIR, scripts/discord_presence.py): the online IDs
+// of the players this one is connected with, one per line in BB_PRESENCE_DIR/coop, written when
+// a connection is established or removed.
+static void PublishPresenceLocked() {
+    const char* dir = std::getenv("BB_PRESENCE_DIR");
+    if (dir == nullptr || dir[0] == '\0') {
+        return;
+    }
+    std::set<std::string> peers;
+    for (const auto& [cid, ci] : g_connections) {
+        if (ci.state == ConnState::Established && !ci.dead_fired) {
+            peers.emplace(ci.online_id.data,
+                          strnlen(ci.online_id.data, ORBIS_NP_ONLINEID_MAX_LENGTH));
+        }
+    }
+    std::string text;
+    for (const auto& peer : peers) {
+        text += peer + "\n";
+    }
+    static std::string published = "\n";
+    if (text == published) {
+        return;
+    }
+    published = text;
+    const std::string path = std::string(dir) + "/coop";
+    const std::string temp = path + ".tmp";
+    std::FILE* file = std::fopen(temp.c_str(), "w");
+    if (file == nullptr) {
+        return;
+    }
+    std::fwrite(text.data(), 1, text.size(), file);
+    if (std::fclose(file) == 0) {
+        std::rename(temp.c_str(), path.c_str());
+    }
+    LOG_INFO(Lib_NpSignaling, "Presence: connected with {} player(s)", peers.size());
+}
+
 void RemoveConnectionLocked(s32 conn_id) {
     const auto it = g_connections.find(conn_id);
     if (it == g_connections.end()) {
@@ -248,6 +289,7 @@ void RemoveConnectionLocked(s32 conn_id) {
         g_npid_to_conn.erase(key_it);
     }
     g_connections.erase(it);
+    PublishPresenceLocked();
 }
 
 void RemoveContextConnectionsLocked(s32 ctx_id) {
@@ -756,6 +798,7 @@ void EstablishConnection(s32 conn_id, bool peer_activated_hint) {
             ArmStepCalloutLocked(ci, kKeepaliveIntervalMs * 1000);
             ci.last_peer_rx_us = NowUs();
             first_establish = true;
+            PublishPresenceLocked();
 
             if (ci.addr != 0 && ci.port != 0) {
                 established_pkt = MakeControlLocked(ci, ControlKind::Established);

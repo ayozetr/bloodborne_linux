@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <pthread.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #define ERR(n) ((int32_t)(UINT32_C(0x80020000)|(n)))
@@ -304,6 +305,44 @@ static int commit_file(const File *f) {
     sync_directory(f->commit);
     return 0;
 }
+/* Discord Rich Presence (BB_PRESENCE_DIR, scripts/discord_presence.py): the area the player is in.
+ * The game opens one MapStudio file per map it loads (map/mapstudio/m24_01_00_01.msb.dcx), the
+ * player's own first and then the maps around it (Central Yharnam brings the Forbidden Woods): a
+ * map that opens 5 s or more after the previous one starts a new load, and its first map is the
+ * area. BB_PRESENCE_DIR/area holds that map, "m24_01". */
+static void presence_map(const char *guest) {
+    static pthread_mutex_t presence_lock=PTHREAD_MUTEX_INITIALIZER;
+    static struct timespec last;
+    static char area[8];
+    const char *dir=getenv("BB_PRESENCE_DIR"), *p=strcasestr(guest,"/map/mapstudio/");
+    if (!dir || !dir[0] || !p) return;
+    p+=strlen("/map/mapstudio/");
+    if ((p[0]!='m' && p[0]!='M') || strlen(p)<6 || p[3]!='_') return;
+    char map[8];
+    snprintf(map,sizeof(map),"%.6s",p);
+    for (char *c=map;*c;++c) if (*c>='A' && *c<='Z') *c=(char)(*c-'A'+'a');
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC,&now);
+    pthread_mutex_lock(&presence_lock);
+    const double gap=(double)(now.tv_sec-last.tv_sec)+(double)(now.tv_nsec-last.tv_nsec)/1e9;
+    const int new_load=!area[0] || gap>=5.0;
+    if (!new_load) {
+        if (strcmp(map,area)) printf("Presence: %s loaded too (+%.1f s)\n",map,gap);
+    } else if (strcmp(map,area)) {
+        snprintf(area,sizeof(area),"%s",map);
+        char path[1024], temp[1040];
+        snprintf(path,sizeof(path),"%s/area",dir);
+        snprintf(temp,sizeof(temp),"%s.tmp",path);
+        FILE *f=fopen(temp,"w");
+        if (f) {
+            fprintf(f,"%s\n",area);
+            if (fclose(f)==0) rename(temp,path);
+        }
+        printf("Presence: area %s\n",area);
+    }
+    last=now;
+    pthread_mutex_unlock(&presence_lock);
+}
 /* All operations return >=0 or -(host errno); wrappers adapt the convention. */
 static int64_t do_open(const char *guest,int flags,int mode) {
     if (game_path(guest) && (flags & (3|0x8|0x200|0x400|0x800))) return -EROFS;
@@ -331,6 +370,7 @@ static int64_t do_open(const char *guest,int flags,int mode) {
         if (e==ENOENT) { ++missing; printf("Runtime: open(%s) -> not found\n",guest); }
         return -e;
     }
+    presence_map(guest);
     struct stat s;
     Listing *dir=NULL;
     if (!fstat(host,&s) && S_ISDIR(s.st_mode)) dir=list_directory(path);

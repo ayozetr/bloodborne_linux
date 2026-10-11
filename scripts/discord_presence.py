@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Discord Rich Presence while the game runs: "Playing Bloodborne", online or offline, with the
-time played. run.sh starts it next to the game (BB_DISCORD=0 turns it off); it ends with the game.
+"""Discord Rich Presence while the game runs: "Playing Bloodborne", the area the player is in,
+online or offline or the co-op partners, and the time played. run.sh starts it next to the game
+(BB_DISCORD=0 turns it off); it ends with the game.
+
+The game writes what the helper shows into BB_PRESENCE_DIR (--presence-dir): `area`, the map of
+the player's area (src/runtime_file.c), and `coop`, the online IDs of the players connected with
+this one, one per line (the online module, np_signaling_state.cpp).
 
 Discord's local IPC: a Unix socket discord-ipc-N in the runtime directory (also inside the
 Flatpak, Snap and Vesktop sandboxes' directories). Frames are a little-endian op code and length,
@@ -21,6 +26,27 @@ import uuid
 # "bloodborne").
 CLIENT_ID = '1558176258121269389'
 HANDSHAKE, FRAME, CLOSE = 0, 1, 2
+# The areas by map (map/mapstudio/mXX_YY_...): the names of Smithbox's Bloodborne map aliases
+# (github.com/vawser/Smithbox, MIT). The Chalice Dungeons (m29) are one name.
+AREAS = {
+    'm21_00': "Hunter's Dream",
+    'm21_01': 'Abandoned Old Workshop',
+    'm22_00': 'Hemwick Charnel Lane',
+    'm23_00': 'Old Yharnam',
+    'm24_00': 'Cathedral Ward',
+    'm24_01': 'Central Yharnam',
+    'm24_02': 'Upper Cathedral Ward',
+    'm25_00': 'Forsaken Castle Cainhurst',
+    'm26_00': 'Nightmare of Mensis',
+    'm27_00': 'Forbidden Woods',
+    'm28_00': "Yahar'gul, Unseen Village",
+    'm32_00': 'Byrgenwerth',
+    'm33_00': 'Nightmare Frontier',
+    'm34_00': "Hunter's Nightmare",
+    'm35_00': 'Research Hall',
+    'm36_00': 'Fishing Hamlet',
+}
+CHALICE_DUNGEON = 'Chalice Dungeon'
 # Where Discord clients put their socket, relative to the runtime/temporary directory.
 SUBDIRS = ('', 'app/com.discordapp.Discord', 'app/com.discordapp.DiscordCanary',
            'app/dev.vencord.Vesktop', '.flatpak/com.discordapp.Discord/xdg-run',
@@ -76,12 +102,43 @@ def connect(client_id, env=os.environ):
     return None
 
 
-def activity(online, start):
-    return {
-        'details': 'Online' if online else 'Offline',
+def area_name(map_id):
+    """The area of a map ("m24_01"), or None for an unknown one."""
+    map_id = (map_id or '').strip().lower()
+    if map_id.startswith('m29_'):
+        return CHALICE_DUNGEON
+    return AREAS.get(map_id)
+
+
+def read_state(directory):
+    """(map, co-op partners) from the game's presence directory; (None, []) without it."""
+    if directory is None:
+        return None, []
+    directory = Path(directory)
+    try:
+        area = (directory / 'area').read_text(encoding='utf-8').strip() or None
+    except OSError:
+        area = None
+    try:
+        lines = (directory / 'coop').read_text(encoding='utf-8', errors='replace').splitlines()
+    except OSError:
+        lines = []
+    return area, [line.strip() for line in lines if line.strip()]
+
+
+def activity(online, start, area=None, partners=()):
+    """The area on the first line and the session on the second: "Co-op with <partners>",
+    "Online" or "Offline". Before the game is in an area, the session alone."""
+    session = (f'Co-op with {", ".join(partners)}' if partners
+               else 'Online' if online else 'Offline')
+    value = {
+        'details': area_name(area) or session,
         'timestamps': {'start': start},
         'assets': {'large_image': 'bloodborne', 'large_text': 'Bloodborne · native Linux port'},
     }
+    if area_name(area):
+        value['state'] = session
+    return value
 
 
 def set_activity(sock, pid, value):
@@ -106,22 +163,29 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--pid', type=int, required=True, help='the game process: ends with it')
     parser.add_argument('--online', action='store_true')
+    parser.add_argument('--presence-dir', help="the game's area and co-op partners")
     parser.add_argument('--retry', type=float, default=15.0, help='seconds between attempts')
     a = parser.parse_args()
     start = int(time.time())
     sock = None
+    shown = None
     while alive(a.pid):
+        value = activity(a.online, start, *read_state(a.presence_dir))
         if sock is None:
             sock = connect(CLIENT_ID)
-            if sock is not None:
-                try:
-                    set_activity(sock, a.pid, activity(a.online, start))
+            shown = None
+        if sock is not None and value != shown:
+            # Discord takes a few updates a minute; the area changes at loading screens only.
+            try:
+                set_activity(sock, a.pid, value)
+                if shown is None:
                     print('Discord: Rich Presence on', flush=True)
-                except (OSError, ConnectionError, ValueError) as error:
-                    print(f'Discord: {error}', flush=True)
-                    sock.close()
-                    sock = None
-        else:
+                shown = value
+            except (OSError, ConnectionError, ValueError) as error:
+                print(f'Discord: {error}', flush=True)
+                sock.close()
+                sock = None
+        elif sock is not None:
             # Discord closed or restarted: connect again on the next round.
             try:
                 sock.settimeout(0)
