@@ -20,8 +20,8 @@ class GameLanguageTests(unittest.TestCase):
         self.assertEqual(bbport_i18n.system_game_language({'LC_ALL': 'de_DE', 'LANG': 'es_ES'}), 4)
 
 
-# The languages this fork keeps complete; ZH_CN comes from upstream and is not maintained here.
-MAINTAINED = ('EN', 'ES', 'IT', 'FR', 'DE', 'PT_BR')
+# The languages this fork keeps complete.
+MAINTAINED = ('EN', 'ES', 'IT', 'FR', 'DE', 'PT_BR', 'ZH_CN')
 CYRILLIC = re.compile('[А-Яа-яЁё]')
 
 
@@ -61,7 +61,7 @@ class TranslationTests(unittest.TestCase):
                 self.assertEqual(sorted(t for t in texts if t not in table), [])
 
     def test_translations_keep_the_placeholders(self):
-        for language in (*MAINTAINED, 'ZH_CN'):
+        for language in MAINTAINED:
             for key, text in getattr(bbport_i18n, language).items():
                 with self.subTest(language=language, key=key[:40]):
                     self.assertEqual(len(fields(text)), len(fields(key)))
