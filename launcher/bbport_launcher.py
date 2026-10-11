@@ -123,6 +123,17 @@ TWEAKS = [
     ("tweak_easy_run", "Бег с меньшим наклоном стика", "Бег примерно с 70% наклона стика вместо 90%"),
     ("tweak_ragdoll", "Физика тел как в Dark Souls", "Тела и предметы разлетаются от ударов"),
 ]
+# Loading and smoothness (patches from bbhost, applied at start): bbport.ini key, title, subtitle,
+# default.
+STREAMING = [
+    ("tweak_quick_reentry", "Быстрая загрузка после смерти",
+     "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не "
+     "минимум 12 с", True),
+    ("tweak_fast_deflate", "Без рывка каждые ~50 с",
+     "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с", True),
+    ("tweak_post_processors", "Третий поток подготовки ресурсов",
+     "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально", False),
+]
 MODEL_LOD = [("Как в игре", "0"), ("Максимальная (-2)", "-2"), ("Ниже (1)", "1"),
              ("Минимальная (2)", "2")]
 FPS_MODES = [("Без ограничения (патч)", "uncap"), ("60", "60"), ("90", "90"),
@@ -219,6 +230,7 @@ INI_DEFAULTS = {
     "mouse_invert_y": "0",
     **{key: "1" if default else "0" for key, _, default in EFFECTS},
     **{key: "0" for key, _, _ in CHEATS + TWEAKS},
+    **{key: "1" if default else "0" for key, _, _, default in STREAMING},
 }
 
 
@@ -902,6 +914,16 @@ class LauncherWindow(Adw.ApplicationWindow):
         effects.add(self.skip_network_row)
         page.add(effects)
 
+        streaming = Adw.PreferencesGroup(title=tr("Загрузки и плавность"),
+                                         description=tr("Патчи игры из bbhost, применяются при запуске"))
+        self.streaming_rows = {}
+        for key, title, subtitle, default in STREAMING:
+            row = Adw.SwitchRow(title=tr(title), subtitle=tr(subtitle),
+                                active=self.ini.get(key, "1" if default else "0") == "1")
+            self.streaming_rows[key] = row
+            streaming.add(row)
+        page.add(streaming)
+
         frames = Adw.PreferencesGroup(title=tr("Частота кадров"))
         self.fps_row = combo_row(tr("Режим"), tr("Какой патч частоты кадров применить к игре"),
                                  FPS_MODES, self.settings["fps_mode"])
@@ -1268,6 +1290,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
+            **{key: "1" if row.get_active() else "0" for key, row in self.streaming_rows.items()},
         })
         save_ini(self.ini, self.ini_lines)
         self.ini, self.ini_lines = load_ini()

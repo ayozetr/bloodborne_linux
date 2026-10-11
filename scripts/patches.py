@@ -50,6 +50,10 @@ EFFECTS={
     'tweak_no_camera_rotation':(None,'Disable Camera Auto Rotation via Movement'),
     'tweak_easy_run':(None,'Sensitive Analog Input (easier to run)'),
     'tweak_ragdoll':(None,'DS1-like physics'),
+    # Loading and smoothness (from bbhost); the first two are on unless turned off.
+    'tweak_quick_reentry':(None,'Quick Re-entry'),
+    'tweak_fast_deflate':(None,'Fast Run-time Deflate'),
+    'tweak_post_processors':(None,'All Resource Post-Processors In Play'),
 }
 # Intel CPUs: the game's tone mapping turns black (DLC areas most; reported as darker than on the
 # PS4): the game code runs natively, and Intel's approximate float instructions differ from the
@@ -142,11 +146,15 @@ def validate_patch_requirements(names, game):
     return names
 
 
+# Effects on when bbport.ini does not name them (files from before they existed).
+DEFAULT_ON={'tweak_quick_reentry','tweak_fast_deflate'}
+
+
 def effect_patches(settings):
     names=[]
     for key,(off,on) in EFFECTS.items():
-        if key not in settings: continue
-        name=on if settings[key]=='1' else off
+        if key not in settings and key not in DEFAULT_ON: continue
+        name=on if settings.get(key,'1')=='1' else off
         if name: names.append(name)
     # Enemy Control and the free camera use the same buttons: the free camera wins.
     if 'Enemy Control' in names and 'Restore Debug Camera' in names:

@@ -89,9 +89,21 @@ class NativeUiTests(unittest.TestCase):
         self.assertIsNone(scaled_sizes({'output_res': '1280x720', 'upscaler': 'taa', 'preset': '3'}))
 
 
+class StreamingPatchTests(unittest.TestCase):
+    def test_bbhost_loading_patches_on_unless_turned_off(self):
+        on = ['Quick Re-entry', 'Fast Run-time Deflate']
+        self.assertEqual(effect_patches({}), on)
+        self.assertEqual(effect_patches({'tweak_quick_reentry': '0'}), on[1:])
+        self.assertEqual(effect_patches({'tweak_post_processors': '1'}),
+                         on + ['All Resource Post-Processors In Play'])
+        self.assertEqual(len(compile_patches(XML, on + ['All Resource Post-Processors In Play'],
+                                             '01.09', SEGMENTS)), 3)
+
+
 class DebugPatchTests(unittest.TestCase):
     def test_camera_patch_is_optional_and_compatible_with_fps_and_debug_menu(self):
-        self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0'}), [])
+        self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0',
+                                         'tweak_quick_reentry': '0', 'tweak_fast_deflate': '0'}), [])
         camera = effect_patches({'debug_camera': '1'})
         writes = compile_patches(XML, camera, '01.09', SEGMENTS)
         self.assertGreater(len(writes), 0)

@@ -3445,4 +3445,24 @@
             <Line Type="bytes" Address="0x01f39030" Value="554889e5534883ec184889fb488d05ed2d80034889042448897424084889e6e87c0c01004889d84883c4185b5dc3"/>
         </PatchList>
     </Metadata>
+    <!-- From droogie/bbhost (patches/*.toml), where each site is checked against its original
+         bytes, noted here in each comment. -->
+    <Metadata Title="Bloodborne" Name="Quick Re-entry" Note="A load after a death or lamp travel ends when the area is ready (2-3 s), not after a 12-second minimum. The multiplayer wait is the game's." Author="droogie (bbhost)" PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <!-- in-game step's first state: je -> jmp to the 0-second minimum; was 41 80 BC 24 E4 00 00 00 00 74 0A C5 FA 10 05 -->
+            <Line Type="bytes" Address="0x01D38B59" Value="4180BC24E400000000EB0AC5FA1005"/>
+        </PatchList>
+    </Metadata>
+    <Metadata Title="Bloodborne" Name="Fast Run-time Deflate" Note="The game compresses the player's recording every ~50 s on the main thread at deflate level 9 (~23 ms in one frame); level 1 does it in a fraction of that." Author="droogie (bbhost)" PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <!-- "algorithm=deflate;level=9" -> level=1; was 3D 39 00 -->
+            <Line Type="bytes" Address="0x04D3A79A" Value="3D3100"/>
+        </PatchList>
+    </Metadata>
+    <Metadata Title="Bloodborne" Name="All Resource Post-Processors In Play" Note="The third of the resource system's post-processor threads, held during play, keeps running. Experimental." Author="droogie (bbhost)" PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <!-- mov dword [rbx+0xe50], 0 -> 2; was C7 83 50 0E 00 00 00 00 00 00 -->
+            <Line Type="bytes" Address="0x018281A8" Value="C783500E000002000000"/>
+        </PatchList>
+    </Metadata>
 </Patch>

@@ -547,6 +547,14 @@ EN = {
     "эта учётная запись уже в сети (игра запущена?)": "this account is already signed in (is the game running?)",
     "вход выполнен": "signed in",
     "вход не удался ({})": "sign-in failed ({})",
+    "Загрузки и плавность": "Loading and smoothness",
+    "Патчи игры из bbhost, применяются при запуске": "Game patches from bbhost, applied at start",
+    "Быстрая загрузка после смерти": "Quick loading after death",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "A load after a death or lamp travel lasts while the area loads (2–3 s), not a 12-second minimum",
+    "Без рывка каждые ~50 с": "No stutter every ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "The game compresses the player's recording faster: a ~23 ms stutter about every 50 s goes away",
+    "Третий поток подготовки ресурсов": "Third resource preparation thread",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "During play three resource preparation threads run, not two. Experimental",
 }
 
 PT_BR = {
@@ -1148,6 +1156,14 @@ PT_BR = {
     "эта учётная запись уже в сети (игра запущена?)": "esta conta já está conectada (o jogo está aberto?)",
     "вход выполнен": "login feito",
     "вход не удался ({})": "falha no login ({})",
+    "Загрузки и плавность": "Carregamento e fluidez",
+    "Патчи игры из bbhost, применяются при запуске": "Patches do jogo do bbhost, aplicados ao iniciar",
+    "Быстрая загрузка после смерти": "Carregamento rápido após morrer",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "O carregamento após morrer ou viajar pela lanterna dura o tempo da área (2–3 s), não um mínimo de 12 s",
+    "Без рывка каждые ~50 с": "Sem travada a cada ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "O jogo comprime mais rápido o registro do jogador: some uma travada de ~23 ms a cada uns 50 s",
+    "Третий поток подготовки ресурсов": "Terceira thread de preparação de recursos",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "Durante o jogo rodam três threads de preparação de recursos, não duas. Experimental",
 }
 
 
@@ -1660,6 +1676,14 @@ ES = {
     "эта учётная запись уже в сети (игра запущена?)": "esta cuenta ya tiene la sesión iniciada (¿está el juego abierto?)",
     "вход выполнен": "sesión iniciada",
     "вход не удался ({})": "no se pudo iniciar sesión ({})",
+    "Загрузки и плавность": "Cargas y fluidez",
+    "Патчи игры из bbhost, применяются при запуске": "Parches del juego de bbhost, se aplican al arrancar",
+    "Быстрая загрузка после смерти": "Carga rápida al morir",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "La carga tras morir o viajar con una lámpara dura lo que tarda la zona (2–3 s), no un mínimo de 12 s",
+    "Без рывка каждые ~50 с": "Sin tirón cada ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "El juego comprime más rápido el registro del jugador: desaparece un tirón de ~23 ms cada unos 50 s",
+    "Третий поток подготовки ресурсов": "Tercer hilo de preparación de recursos",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "Durante el juego funcionan tres hilos de preparación de recursos, no dos. Experimental",
 }
 
 
@@ -2172,6 +2196,14 @@ IT = {
     "эта учётная запись уже в сети (игра запущена?)": "questo account ha già effettuato l'accesso (il gioco è aperto?)",
     "вход выполнен": "accesso riuscito",
     "вход не удался ({})": "accesso non riuscito ({})",
+    "Загрузки и плавность": "Caricamenti e fluidità",
+    "Патчи игры из bbhost, применяются при запуске": "Patch del gioco da bbhost, applicate all'avvio",
+    "Быстрая загрузка после смерти": "Caricamento rapido dopo la morte",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "Il caricamento dopo la morte o un viaggio dalla lanterna dura quanto serve all'area (2–3 s), non un minimo di 12 s",
+    "Без рывка каждые ~50 с": "Nessuno scatto ogni ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "Il gioco comprime più in fretta la registrazione del giocatore: sparisce uno scatto di ~23 ms ogni 50 s circa",
+    "Третий поток подготовки ресурсов": "Terzo thread di preparazione delle risorse",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "Durante il gioco lavorano tre thread di preparazione delle risorse, non due. Sperimentale",
 }
 
 
@@ -2684,6 +2716,14 @@ FR = {
     "эта учётная запись уже в сети (игра запущена?)": "ce compte est déjà connecté (le jeu est-il lancé ?)",
     "вход выполнен": "connecté",
     "вход не удался ({})": "échec de la connexion ({})",
+    "Загрузки и плавность": "Chargements et fluidité",
+    "Патчи игры из bbhost, применяются при запуске": "Patchs du jeu issus de bbhost, appliqués au démarrage",
+    "Быстрая загрузка после смерти": "Chargement rapide après la mort",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "Le chargement après une mort ou un voyage par lanterne dure le temps de charger la zone (2–3 s), pas 12 s minimum",
+    "Без рывка каждые ~50 с": "Plus de saccade toutes les ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "Le jeu compresse plus vite l'enregistrement du joueur : une saccade de ~23 ms toutes les 50 s environ disparaît",
+    "Третий поток подготовки ресурсов": "Troisième thread de préparation des ressources",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "En jeu, trois threads de préparation des ressources tournent, et non deux. Expérimental",
 }
 
 
@@ -3196,6 +3236,14 @@ DE = {
     "эта учётная запись уже в сети (игра запущена?)": "dieses Konto ist bereits angemeldet (läuft das Spiel?)",
     "вход выполнен": "angemeldet",
     "вход не удался ({})": "Anmeldung fehlgeschlagen ({})",
+    "Загрузки и плавность": "Laden und Flüssigkeit",
+    "Патчи игры из bbhost, применяются при запуске": "Spiel-Patches aus bbhost, beim Start angewendet",
+    "Быстрая загрузка после смерти": "Schnelles Laden nach dem Tod",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "Das Laden nach dem Tod oder einer Laternenreise dauert so lange wie das Gebiet (2–3 s), nicht mindestens 12 s",
+    "Без рывка каждые ~50 с": "Kein Ruckler alle ~50 s",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "Das Spiel komprimiert die Spieleraufzeichnung schneller: ein Ruckler von ~23 ms etwa alle 50 s verschwindet",
+    "Третий поток подготовки ресурсов": "Dritter Thread zur Ressourcenvorbereitung",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "Im Spiel laufen drei Threads zur Ressourcenvorbereitung statt zwei. Experimentell",
 }
 
 
@@ -3650,6 +3698,14 @@ ZH_CN = {
     "эта учётная запись уже в сети (игра запущена?)": "该账户已经登录（游戏正在运行吗？）",
     "вход выполнен": "已登录",
     "вход не удался ({})": "登录失败（{}）",
+    "Загрузки и плавность": "加载与流畅度",
+    "Патчи игры из bbhost, применяются при запуске": "来自 bbhost 的游戏补丁，在启动时生效",
+    "Быстрая загрузка после смерти": "死亡后快速加载",
+    "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "死亡或通过提灯传送后的加载只持续区域加载所需的时间（2–3 秒），而不是至少 12 秒",
+    "Без рывка каждые ~50 с": "消除每约 50 秒一次的卡顿",
+    "Игра быстрее сжимает запись игрока: пропадает рывок ~23 мс примерно каждые 50 с": "游戏更快地压缩玩家记录：约每 50 秒一次、约 23 毫秒的卡顿消失",
+    "Третий поток подготовки ресурсов": "第三个资源准备线程",
+    "Во время игры работают три потока подготовки ресурсов, а не два. Экспериментально": "游戏中运行三个资源准备线程，而不是两个。实验性",
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
