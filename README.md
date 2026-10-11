@@ -14,7 +14,8 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
 ## Features
 
 - **Online play (beta)** through [The Hunter's Dream](https://thehuntersdream.com) and shadNet:
-  messages, bloodstains, ghosts, bells and summons. Linux and Windows players can play together.
+  messages, bloodstains, ghosts, bells and summons. Linux and Windows players can play together,
+  through shadPS4's public server or [one of your own](docs/SERVER.md).
 - **Upscaling:** AMD FSR 3.1, FSR 4 and FSR 4.1.1, **NVIDIA DLSS** on GeForce RTX, and
   native-resolution TAA.
 - **Unlocked frame rate**, capped at your display's refresh rate up to 120 FPS (above that the
@@ -71,18 +72,24 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency from `shell
 
 ### Online play
 
-1. Register a shadNet account at [shadnet.shadps4.net](https://shadnet.shadps4.net).
-2. In the launcher, open **Online**, turn on **Play online** and enter your account name (not
-   your email) and password. **Test the connection**: all three servers should be reachable.
+1. Register a shadNet account at [shadnet.shadps4.net](https://shadnet.shadps4.net), or get one
+   from the owner of your group's own server.
+2. In the launcher, open **Online**, turn on **Play online**, choose the shadNet server and enter
+   your account name (not your email) and password. **Test the connection**: every line should
+   be green.
 3. Start the game and choose online at the title screen.
 
 Everyone in a session needs game version 1.09 and the same servers. Turn cheats off when you
 play with others.
 
-Co-op connects the players directly over UDP. With ufw or firewalld on, the launcher's **Online**
-page says so and gives the commands: pin the port with `SHADPS4_P2P_PORT=3658` in the extra
-variables, open it (`sudo ufw allow 3658/udp`), and for UPnP let the router's answers in
-(`sudo ufw allow from <router> proto udp`).
+**Co-op needs your own server for now:** shadPS4's public server does not answer on its UDP port,
+so summons do not connect through it (messages, bloodstains and ghosts do).
+[docs/SERVER.md](docs/SERVER.md) sets one up with Docker and Tailscale.
+
+Co-op connects the players directly over UDP. UPnP opens the port on the router by itself; with
+ufw or firewalld on, the launcher's **Online** page says so and gives the commands: pin the
+**Co-op port** (for example 3658), open it (`sudo ufw allow 3658/udp`), and for UPnP let the
+router's answers in (`sudo ufw allow from <router> proto udp`). [More in docs/ONLINE.md](docs/ONLINE.md).
 
 ### DLSS
 

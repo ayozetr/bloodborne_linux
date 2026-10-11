@@ -5,6 +5,9 @@
 - [COMPATIBILITY.md](COMPATIBILITY.md): which releases of Bloodborne run, and which have been
   checked.
 - [MODS.en.md](MODS.en.md): file mods and third-party patches.
+- [ONLINE.md](ONLINE.md): online play and co-op: the account, the bells, the ports.
+- [SERVER.md](SERVER.md): hosting your own co-op server (shadnet-p2p) for a group of friends.
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md): common problems and what to do.
 
 ## For this fork
 

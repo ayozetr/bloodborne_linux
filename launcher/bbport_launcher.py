@@ -184,13 +184,17 @@ DEFAULTS = {
     "extra_env": "",
     "discord": True,
     # Co-op (Online page): off by default; shadPS4's public shadNet server and The Hunter's Dream.
+    # online_server_kind: "public" or "own" (docs/SERVER.md); unset, online.server_kind decides.
     "online": False,
     "online_community": online.COMMUNITY_SERVER,
+    "online_server_kind": None,
     "online_server": online.SHADNET_SERVER,
     "online_webapi": "",
     "online_npid": "",
     "online_password": "",
     "online_upnp": True,
+    "online_p2p_port": 0,  # 0: a random port each time (SHADPS4_P2P_PORT)
+    "online_seamless": False,
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -341,6 +345,14 @@ def fsr411_build_command(upscaler, loader=None):
     return command + ([str(loader)] if loader else []), env
 
 
+# The Online page's shadNet server choice (online.server_kind).
+SERVER_KINDS = [
+    ("Публичный сервер shadPS4", "public", "srv.shadps4.net:31313"),
+    ("Свой сервер", "own", "shadnet-p2p: на вашем ПК или VPS"),
+]
+SERVER_GUIDE_URL = f"{bbport_update.REPOSITORY_URL}/blob/main/docs/SERVER.md"
+
+
 def online_module():
     """The online module beside the GPU library (gpu/bbnet; a build without its libraries has none),
     or BB_NET_MODULE (the AppImage's copy)."""
@@ -413,15 +425,7 @@ def game_environment(s):
         env["BB_VK_VALIDATION"] = "1"
     env["BB_DISCORD"] = "1" if s.get("discord", True) else "0"
     if s.get("online") and online_module():
-        server = s["online_server"].strip() or online.SHADNET_SERVER
-        community = online.community_address(s["online_community"])
-        env["BB_ONLINE"] = "1"
-        env["BB_SHADNET_SERVER"] = server
-        env["BB_SHADNET_WEBAPI"] = online.webapi_setting(s["online_webapi"], server, community)
-        env["BB_SHADNET_NPID"] = s["online_npid"].strip()
-        env["BB_SHADNET_PASSWORD"] = s["online_password"]
-        env["BB_UPNP"] = "1" if s["online_upnp"] else "0"
-        env["BB_COMMUNITY_SERVER"] = community
+        env.update(online.environment(s))
     for item in s["extra_env"].split():
         if "=" in item:
             key, value = item.split("=", 1)
@@ -1197,12 +1201,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["mods_enabled"] = self.mods_enabled_row.get_active()
         s["discord"] = self.discord_row.get_active()
         s["online"] = self.online_row.get_active()
-        s["online_community"] = self.community_row.get_text().strip()
-        s["online_server"] = self.server_row.get_text().strip()
-        s["online_webapi"] = self.webapi_row.get_text().strip()
-        s["online_npid"] = self.npid_row.get_text().strip()
-        s["online_password"] = self.password_row.get_text()
-        s["online_upnp"] = self.upnp_row.get_active()
+        s.update(self.online_settings())
         self.save_mod_profile()
         self.save_patch_profile()
         save_settings(s)
@@ -1454,15 +1453,27 @@ class LauncherWindow(Adw.ApplicationWindow):
         game.add(self.community_row)
         page.add(game)
 
-        coop = Adw.PreferencesGroup(
-            title=tr("Сервер кооператива (колокола и призывы)"),
-            description=tr("srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера "
-                           "укажите host:port от его владельца. WebAPI: оставьте пустым, тогда "
-                           "берётся адрес сервера с портом 31315"))
-        self.server_row = Adw.EntryRow(title=tr("Адрес сервера"), text=s["online_server"])
-        self.webapi_row = Adw.EntryRow(title=tr("Адрес WebAPI"), text=s["online_webapi"])
-        coop.add(self.server_row)
-        coop.add(self.webapi_row)
+        coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
+        self.server_kind_row = combo_row(tr("Сервер shadNet"), None, SERVER_KINDS, online.server_kind(s))
+        coop.add(self.server_kind_row)
+        own = s["online_server"] if s["online_server"] != online.SHADNET_SERVER else ""
+        self.server_row = Adw.EntryRow(title=tr("Адрес сервера (host:port)"), text=own)
+        self.webapi_row = Adw.EntryRow(title=tr("Адрес WebAPI (пусто: порт 31315 сервера)"),
+                                       text=s["online_webapi"])
+        self.seamless_row = Adw.SwitchRow(
+            title=tr("Бесшовный кооператив (экспериментально)"),
+            subtitle=tr("Призывы между разными локациями. Только если на сервере "
+                        "BloodborneSeamlessCoop=true, и у всех игроков так же"),
+            active=s["online_seamless"])
+        guide = Adw.ActionRow(title=tr("Как запустить свой сервер"), subtitle=SERVER_GUIDE_URL,
+                              activatable=True)
+        guide.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
+        guide.connect("activated", lambda _row: self.open_uri(SERVER_GUIDE_URL))
+        for row in (self.server_row, self.webapi_row, self.seamless_row, guide):
+            coop.add(row)
+        self.own_server_rows = (self.server_row, self.webapi_row, self.seamless_row)
+        self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
+        self.show_server_kind()
         page.add(coop)
 
         account = Adw.PreferencesGroup(
@@ -1484,18 +1495,24 @@ class LauncherWindow(Adw.ApplicationWindow):
                                       subtitle=tr("Выключите при Tailscale или другом VPN"),
                                       active=s["online_upnp"])
         connection.add(self.upnp_row)
-        # ufw and firewalld drop the peers' packets and, for UPnP, the router's answers.
+        self.p2p_port_row = Adw.SpinRow.new_with_range(0, 65535, 1)
+        self.p2p_port_row.set_title(tr("Порт кооператива (UDP)"))
+        self.p2p_port_row.set_subtitle(tr("0: случайный при каждом запуске. Закрепите его, чтобы "
+                                          "открыть в брандмауэре или на роутере вручную"))
+        self.p2p_port_row.set_value(int(s["online_p2p_port"] or 0))
+        connection.add(self.p2p_port_row)
+        # ufw and firewalld drop the peers' packets and, for UPnP, the router's answers: UPnP opens
+        # the port on the router only.
+        self.firewall_rows = []
+        gateway = online.default_gateway()
         for firewall in online.active_firewalls():
-            port_rule, router_rule = online.firewall_commands(firewall, online.default_gateway())
-            lines = [tr("Кооператив принимает входящие соединения по UDP. Закрепите порт "
-                        "(SHADPS4_P2P_PORT={} в «{}») и откройте его: {}").format(
-                         online.P2P_PORT, tr("Доп. переменные (ИМЯ=значение через пробел)"), port_rule)]
-            if router_rule:
-                lines.append(tr("Для UPnP нужны ответы роутера: {}").format(router_rule))
             warning = Adw.ActionRow(title=tr("Включён брандмауэр: {}").format(firewall),
-                                    subtitle="\n".join(lines), subtitle_selectable=True)
+                                    subtitle_selectable=True)
             warning.add_prefix(Gtk.Image(icon_name="dialog-warning-symbolic"))
+            self.firewall_rows.append((warning, firewall, gateway))
             connection.add(warning)
+        self.p2p_port_row.connect("notify::value", lambda *_: self.show_firewall_rows())
+        self.show_firewall_rows()
         test = Adw.ActionRow(title=tr("Проверить соединение"))
         self.test_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
         self.test_button.connect("clicked", self.on_test_connection)
@@ -1506,15 +1523,42 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(connection)
         return page
 
-    def online_addresses(self):
-        server = self.server_row.get_text().strip() or online.SHADNET_SERVER
-        community = online.community_address(self.community_row.get_text())
-        webapi = online.webapi_setting(self.webapi_row.get_text(), server, community)
-        return server, webapi, community
+    def online_settings(self):
+        """The Online page's settings (the keys of DEFAULTS)."""
+        return {
+            "online_community": self.community_row.get_text().strip(),
+            "online_server_kind": combo_value(self.server_kind_row),
+            "online_server": self.server_row.get_text().strip(),
+            "online_webapi": self.webapi_row.get_text().strip(),
+            "online_npid": self.npid_row.get_text().strip(),
+            "online_password": self.password_row.get_text(),
+            "online_upnp": self.upnp_row.get_active(),
+            "online_p2p_port": int(self.p2p_port_row.get_value()),
+            "online_seamless": self.seamless_row.get_active(),
+        }
+
+    def show_server_kind(self):
+        own = combo_value(self.server_kind_row) == "own"
+        for row in self.own_server_rows:
+            row.set_visible(own)
+
+    def show_firewall_rows(self):
+        port = int(self.p2p_port_row.get_value())
+        for row, firewall, gateway in self.firewall_rows:
+            port_rule, router_rule = online.firewall_commands(firewall, gateway, port or online.P2P_PORT)
+            lines = [tr("UPnP открывает порт только на роутере; брандмауэр этого компьютера всё "
+                        "равно блокирует кооператив. Откройте порт: {}").format(port_rule)]
+            if not port:
+                lines.insert(0, tr("Закрепите порт кооператива выше (например, {}): случайный "
+                                   "порт в брандмауэре не открыть").format(online.P2P_PORT))
+            if router_rule:
+                lines.append(tr("Для UPnP нужны ответы роутера: {}").format(router_rule))
+            row.set_subtitle(GLib.markup_escape_text("\n".join(lines)))
 
     def on_test_connection(self, _button):
-        server, webapi, community = self.online_addresses()
-        names = {"game": tr("Игровой сервер"), "shadnet": tr("Сервер shadNet"), "webapi": "WebAPI"}
+        server, webapi, community = online.addresses(self.online_settings())
+        names = {"game": tr("Игровой сервер"), "shadnet": tr("Сервер shadNet"),
+                 "stun": tr("UDP сервера shadNet (призывы)"), "webapi": "WebAPI"}
         for row in self.test_rows:
             self.connection_group.remove(row)
         self.test_rows = []
@@ -1523,10 +1567,15 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def show(results):
             for name, address, ok, detail in results:
+                if name == "stun" and ok:
+                    status = tr("отвечает; ваш публичный адрес: {}").format(detail)
+                elif name == "stun" and detail == "timeout":
+                    status = tr("не отвечает: призывы не соединятся")
+                else:
+                    status = tr("доступен") if ok else f'{tr("недоступен")} ({detail})'
                 # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
                 row = Adw.ActionRow(title=GLib.markup_escape_text(f"{names[name]}: {address}"),
-                                    subtitle=GLib.markup_escape_text(
-                                        tr("доступен") if ok else f'{tr("недоступен")} ({detail})'))
+                                    subtitle=GLib.markup_escape_text(status))
                 row.add_prefix(Gtk.Image(icon_name="object-select-symbolic" if ok else "dialog-warning-symbolic"))
                 self.connection_group.add(row)
                 self.test_rows.append(row)

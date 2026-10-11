@@ -209,9 +209,6 @@ EN = {
     "Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн": "This build has no online module (libbbnet.so): offline play only",
     'Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email': 'The Online ID is the account name (NPID) you registered on the server, not your email address',
     'UPnP (открыть порт на роутере автоматически)': 'UPnP (open a port on the router automatically)',
-    'srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315': "srv.shadps4.net:31313 is shadPS4's public server. For a private server, enter host:port from the person who runs it. WebAPI: leave it empty to use the server address with port 31315",
-    'Адрес WebAPI': 'WebAPI address',
-    'Адрес сервера': 'Server address',
     'Выключено: игра остаётся офлайн, как раньше': 'Off: the game stays offline, as before',
     'Выключите при Tailscale или другом VPN': 'Turn it off with Tailscale or another VPN',
     'Играть онлайн': 'Play online',
@@ -377,9 +374,6 @@ EN = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Game server (messages, bloodstains, ghosts)",
     "Игровой сервер": "Game server",
     "Сервер кооператива (колокола и призывы)": "Co-op server (bells and summons)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 is shadPS4's public server. For a private server, enter host:port from the person who runs it. WebAPI: leave it empty to use the server address with port 31315",
-    "Адрес сервера": "Server address",
-    "Адрес WebAPI": "WebAPI address",
     "Учётная запись": "Account",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Your shadNet account name, not your email. Register at shadnet.shadps4.net or ask the owner of a private server. The password is saved on this computer with the launcher settings",
     "Пароль": "Password",
@@ -427,8 +421,6 @@ EN = {
         "The Americas",
     "Включён брандмауэр: {}":
         "Firewall on: {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "Co-op takes incoming UDP connections. Pin the port (SHADPS4_P2P_PORT={} in “{}”) and open it: {}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP needs the router's answers: {}",
     "О программе":
@@ -485,6 +477,39 @@ EN = {
         "GNU GPL v2 or later. No game files included: Bloodborne belongs to Sony Interactive Entertainment and FromSoftware",
     "Проверить сейчас":
         "Check now",
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0: a random port each time. Pin it to open it in a firewall or on the router by hand',
+    'UDP сервера shadNet (призывы)':
+        "shadNet server's UDP (summons)",
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        "UPnP opens the port on the router only; this computer's firewall still blocks co-op. Open the port: {}",
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        "WebAPI address (empty: the server's port 31315)",
+    'Адрес сервера (host:port)':
+        'Server address (host:port)',
+    'Бесшовный кооператив (экспериментально)':
+        'Seamless co-op (experimental)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Pin the co-op port above (for example {}): a random port cannot be opened in a firewall',
+    'Как запустить свой сервер':
+        'How to host your own server',
+    'Порт кооператива (UDP)':
+        'Co-op port (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Summons between different areas. Only when the server has BloodborneSeamlessCoop=true, and every player turns it on too',
+    'Публичный сервер shadPS4':
+        "shadPS4's public server",
+    'Свой сервер':
+        'Your own server',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p: on your PC or a VPS',
+    'Сервер shadNet':
+        'shadNet server',
+    'не отвечает: призывы не соединятся':
+        'no answer: summons will not connect',
+    'отвечает; ваш публичный адрес: {}':
+        'answers; your public address: {}',
 }
 
 PT_BR = {
@@ -749,9 +774,6 @@ PT_BR = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor do jogo (mensagens, manchas de sangue, fantasmas)",
     "Игровой сервер": "Servidor do jogo",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (sinos e invocações)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 é o servidor público do shadPS4. Para um servidor privado, informe o host:porta de quem o administra. WebAPI: deixe vazio para usar o endereço do servidor com a porta 31315",
-    "Адрес сервера": "Endereço do servidor",
-    "Адрес WebAPI": "Endereço da WebAPI",
     "Учётная запись": "Conta",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "O nome da sua conta shadNet, não o e-mail. Registre-se em shadnet.shadps4.net ou peça ao dono de um servidor privado. A senha fica salva neste computador com as configurações do launcher",
     "Пароль": "Senha",
@@ -916,8 +938,6 @@ PT_BR = {
         "Américas",
     "Включён брандмауэр: {}":
         "Firewall ativo: {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "O cooperativo recebe conexões UDP de entrada. Fixe a porta (SHADPS4_P2P_PORT={} em “{}”) e abra-a: {}",
     "Для UPnP нужны ответы роутера: {}":
         "O UPnP precisa das respostas do roteador: {}",
     "О программе":
@@ -1021,6 +1041,39 @@ PT_BR = {
         'Esta build não tem a ponte do DLSS (libbbport_dlss.so): o DLSS não vai funcionar',
     'Это не библиотека DLSS':
         'Esta não é a biblioteca do DLSS',
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0: uma aleatória a cada vez. Fixe-a para abri-la no firewall ou manualmente no roteador',
+    'UDP сервера shadNet (призывы)':
+        'UDP do servidor shadNet (invocações)',
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        'O UPnP só abre a porta no roteador; o firewall deste computador ainda bloqueia o cooperativo. Abra a porta: {}',
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        'Endereço do WebAPI (vazio: a porta 31315 do servidor)',
+    'Адрес сервера (host:port)':
+        'Endereço do servidor (host:porta)',
+    'Бесшовный кооператив (экспериментально)':
+        'Cooperativo seamless (experimental)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Fixe a porta do cooperativo acima (por exemplo, {}): uma porta aleatória não pode ser aberta no firewall',
+    'Как запустить свой сервер':
+        'Como hospedar seu próprio servidor',
+    'Порт кооператива (UDP)':
+        'Porta do cooperativo (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Invocações entre áreas diferentes. Só se o servidor tiver BloodborneSeamlessCoop=true e todos os jogadores ativarem',
+    'Публичный сервер shadPS4':
+        'Servidor público do shadPS4',
+    'Свой сервер':
+        'Servidor próprio',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p: no seu PC ou em um VPS',
+    'Сервер shadNet':
+        'Servidor shadNet',
+    'не отвечает: призывы не соединятся':
+        'não responde: as invocações não vão conectar',
+    'отвечает; ваш публичный адрес: {}':
+        'responde; seu endereço público: {}',
 }
 
 
@@ -1277,9 +1330,6 @@ ES = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor del juego (mensajes, manchas de sangre, fantasmas)",
     "Игровой сервер": "Servidor del juego",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (campanas e invocaciones)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 es el servidor público de shadPS4. Para un servidor privado, escribe el host:puerto que te dé quien lo gestiona. WebAPI: déjalo vacío para usar la dirección del servidor con el puerto 31315",
-    "Адрес сервера": "Dirección del servidor",
-    "Адрес WebAPI": "Dirección de la WebAPI",
     "Учётная запись": "Cuenta",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "El nombre de tu cuenta de shadNet, no el correo. Regístrate en shadnet.shadps4.net o pídesela a quien gestione un servidor privado. La contraseña se guarda en este ordenador con los ajustes del launcher",
     "Пароль": "Contraseña",
@@ -1363,8 +1413,6 @@ ES = {
         "América",
     "Включён брандмауэр: {}":
         "Cortafuegos activado: {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "El cooperativo recibe conexiones UDP entrantes. Fija el puerto (SHADPS4_P2P_PORT={} en «{}») y ábrelo: {}",
     "Для UPnP нужны ответы роутера: {}":
         "El UPnP necesita las respuestas del router: {}",
     "О программе":
@@ -1468,6 +1516,39 @@ ES = {
         'Esta compilación no tiene el puente de DLSS (libbbport_dlss.so): DLSS no funcionará',
     'Это не библиотека DLSS':
         'No es la biblioteca de DLSS',
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0: uno aleatorio cada vez. Fíjalo para abrirlo en el cortafuegos o a mano en el router',
+    'UDP сервера shadNet (призывы)':
+        'UDP del servidor shadNet (invocaciones)',
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        'El UPnP solo abre el puerto en el router; el cortafuegos de este equipo sigue bloqueando el cooperativo. Abre el puerto: {}',
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        'Dirección del WebAPI (vacía: el puerto 31315 del servidor)',
+    'Адрес сервера (host:port)':
+        'Dirección del servidor (host:puerto)',
+    'Бесшовный кооператив (экспериментально)':
+        'Cooperativo seamless (experimental)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Fija el puerto del cooperativo arriba (por ejemplo, {}): un puerto aleatorio no se puede abrir en el cortafuegos',
+    'Как запустить свой сервер':
+        'Cómo montar tu propio servidor',
+    'Порт кооператива (UDP)':
+        'Puerto del cooperativo (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Invocaciones entre zonas distintas. Solo si el servidor tiene BloodborneSeamlessCoop=true y todos los jugadores lo activan',
+    'Публичный сервер shadPS4':
+        'Servidor público de shadPS4',
+    'Свой сервер':
+        'Servidor propio',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p: en tu PC o en un VPS',
+    'Сервер shadNet':
+        'Servidor shadNet',
+    'не отвечает: призывы не соединятся':
+        'no responde: las invocaciones no conectarán',
+    'отвечает; ваш публичный адрес: {}':
+        'responde; tu dirección pública: {}',
 }
 
 
@@ -1724,9 +1805,6 @@ IT = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Server di gioco (messaggi, macchie di sangue, fantasmi)",
     "Игровой сервер": "Server di gioco",
     "Сервер кооператива (колокола и призывы)": "Server cooperativo (campane ed evocazioni)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 è il server pubblico di shadPS4. Per un server privato, inserisci host:porta forniti da chi lo gestisce. WebAPI: lascialo vuoto per usare l'indirizzo del server con la porta 31315",
-    "Адрес сервера": "Indirizzo del server",
-    "Адрес WebAPI": "Indirizzo WebAPI",
     "Учётная запись": "Account",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Il nome del tuo account shadNet, non l'email. Registrati su shadnet.shadps4.net o chiedi a chi gestisce un server privato. La password viene salvata su questo computer con le impostazioni del launcher",
     "Пароль": "Password",
@@ -1810,8 +1888,6 @@ IT = {
         "America",
     "Включён брандмауэр: {}":
         "Firewall attivo: {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "La cooperativa riceve connessioni UDP in entrata. Fissa la porta (SHADPS4_P2P_PORT={} in «{}») e aprila: {}",
     "Для UPnP нужны ответы роутера: {}":
         "L'UPnP ha bisogno delle risposte del router: {}",
     "О программе":
@@ -1915,6 +1991,39 @@ IT = {
         'Questa build non ha il bridge DLSS (libbbport_dlss.so): DLSS non funzionerà',
     'Это не библиотека DLSS':
         'Non è la libreria DLSS',
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0: una casuale ogni volta. Fissala per aprirla nel firewall o a mano sul router',
+    'UDP сервера shadNet (призывы)':
+        'UDP del server shadNet (evocazioni)',
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        'UPnP apre la porta solo sul router; il firewall di questo computer blocca comunque la cooperativa. Apri la porta: {}',
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        'Indirizzo WebAPI (vuoto: la porta 31315 del server)',
+    'Адрес сервера (host:port)':
+        'Indirizzo del server (host:porta)',
+    'Бесшовный кооператив (экспериментально)':
+        'Cooperativa seamless (sperimentale)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Fissa la porta della cooperativa qui sopra (per esempio {}): una porta casuale non si può aprire nel firewall',
+    'Как запустить свой сервер':
+        'Come ospitare un tuo server',
+    'Порт кооператива (UDP)':
+        'Porta della cooperativa (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Evocazioni tra zone diverse. Solo se il server ha BloodborneSeamlessCoop=true e tutti i giocatori la attivano',
+    'Публичный сервер shadPS4':
+        'Server pubblico di shadPS4',
+    'Свой сервер':
+        'Server tuo',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p: sul tuo PC o su un VPS',
+    'Сервер shadNet':
+        'Server shadNet',
+    'не отвечает: призывы не соединятся':
+        'non risponde: le evocazioni non si collegheranno',
+    'отвечает; ваш публичный адрес: {}':
+        'risponde; il tuo indirizzo pubblico: {}',
 }
 
 
@@ -2171,9 +2280,6 @@ FR = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Serveur de jeu (messages, taches de sang, fantômes)",
     "Игровой сервер": "Serveur de jeu",
     "Сервер кооператива (колокола и призывы)": "Serveur coopératif (cloches et invocations)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 est le serveur public de shadPS4. Pour un serveur privé, saisissez l'hôte:port fourni par son administrateur. WebAPI : laissez vide pour utiliser l'adresse du serveur avec le port 31315",
-    "Адрес сервера": "Adresse du serveur",
-    "Адрес WebAPI": "Adresse WebAPI",
     "Учётная запись": "Compte",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Le nom de votre compte shadNet, pas votre e-mail. Inscrivez-vous sur shadnet.shadps4.net ou demandez à l'administrateur d'un serveur privé. Le mot de passe est enregistré sur cet ordinateur avec les réglages du launcher",
     "Пароль": "Mot de passe",
@@ -2257,8 +2363,6 @@ FR = {
         "Amériques",
     "Включён брандмауэр: {}":
         "Pare-feu actif : {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "La coopération reçoit des connexions UDP entrantes. Fixez le port (SHADPS4_P2P_PORT={} dans « {} ») et ouvrez-le : {}",
     "Для UPnP нужны ответы роутера: {}":
         "L'UPnP a besoin des réponses du routeur : {}",
     "О программе":
@@ -2362,6 +2466,39 @@ FR = {
         "Cette version n'a pas le pont DLSS (libbbport_dlss.so) : DLSS ne fonctionnera pas",
     'Это не библиотека DLSS':
         "Ce n'est pas la bibliothèque DLSS",
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0 : un port aléatoire à chaque fois. Fixez-le pour l’ouvrir dans le pare-feu ou à la main sur le routeur',
+    'UDP сервера shadNet (призывы)':
+        'UDP du serveur shadNet (invocations)',
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        'UPnP n’ouvre le port que sur le routeur ; le pare-feu de cet ordinateur bloque quand même la coopération. Ouvrez le port : {}',
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        'Adresse WebAPI (vide : le port 31315 du serveur)',
+    'Адрес сервера (host:port)':
+        'Adresse du serveur (hôte:port)',
+    'Бесшовный кооператив (экспериментально)':
+        'Coopération seamless (expérimental)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Fixez le port de coopération ci-dessus (par exemple {}) : un port aléatoire ne peut pas être ouvert dans un pare-feu',
+    'Как запустить свой сервер':
+        'Héberger votre propre serveur',
+    'Порт кооператива (UDP)':
+        'Port de coopération (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Invocations entre zones différentes. Seulement si le serveur a BloodborneSeamlessCoop=true et que tous les joueurs l’activent',
+    'Публичный сервер shadPS4':
+        'Serveur public de shadPS4',
+    'Свой сервер':
+        'Votre propre serveur',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p : sur votre PC ou un VPS',
+    'Сервер shadNet':
+        'Serveur shadNet',
+    'не отвечает: призывы не соединятся':
+        'pas de réponse : les invocations ne se connecteront pas',
+    'отвечает; ваш публичный адрес: {}':
+        'répond ; votre adresse publique : {}',
 }
 
 
@@ -2618,9 +2755,6 @@ DE = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "Spielserver (Nachrichten, Blutflecken, Geister)",
     "Игровой сервер": "Spielserver",
     "Сервер кооператива (колокола и призывы)": "Koop-Server (Glocken und Beschwörungen)",
-    "srv.shadps4.net:31313 — публичный сервер shadPS4. Для частного сервера укажите host:port от его владельца. WebAPI: оставьте пустым, тогда берётся адрес сервера с портом 31315": "srv.shadps4.net:31313 ist der öffentliche Server von shadPS4. Für einen privaten Server gib Host:Port vom Betreiber ein. WebAPI: leer lassen, dann wird die Serveradresse mit Port 31315 verwendet",
-    "Адрес сервера": "Serveradresse",
-    "Адрес WebAPI": "WebAPI-Adresse",
     "Учётная запись": "Konto",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Dein shadNet-Kontoname, nicht deine E-Mail. Registriere dich auf shadnet.shadps4.net oder frag den Betreiber eines privaten Servers. Das Passwort wird mit den Launcher-Einstellungen auf diesem Computer gespeichert",
     "Пароль": "Passwort",
@@ -2704,8 +2838,6 @@ DE = {
         "Amerika",
     "Включён брандмауэр: {}":
         "Firewall aktiv: {}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "Der Koop empfängt eingehende UDP-Verbindungen. Lege den Port fest (SHADPS4_P2P_PORT={} in „{}“) und öffne ihn: {}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP braucht die Antworten des Routers: {}",
     "О программе":
@@ -2809,6 +2941,39 @@ DE = {
         'Dieser Build hat keine DLSS-Brücke (libbbport_dlss.so): DLSS funktioniert nicht',
     'Это не библиотека DLSS':
         'Das ist nicht die DLSS-Bibliothek',
+    # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
+    '0: случайный при каждом запуске. Закрепите его, чтобы открыть в брандмауэре или на роутере вручную':
+        '0: jedes Mal ein zufälliger Port. Lege ihn fest, um ihn in der Firewall oder von Hand am Router zu öffnen',
+    'UDP сервера shadNet (призывы)':
+        'UDP des shadNet-Servers (Beschwörungen)',
+    'UPnP открывает порт только на роутере; брандмауэр этого компьютера всё равно блокирует кооператив. Откройте порт: {}':
+        'UPnP öffnet den Port nur am Router; die Firewall dieses Computers blockiert den Koop trotzdem. Öffne den Port: {}',
+    'Адрес WebAPI (пусто: порт 31315 сервера)':
+        'WebAPI-Adresse (leer: Port 31315 des Servers)',
+    'Адрес сервера (host:port)':
+        'Serveradresse (Host:Port)',
+    'Бесшовный кооператив (экспериментально)':
+        'Nahtloser Koop (experimentell)',
+    'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
+        'Lege oben den Koop-Port fest (zum Beispiel {}): ein zufälliger Port lässt sich in der Firewall nicht öffnen',
+    'Как запустить свой сервер':
+        'Eigenen Server betreiben',
+    'Порт кооператива (UDP)':
+        'Koop-Port (UDP)',
+    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
+        'Beschwörungen zwischen verschiedenen Gebieten. Nur wenn der Server BloodborneSeamlessCoop=true hat und alle Spieler es einschalten',
+    'Публичный сервер shadPS4':
+        'Öffentlicher Server von shadPS4',
+    'Свой сервер':
+        'Eigener Server',
+    'shadnet-p2p: на вашем ПК или VPS':
+        'shadnet-p2p: auf deinem PC oder einem VPS',
+    'Сервер shadNet':
+        'shadNet-Server',
+    'не отвечает: призывы не соединятся':
+        'keine Antwort: Beschwörungen werden nicht verbunden',
+    'отвечает; ваш публичный адрес: {}':
+        'antwortet; deine öffentliche Adresse: {}',
 }
 
 
@@ -3110,8 +3275,6 @@ ZH_CN = {
         "美洲",
     "Включён брандмауэр: {}":
         "防火墙已开启：{}",
-    "Кооператив принимает входящие соединения по UDP. Закрепите порт (SHADPS4_P2P_PORT={} в «{}») и откройте его: {}":
-        "合作模式需要接收 UDP 入站连接。请固定端口（在“{1}”中填写 SHADPS4_P2P_PORT={0}）并开放它：{2}",
     "Для UPnP нужны ответы роутера: {}":
         "UPnP 需要接收路由器的应答：{}",
     "О программе":

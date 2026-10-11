@@ -10,6 +10,7 @@ bells and summons go through a shadNet server (shadPS4's public one by default).
 server -> the community server; summon signs -> the shadNet WebAPI when it has the Bloodborne
 summon service) and prints its path for SHADPS4_HTTP_HOST_OVERRIDES_JSON. A player who needs
 other addresses puts them in DIR/host_overrides.custom.json, which is then used as it is.
+`online.py check` tests the servers, the shadNet server's UDP port included (docs/SERVER.md).
 """
 import argparse
 import json
@@ -17,6 +18,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import struct
 import subprocess
 import sys
 import urllib.error
@@ -28,6 +30,14 @@ SHADNET_SERVER = 'srv.shadps4.net:31313'
 GAME_SERVER = 'https://ss4.scej-network.jp:20443'
 # The server's ss.info sends the game to this port for its API (summons among them).
 COMMUNITY_API_PORT = 18671
+
+
+# The shadNet server's UDP port (shadnet.cfg MatchingUdpPort): the game pings it to learn its public
+# address, which the server hands to the other player of a summon.
+STUN_PORT = 31314
+# The online ID of the connection test's ping: the server keeps one address per online ID, and the
+# player's own would replace the address of a game running meanwhile.
+STUN_TEST_ID = b'bbport-udp-test'
 
 
 def community_address(value):
@@ -53,6 +63,68 @@ def webapi_setting(webapi, server, community):
     if webapi and community_host in webapi:
         webapi = ''
     return webapi or webapi_address(server)
+
+
+def server_kind(settings):
+    """'public' (shadPS4's server) or 'own'; settings from before the choice existed are 'own'
+    when they name another server."""
+    kind = settings.get('online_server_kind')
+    if kind in ('public', 'own'):
+        return kind
+    server = str(settings.get('online_server') or '').strip()
+    return 'own' if server and server != SHADNET_SERVER else 'public'
+
+
+def addresses(settings):
+    """(shadNet server, WebAPI, game server) for the launcher's settings. A server without a port
+    gets shadNet's 31313; shadPS4's public server ignores the WebAPI field."""
+    community = community_address(settings.get('online_community'))
+    server = str(settings.get('online_server') or '').strip()
+    if server_kind(settings) == 'public' or not server:
+        return SHADNET_SERVER, webapi_address(SHADNET_SERVER), community
+    if ':' not in server:
+        server += ':31313'
+    return server, webapi_setting(settings.get('online_webapi'), server, community), community
+
+
+def environment(settings):
+    """The game's online variables (run.sh and the online module) for the launcher's settings."""
+    server, webapi, community = addresses(settings)
+    env = {
+        'BB_ONLINE': '1',
+        'BB_SHADNET_SERVER': server,
+        'BB_SHADNET_WEBAPI': webapi,
+        'BB_SHADNET_NPID': str(settings.get('online_npid') or '').strip(),
+        'BB_SHADNET_PASSWORD': settings.get('online_password') or '',
+        'BB_UPNP': '1' if settings.get('online_upnp', True) else '0',
+        'BB_COMMUNITY_SERVER': community,
+    }
+    port = int(settings.get('online_p2p_port') or 0)
+    if 0 < port < 65536:
+        env['SHADPS4_P2P_PORT'] = str(port)
+    # Summons through the server's WebAPI (http.cpp); the server needs BloodborneSeamlessCoop=true.
+    if server_kind(settings) == 'own' and settings.get('online_seamless'):
+        env['SHADPS4_BLOODBORNE_SEAMLESS_COOP'] = '1'
+    return env
+
+
+def stun_ping(host, port=STUN_PORT, timeout=2.0, attempts=3):
+    """The public (address, port) the shadNet server sees for this computer, from the ping the
+    game sends it (np_signaling_helpers.cpp: a 0xffff signaling header, command 1, the online ID
+    and the local address); OSError, TimeoutError when nothing answers."""
+    ping = b'\xff\xff\xff\xff' + b'\x01' + STUN_TEST_ID.ljust(16, b'\0') + bytes(4)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.settimeout(timeout)
+        address = socket.gethostbyname(host)
+        for _ in range(attempts):
+            sock.sendto(ping, (address, port))
+            try:
+                reply, sender = sock.recvfrom(64)
+            except TimeoutError:
+                continue
+            if sender[0] == address and len(reply) == 10 and reply[:4] == b'\xff' * 4:
+                return socket.inet_ntoa(reply[4:8]), struct.unpack('!H', reply[8:10])[0]
+        raise TimeoutError(f'no answer from {host}:{port} (UDP)')
 
 
 def summon_service(webapi):
@@ -128,17 +200,18 @@ def default_gateway(route=Path('/proc/net/route')):
     return None
 
 
-def firewall_commands(firewall, gateway=None):
+def firewall_commands(firewall, gateway=None, port=P2P_PORT):
     """(open the co-op port, let the router's UPnP replies in or None) for a firewall."""
     if firewall == 'ufw':
-        return (f'sudo ufw allow {P2P_PORT}/udp',
+        return (f'sudo ufw allow {port}/udp',
                 f'sudo ufw allow from {gateway} proto udp' if gateway else None)
-    return (f'sudo firewall-cmd --permanent --add-port={P2P_PORT}/udp && sudo firewall-cmd --reload',
+    return (f'sudo firewall-cmd --permanent --add-port={port}/udp && sudo firewall-cmd --reload',
             None)
 
 
 def check(server, webapi, community):
-    """(name, address, ok, detail) for the game server, the shadNet server and its WebAPI."""
+    """(name, address, ok, detail) for the game server, the shadNet server, its UDP port (detail:
+    the public address it sees, or 'timeout') and its WebAPI."""
     results = []
     try:
         with urllib.request.urlopen(community + ':20443/bb-eu/ss.info', timeout=6) as reply:
@@ -152,6 +225,13 @@ def check(server, webapi, community):
         results.append(('shadnet', server, True, ''))
     except (OSError, ValueError) as error:
         results.append(('shadnet', server, False, str(error)))
+    try:
+        public, public_port = stun_ping(host or server)
+        results.append(('stun', f'{host or server}:{STUN_PORT}', True, f'{public}:{public_port}'))
+    except TimeoutError:
+        results.append(('stun', f'{host or server}:{STUN_PORT}', False, 'timeout'))
+    except OSError as error:
+        results.append(('stun', f'{host or server}:{STUN_PORT}', False, str(error)))
     try:
         with urllib.request.urlopen(webapi.rstrip('/') + '/status', timeout=4) as reply:
             ok = b'"ok":true' in reply.read(512).replace(b' ', b'')
