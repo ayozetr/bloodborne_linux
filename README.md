@@ -88,7 +88,8 @@ play with others.
 
 **Co-op needs your own server for now:** shadPS4's public server does not answer on its UDP port,
 so summons do not connect through it (messages, bloodstains and ghosts do).
-[docs/SERVER.md](docs/SERVER.md) sets one up with Docker and Tailscale.
+[docs/SERVER.md](docs/SERVER.md) sets one up with Docker and Tailscale; it has been tested with a
+Linux and a Windows player.
 
 Co-op connects the players directly over UDP. UPnP opens the port on the router by itself; with
 ufw or firewalld on, the launcher's **Online** page says so and gives the commands: pin the

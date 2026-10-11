@@ -11,6 +11,10 @@ Messages, bloodstains and ghosts still come from The Hunter's Dream, whichever s
 use. Windows players of [Supermedo's port](https://github.com/Supermedo/bloodborne_pc) can join
 the same server.
 
+Tested with two players, one on this Linux port and one on Supermedo's Windows port, over
+Tailscale, with the server below on a home server (Ubuntu 26.04): summons, a boss fight together
+and summoning again after the helper died.
+
 ## How it fits together
 
 - **One always-on computer runs the server:** a VPS, a home server, or one of the players' PCs
