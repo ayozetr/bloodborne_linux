@@ -196,7 +196,7 @@ Instance::Instance(const Frontend::WindowSystemInfo& window_info, s32 physical_d
                VK_VERSION_MAJOR(TargetVulkanApiVersion), VK_VERSION_MINOR(TargetVulkanApiVersion),
                VK_VERSION_MAJOR(properties.apiVersion), VK_VERSION_MINOR(properties.apiVersion));
 
-    CreateDevice();
+    ASSERT_MSG(CreateDevice(), "Unable to initialize Vulkan device");
     CollectPhysicalMemoryInfo();
     CollectImageFormatInfo();
     CollectToolingInfo();
@@ -459,6 +459,7 @@ bool Instance::CreateDevice() {
     const auto vk11_features = feature_chain.get<vk::PhysicalDeviceVulkan11Features>();
     vk12_features = feature_chain.get<vk::PhysicalDeviceVulkan12Features>();
     vk13_features = feature_chain.get<vk::PhysicalDeviceVulkan13Features>();
+    const auto renderer_extension_count = enabled_extensions.size();
     // bbport: DLSS (optional bridge library) needs its own device extensions on NVIDIA GPUs.
     std::vector<const char*> dlss_extensions;
     if (Dlss* dlss = Dlss::Get()) {
@@ -701,6 +702,24 @@ bool Instance::CreateDevice() {
     }
 
     auto [device_result, dev] = physical_device.createDeviceUnique(device_chain.get());
+    if (device_result != vk::Result::eSuccess &&
+        enabled_extensions.size() > renderer_extension_count) {
+        // NGX can advertise its extensions even when their runtime dependencies are missing
+        // (e.g. NVIDIA UVM/CUDA on Linux). DLSS is optional: retry the renderer's original
+        // extension set, and keep NGX from initializing against a device without its extensions.
+        LOG_WARNING(Render_Vulkan, "Device creation with DLSS extensions failed: {}; "
+                    "retrying without DLSS", vk::to_string(device_result));
+        if (Dlss* dlss = Dlss::Get()) {
+            dlss->Disable(fmt::format("Vulkan device creation failed with DLSS extensions: {} "
+                                     "(check NVIDIA CUDA/UVM availability)",
+                                     vk::to_string(device_result)));
+        }
+        enabled_extensions.resize(renderer_extension_count);
+        device_chain.get().enabledExtensionCount = static_cast<u32>(enabled_extensions.size());
+        auto retry = physical_device.createDeviceUnique(device_chain.get());
+        device_result = retry.result;
+        dev = std::move(retry.value);
+    }
     if (device_result != vk::Result::eSuccess) {
         LOG_CRITICAL(Render_Vulkan, "Failed to create device: {}", vk::to_string(device_result));
         return false;

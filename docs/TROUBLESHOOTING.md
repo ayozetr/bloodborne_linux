@@ -34,6 +34,10 @@ The log says why, on a line starting with `DLSS:`.
 - The 0.4-linux.1 AppImage ships a modified copy of NVIDIA's DLSS library, which the driver
   refuses (`Feature requirement query failed: 0xbad00012`): update to 0.5-linux.1 or newer.
 - From the repository, DLSS needs `bash tools/build_dlss.sh` once after `build.sh`.
+- If the log says `Device creation with DLSS extensions failed`, NVIDIA's CUDA/UVM
+  module is missing: the game then uses FSR 3.1. Load it with `sudo modprobe nvidia_uvm` (the
+  `nvidia-modprobe` package loads it when needed); with Secure Boot, a module signing key that
+  is not enrolled stops it (`Key was rejected by service`).
 
 ## Spanish shows the Latin American text (or the other way round)
 

@@ -259,6 +259,14 @@ Experimental от октября 2026; Proton 11.0 из Steam и GE-Proton 9 —
 векторы движения, jitter). Без библиотек, на других видеокартах или с `BB_DLSS=0` он недоступен,
 а выбранный DLSS заменяется на FSR 3.1.
 
+На Linux DLSS также нужен CUDA/UVM из драйвера NVIDIA. Если устройство не создаётся с
+расширениями DLSS, рендерер повторяет попытку без них и использует FSR 3.1. Если отсутствует
+`/dev/nvidia-uvm`, загрузи установленный модуль командой `sudo modprobe nvidia_uvm` и перезапусти
+игру. Пакет `nvidia-modprobe` из репозитория дистрибутива позволяет библиотекам NVIDIA загружать
+модуль по мере необходимости.
+Если при включённом Secure Boot команда `modprobe` сообщает `Key was rejected by service`,
+зарегистрируй ключ подписи модуля по [процедуре MOK своего дистрибутива](https://documentation.ubuntu.com/security/security-features/platform-protections/secure-boot/#mok-generation-and-signing-process).
+
 AppImage, собранный с `DLSS_SDK_ROOT`, содержит мост и библиотеку NVIDIA (лицензия RTX SDK от NVIDIA
 это разрешает в составе приложения; её текст — `NVIDIA-DLSS-LICENSE.txt` в пакете). Более новая
 `libnvidia-ngx-dlss.so.<версия>` (из `lib/Linux_x86_64/rel` в SDK) выбирается в лаунчере:

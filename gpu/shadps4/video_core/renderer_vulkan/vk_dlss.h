@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "common/types.h"
@@ -31,6 +32,8 @@ public:
                                 std::vector<const char*>& enabled);
     /// After the device exists.
     void Initialize(vk::Instance instance, vk::PhysicalDevice physical, vk::Device device);
+    /// Device creation can fail despite advertised NGX extensions (e.g. missing CUDA/UVM).
+    void Disable(std::string_view reason);
     void Shutdown();
 
     [[nodiscard]] bool Available() const;

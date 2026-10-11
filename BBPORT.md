@@ -287,6 +287,13 @@ DLSS gets the inputs FSR 3.1 gets (scene color, depth, motion vectors, jitter). 
 libraries, on other GPUs or with `BB_DLSS=0` it is listed as unavailable, and a DLSS setting falls
 back to FSR 3.1.
 
+On Linux, DLSS also needs NVIDIA's CUDA/UVM runtime. If device creation fails with the DLSS
+extensions, the renderer retries without them and uses FSR 3.1. If `/dev/nvidia-uvm` is missing,
+load the installed driver module with `sudo modprobe nvidia_uvm` and restart the game. Installing
+the distribution's `nvidia-modprobe` package lets NVIDIA's libraries load the module when needed.
+If `modprobe` reports `Key was rejected by service` with Secure Boot enabled, enroll the
+module's signing key using the distribution's [MOK procedure](https://documentation.ubuntu.com/security/security-features/platform-protections/secure-boot/#mok-generation-and-signing-process).
+
 The AppImage built with `DLSS_SDK_ROOT` carries the bridge and NVIDIA's library (NVIDIA's RTX SDK
 license allows that in an application; its text is `NVIDIA-DLSS-LICENSE.txt` in the package). A
 newer `libnvidia-ngx-dlss.so.<version>` (from the SDK's `lib/Linux_x86_64/rel`) is chosen in the
