@@ -1,0 +1,84 @@
+name: Bug report
+description: The game or the launcher does something wrong, crashes or does not start.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Before you start, [docs/TROUBLESHOOTING.md](https://github.com/ayozetr/bloodborne_linux/blob/main/docs/TROUBLESHOOTING.md) covers the common problems.
+
+        Only your own dump of the game with the 1.09 update is supported. Do not ask for or link game files.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The launcher's **About** page shows it.
+      placeholder: 0.51-linux.2
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you run it
+      options:
+        - AppImage
+        - From source (run.sh / the launcher in a checkout)
+        - Steam Deck (AppImage)
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Distribution, GPU and driver
+      placeholder: CachyOS, RTX 3060, NVIDIA 580.95 / Fedora 43, RX 7800 XT, Mesa 25.2
+    validations:
+      required: true
+  - type: input
+    id: graphics
+    attributes:
+      label: Upscaler, preset and output resolution
+      description: From the launcher's **Settings** page or the in-game menu (Insert / L3+R3).
+      placeholder: FSR 3.1, Quality, 2560x1440
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead. Screenshots or a short video help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+      description: Where in the game, and what you did right before. Say if it happens every time.
+      placeholder: |
+        1. Load the save at the Cathedral Ward lamp
+        2. Walk towards Old Yharnam
+        3. The game closes during the load
+  - type: dropdown
+    id: online
+    attributes:
+      label: Online
+      options:
+        - Offline
+        - Online, shadPS4's public server
+        - Online, my own server
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        In the launcher's **Log** page, **Export log…** and drag the file here (or **Copy** and paste it).
+        Do not paste your shadNet password or your trophy key anywhere in the issue.
+      placeholder: Drag the exported log here.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I use my own dump of Bloodborne with the 1.09 update.
+          required: true
+        - label: I searched the existing issues for the same problem.
+          required: true
