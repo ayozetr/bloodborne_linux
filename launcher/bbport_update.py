@@ -19,6 +19,7 @@ REPOSITORY_URL = f"https://github.com/{REPOSITORY}"
 UPSTREAM_URL = "https://github.com/deadinside28/bloodborne_pc"
 WINDOWS_URL = "https://github.com/Supermedo/bloodborne_pc"
 LICENSE_URL = f"{REPOSITORY_URL}/blob/main/LICENSE"
+KOFI_URL = "https://ko-fi.com/ayozetr"
 RELEASES_URL = f"{REPOSITORY_URL}/releases"
 LATEST_API = f"https://api.github.com/repos/{REPOSITORY}/releases/latest"
 

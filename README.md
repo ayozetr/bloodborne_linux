@@ -125,6 +125,11 @@ Keyboard**. **Gestures menu without motion-control icons** cleans up the gesture
 prompts are put into your own game's menu files at each start, and nothing in the game folder
 changes.
 
+## Support
+
+If this fork is useful to you and you would like to support it, you can on
+[Ko-fi](https://ko-fi.com/ayozetr). The port itself is deadinside28's work (see below).
+
 ## Credits
 
 - [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc): **bbport**, the

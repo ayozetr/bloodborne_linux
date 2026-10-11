@@ -511,6 +511,7 @@ EN = {
         'no answer: summons will not connect',
     'отвечает; ваш публичный адрес: {}':
         'answers; your public address: {}',
+    "Поддержать проект": 'Support this project',
 }
 
 PT_BR = {
@@ -1076,6 +1077,7 @@ PT_BR = {
         'não responde: as invocações não vão conectar',
     'отвечает; ваш публичный адрес: {}':
         'responde; seu endereço público: {}',
+    "Поддержать проект": 'Apoiar este projeto',
 }
 
 
@@ -1552,6 +1554,7 @@ ES = {
         'no responde: las invocaciones no conectarán',
     'отвечает; ваш публичный адрес: {}':
         'responde; tu dirección pública: {}',
+    "Поддержать проект": 'Apoyar este proyecto',
 }
 
 
@@ -2028,6 +2031,7 @@ IT = {
         'non risponde: le evocazioni non si collegheranno',
     'отвечает; ваш публичный адрес: {}':
         'risponde; il tuo indirizzo pubblico: {}',
+    "Поддержать проект": 'Sostieni questo progetto',
 }
 
 
@@ -2504,6 +2508,7 @@ FR = {
         'pas de réponse : les invocations ne se connecteront pas',
     'отвечает; ваш публичный адрес: {}':
         'répond ; votre adresse publique : {}',
+    "Поддержать проект": 'Soutenir ce projet',
 }
 
 
@@ -2980,6 +2985,7 @@ DE = {
         'keine Antwort: Beschwörungen werden nicht verbunden',
     'отвечает; ваш публичный адрес: {}':
         'antwortet; deine öffentliche Adresse: {}',
+    "Поддержать проект": 'Dieses Projekt unterstützen',
 }
 
 

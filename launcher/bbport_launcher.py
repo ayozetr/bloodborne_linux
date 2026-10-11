@@ -1616,6 +1616,12 @@ class LauncherWindow(Adw.ApplicationWindow):
             row.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
             row.connect("activated", lambda _row, link=url: self.open_uri(link))
             about.add(row)
+        support = Adw.ActionRow(title=tr("Поддержать проект"), subtitle="ko-fi.com/ayozetr",
+                                activatable=True)
+        support.add_prefix(Gtk.Image(icon_name="emblem-favorite-symbolic"))
+        support.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
+        support.connect("activated", lambda _row: self.open_uri(bbport_update.KOFI_URL))
+        about.add(support)
         page.add(about)
 
         updates = Adw.PreferencesGroup(title=tr("Обновления"))
