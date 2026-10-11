@@ -14,6 +14,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <SDL3/SDL.h>
@@ -55,6 +56,25 @@ float base_scale = 1.0f;
 std::mutex prompt_mutex;
 std::atomic<bool> prompt_active{false};
 std::string prompt_title, prompt_text;
+// bbport: an on-screen keyboard in the text dialog, for a controller (Steam Deck, the sofa): the
+// name could only be typed on a physical keyboard. From SrShadowy/bloodborne_pc. Its state is
+// kept under imgui_mutex (HandleEvent, Render); the edits go to the window thread, which owns the
+// text (TakeTextEdits), so the render thread never changes the window.
+struct OnScreenKeyboard {
+    int row = 1, col = 0;
+    bool caps = true;
+    u64 last_stick_ms = 0;
+} osk;
+std::vector<TextEdit> text_edits; // under prompt_mutex
+constexpr int OskRows = 5;
+constexpr const char* OskKeys[4][2][12] = {
+    {{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "_"},
+     {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "_"}},
+    {{"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"}, {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"}},
+    {{"A", "S", "D", "F", "G", "H", "J", "K", "L", "'"}, {"a", "s", "d", "f", "g", "h", "j", "k", "l", "'"}},
+    {{"Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"}, {"z", "x", "c", "v", "b", "n", "m", ",", ".", "/"}},
+};
+enum OskAction { OskCaps, OskSpace, OskBackspace, OskClear, OskConfirm, OskCancel, OskActions };
 
 // Present rate for the FPS counter.
 std::chrono::steady_clock::time_point last_present{};
@@ -723,6 +743,81 @@ void TrophyCard() {
                   IM_COL32(255, 255, 255, int(255 * alpha)), notice.name.c_str(), nullptr, text_w);
 }
 
+int OskRowLength(int row) {
+    return row == 0 ? 12 : row < 4 ? 10 : OskActions;
+}
+
+const char* OskActionLabel(int action) {
+    switch (action) {
+    case OskCaps: return BbSettings::MenuText("Caps", "Регистр");
+    case OskSpace: return BbSettings::MenuText("Space", "Пробел");
+    case OskBackspace: return BbSettings::MenuText("Delete", "Стереть");
+    case OskClear: return BbSettings::MenuText("Clear", "Очистить");
+    case OskConfirm: return BbSettings::MenuText("OK", "OK");
+    default: return BbSettings::MenuText("Cancel", "Отмена");
+    }
+}
+
+void OskEdit(TextEdit::Kind kind, std::string text = {}) {
+    std::scoped_lock lock{prompt_mutex};
+    text_edits.push_back({kind, std::move(text)});
+}
+
+void OskPress(int row, int col) {
+    if (row < 4) {
+        OskEdit(TextEdit::Append, OskKeys[row][osk.caps ? 0 : 1][col]);
+        return;
+    }
+    switch (col) {
+    case OskCaps: osk.caps = !osk.caps; break;
+    case OskSpace: OskEdit(TextEdit::Append, " "); break;
+    case OskBackspace: OskEdit(TextEdit::Backspace); break;
+    case OskClear: OskEdit(TextEdit::Clear); break;
+    case OskConfirm: OskEdit(TextEdit::Confirm); break;
+    default: OskEdit(TextEdit::Cancel); break;
+    }
+}
+
+void OskMove(int d_row, int d_col) {
+    osk.row = (osk.row + d_row + OskRows) % OskRows;
+    const int length = OskRowLength(osk.row);
+    osk.col = d_col ? (osk.col + d_col + length) % length : std::min(osk.col, length - 1);
+}
+
+/// Window thread, the text dialog open and the menu closed: a controller types on the keyboard.
+bool OskEvent(const SDL_Event& event) {
+    if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
+        switch (event.gbutton.button) {
+        case SDL_GAMEPAD_BUTTON_DPAD_UP: OskMove(-1, 0); return true;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN: OskMove(1, 0); return true;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT: OskMove(0, -1); return true;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: OskMove(0, 1); return true;
+        case SDL_GAMEPAD_BUTTON_SOUTH: OskPress(osk.row, osk.col); return true;
+        case SDL_GAMEPAD_BUTTON_WEST: OskEdit(TextEdit::Backspace); return true;
+        case SDL_GAMEPAD_BUTTON_NORTH: OskEdit(TextEdit::Append, " "); return true;
+        case SDL_GAMEPAD_BUTTON_EAST: OskEdit(TextEdit::Cancel); return true;
+        case SDL_GAMEPAD_BUTTON_START: OskEdit(TextEdit::Confirm); return true;
+        case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
+        case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: osk.caps = !osk.caps; return true;
+        default: return false;
+        }
+    }
+    if (event.type == SDL_EVENT_GAMEPAD_AXIS_MOTION &&
+        (event.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX || event.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY)) {
+        constexpr int Deadzone = 18000;
+        const u64 now = SDL_GetTicks();
+        const int value = event.gaxis.value;
+        if (now - osk.last_stick_ms < 180 || (value < Deadzone && value > -Deadzone)) {
+            return true;
+        }
+        osk.last_stick_ms = now;
+        const int step = value > 0 ? 1 : -1;
+        event.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX ? OskMove(0, step) : OskMove(step, 0);
+        return true;
+    }
+    return false;
+}
+
 void TextPrompt() {
     std::string title, text;
     {
@@ -730,11 +825,12 @@ void TextPrompt() {
         title = prompt_title;
         text = prompt_text;
     }
+    const float s = ImGui::GetStyle().FontScaleMain;
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
                                    viewport->WorkPos.y + viewport->WorkSize.y * 0.5f),
                             ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.9f);
+    ImGui::SetNextWindowBgAlpha(0.94f);
     ImGui::Begin("##textprompt", nullptr,
                  ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
                      ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav |
@@ -743,7 +839,44 @@ void TextPrompt() {
     ImGui::Separator();
     ImGui::Text("%s_", text.c_str());
     ImGui::Separator();
-    ImGui::TextUnformatted("Keyboard: type, Backspace = delete, Enter = OK, Esc = cancel");
+    // The keys: the selected one in the menu's accent colour. Drawn only (NoInputs): the
+    // controller moves the selection, a physical keyboard types as before.
+    const ImVec2 key(40.0f * s, 34.0f * s);
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const auto key_button = [&](const char* label, float width, bool selected) {
+        ImGui::PushStyleColor(ImGuiCol_Button, selected ? style.Colors[ImGuiCol_ButtonActive]
+                                                        : style.Colors[ImGuiCol_FrameBg]);
+        ImGui::Button(label, ImVec2(width, key.y));
+        ImGui::PopStyleColor();
+    };
+    for (int row = 0; row < 4; ++row) {
+        for (int col = 0; col < OskRowLength(row); ++col) {
+            if (col) {
+                ImGui::SameLine();
+            }
+            ImGui::PushID(row * 16 + col);
+            key_button(OskKeys[row][osk.caps ? 0 : 1][col], key.x, osk.row == row && osk.col == col);
+            ImGui::PopID();
+        }
+    }
+    for (int action = 0; action < OskActions; ++action) {
+        if (action) {
+            ImGui::SameLine();
+        }
+        const char* label = OskActionLabel(action);
+        const bool caps_on = action == OskCaps && osk.caps;
+        key_button(label, std::max(key.x * 1.4f, ImGui::CalcTextSize(label).x + 18.0f * s),
+                   (osk.row == 4 && osk.col == action) || caps_on);
+    }
+    ImGui::Separator();
+    ImGui::TextUnformatted(BbSettings::MenuText(
+        "Controller: D-pad or left stick moves, Cross types, Square deletes, Triangle is a space, "
+        "L1/R1 caps, Options = OK, Circle = cancel",
+        "Геймпад: крестовина или левый стик — выбор, Cross — ввод, Square — стереть, Triangle — "
+        "пробел, L1/R1 — регистр, Options — OK, Circle — отмена"));
+    ImGui::TextUnformatted(BbSettings::MenuText(
+        "Keyboard: type, Backspace = delete, Enter = OK, Esc = cancel",
+        "Клавиатура: ввод, Backspace — стереть, Enter — OK, Esc — отмена"));
     ImGui::End();
 }
 
@@ -852,8 +985,20 @@ void SetTextPrompt(bool active, const std::string& prompt, const std::string& te
         std::scoped_lock lock{prompt_mutex};
         prompt_title = prompt;
         prompt_text = text;
+        if (!active) {
+            text_edits.clear();
+        }
+    }
+    if (active && !prompt_active.exchange(true)) {
+        std::scoped_lock lock{imgui_mutex};
+        osk = OnScreenKeyboard{};
     }
     prompt_active = active;
+}
+
+std::vector<TextEdit> TakeTextEdits() {
+    std::scoped_lock lock{prompt_mutex};
+    return std::exchange(text_edits, {});
 }
 
 void Init(const Vulkan::Instance& instance, vk::Format format, u32 image_count) {
@@ -958,6 +1103,8 @@ bool HandleEvent(const SDL_Event& event) {
         }
         return true;
     }
+    case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+        return !is_open && prompt_active && OskEvent(event);
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
     case SDL_EVENT_GAMEPAD_BUTTON_UP: {
         const bool down = event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN;
@@ -972,7 +1119,7 @@ bool HandleEvent(const SDL_Event& event) {
             return true;
         }
         if (!is_open) {
-            return false;
+            return prompt_active && OskEvent(event);
         }
         if (const ImGuiKey key = KeyFromGamepad(button); key != ImGuiKey_None) {
             io.AddKeyEvent(key, down);

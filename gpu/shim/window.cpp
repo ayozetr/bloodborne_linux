@@ -162,6 +162,40 @@ bool WindowSDL::PollEvents() {
             SDL_StartTextInput(window);
             UpdateTextTitle();
         }
+        // The on-screen keyboard's edits (a controller), applied here, where the text and the
+        // window belong.
+        if (text_active) {
+            const auto edits = BbOverlay::TakeTextEdits();
+            for (const auto& edit : edits) {
+                switch (edit.kind) {
+                case BbOverlay::TextEdit::Append:
+                    text += edit.text;
+                    break;
+                case BbOverlay::TextEdit::Backspace:
+                    if (!text.empty()) {
+                        size_t cut = text.size() - 1; // drop one UTF-8 code point
+                        while (cut > 0 && (static_cast<unsigned char>(text[cut]) & 0xC0) == 0x80) --cut;
+                        text.erase(cut);
+                    }
+                    break;
+                case BbOverlay::TextEdit::Clear:
+                    text.clear();
+                    break;
+                case BbOverlay::TextEdit::Confirm:
+                case BbOverlay::TextEdit::Cancel:
+                    text_state = edit.kind == BbOverlay::TextEdit::Cancel ? 2 : 1;
+                    text_active = false;
+                    SDL_StopTextInput(window);
+                    break;
+                }
+                if (!text_active) {
+                    break;
+                }
+            }
+            if (!edits.empty()) {
+                UpdateTextTitle();
+            }
+        }
     }
     if (!text_active) {
         BbOverlay::UpdateTextInput(window);
