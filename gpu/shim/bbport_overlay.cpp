@@ -19,6 +19,7 @@
 
 #include <SDL3/SDL.h>
 #include "bbport_settings.h"
+#include "bbport_shader_activity.h"
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
 #include "imgui_internal.h" // RegisterUserTexture: the trophies' icons
@@ -586,6 +587,13 @@ void Menu() {
 
     ImGui::SeparatorText(BbSettings::MenuText("Other", "Прочее"));
     Checkbox(BbSettings::MenuText("FPS counter in corner", "Счётчик FPS в углу"), s.show_fps);
+    Checkbox(BbSettings::MenuText("Notice while shaders compile", "Уведомление о компиляции шейдеров"),
+             s.shader_notice);
+    Hint(BbSettings::MenuText(
+        "\"Compiling shaders\" in the bottom-left corner: a stutter then is the shader cache "
+        "filling, not a problem. Each place only once.",
+        "«Компиляция шейдеров» в левом нижнем углу: рывок в это время — заполнение кэша "
+        "шейдеров, а не проблема. В каждом месте только один раз."));
 
     ImGui::Spacing();
     if (ImGui::Button(BbSettings::MenuText("Close", "Закрыть"))) {
@@ -636,6 +644,36 @@ void FpsCounter() {
                 : s.upscaler == BbSettings::UpscalerDlss   ? "DLSS"
                                                            : "");
     ImGui::End();
+}
+
+// The shader notice: shown while compiling and 400 ms after, then fading out over 400 ms.
+constexpr std::int64_t ShaderNoticeHoldMs = 400, ShaderNoticeFadeMs = 400;
+
+bool ShaderNoticeDue() {
+    const std::int64_t idle = BbShaderActivity::IdleMs();
+    return BbSettings::Get().shader_notice && idle >= 0 &&
+           idle < ShaderNoticeHoldMs + ShaderNoticeFadeMs;
+}
+
+void ShaderNotice() {
+    const std::int64_t idle = BbShaderActivity::IdleMs();
+    const float alpha =
+        idle <= ShaderNoticeHoldMs ? 1.0f
+                                   : 1.0f - float(idle - ShaderNoticeHoldMs) / ShaderNoticeFadeMs;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const float pad = 12.0f * base_scale;
+    ImGui::SetNextWindowPos(
+        ImVec2(viewport->WorkPos.x + pad, viewport->WorkPos.y + viewport->WorkSize.y - pad),
+        ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+    ImGui::SetNextWindowBgAlpha(0.5f * alpha);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+    ImGui::Begin("##shaders", nullptr,
+                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+                     ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav |
+                     ImGuiWindowFlags_NoFocusOnAppearing);
+    ImGui::TextUnformatted(BbSettings::MenuText("Compiling shaders…", "Компиляция шейдеров…"));
+    ImGui::End();
+    ImGui::PopStyleVar();
 }
 
 ImU32 GradeColour(char grade, float alpha) {
@@ -1169,7 +1207,8 @@ bool HandleEvent(const SDL_Event& event) {
 }
 
 bool Visible() {
-    return initialized && (menu_open || prompt_active || notice_busy || BbSettings::Get().show_fps);
+    return initialized && (menu_open || prompt_active || notice_busy || BbSettings::Get().show_fps ||
+                           ShaderNoticeDue());
 }
 
 void TrophyNotice(int id, char grade, std::string name, std::vector<u8> icon, int icon_size) {
@@ -1234,6 +1273,9 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
     }
     if (BbSettings::Get().show_fps && !menu_open) {
         FpsCounter();
+    }
+    if (!menu_open && ShaderNoticeDue()) {
+        ShaderNotice();
     }
     if (prompt_active && !menu_open) {
         TextPrompt();

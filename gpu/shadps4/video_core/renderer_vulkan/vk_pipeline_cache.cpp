@@ -38,6 +38,7 @@
 #include "bbport_guest_memory.h"
 #include "bbport_settings.h"
 #include "game_profile.h"
+#include "bbport_shader_activity.h"
 #include "bbport_toggles.h"
 
 // bbport: common/assert.cpp calls it before stopping on a failed check (SpeculativeAssertExit).
@@ -497,7 +498,11 @@ std::atomic<u32> g_bb_compiles;
 namespace {
 struct CompileTimer {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    CompileTimer() {
+        BbShaderActivity::Begin();
+    }
     ~CompileTimer() {
+        BbShaderActivity::End();
         g_bb_compile_ns += u64(std::chrono::duration_cast<std::chrono::nanoseconds>(
                                    std::chrono::steady_clock::now() - start)
                                    .count());
