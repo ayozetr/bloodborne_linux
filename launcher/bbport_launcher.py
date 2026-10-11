@@ -633,7 +633,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(launcher)
 
         game = Adw.PreferencesGroup(title=tr("Игра"))
-        self.game_row = Adw.ActionRow(title=tr("Папка игры (CUSA03173)"))
+        self.game_row = Adw.ActionRow(title=tr("Папка игры"))
         self.game_status = Gtk.Image()
         self.game_row.add_suffix(self.game_status)
         self.game_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку с eboot.bin"),
@@ -1072,6 +1072,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         path = self.game_dir()
         ok = bool(self.settings["game_dir"]) and (path / "eboot.bin").is_file()
         self.game_row.set_subtitle(str(path) if self.settings["game_dir"] else tr("не выбрана"))
+        # The title ID of the release in the folder (CUSA00900, CUSA03173, ...), from its param.sfo.
+        try:
+            title_id = str(sfo((path / "sce_sys/param.sfo").read_bytes()).get("TITLE_ID", "")) if ok else ""
+        except (OSError, ValueError, IndexError):
+            title_id = ""
+        self.game_row.set_title(tr("Папка игры ({})").format(title_id) if title_id else tr("Папка игры"))
         # Other versions of the game start and then crash in its code (issues #7, #13, #14).
         problem = self.game_problem(path) if ok else None
         if not ok:
@@ -1088,7 +1094,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             }[kind]
             self.game_row.set_subtitle(f"{path}\n{tooltip}")
         else:
-            tooltip = tr("Bloodborne CUSA03173, версия 1.09")
+            tooltip = tr("Bloodborne {}, версия 1.09").format(title_id or "")
         self.game_status.set_from_icon_name("object-select-symbolic" if ok and not problem else "dialog-warning-symbolic")
         self.game_status.set_tooltip_text(tooltip)
         self.launch_button.set_sensitive(ok or self.process is not None)
