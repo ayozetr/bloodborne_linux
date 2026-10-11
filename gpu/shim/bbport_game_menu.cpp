@@ -87,7 +87,11 @@ std::u16string Utf16(const char* utf8) {
 u32 AddText(const char* english, const char* russian) {
     Text text;
     for (int l = 0; l < int(BbSettings::MenuLanguage::Count); ++l) {
-        text.languages[l] = Utf16(BbSettings::MenuTextIn(BbSettings::MenuLanguage(l), english, russian));
+        // The game's font has no Chinese characters: its pages stay in English there.
+        const auto language = BbSettings::MenuLanguage(l) == BbSettings::MenuLanguage::ChineseSimplified
+                                  ? BbSettings::MenuLanguage::English
+                                  : BbSettings::MenuLanguage(l);
+        text.languages[l] = Utf16(BbSettings::MenuTextIn(language, english, russian));
     }
     texts.push_back(std::move(text));
     return IdBase + u32(texts.size() - 1);
@@ -103,7 +107,9 @@ BbSettings::MenuLanguage LanguageOfTheGame() {
         for (const char* key : {"LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"}) {
             if (const char* locale = std::getenv(key); locale && *locale) {
                 const MenuLanguage l = BbSettings::MenuLanguageFromCode(locale);
-                return l == MenuLanguage::PortugueseBrazil ? MenuLanguage::English : l;
+                return l == MenuLanguage::PortugueseBrazil || l == MenuLanguage::ChineseSimplified
+                           ? MenuLanguage::English
+                           : l;
             }
         }
     }

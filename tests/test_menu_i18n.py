@@ -17,7 +17,8 @@ def literals(src, pos):
 
 
 def translations():
-    """bbport_menu_i18n.h: English -> the Spanish, Italian, French, German, Portuguese row."""
+    """bbport_menu_i18n.h: English -> the Spanish, Italian, French, German, Portuguese, Chinese
+    row."""
     src = (SHIM / 'bbport_menu_i18n.h').read_text(encoding='utf-8')
     rows = {}
     for match in re.finditer(r'\n    \{(?=\s*")', src):
@@ -73,7 +74,7 @@ class MenuTranslationTests(unittest.TestCase):
     def test_rows_have_every_language_and_keep_the_placeholders(self):
         for english, row in translations().items():
             with self.subTest(text=english[:40]):
-                self.assertEqual(len(row), 5)
+                self.assertEqual(len(row), 6)
                 for text in row:
                     self.assertEqual(PRINTF.findall(text), PRINTF.findall(english))
 

@@ -798,6 +798,51 @@ void ScriptedKeys() {
     }
 }
 
+// bbport: the menu's own font has no Chinese characters. The first time the menu opens or speaks
+// Simplified Chinese, a system font for it is merged into that font: BB_CJK_FONT (a file), else
+// fontconfig's choice for zh-cn (Noto Sans CJK, WenQuanYi...). ImGui 1.92 rasterizes glyphs as
+// they are drawn, so the font costs memory for its file, not a texture of every character.
+// Without such a font the Chinese texts show as boxes, and the log says why.
+void LoadCjkFont() {
+    std::string path;
+    int index = 0;
+    if (const char* file = std::getenv("BB_CJK_FONT"); file && *file) {
+        path = file;
+    } else if (FILE* pipe = popen("fc-match -f '%{file}|%{index}|%{lang}' 'sans-serif:lang=zh-cn' "
+                                  "2>/dev/null",
+                                  "r")) {
+        std::string out;
+        char buffer[4096];
+        for (size_t n; (n = std::fread(buffer, 1, sizeof(buffer), pipe)) > 0;) {
+            out.append(buffer, n);
+        }
+        pclose(pipe);
+        // file|index|lang|lang|...: fontconfig answers with some font even when none has
+        // Chinese, so its languages must list zh-cn.
+        const size_t first = out.find('|');
+        const size_t second = first == std::string::npos ? first : out.find('|', first + 1);
+        if (second != std::string::npos && (out + "|").find("|zh-cn|", second) != std::string::npos) {
+            path = out.substr(0, first);
+            index = std::atoi(out.c_str() + first + 1);
+        }
+    }
+    if (path.empty()) {
+        std::printf("Overlay: no font with Chinese characters found (install Noto Sans CJK or "
+                    "WenQuanYi, or set BB_CJK_FONT to a font file)\n");
+        return;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.FontNo = index;
+    config.DstFont = io.Fonts->Fonts[0];
+    if (io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f, &config)) {
+        std::printf("Overlay: Chinese characters from %s\n", path.c_str());
+    } else {
+        std::printf("Overlay: could not load the font %s\n", path.c_str());
+    }
+}
+
 } // namespace
 
 void SetTextPrompt(bool active, const std::string& prompt, const std::string& text) {
@@ -1026,6 +1071,13 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
         base_scale = scale;
     }
 
+    static bool cjk_font_tried = false;
+    // Also when the menu opens in another language: its language list names Chinese in Chinese.
+    if (!cjk_font_tried &&
+        (menu_open || BbSettings::Get().menu_language == BbSettings::MenuLanguage::ChineseSimplified)) {
+        cjk_font_tried = true;
+        LoadCjkFont();
+    }
     ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();
     if (menu_open) {

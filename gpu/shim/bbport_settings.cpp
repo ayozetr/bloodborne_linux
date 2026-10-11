@@ -34,7 +34,7 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         if (it != std::end(MenuLanguageCodes)) {
             v.menu_language = MenuLanguage(it - std::begin(MenuLanguageCodes));
         } else {
-            std::printf("Settings: unknown menu_language '%s' (expected en, ru, es, it, fr, de or pt_BR)\n",
+            std::printf("Settings: unknown menu_language '%s' (expected en, ru, es, it, fr, de, pt_BR or zh_CN)\n",
                         value.c_str());
         }
     } else if (key == "upscaler") {
