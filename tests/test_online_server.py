@@ -15,6 +15,16 @@ class ServerChoiceTests(unittest.TestCase):
         self.assertEqual(online.server_kind({'online_server_kind': 'public',
                                              'online_server': '100.64.0.7:31313'}), 'public')
 
+    def test_one_account_for_each_kind_of_server(self):
+        settings = {'online_server_kind': 'own', 'online_npid': 'me', 'online_password': 'pw',
+                    'online_accounts': {'public': {'npid': 'pub', 'password': 'p2'}}}
+        self.assertEqual(online.account(settings, 'public'), ('pub', 'p2'))
+        # The chosen server's account from before online_accounts existed.
+        self.assertEqual(online.account(settings, 'own'), ('me', 'pw'))
+        old = {'online_server': online.SHADNET_SERVER, 'online_npid': 'me', 'online_password': 'pw'}
+        self.assertEqual(online.account(old, 'public'), ('me', 'pw'))
+        self.assertEqual(online.account(old, 'own'), ('', ''))
+
     def test_public_server_ignores_the_own_server_fields(self):
         server, webapi, community = online.addresses({
             'online_server_kind': 'public', 'online_server': '100.64.0.7',

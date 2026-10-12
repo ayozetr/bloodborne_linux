@@ -195,6 +195,9 @@ DEFAULTS = {
     "online_webapi": "",
     "online_npid": "",
     "online_password": "",
+    # The account of each kind of server ({"public": {"npid", "password"}, "own": ...}): the
+    # Online page swaps them when the server changes; online_npid/password are the chosen one's.
+    "online_accounts": {},
     "online_upnp": True,
     "online_p2p_port": 0,  # 0: a random port each time (SHADPS4_P2P_PORT)
     "online_seamless": False,
@@ -1526,10 +1529,15 @@ class LauncherWindow(Adw.ApplicationWindow):
             description=tr("Имя учётной записи shadNet, не email. Зарегистрируйтесь на "
                            "shadnet.shadps4.net или спросите владельца частного сервера. Пароль "
                            "хранится на этом компьютере вместе с настройками лаунчера"))
-        self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=s["online_npid"])
-        self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=s["online_password"])
+        self.account_kind = online.server_kind(s)
+        self.online_accounts = {kind: dict(zip(("npid", "password"), online.account(s, kind)))
+                                for kind in ("public", "own")}
+        npid, password = online.account(s, self.account_kind)
+        self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=npid)
+        self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=password)
         account.add(self.npid_row)
         account.add(self.password_row)
+        self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
         page.add(account)
 
         connection = Adw.PreferencesGroup(
@@ -1580,7 +1588,28 @@ class LauncherWindow(Adw.ApplicationWindow):
             "online_upnp": self.upnp_row.get_active(),
             "online_p2p_port": int(self.p2p_port_row.get_value()),
             "online_seamless": self.seamless_row.get_active(),
+            "online_accounts": self.kept_accounts(),
         }
+
+    def kept_accounts(self):
+        self.keep_account()
+        return {kind: dict(kept) for kind, kept in self.online_accounts.items()}
+
+    def keep_account(self):
+        """The account typed in, as the one of the server chosen in the page."""
+        self.online_accounts[self.account_kind] = {"npid": self.npid_row.get_text().strip(),
+                                                   "password": self.password_row.get_text()}
+
+    def swap_account(self):
+        """Another kind of server chosen: its own account in the fields, the other one kept."""
+        kind = combo_value(self.server_kind_row)
+        if kind == self.account_kind:
+            return
+        self.keep_account()
+        self.account_kind = kind
+        kept = self.online_accounts.get(kind, {})
+        self.npid_row.set_text(kept.get("npid", ""))
+        self.password_row.set_text(kept.get("password", ""))
 
     def show_server_kind(self):
         own = combo_value(self.server_kind_row) == "own"

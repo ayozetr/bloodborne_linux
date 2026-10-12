@@ -75,6 +75,18 @@ def server_kind(settings):
     return 'own' if server and server != SHADNET_SERVER else 'public'
 
 
+def account(settings, kind):
+    """(online ID, password) kept for one kind of server: each has its own accounts, so the
+    launcher keeps one for each (online_accounts). Settings from before that know only the one of
+    the server chosen then."""
+    kept = (settings.get('online_accounts') or {}).get(kind)
+    if isinstance(kept, dict):
+        return str(kept.get('npid') or ''), str(kept.get('password') or '')
+    if kind == server_kind(settings):
+        return str(settings.get('online_npid') or ''), str(settings.get('online_password') or '')
+    return '', ''
+
+
 def addresses(settings):
     """(shadNet server, WebAPI, game server) for the launcher's settings. A server without a port
     gets shadNet's 31313; shadPS4's public server ignores the WebAPI field."""
