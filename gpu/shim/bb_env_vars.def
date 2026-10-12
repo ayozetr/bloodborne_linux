@@ -106,6 +106,7 @@ BB_ENV(BB_APP0_ADB, TUNING, "=serial: the game's files fetched from a phone over
 BB_ENV(BB_ASYNC_PIPELINE_THREADS, TUNING, "=N: threads compiling pipelines in the background")
 BB_ENV(BB_ASYNC_SUBMIT, TUNING, "=0: the presenter submits the frame itself instead of a submit thread")
 BB_ENV(BB_AUDIO, TUNING, "=none: no audio device (headless runs)")
+BB_ENV(BB_AUDIO_GAIN, TUNING, "=N (0-8, default 1): the game's sound level on top of the fold to the device's channels")
 BB_ENV(BB_AUTO_NOHIZ, TUNING, "=0 (run.sh): no automatic RADV_DEBUG=nohiz on the GPUs that need it")
 BB_ENV(BB_AVPLAYER_ASYNC_READY, TUNING, "=1: movie StateReady on the controller thread, as before (crashed at 200+ FPS)")
 BB_ENV(BB_BDA_DEDICATED_MB, TUNING, "=N: buffers with GPU addresses get dedicated memory from N MiB")
