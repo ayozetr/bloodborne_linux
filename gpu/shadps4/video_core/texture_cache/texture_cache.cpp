@@ -886,9 +886,26 @@ void TextureCache::RefreshImage(Image& image) {
     RENDERER_TRACE;
     TRACE_HINT(fmt::format("{:x}:{:x}", image.info.guest_address, image.info.guest_size));
 
+    // bbport: BB_TC_LEGACY_HASH=1 compares and records guest memory as 0.51-linux.1 did, before
+    // 1bc4f37 (issue #1: a full-screen blur stuck after an area load). A test switch.
+    static const bool legacy_hash = [] {
+        const char* env = std::getenv("BB_TC_LEGACY_HASH");
+        return env && env[0] == '1';
+    }();
     if (True(image.flags & ImageFlagBits::MaybeCpuDirty) &&
         False(image.flags & ImageFlagBits::CpuDirty)) {
-        const u64 hash = MaybeDirtyHash(image);
+        u64 hash;
+        if (legacy_hash) {
+            // The first 8x8 pixels, as before: never equal to the whole-image hash of marking.
+            const auto addr = std::bit_cast<u8*>(image.info.guest_address);
+            const u32 w = std::min(image.info.size.width, u32(8));
+            const u32 h = std::min(image.info.size.height, u32(8));
+            const u32 s_w = image.info.props.is_block ? Common::DivCeil(w, 4u) : w;
+            const u32 s_h = image.info.props.is_block ? Common::DivCeil(h, 4u) : h;
+            hash = XXH3_64bits(addr, s_w * s_h * (image.info.num_bits / 8));
+        } else {
+            hash = MaybeDirtyHash(image);
+        }
         if (image.hash == hash) {
             image.flags &= ~ImageFlagBits::MaybeCpuDirty;
             return;
@@ -961,11 +978,22 @@ void TextureCache::RefreshImage(Image& image) {
         // contents with stale guest memory (a 1x1 exposure texture computed once: the
         // character creation preview went black after one frame).
         const u8* mip_addr = std::bit_cast<u8*>(image.info.guest_address) + mip_offset;
-        const u64 mip_hash = XXH3_64bits(mip_addr, mip_size);
-        if (is_gpu_modified && !is_gpu_dirty && image.mip_hashes[m] == mip_hash) {
-            continue;
+        if (legacy_hash) {
+            // Only uploads over GPU-written contents record their hash, as before.
+            if (is_gpu_modified && !is_gpu_dirty) {
+                const u64 hash = XXH3_64bits(mip_addr, mip_size);
+                if (image.mip_hashes[m] == hash) {
+                    continue;
+                }
+                image.mip_hashes[m] = hash;
+            }
+        } else {
+            const u64 mip_hash = XXH3_64bits(mip_addr, mip_size);
+            if (is_gpu_modified && !is_gpu_dirty && image.mip_hashes[m] == mip_hash) {
+                continue;
+            }
+            image.mip_hashes[m] = mip_hash;
         }
-        image.mip_hashes[m] = mip_hash;
 
         const u32 extent_width = mip_pitch ? std::min(mip_pitch, width) : width;
         const u32 extent_height = mip_height ? std::min(mip_height, height) : height;
