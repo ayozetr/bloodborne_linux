@@ -43,10 +43,12 @@ CONF = b'''<!--Sce-Np-Trophy-Signature: x--><?xml version="1.0" encoding="utf-8"
 <trophyconf version="1.1"><title-name>Game</title-name>
 <trophy id="000" hidden="no" ttype="P" pid="-1"><name>All</name><detail>Everything</detail></trophy>
 <trophy id="001" hidden="yes" ttype="B" pid="000"><name>First</name><detail>Do one</detail></trophy>
+<trophy id="002" hidden="no" ttype="G" pid="-1" gid="001"><name>Extra</name><detail>Add-on</detail></trophy>
 </trophyconf>'''
 SPANISH = '''<?xml version="1.0" encoding="utf-8"?><trophyconf><title-name>Juego</title-name>
 <trophy id="000"><name>Todo</name><detail>Todo hecho</detail></trophy>
-<trophy id="001"><name>Primero</name><detail>Hazlo</detail></trophy></trophyconf>'''.encode()
+<trophy id="001"><name>Primero</name><detail>Hazlo</detail></trophy>
+<trophy id="002"><name>Extra</name><detail>Contenido adicional</detail></trophy></trophyconf>'''.encode()
 
 
 class AesTests(unittest.TestCase):
@@ -71,6 +73,7 @@ class TrophyFileTests(unittest.TestCase):
         (game / 'sce_sys' / 'npbind.dat').write_bytes(b'\0\1junk' + COMM_ID.encode() + b'\0more')
         (game / 'sce_sys' / 'trophy' / 'trophy00.trp').write_bytes(trp({
             'ICON0.PNG': b'icon', 'TROP000.PNG': b'png0', 'TROP001.PNG': b'png1',
+            'TROP002.PNG': b'png2',
             'TROPCONF.ESFM': esfm(CONF), 'TROP.ESFM': esfm(CONF), 'TROP_03.ESFM': esfm(SPANISH)}))
         return game
 
@@ -86,7 +89,7 @@ class TrophyFileTests(unittest.TestCase):
             entries = trophies.read_trp(game / 'sce_sys' / 'trophy' / 'trophy00.trp')
             listed = trophies.trophy_list(entries, KEY, COMM_ID, 3)
             self.assertEqual(listed[0], {'grade': 'P', 'hidden': False, 'name': 'Todo',
-                                         'detail': 'Todo hecho'})
+                                         'detail': 'Todo hecho', 'platinum': False})
             self.assertEqual((listed[1]['grade'], listed[1]['hidden'], listed[1]['name']),
                              ('B', True, 'Primero'))
             self.assertEqual(trophies.trophy_list(entries, KEY, COMM_ID, 1)[1]['name'], 'First')
@@ -94,8 +97,22 @@ class TrophyFileTests(unittest.TestCase):
     def test_without_the_key_only_the_icons(self):
         with tempfile.TemporaryDirectory() as tmp:
             entries = trophies.read_trp(self.game(tmp) / 'sce_sys' / 'trophy' / 'trophy00.trp')
-            self.assertEqual(sorted(trophies.trophy_list(entries)), [0, 1])
+            self.assertEqual(sorted(trophies.trophy_list(entries)), [0, 1, 2])
             self.assertEqual(trophies.trophy_list(entries)[1]['name'], '')
+
+    def test_add_on_trophies_do_not_count_toward_the_platinum(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            game, user = self.game(tmp), Path(tmp) / 'user'
+            entries = trophies.read_trp(game / 'sce_sys' / 'trophy' / 'trophy00.trp')
+            listed = trophies.trophy_list(entries, KEY, COMM_ID, 3)
+            self.assertEqual({i: t['platinum'] for i, t in listed.items()}, {0: False, 1: True, 2: False})
+            directory = trophies.prepare(game, user, KEY, 3)
+            self.assertEqual((directory / 'trophies.tsv').read_text().splitlines()[1],
+                             '1\tB\t1\tPrimero\tHazlo\t1')
+            self.assertEqual({i: t['platinum'] for i, t in trophies.read_list(directory).items()},
+                             {0: False, 1: True, 2: False})
+            (directory / 'trophies.tsv').write_text('1\tB\t1\tOld\tFive fields\n')
+            self.assertFalse(trophies.read_list(directory)[1]['platinum'])
 
     def test_wrong_key(self):
         with tempfile.TemporaryDirectory() as tmp:

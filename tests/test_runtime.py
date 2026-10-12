@@ -35,6 +35,14 @@ class RuntimeTests(unittest.TestCase):
         r=self.run_case('--rwlock-lifecycle')
         self.assertEqual(r.returncode,0,r.stdout+r.stderr)
 
+    def test_platinum_skips_add_on_trophies(self):
+        r=self.run_case('--trophy-platinum')
+        self.assertEqual(r.returncode,0,r.stdout+r.stderr)
+        self.assertIn('trophy 0 unlocked',r.stdout)
+        r=self.run_case('--trophy-platinum-legacy')
+        self.assertEqual(r.returncode,0,r.stdout+r.stderr)
+        self.assertNotIn('trophy 0 unlocked',r.stdout)
+
     def test_rwlock_multiple_readers_exclude_writer(self):
         r=self.run_case('--rwlock-concurrency')
         self.assertEqual(r.returncode,0,r.stdout+r.stderr)

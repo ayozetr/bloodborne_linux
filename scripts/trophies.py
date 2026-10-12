@@ -10,7 +10,8 @@ key, which the player supplies (shadPS4's TrophyKey). Without it, only the icons
 `trophies.py prepare --game DIR --user DIR [--language N]` (key in BB_TROPHY_KEY) writes
 DIR/trophies/<NP communication id>/: icons/ (the PNGs, and TROPxxx.rgba for the overlay's notice:
 width and height as little-endian u32, then 128x128 RGBA, made with Pillow), and trophies.tsv for
-the runtime (id, grade P/G/S/B or -, hidden 1/0, name, detail); prints that directory. The runtime appends what the game unlocks
+the runtime (id, grade P/G/S/B or -, hidden 1/0, name, detail, platinum 1/0: whether it counts
+toward the platinum, which add-on trophies do not); prints that directory. The runtime appends what the game unlocks
 to earned.tsv there (id, Unix time) and shows it in the overlay (src/runtime_services.c).
 """
 import argparse
@@ -173,7 +174,8 @@ def decrypt_esfm(data, key, comm_id):
 
 
 def parse_sfm(xml):
-    """(title, {id: {grade, hidden, name, detail}}) of a decrypted trophy list."""
+    """(title, {id: {grade, hidden, name, detail, platinum}}) of a decrypted trophy list.
+    platinum: the trophy counts toward the platinum (its pid names it; add-on trophies have -1)."""
     text = xml.decode('utf-8', 'replace')
     start = text.find('<trophyconf')
     if start < 0:
@@ -186,15 +188,17 @@ def parse_sfm(xml):
             'hidden': node.get('hidden', 'no') == 'yes',
             'name': (node.findtext('name') or '').strip(),
             'detail': (node.findtext('detail') or '').strip(),
+            'platinum': node.get('pid', '-1') != '-1',
         }
     return (root.findtext('title-name') or '').strip(), trophies
 
 
 def trophy_list(entries, key=None, comm_id=None, language=None):
-    """{id: {grade, hidden, name, detail}} from a TRP's entries: names in the game language
+    """{id: {grade, hidden, name, detail, platinum}} from a TRP's entries: names in the game language
     (TROP_xx, xx the PS4 language number) or the default list; without a key, the icons' ids."""
     icons = sorted(int(n[4:7]) for n in entries if re.fullmatch(r'TROP\d{3}\.PNG', n))
-    trophies = {i: {'grade': '-', 'hidden': False, 'name': '', 'detail': ''} for i in icons}
+    trophies = {i: {'grade': '-', 'hidden': False, 'name': '', 'detail': '', 'platinum': False}
+                for i in icons}
     if key is None or comm_id is None:
         return trophies
     _title, config = parse_sfm(decrypt_esfm(entries['TROPCONF.ESFM'], key, comm_id))
@@ -230,7 +234,7 @@ def read_earned(directory):
 
 
 def read_list(directory):
-    """{id: {grade, hidden, name, detail}} from trophies.tsv."""
+    """{id: {grade, hidden, name, detail, platinum}} from trophies.tsv."""
     trophies = {}
     try:
         lines = (Path(directory) / 'trophies.tsv').read_text(encoding='utf-8').splitlines()
@@ -238,9 +242,10 @@ def read_list(directory):
         return trophies
     for line in lines:
         fields = line.split('\t')
-        if len(fields) == 5 and fields[0].isdigit():
+        if len(fields) in (5, 6) and fields[0].isdigit():
             trophies[int(fields[0])] = {'grade': fields[1], 'hidden': fields[2] == '1',
-                                        'name': fields[3], 'detail': fields[4]}
+                                        'name': fields[3], 'detail': fields[4],
+                                        'platinum': fields[5:] == ['1']}
     return trophies
 
 
@@ -288,7 +293,7 @@ def prepare(game, user, key=None, language=None):
             if re.fullmatch(r'TROP\d{3}\.PNG', name) and not raw.is_file():
                 write_rgba(data, raw)
     lines = [f'{i}\t{t["grade"]}\t{int(t["hidden"])}\t{_clean(t["name"])}\t{_clean(t["detail"])}'
-             for i, t in sorted(trophies.items())]
+             f'\t{int(t.get("platinum", False))}' for i, t in sorted(trophies.items())]
     temp = directory / 'trophies.tsv.tmp'
     temp.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     os.replace(temp, directory / 'trophies.tsv')

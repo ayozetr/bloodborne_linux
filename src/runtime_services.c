@@ -268,15 +268,16 @@ static ABI int32_t ime_result(uint32_t *result) {
 static ABI int32_t ime_term(void) { memset(&ime,0,sizeof(ime)); return 0; }
 
 /* ---- Trophies: recorded in BB_TROPHY_DIR (scripts/trophies.py), shown in the overlay ----
- * trophies.tsv lists the game's trophies (id, grade, hidden, name, detail), from the dump;
- * earned.tsv gets "id<TAB>Unix time" for each one the first time the game unlocks it. The
- * platinum, which the PS4 itself awards, follows once every other trophy is earned. */
+ * trophies.tsv lists the game's trophies (id, grade, hidden, name, detail, platinum), from the
+ * dump; earned.tsv gets "id<TAB>Unix time" for each one the first time the game unlocks it. The
+ * platinum, which the PS4 itself awards, follows once every trophy that counts toward it is
+ * earned: the base game's, not an add-on's (Bloodborne's 34-39, The Old Hunters). */
 #define TROPHY_MAX 128
 typedef struct { char grade; char name[160]; } TrophyEntry;
 static pthread_mutex_t trophy_lock=PTHREAD_MUTEX_INITIALIZER;
 static TrophyEntry trophy_list[TROPHY_MAX];
-static unsigned char trophy_known[TROPHY_MAX], trophy_earned[TROPHY_MAX];
-static int trophy_loaded;
+static unsigned char trophy_known[TROPHY_MAX], trophy_earned[TROPHY_MAX], trophy_counts[TROPHY_MAX];
+static int trophy_loaded, trophy_counts_known;
 static void trophy_load(void) {
     if (trophy_loaded) return;
     trophy_loaded=1;
@@ -286,13 +287,14 @@ static void trophy_load(void) {
     snprintf(path,sizeof(path),"%s/trophies.tsv",dir);
     FILE *f=fopen(path,"r");
     while (f && fgets(line,sizeof(line),f)) {
-        char *fields[5]={line}; int n=1;
-        for (char *c=line;*c && n<5;++c) if (*c=='\t') { *c=0; fields[n++]=c+1; }
+        char *fields[6]={line}; int n=1;
+        for (char *c=line;*c && n<6;++c) if (*c=='\t') { *c=0; fields[n++]=c+1; }
         int id=atoi(fields[0]);
         if (n<4 || id<0 || id>=TROPHY_MAX) continue;
         fields[3][strcspn(fields[3],"\r\n")]=0;
         trophy_known[id]=1;
         trophy_list[id].grade=fields[1][0];
+        if (n==6) { trophy_counts_known=1; trophy_counts[id]=fields[5][0]=='1'; }
         snprintf(trophy_list[id].name,sizeof(trophy_list[id].name),"%s",fields[3]);
     }
     if (f) fclose(f);
@@ -323,13 +325,14 @@ static int trophy_record(int id) {
     bbgpu_trophy_notice(id,trophy_known[id] ? trophy_list[id].grade : '-',name,dir && dir[0] ? icon : NULL);
     return 1;
 }
-/* The platinum's id once every other known trophy is earned, else -1. */
+/* The platinum's id once every trophy that counts toward it is earned, else -1. A list without
+ * that column (written by an older scripts/trophies.py) counts every other trophy. */
 static int trophy_platinum_due(void) {
     int platinum=-1;
     for (int i=0;i<TROPHY_MAX;++i) {
         if (!trophy_known[i]) continue;
         if (trophy_list[i].grade=='P') platinum=i;
-        else if (!trophy_earned[i]) return -1;
+        else if ((trophy_counts[i] || !trophy_counts_known) && !trophy_earned[i]) return -1;
     }
     return platinum>=0 && !trophy_earned[platinum] ? platinum : -1;
 }

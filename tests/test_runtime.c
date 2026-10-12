@@ -12,6 +12,7 @@ void runtime_restart(void) { abort(); }
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdatomic.h>
+#include <unistd.h>
 #include <time.h>
 
 typedef int (ABI *Register)(GuestCallback);
@@ -392,6 +393,25 @@ static void rw_timeouts(void) {
     assert(rw_unlock(&f.lock)==0);
     fixture_destroy(&f);
 }
+/* Trophies (src/runtime_services.c): the platinum needs the trophies marked as counting toward it
+ * in trophies.tsv, not an add-on's; a list without that column (older) needs every other one. */
+typedef int32_t (ABI *TrophyUnlock)(int32_t,int32_t,int32_t,int32_t *);
+static int trophy_platinum(int legacy) {
+    char dir[]="/tmp/bb-trophies-XXXXXX", path[64];
+    assert(mkdtemp(dir));
+    snprintf(path,sizeof(path),"%s/trophies.tsv",dir);
+    FILE *f=fopen(path,"w"); assert(f);
+    if (legacy) fputs("0\tP\t0\tAll\tx\n1\tB\t0\tFirst\tx\n2\tG\t0\tExtra\tx\n",f);
+    else fputs("0\tP\t0\tAll\tx\t0\n1\tB\t0\tFirst\tx\t1\n2\tG\t0\tExtra\tx\t0\n",f);
+    fclose(f);
+    setenv("BB_TROPHY_DIR",dir,1);
+    int32_t platinum=-2;
+    assert(GET(TrophyUnlock,"28xmRUFao68#l#m")(1,1,1,&platinum)==0);
+    snprintf(path,sizeof(path),"%s/earned.tsv",dir); remove(path);
+    snprintf(path,sizeof(path),"%s/trophies.tsv",dir); remove(path);
+    rmdir(dir);
+    return platinum;
+}
 int main(int argc,char **argv) {
     runtime_start(0); assert(runtime_resolve("bzQExy189ZI#q#q",0)==0);
     runtime_start(1);
@@ -417,6 +437,8 @@ int main(int argc,char **argv) {
     if (argc>1 && !strcmp(argv[1],"--rwlock-lifecycle")) { rw_lifecycle(); return 0; }
     if (argc>1 && !strcmp(argv[1],"--rwlock-concurrency")) { rw_concurrency(); return 0; }
     if (argc>1 && !strcmp(argv[1],"--rwlock-timeouts")) { rw_timeouts(); return 0; }
+    if (argc>1 && !strcmp(argv[1],"--trophy-platinum")) { assert(trophy_platinum(0)==0); return 0; }
+    if (argc>1 && !strcmp(argv[1],"--trophy-platinum-legacy")) { assert(trophy_platinum(1)==-1); return 0; }
     libc_support(); posix_mutexes(); wall_time(); exit_handlers(); guards(); mutexes(); direct_memory(); write_traps(); memory_primitives();
     rw_lifecycle(); rw_concurrency(); rw_timeouts();
     puts("PASS: callback lifecycle, guard ABI, mutex errors, shared direct memory, memory primitives, resolver scope");
