@@ -87,6 +87,27 @@ class PromptTests(unittest.TestCase):
         changed = [i for i, (a, b) in enumerate(zip(mt.blocks(old, atlas), mt.blocks(tpf, atlas))) if a != b]
         self.assertTrue(set(changed) <= set(which))
 
+    def test_ab_swap_swaps_the_cross_and_circle_glyphs(self):
+        config = self.root / 'bbport.ini'
+        config.write_text('pad.cross=b\npad.circle=a\n')
+        self.assertTrue(menu_prompts.ab_swapped(config))
+        config.write_text('pad.cross=b\n')
+        self.assertFalse(menu_prompts.ab_swapped(config))
+        self.assertFalse(menu_prompts.ab_swapped(None))
+        plain, _ = mt.read_dcx(menu_prompts.build_common(self.base, 'switch', {}))
+        swapped, _ = mt.read_dcx(menu_prompts.build_common(self.base, 'switch', {}, swap_ab=True))
+        textures = mt.textures(swapped)
+        self.assertEqual(mt.blocks(swapped, textures['KG_OK']), mt.blocks(plain, textures['KG_Cancel']))
+        self.assertEqual(mt.blocks(swapped, textures['KG_Cancel']), mt.blocks(plain, textures['KG_OK']))
+        self.assertEqual(mt.blocks(swapped, textures['KG_R_U']), mt.blocks(plain, textures['KG_R_U']))
+
+    def test_launcher_swap_binds_what_the_runtime_reads(self):
+        launcher = (ROOT / 'launcher' / 'bbport_launcher.py').read_text()
+        self.assertIn('("cross", "Крест", "Space", "a")', launcher)
+        self.assertIn('("circle", "Круг", "Left Shift", "b")', launcher)
+        self.assertIn('self.set_control("pad", "cross", "b" if swap else None)', launcher)
+        self.assertIn('self.set_control("pad", "circle", "a" if swap else None)', launcher)
+
     def test_keyboard_prompts_follow_the_bound_keys(self):
         config = self.root / 'bbport.ini'
         config.write_text('key.cross=Return, Space\nkey.circle=\n')

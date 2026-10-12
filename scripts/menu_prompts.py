@@ -7,7 +7,8 @@
 
 prints the folders (os.pathsep-separated) that mods.py lays under the mods (--ui-mods):
 - Xbox and Switch: the icons of Dommo's "DS3 Style" prompts (Nexus, Bloodborne mod 30) from
-  assets/menu_prompts, put into the game's menu/common.tpf.dcx.
+  assets/menu_prompts, put into the game's menu/common.tpf.dcx. With bbport.ini's pad.cross=b
+  and pad.circle=a (the launcher's A/B swap), cross and circle show each other's glyph.
 - keyboard: icons drawn for the keys bbport.ini binds (key.<input>=, else the defaults); needs
   Pillow. Which textures to draw (the KG_* icons and three atlas spots) follows Abken's KBM
   Icons Generator (Nexus, Bloodborne mod 537); nothing of it is used.
@@ -99,6 +100,34 @@ def key_bindings(config):
     return keys
 
 
+def ab_swapped(config):
+    """bbport.ini binds cross to the gamepad's east button (b) and circle to the south one (a):
+    the launcher's A/B swap for Nintendo-style controllers."""
+    pads = {}
+    try:
+        lines = Path(config).read_text().splitlines() if config else []
+    except OSError:
+        lines = []
+    for line in lines:
+        name, _, value = line.partition('=')
+        if name.strip() in ('pad.cross', 'pad.circle'):
+            pads[name.strip()[4:]] = value.split(',')[0].strip().casefold()
+    return pads.get('cross') == 'b' and pads.get('circle') == 'a'
+
+
+def swap_atlas_glyphs(strip):
+    """The atlas strip's blocks with its circle and cross prompts swapped."""
+    import menu_textures as mt
+    x0, y0, w, h = ATLAS_STRIP
+    image = mt.decode(w, h, strip)
+    boxes = [(x - x0, y - y0, x - x0 + 26, y - y0 + 26)
+             for x, y in (ATLAS_GLYPHS['KG_OK'], ATLAS_GLYPHS['KG_Cancel'])]
+    ok, cancel = (image.crop(box) for box in boxes)
+    image.paste(cancel, boxes[0][:2])
+    image.paste(ok, boxes[1][:2])
+    return mt.encode(image)
+
+
 def key_label(key):
     if not key:
         return '–'
@@ -173,8 +202,9 @@ def keyboard_assets(keys):
     return icons, strip
 
 
-def build_common(base, prompts, keys):
-    """The game's menu/common.tpf.dcx (bytes `base`) with `prompts` (xbox, switch, keyboard)."""
+def build_common(base, prompts, keys, swap_ab=False):
+    """The game's menu/common.tpf.dcx (bytes `base`) with `prompts` (xbox, switch, keyboard);
+    `swap_ab`: cross and circle show each other's glyph (gamepad prompts only)."""
     import menu_textures as mt
     tpf, header = mt.read_dcx(base)
     tpf = bytearray(tpf)
@@ -187,6 +217,12 @@ def build_common(base, prompts, keys):
         folder = ASSETS / prompts
         blocks = {slot: mt.dds_blocks((folder / f'{slot}.dds').read_bytes()) for slot in ICONS}
         strip = mt.dds_blocks((folder / 'atlas.dds').read_bytes())
+        if swap_ab:
+            blocks['KG_OK'], blocks['KG_Cancel'] = blocks['KG_Cancel'], blocks['KG_OK']
+            try:
+                strip = swap_atlas_glyphs(strip)
+            except ImportError:  # no Pillow: the small prompts are swapped, the big ones are not
+                pass
     for slot, new in blocks.items():
         texture = textures[slot]
         if len(new) != (texture['width'] // 4) * (texture['height'] // 4):
@@ -261,12 +297,14 @@ def main(argv=None):
         base = game_file(args.game, 'common.tpf.dcx')
         stat = base.stat()
         keys = key_bindings(args.config) if args.prompts == 'keyboard' else {}
+        swap_ab = args.prompts != 'keyboard' and ab_swapped(args.config)
         labels = sorted((name, key_label(key)) for name, key in keys.items())
         used_assets = sorted((ASSETS / args.prompts).glob('*.dds')) if args.prompts != 'keyboard' else []
-        key = hashlib.sha256(json.dumps([sources(*used_assets), args.prompts, labels, str(base),
-                                         stat.st_size, stat.st_mtime_ns]).encode()).hexdigest()[:16]
+        key = hashlib.sha256(json.dumps([sources(*used_assets), args.prompts, labels, swap_ab,
+                                         str(base), stat.st_size,
+                                         stat.st_mtime_ns]).encode()).hexdigest()[:16]
         folders.append(cached(args.out, f'prompts-{key}', 'common.tpf.dcx',
-                              lambda: build_common(base.read_bytes(), args.prompts, keys)))
+                              lambda: build_common(base.read_bytes(), args.prompts, keys, swap_ab)))
         used.add(f'prompts-{key}')
     if args.gestures == '1':
         base = game_file(args.game, 'gesturetop.gfx')

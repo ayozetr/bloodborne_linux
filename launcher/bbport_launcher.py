@@ -779,6 +779,16 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.prompts_row = combo_row(tr("Иконки кнопок"), tr("Применяется при запуске игры"),
                                      PROMPT_CHOICES, self.settings["prompts"])
         controls.add(self.prompts_row)
+        # Nintendo-style controllers (issue #3): cross on the east button (A there), circle on
+        # the south one; the Xbox and Switch prompts follow (menu_prompts.py).
+        self.ab_swap_row = Adw.SwitchRow(
+            title=tr("Поменять местами A и B"),
+            subtitle=tr("Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. "
+                        "Применяется при запуске игры"),
+            active=self.ab_swapped())
+        self.ab_swap_syncing = False
+        self.ab_swap_row.connect("notify::active", lambda *_: self.on_ab_swap())
+        controls.add(self.ab_swap_row)
         self.gestures_row = Adw.SwitchRow(title=tr("Меню жестов без значков управления движением"),
                                           active=self.settings["gestures_no_motion"])
         controls.add(self.gestures_row)
@@ -1132,6 +1142,22 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.ini[f"{kind}.{name}"] = value
         self.show_control(kind, name)
         self.store()
+        if kind == "pad" and name in ("cross", "circle"):
+            self.ab_swap_syncing = True
+            self.ab_swap_row.set_active(self.ab_swapped())
+            self.ab_swap_syncing = False
+
+    def ab_swapped(self):
+        """Cross on the gamepad's b (east) button and circle on a (south)."""
+        return ((self.ini.get("pad.cross") or "").casefold() == "b"
+                and (self.ini.get("pad.circle") or "").casefold() == "a")
+
+    def on_ab_swap(self):
+        if self.ab_swap_syncing:
+            return
+        swap = self.ab_swap_row.get_active()
+        self.set_control("pad", "cross", "b" if swap else None)
+        self.set_control("pad", "circle", "a" if swap else None)
 
     def assign_control(self, kind, name):
         tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"

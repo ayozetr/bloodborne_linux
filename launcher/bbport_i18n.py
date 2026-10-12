@@ -400,6 +400,8 @@ EN = {
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Applies when the game starts",
     "Иконки кнопок": "Button prompts",
+    "Поменять местами A и B": "Swap A and B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "For Nintendo-style controllers: confirm on A, back on B. Applies when the game starts",
     "Автоматически (по контроллеру)": "Automatic (by controller)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Gestures menu without motion-control icons",
@@ -830,6 +832,8 @@ PT_BR = {
     "Клавиатура": "Teclado",
     "Применяется при запуске игры": "Aplicado ao iniciar o jogo",
     "Иконки кнопок": "Ícones dos botões",
+    "Поменять местами A и B": "Trocar A e B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "Para controles no estilo Nintendo: confirmar no A, voltar no B. Aplicado ao iniciar o jogo",
     "Автоматически (по контроллеру)": "Automático (pelo controle)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menu de gestos sem ícones de controle por movimento",
@@ -1414,6 +1418,8 @@ ES = {
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Se aplica al iniciar el juego",
     "Иконки кнопок": "Iconos de botones",
+    "Поменять местами A и B": "Intercambiar A y B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "Para mandos estilo Nintendo: confirmar con A, volver con B. Se aplica al iniciar el juego",
     "Автоматически (по контроллеру)": "Automático (según el mando)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menú de gestos sin iconos de control por movimiento",
@@ -1918,6 +1924,8 @@ IT = {
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Si applica all'avvio del gioco",
     "Иконки кнопок": "Icone dei pulsanti",
+    "Поменять местами A и B": "Scambia A e B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "Per controller in stile Nintendo: conferma con A, indietro con B. Si applica all'avvio del gioco",
     "Автоматически (по контроллеру)": "Automatico (in base al controller)",
     "PlayStation (оригинал)": "PlayStation (originale)",
     "Меню жестов без значков управления движением": "Menu dei gesti senza icone del controllo di movimento",
@@ -2422,6 +2430,8 @@ FR = {
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "S'applique au lancement du jeu",
     "Иконки кнопок": "Icônes des boutons",
+    "Поменять местами A и B": "Inverser A et B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "Pour les manettes de type Nintendo : valider avec A, retour avec B. Appliqué au lancement du jeu",
     "Автоматически (по контроллеру)": "Automatique (selon la manette)",
     'PlayStation (оригинал)': "PlayStation (d'origine)",
     "Меню жестов без значков управления движением": "Menu des gestes sans icônes de détection de mouvement",
@@ -2926,6 +2936,8 @@ DE = {
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Wird beim Spielstart übernommen",
     "Иконки кнопок": "Tastensymbole",
+    "Поменять местами A и B": "A und B tauschen",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "Für Controller im Nintendo-Stil: Bestätigen mit A, Zurück mit B. Wird beim Spielstart übernommen",
     "Автоматически (по контроллеру)": "Automatisch (nach Controller)",
     "PlayStation (оригинал)": "PlayStation (Original)",
     "Меню жестов без значков управления движением": "Gestenmenü ohne Symbole der Bewegungssteuerung",
@@ -3542,6 +3554,8 @@ ZH_CN = {
     "Игровой сервер (сообщения, пятна крови, призраки)": "游戏服务器（留言、血迹、幻影）",
     "Изменения игрового процесса": "玩法调整",
     "Иконки кнопок": "按键图标",
+    "Поменять местами A и B": "交换 A 和 B",
+    "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "适用于任天堂风格的手柄：A 确认，B 返回。启动游戏时生效",
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "你的 shadNet 账户名，不是邮箱。可在 shadnet.shadps4.net 注册，或向私人服务器的所有者索取。密码会与启动器设置一起保存在本机",
     "Как запустить свой сервер": "如何搭建自己的服务器",
     "Ключ трофеев": "奖杯密钥",
