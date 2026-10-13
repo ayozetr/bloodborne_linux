@@ -613,6 +613,8 @@ void Menu() {
         "filling, not a problem. Each place only once.",
         "«Компиляция шейдеров» в левом нижнем углу: рывок в это время — заполнение кэша "
         "шейдеров, а не проблема. В каждом месте только один раз."));
+    Checkbox(BbSettings::MenuText("Sound when a trophy is earned", "Звук при получении трофея"),
+             s.trophy_sound);
 
     ImGui::Spacing();
     if (ImGui::Button(BbSettings::MenuText("Close", "Закрыть"))) {
@@ -744,6 +746,43 @@ ImTextureData* NoticeIcon(const Notice& n) {
     return texture;
 }
 
+// The trophy chime: a short bell of our own (no audio from the console), two notes and a third
+// for the platinum, on its own SDL stream beside the game's. From GerasimosKan's trophies
+// (deadinside28/bloodborne_pc#127). BB_AUDIO=none keeps it silent like the game.
+void TrophyChime(bool platinum) {
+    static SDL_AudioStream* stream = []() -> SDL_AudioStream* {
+        const char* mode = std::getenv("BB_AUDIO");
+        if ((mode && !std::strcmp(mode, "none")) || !SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+            return nullptr;
+        }
+        const SDL_AudioSpec spec{SDL_AUDIO_F32, 1, 48000};
+        SDL_AudioStream* s =
+            SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
+        if (s) {
+            SDL_ResumeAudioStreamDevice(s);
+        }
+        return s;
+    }();
+    if (!stream) {
+        return;
+    }
+    constexpr int rate = 48000;
+    constexpr float two_pi = 6.2831853f, step = 0.09f;
+    std::vector<float> pcm(rate * 6 / 5);
+    const float notes[] = {1318.5f, 1975.5f, 2637.0f}; // E6, B6, E7
+    for (int k = 0; k < (platinum ? 3 : 2); ++k) {
+        for (std::size_t i = std::size_t(k * step * rate); i < pcm.size(); ++i) {
+            const float t = float(i) / rate - k * step, f = notes[k];
+            const float envelope = std::min(t / 0.004f, 1.0f) * std::exp(-t * 5.0f);
+            // A bell: the fundamental and a quickly fading inharmonic partial.
+            pcm[i] += 0.12f * envelope *
+                      (std::sin(two_pi * f * t) +
+                       0.35f * std::exp(-t * 8.0f) * std::sin(two_pi * 2.76f * f * t));
+        }
+    }
+    SDL_PutAudioStreamData(stream, pcm.data(), int(pcm.size() * sizeof(float)));
+}
+
 void TrophyCard() {
     const auto now = std::chrono::steady_clock::now();
     if (!notice_shown) {
@@ -756,6 +795,9 @@ void TrophyCard() {
         notices.pop_front();
         notice_shown = true;
         notice_start = now;
+        if (BbSettings::Get().trophy_sound) {
+            TrophyChime(notice.grade == 'P');
+        }
     }
     const float t = std::chrono::duration<float>(now - notice_start).count();
     if (t > NoticeIn + NoticeHold + NoticeOut) {
