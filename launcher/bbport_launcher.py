@@ -1886,7 +1886,7 @@ class LauncherWindow(Adw.ApplicationWindow):
     def show_update_state(self, progress=None):
         """The update row and its button for the current state."""
         latest, state = self.latest, self.update_state
-        newer = latest is not None and bbport_update.is_newer(latest["tag"])
+        newer = isinstance(latest, dict) and bbport_update.is_newer(latest["tag"])
         appimage = bbport_update.running_appimage()
         button, sensitive = tr("Проверить сейчас"), True
         if state == "checking":
