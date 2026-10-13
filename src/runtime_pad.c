@@ -200,10 +200,18 @@ static uint8_t stick_axis(int axis,int16_t raw) {
 static uint16_t touch_axis(float v, int max) {
     return (uint16_t)(v<=0.0f ? 0 : v>=1.0f ? max : (int)(v*max+0.5f));
 }
+/* A touch as the pad reports one: a new id per press (1..127; 0 is not a valid one) and the
+ * time held since the first sample down. For the gestures (Tab) and personal effects (Backspace)
+ * menus. */
+static uint8_t touch_id;
+static uint64_t touch_down;
 static void touch_click(PadData *d, int right) {
+    const uint64_t now=now_us();
+    if (!touch_down) { touch_down=now; touch_id=(uint8_t)(touch_id%127+1); }
     d->buttons|=BTN_TOUCHPAD;
     d->touch_count=1;
-    d->touches[0]=(PadTouch){.x=right ? 1440 : 480,.y=471,.id=0};
+    d->touch_held_time=(uint32_t)(now-touch_down);
+    d->touches[0]=(PadTouch){.x=right ? 1440 : 480,.y=471,.id=touch_id};
 }
 
 /* BB_GAMEPAD (the launcher's controller choice): its SDL GUID, or part of its name. Issue #15:
@@ -689,6 +697,7 @@ static void sample(PadData *d) {
     d->buttons|=injected.buttons;
     if (injected.touch_side>=0) touch_click(d,injected.touch_side);
     else if ((d->buttons & BTN_TOUCHPAD) && !d->touch_count) touch_click(d,0);
+    if (!d->touch_count) touch_down=0;
     if (injected.buttons & BTN_L2) d->l2=255;
     if (injected.buttons & BTN_R2) d->r2=255;
     uint8_t *axes[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
