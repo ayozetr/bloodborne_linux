@@ -37,18 +37,18 @@ bool ReadFile(const std::string& path, std::vector<u8>& data) {
     return bool(file.read(reinterpret_cast<char*>(data.data()), std::streamsize(data.size())));
 }
 
+// The model for the menu's preset. bbport: Performance and Ultra Performance (2x and 3x) use the
+// balanced model too: the v07 performance and ultra performance models leave trails behind moving
+// characters in Bloodborne, and the balanced one handles those ratios cleanly (IFreemz's
+// shadPS4-Bloodborne-DLSS-FSR, 9b2766e). The render size still follows the preset.
 FfxFsr4ModelPreset ModelPreset(int preset) {
     switch (preset) {
     case 0:
         return FFX_FSR4_MODEL_PRESET_NATIVE_AA;
     case 1:
         return FFX_FSR4_MODEL_PRESET_QUALITY;
-    case 2:
-        return FFX_FSR4_MODEL_PRESET_BALANCED;
-    case 3:
-        return FFX_FSR4_MODEL_PRESET_PERFORMANCE;
     default:
-        return FFX_FSR4_MODEL_PRESET_ULTRA_PERFORMANCE;
+        return FFX_FSR4_MODEL_PRESET_BALANCED;
     }
 }
 

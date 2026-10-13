@@ -603,7 +603,7 @@ THANKS = (
         _github("droogie", "Быстрая загрузка после смерти и перемещения (bbhost) и сервер "
                            "The Hunter's Dream"),
         _github("Wozzardman", "Сетевые библиотеки игры по сети и сервер для своего кооператива"),
-        _github("IFreemz", "Основа поддержки DLSS"),
+        _github("IFreemz", "Основа поддержки DLSS и модель FSR 4 без шлейфов за персонажами"),
         _github("FireBurn", "Апскейлер FSR 3.1"),
         _github("Obrikash", "Игра запускается, когда DLSS нельзя использовать"),
         _github("Qiming-Liu", "Перевод на упрощённый китайский"),
