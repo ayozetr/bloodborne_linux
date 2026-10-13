@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, system_game_language, tr
+import bbport_cache
 import bbport_steam
 import bbport_update
 
@@ -698,6 +699,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_button.set_sensitive(self.fsr411_build is None)
         if hasattr(self, "fsr411_button"):
             self.fsr411_button.set_sensitive(not running)
+        if hasattr(self, "cache_button"):
+            self.show_cache()
 
     # --- settings page -------------------------------------------------------------------
 
@@ -1001,6 +1004,12 @@ class LauncherWindow(Adw.ApplicationWindow):
             tr("Меньше рывков при подгрузке зон"), PREUPLOAD,
             self.settings.get("preupload", ""))
         perf.add(self.preupload_row)
+        self.cache_row = Adw.ActionRow(title=tr("Кэш шейдеров"))
+        self.cache_button = Gtk.Button(label=tr("Очистить"), valign=Gtk.Align.CENTER)
+        self.cache_button.connect("clicked", self.on_clear_cache)
+        self.cache_row.add_suffix(self.cache_button)
+        perf.add(self.cache_row)
+        self.show_cache()
         page.add(perf)
 
         dev = Adw.PreferencesGroup(title=tr("Для разработчика"))
@@ -1059,6 +1068,31 @@ class LauncherWindow(Adw.ApplicationWindow):
     def game_dir(self):
         return Path(self.settings["game_dir"]).expanduser()
 
+    def show_cache(self):
+        """The shader cache's size; it can be cleared while the game is not running."""
+        size = bbport_cache.size(self.user_dir())
+        self.cache_row.set_subtitle(
+            tr("{}. Если после обновления картинка выглядит странно, очистите его: шейдеры "
+               "соберутся заново (первые минуты в каждой зоне возможны рывки)").format(
+                GLib.format_size(size)) if size else tr("Пусто: шейдеры соберутся при игре"))
+        self.cache_button.set_sensitive(bool(size) and self.process is None)
+
+    def on_clear_cache(self, _button):
+        dialog = Adw.AlertDialog(heading=tr("Очистить кэш шейдеров?"), body=tr(
+            "Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения "
+            "и настройки не затрагиваются."))
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("clear", tr("Очистить"))
+        dialog.set_response_appearance("clear", Adw.ResponseAppearance.DESTRUCTIVE)
+
+        def answered(_dialog, response):
+            if response == "clear" and self.process is None:
+                bbport_cache.clear(self.user_dir())
+                self.show_cache()
+
+        dialog.connect("response", answered)
+        dialog.present(self)
+
     def user_dir(self):
         return Path(self.settings["user_dir"]).expanduser() if self.settings["user_dir"] \
             else DATA_DIR / "user"
@@ -1073,6 +1107,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.user_status.set_tooltip_text(tr("Найдены сохранения") if found
                                           else tr("Сохранений пока нет: игра создаст их здесь"))
         self.user_reset.set_sensitive(custom)
+        if hasattr(self, "cache_row"):
+            self.show_cache()
 
     def update_dlc_status(self):
         path = self.settings.get("dlc_dir", "")

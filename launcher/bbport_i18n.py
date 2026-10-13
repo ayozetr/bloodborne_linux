@@ -587,6 +587,13 @@ EN = {
     'Рендерер и компилятор шейдеров': 'The renderer and shader recompiler',
     'Инструмент для сборки AppImage': 'The tool that builds the AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Found the bug that kept the game from starting on some graphics cards',
+    # Shader cache
+    'Кэш шейдеров': 'Shader cache',
+    'Очистить': 'Clear',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. If the picture looks wrong after an update, clear it: the shaders are built again (some stutter in each area for the first minutes)',
+    'Пусто: шейдеры соберутся при игре': 'Empty: the shaders are built as you play',
+    'Очистить кэш шейдеров?': 'Clear the shader cache?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
 }
 
 PT_BR = {
@@ -1228,6 +1235,13 @@ PT_BR = {
     'Рендерер и компилятор шейдеров': 'O renderizador e o recompilador de shaders',
     'Инструмент для сборки AppImage': 'A ferramenta que gera a AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontrou o erro que impedia o jogo de iniciar em algumas placas de vídeo',
+    # Shader cache
+    'Кэш шейдеров': 'Cache de shaders',
+    'Очистить': 'Limpar',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. Se a imagem parecer estranha após uma atualização, limpe-o: os shaders são gerados de novo (pode haver travadas nos primeiros minutos de cada área)',
+    'Пусто: шейдеры соберутся при игре': 'Vazio: os shaders são gerados enquanto você joga',
+    'Очистить кэш шейдеров?': 'Limpar o cache de shaders?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
 }
 
 
@@ -1780,6 +1794,13 @@ ES = {
     'Рендерер и компилятор шейдеров': 'El renderizador y el recompilador de shaders',
     'Инструмент для сборки AppImage': 'La herramienta que crea la AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontró el fallo que impedía arrancar el juego en algunas gráficas',
+    # Shader cache
+    'Кэш шейдеров': 'Caché de shaders',
+    'Очистить': 'Borrar',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. Si la imagen se ve rara tras una actualización, bórrala: los shaders se vuelven a generar (puede haber tirones los primeros minutos en cada zona)',
+    'Пусто: шейдеры соберутся при игре': 'Vacía: los shaders se generan mientras juegas',
+    'Очистить кэш шейдеров?': '¿Borrar la caché de shaders?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
 }
 
 
@@ -2332,6 +2353,13 @@ IT = {
     'Рендерер и компилятор шейдеров': 'Il renderer e il ricompilatore degli shader',
     'Инструмент для сборки AppImage': 'Lo strumento che crea l’AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Ha trovato il bug che impediva l’avvio del gioco su alcune schede video',
+    # Shader cache
+    'Кэш шейдеров': 'Cache degli shader',
+    'Очистить': 'Svuota',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. Se l’immagine sembra strana dopo un aggiornamento, svuotala: gli shader vengono ricreati (possibili scatti nei primi minuti di ogni area)',
+    'Пусто: шейдеры соберутся при игре': 'Vuota: gli shader vengono creati mentre giochi',
+    'Очистить кэш шейдеров?': 'Svuotare la cache degli shader?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
 }
 
 
@@ -2884,6 +2912,13 @@ FR = {
     'Рендерер и компилятор шейдеров': 'Le moteur de rendu et le recompilateur de shaders',
     'Инструмент для сборки AppImage': 'L’outil qui crée l’AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'A trouvé le bug qui empêchait le jeu de démarrer sur certaines cartes graphiques',
+    # Shader cache
+    'Кэш шейдеров': 'Cache des shaders',
+    'Очистить': 'Vider',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. Si l’image semble étrange après une mise à jour, videz-le : les shaders sont reconstruits (quelques saccades les premières minutes dans chaque zone)',
+    'Пусто: шейдеры соберутся при игре': 'Vide : les shaders sont construits pendant que vous jouez',
+    'Очистить кэш шейдеров?': 'Vider le cache des shaders ?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
 }
 
 
@@ -3436,6 +3471,13 @@ DE = {
     'Рендерер и компилятор шейдеров': 'Der Renderer und der Shader-Recompiler',
     'Инструмент для сборки AppImage': 'Das Werkzeug, das das AppImage baut',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Hat den Fehler gefunden, der den Spielstart auf manchen Grafikkarten verhinderte',
+    # Shader cache
+    'Кэш шейдеров': 'Shader-Cache',
+    'Очистить': 'Leeren',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}. Wenn das Bild nach einem Update seltsam aussieht, leeren: Die Shader werden neu erstellt (in den ersten Minuten jedes Gebiets kann es ruckeln)',
+    'Пусто: шейдеры соберутся при игре': 'Leer: Die Shader werden beim Spielen erstellt',
+    'Очистить кэш шейдеров?': 'Shader-Cache leeren?',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
 }
 
 
@@ -3930,6 +3972,13 @@ ZH_CN = {
     'Рендерер и компилятор шейдеров': '渲染器与着色器重编译器',
     'Инструмент для сборки AppImage': '构建 AppImage 的工具',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': '发现了导致游戏在部分显卡上无法启动的错误',
+    # Shader cache
+    'Кэш шейдеров': '着色器缓存',
+    'Очистить': '清除',
+    '{}. Если после обновления картинка выглядит странно, очистите его: шейдеры соберутся заново (первые минуты в каждой зоне возможны рывки)': '{}。如果更新后画面异常，请清除：着色器会重新生成（每个区域的前几分钟可能卡顿）',
+    'Пусто: шейдеры соберутся при игре': '空：着色器会在游玩时生成',
+    'Очистить кэш шейдеров?': '清除着色器缓存？',
+    'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
