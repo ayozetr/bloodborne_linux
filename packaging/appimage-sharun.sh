@@ -10,6 +10,13 @@
 set -euo pipefail
 cd -- "$(dirname -- "$0")/.."
 [[ -f out/bb-probe && -f out/gpu/libbbgpu.so ]] || { echo 'Build first: bash build.sh' >&2; exit 1; }
+# Mesa's Vulkan drivers come from this system: on a build host with only NVIDIA's driver none went
+# in, and the game found no GPU on AMD and Intel ("Failed to enumerate physical devices:
+# ErrorInitializationFailed", issue #4). Arch: vulkan-radeon and vulkan-intel.
+for driver in radeon intel; do
+    [[ -f /usr/share/vulkan/icd.d/${driver}_icd.json ]] || {
+        echo "Mesa's $driver Vulkan driver is not installed: pacman -S vulkan-$driver" >&2; exit 1; }
+done
 # FSR 4 assets ship with the package (downloaded once; files already there are kept).
 bash tools/fetch_fsr4_assets.sh
 root=$PWD
@@ -111,6 +118,12 @@ if [[ -n $net ]]; then
     mkdir -p "$d/net"
     ln -sf "$(realpath --relative-to="$d/net" "$module")" "$d/net/libbbnet.so"
 fi
+for driver in radeon intel; do
+    ls "$appdir"/share/vulkan/icd.d/${driver}_icd*.json "$appdir"/lib/libvulkan_$driver.so \
+        >/dev/null 2>&1 || { echo "Mesa's $driver Vulkan driver is missing from the AppDir" >&2; exit 1; }
+done
+# sharun points Vulkan at these (VK_DRIVER_FILES), plus the host's NVIDIA manifest when there is
+# one, never at the host's Mesa.
 "$quick" --make-appimage
 
 mkdir -p "$root/dist"

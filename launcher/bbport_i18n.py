@@ -586,6 +586,7 @@ EN = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Game patches: high frame rates, resolution and more',
     'Рендерер и компилятор шейдеров': 'The renderer and shader recompiler',
     'Инструмент для сборки AppImage': 'The tool that builds the AppImage',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Found the bug that kept the game from starting on some graphics cards',
 }
 
 PT_BR = {
@@ -1226,6 +1227,7 @@ PT_BR = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Patches do jogo: FPS altos, resolução e mais',
     'Рендерер и компилятор шейдеров': 'O renderizador e o recompilador de shaders',
     'Инструмент для сборки AppImage': 'A ferramenta que gera a AppImage',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontrou o erro que impedia o jogo de iniciar em algumas placas de vídeo',
 }
 
 
@@ -1777,6 +1779,7 @@ ES = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Parches del juego: FPS altos, resolución y más',
     'Рендерер и компилятор шейдеров': 'El renderizador y el recompilador de shaders',
     'Инструмент для сборки AppImage': 'La herramienta que crea la AppImage',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontró el fallo que impedía arrancar el juego en algunas gráficas',
 }
 
 
@@ -2328,6 +2331,7 @@ IT = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Patch del gioco: FPS alti, risoluzione e altro',
     'Рендерер и компилятор шейдеров': 'Il renderer e il ricompilatore degli shader',
     'Инструмент для сборки AppImage': 'Lo strumento che crea l’AppImage',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Ha trovato il bug che impediva l’avvio del gioco su alcune schede video',
 }
 
 
@@ -2879,6 +2883,7 @@ FR = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Patchs du jeu : FPS élevés, résolution et plus',
     'Рендерер и компилятор шейдеров': 'Le moteur de rendu et le recompilateur de shaders',
     'Инструмент для сборки AppImage': 'L’outil qui crée l’AppImage',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'A trouvé le bug qui empêchait le jeu de démarrer sur certaines cartes graphiques',
 }
 
 
@@ -3430,6 +3435,7 @@ DE = {
     'Патчи игры: высокий FPS, разрешение и другое': 'Spiel-Patches: hohe Bildraten, Auflösung und mehr',
     'Рендерер и компилятор шейдеров': 'Der Renderer und der Shader-Recompiler',
     'Инструмент для сборки AppImage': 'Das Werkzeug, das das AppImage baut',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Hat den Fehler gefunden, der den Spielstart auf manchen Grafikkarten verhinderte',
 }
 
 
@@ -3923,6 +3929,7 @@ ZH_CN = {
     'Патчи игры: высокий FPS, разрешение и другое': '游戏补丁：高帧率、分辨率等',
     'Рендерер и компилятор шейдеров': '渲染器与着色器重编译器',
     'Инструмент для сборки AppImage': '构建 AppImage 的工具',
+    'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': '发现了导致游戏在部分显卡上无法启动的错误',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
