@@ -541,6 +541,12 @@ EN = {
         'Silver',
     'Бронзовый':
         'Bronze',
+    "Вход в shadNet": "shadNet sign-in",
+    "неверное имя или пароль": "wrong name or password",
+    "такой учётной записи нет на этом сервере": "no such account on this server",
+    "эта учётная запись уже в сети (игра запущена?)": "this account is already signed in (is the game running?)",
+    "вход выполнен": "signed in",
+    "вход не удался ({})": "sign-in failed ({})",
 }
 
 PT_BR = {
@@ -1136,6 +1142,12 @@ PT_BR = {
         'Prata',
     'Бронзовый':
         'Bronze',
+    "Вход в shadNet": "Login no shadNet",
+    "неверное имя или пароль": "nome ou senha incorretos",
+    "такой учётной записи нет на этом сервере": "essa conta não existe neste servidor",
+    "эта учётная запись уже в сети (игра запущена?)": "esta conta já está conectada (o jogo está aberto?)",
+    "вход выполнен": "login feito",
+    "вход не удался ({})": "falha no login ({})",
 }
 
 
@@ -1642,6 +1654,12 @@ ES = {
         'Plata',
     'Бронзовый':
         'Bronce',
+    "Вход в shadNet": "Inicio de sesión en shadNet",
+    "неверное имя или пароль": "nombre o contraseña incorrectos",
+    "такой учётной записи нет на этом сервере": "esa cuenta no existe en este servidor",
+    "эта учётная запись уже в сети (игра запущена?)": "esta cuenta ya tiene la sesión iniciada (¿está el juego abierto?)",
+    "вход выполнен": "sesión iniciada",
+    "вход не удался ({})": "no se pudo iniciar sesión ({})",
 }
 
 
@@ -2148,6 +2166,12 @@ IT = {
         'Argento',
     'Бронзовый':
         'Bronzo',
+    "Вход в shadNet": "Accesso a shadNet",
+    "неверное имя или пароль": "nome o password errati",
+    "такой учётной записи нет на этом сервере": "questo account non esiste su questo server",
+    "эта учётная запись уже в сети (игра запущена?)": "questo account ha già effettuato l'accesso (il gioco è aperto?)",
+    "вход выполнен": "accesso riuscito",
+    "вход не удался ({})": "accesso non riuscito ({})",
 }
 
 
@@ -2654,6 +2678,12 @@ FR = {
         'Argent',
     'Бронзовый':
         'Bronze',
+    "Вход в shadNet": "Connexion à shadNet",
+    "неверное имя или пароль": "nom ou mot de passe incorrect",
+    "такой учётной записи нет на этом сервере": "ce compte n'existe pas sur ce serveur",
+    "эта учётная запись уже в сети (игра запущена?)": "ce compte est déjà connecté (le jeu est-il lancé ?)",
+    "вход выполнен": "connecté",
+    "вход не удался ({})": "échec de la connexion ({})",
 }
 
 
@@ -3160,6 +3190,12 @@ DE = {
         'Silber',
     'Бронзовый':
         'Bronze',
+    "Вход в shadNet": "shadNet-Anmeldung",
+    "неверное имя или пароль": "falscher Name oder falsches Passwort",
+    "такой учётной записи нет на этом сервере": "dieses Konto gibt es auf diesem Server nicht",
+    "эта учётная запись уже в сети (игра запущена?)": "dieses Konto ist bereits angemeldet (läuft das Spiel?)",
+    "вход выполнен": "angemeldet",
+    "вход не удался ({})": "Anmeldung fehlgeschlagen ({})",
 }
 
 
@@ -3608,6 +3644,12 @@ ZH_CN = {
     "не отвечает: призывы не соединятся": "无响应：召唤将无法连接",
     "недоступен": "无法连接",
     "отвечает; ваш публичный адрес: {}": "有响应；你的公网地址：{}",
+    "Вход в shadNet": "shadNet 登录",
+    "неверное имя или пароль": "用户名或密码错误",
+    "такой учётной записи нет на этом сервере": "此服务器上没有该账户",
+    "эта учётная запись уже в сети (игра запущена?)": "该账户已经登录（游戏正在运行吗？）",
+    "вход выполнен": "已登录",
+    "вход не удался ({})": "登录失败（{}）",
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

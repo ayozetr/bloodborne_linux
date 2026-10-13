@@ -20,11 +20,12 @@ together: everyone needs the game at version 1.09 and the same servers.
    (shadPS4's public one or your own, with its address), and enter the **account name** (not the
    email) and the password. The password is kept on this computer with the launcher's settings.
 3. **Test the connection**: the game server, the shadNet server, its UDP port and its WebAPI
-   should all answer.
+   should all answer, and with the account filled in, the sign-in should work. A wrong name or
+   password shows there (the server does not say which of the two).
 
-If the game says you are not signed in to PlayStation Network, the shadNet login failed. The
-usual cause is the password: the log then has a shadNet login error (code 8 is a wrong
-password). *Test the connection* only checks that the servers answer, not the account.
+If the game says you are not signed in to PlayStation Network, the shadNet login failed: the log
+then has a shadNet login error (code 8 is a wrong name or password). If the server did not answer
+when the game started, the game keeps trying in the background.
 
 ## Summoning in the game
 

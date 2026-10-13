@@ -221,9 +221,66 @@ def firewall_commands(firewall, gateway=None, port=P2P_PORT):
             None)
 
 
-def check(server, webapi, community):
+# shadNet's TCP protocol (gpu/bbnet/shadps4/shadnet/client.h): a 15-byte header (packet type u8,
+# command u16, total size u32, packet id u64, little endian); the server greets with ServerInfo
+# (its protocol version, u32) and answers Login with an error byte. srv.shadps4.net answers 8 for
+# an unknown name as well as for a wrong password.
+SHADNET_HEADER = struct.Struct('<BHIQ')
+SHADNET_PROTOCOL = 1
+LOGIN_ERRORS = {5: 'error', 6: 'already signed in', 7: 'no such account',
+                8: 'wrong name or password', 9: 'wrong token'}
+
+
+def proto_string(field, text):
+    data = text.encode()
+    length, varint = len(data), bytearray()
+    while True:
+        varint.append(length & 0x7f | (0x80 if length > 0x7f else 0))
+        length >>= 7
+        if not length:
+            return bytes([field << 3 | 2]) + bytes(varint) + data
+
+
+def shadnet_login(host, port, npid, password, timeout=6.0):
+    """Signs in to a shadNet server as the game does and leaves at once: (ok, detail), detail an
+    entry of LOGIN_ERRORS, 'protocol vN' or the socket error."""
+    def receive(sock, size):
+        data = b''
+        while len(data) < size:
+            chunk = sock.recv(size - len(data))
+            if not chunk:
+                raise ConnectionError('the server closed the connection')
+            data += chunk
+        return data
+
+    def packet(sock):
+        kind, command, total, _id = SHADNET_HEADER.unpack(receive(sock, SHADNET_HEADER.size))
+        if not SHADNET_HEADER.size <= total <= 0x800000:
+            raise ConnectionError('not a shadNet server')
+        return kind, command, receive(sock, total - SHADNET_HEADER.size)
+
+    with socket.create_connection((host, port), timeout=timeout) as sock:
+        kind, _command, payload = packet(sock)
+        if kind != 3:
+            raise ConnectionError('not a shadNet server')
+        version = struct.unpack_from('<I', payload)[0] if len(payload) >= 4 else SHADNET_PROTOCOL
+        if version != SHADNET_PROTOCOL:
+            return False, f'protocol v{version}'
+        request = (proto_string(1, npid) + proto_string(2, password) +
+                   proto_string(4, 'CUSA00900') + proto_string(5, 'Bloodborne'))
+        body = struct.pack('<I', len(request)) + request
+        sock.sendall(SHADNET_HEADER.pack(0, 0, SHADNET_HEADER.size + len(body), 1) + body)
+        while True:  # notifications may come first
+            kind, command, payload = packet(sock)
+            if kind == 1 and command == 0:
+                error = payload[0] if payload else 1
+                return error == 0, LOGIN_ERRORS.get(error, f'code {error}') if error else ''
+
+
+def check(server, webapi, community, account=None):
     """(name, address, ok, detail) for the game server, the shadNet server, its UDP port (detail:
-    the public address it sees, or 'timeout') and its WebAPI."""
+    the public address it sees, or 'timeout'), its WebAPI, and with account (npid, password) the
+    sign-in (detail: an entry of LOGIN_ERRORS, or why it could not be tried)."""
     results = []
     try:
         with urllib.request.urlopen(community + ':20443/bb-eu/ss.info', timeout=6) as reply:
@@ -250,6 +307,13 @@ def check(server, webapi, community):
         results.append(('webapi', webapi, ok, '' if ok else 'not a shadNet server'))
     except (OSError, ValueError) as error:
         results.append(('webapi', webapi, False, str(error)))
+    npid, password = account or ('', '')
+    if npid and password and results[1][2]:
+        try:
+            ok, detail = shadnet_login(host or server, int(port or 31313), npid, password)
+            results.append(('login', npid, ok, detail))
+        except (OSError, ValueError) as error:
+            results.append(('login', npid, False, str(error)))
     return results
 
 

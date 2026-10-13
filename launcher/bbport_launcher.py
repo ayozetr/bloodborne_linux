@@ -1632,7 +1632,12 @@ class LauncherWindow(Adw.ApplicationWindow):
     def on_test_connection(self, _button):
         server, webapi, community = online.addresses(self.online_settings())
         names = {"game": tr("Игровой сервер"), "shadnet": tr("Сервер shadNet"),
-                 "stun": tr("UDP сервера shadNet (призывы)"), "webapi": "WebAPI"}
+                 "stun": tr("UDP сервера shadNet (призывы)"), "webapi": "WebAPI",
+                 "login": tr("Вход в shadNet")}
+        login_errors = {"wrong name or password": tr("неверное имя или пароль"),
+                        "no such account": tr("такой учётной записи нет на этом сервере"),
+                        "already signed in": tr("эта учётная запись уже в сети (игра запущена?)")}
+        account = (self.npid_row.get_text().strip(), self.password_row.get_text())
         for row in self.test_rows:
             self.connection_group.remove(row)
         self.test_rows = []
@@ -1645,6 +1650,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                     status = tr("отвечает; ваш публичный адрес: {}").format(detail)
                 elif name == "stun" and detail == "timeout":
                     status = tr("не отвечает: призывы не соединятся")
+                elif name == "login":
+                    status = tr("вход выполнен") if ok else login_errors.get(
+                        detail, tr("вход не удался ({})").format(detail))
                 else:
                     status = tr("доступен") if ok else f'{tr("недоступен")} ({detail})'
                 # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
@@ -1658,7 +1666,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             return False
 
         def work():
-            results = online.check(server, webapi, community)
+            results = online.check(server, webapi, community, account)
             GLib.idle_add(show, results)
         threading.Thread(target=work, daemon=True).start()
 
