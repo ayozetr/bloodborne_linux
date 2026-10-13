@@ -595,6 +595,7 @@ EN = {
     'Очистить кэш шейдеров?': 'Clear the shader cache?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophy names in English without the key, and the sound when one is earned',
+    'Буфер трафарета, в который писали цветные изображения': 'The stencil buffer that colour images were writing into',
 }
 
 PT_BR = {
@@ -1244,6 +1245,7 @@ PT_BR = {
     'Очистить кэш шейдеров?': 'Limpar o cache de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Nomes dos troféus em inglês sem a chave e o som ao conquistar um',
+    'Буфер трафарета, в который писали цветные изображения': 'O buffer de estêncil em que imagens de cor escreviam',
 }
 
 
@@ -1804,6 +1806,7 @@ ES = {
     'Очистить кэш шейдеров?': '¿Borrar la caché de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Los nombres de los trofeos en inglés sin la clave y el sonido al conseguir uno',
+    'Буфер трафарета, в который писали цветные изображения': 'El búfer de estarcido en el que escribían imágenes de color',
 }
 
 
@@ -2364,6 +2367,7 @@ IT = {
     'Очистить кэш шейдеров?': 'Svuotare la cache degli shader?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'I nomi dei trofei in inglese senza la chiave e il suono quando se ne ottiene uno',
+    'Буфер трафарета, в который писали цветные изображения': 'Lo stencil buffer in cui scrivevano immagini a colori',
 }
 
 
@@ -2924,6 +2928,7 @@ FR = {
     'Очистить кэш шейдеров?': 'Vider le cache des shaders ?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Les noms des trophées en anglais sans la clé et le son à l’obtention d’un trophée',
+    'Буфер трафарета, в который писали цветные изображения': 'Le tampon de stencil dans lequel écrivaient des images couleur',
 }
 
 
@@ -3484,6 +3489,7 @@ DE = {
     'Очистить кэш шейдеров?': 'Shader-Cache leeren?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophäennamen auf Englisch ohne Schlüssel und der Ton beim Erhalt einer Trophäe',
+    'Буфер трафарета, в который писали цветные изображения': 'Der Stencil-Puffer, in den Farbbilder schrieben',
 }
 
 
@@ -3987,6 +3993,7 @@ ZH_CN = {
     'Очистить кэш шейдеров?': '清除着色器缓存？',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
     'Названия трофеев на английском без ключа и звук при получении трофея': '无密钥时的英文奖杯名称与获得奖杯时的音效',
+    'Буфер трафарета, в который писали цветные изображения': '被颜色图像写入的模板缓冲区',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
