@@ -27,6 +27,7 @@
 #include <chrono>
 #include <cmath>
 #include <csetjmp>
+#include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <filesystem>
@@ -93,6 +94,30 @@ bool CanBlitToSwapchain(const vk::PhysicalDevice physical_device, vk::Format for
 [[nodiscard]] vk::ImageBlit MakeImageBlitStretch(s32 frame_width, s32 frame_height,
                                                  s32 swapchain_width, s32 swapchain_height) {
     return MakeImageBlit(frame_width, frame_height, swapchain_width, swapchain_height, 0, 0);
+}
+
+// bbport: a frame's fence, waited for in 10 s slices. Past the first slice the log says so, once
+// per wait, with the breadcrumbs (which command the GPU has not finished): without it a GPU that
+// never finishes the frame froze the game with nothing in the log (issue #5).
+static vk::Result WaitFrameFence(vk::Device device, vk::Fence fence, const char* where) {
+    constexpr u64 slice = 10'000'000'000ULL;
+    bool told = false;
+    while (true) {
+        const vk::Result result = device.waitForFences(fence, false, slice);
+        if (result != vk::Result::eTimeout) {
+            if (told) {
+                std::printf("Presenter: %s finished after all\n", where);
+                std::fflush(stdout);
+            }
+            return result;
+        }
+        if (!told) {
+            told = true;
+            std::printf("Presenter: %s not finished after 10 s: the GPU is stuck on it\n", where);
+            std::fflush(stdout);
+            Breadcrumbs::ReportStuck(where);
+        }
+    }
 }
 
 static vk::Rect2D FitImage(s32 frame_width, s32 frame_height, s32 swapchain_width,
@@ -251,13 +276,10 @@ Frame* Presenter::PrepareLastFrame() {
     Frame* frame = last_submit_frame;
 
     while (true) {
-        vk::Result result = instance.GetDevice().waitForFences(frame->present_done, false,
-                                                               std::numeric_limits<u64>::max());
+        vk::Result result =
+            WaitFrameFence(instance.GetDevice(), frame->present_done, "the last frame");
         if (result == vk::Result::eSuccess) {
             break;
-        }
-        if (result == vk::Result::eTimeout) {
-            continue;
         }
         if (result == vk::Result::eErrorDeviceLost) {
             Breadcrumbs::ReportDeviceLost("waiting for a frame");
@@ -760,7 +782,7 @@ Frame* Presenter::GetRenderFrame() {
     vk::Result result{};
 
     const auto wait = [&]() {
-        result = device.waitForFences(frame->present_done, false, std::numeric_limits<u64>::max());
+        result = WaitFrameFence(device, frame->present_done, "a frame to draw into");
         return result;
     };
 

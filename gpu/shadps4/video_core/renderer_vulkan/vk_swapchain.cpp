@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
+#include <cstdio>
 #include <limits>
 #include "common/assert.h"
 #include "common/logging/log.h"
@@ -120,9 +121,25 @@ void Swapchain::SetHDR(bool hdr) {
 
 bool Swapchain::AcquireNextImage() {
     vk::Device device = instance.GetDevice();
-    vk::Result result =
-        device.acquireNextImageKHR(swapchain, std::numeric_limits<u64>::max(),
-                                   image_acquired[frame_index], VK_NULL_HANDLE, &image_index);
+    // bbport: in 10 s slices, saying so once when the compositor holds every image that long
+    // (issue #5: a frozen game with nothing in the log).
+    vk::Result result;
+    bool told = false;
+    while ((result = device.acquireNextImageKHR(swapchain, 10'000'000'000ULL,
+                                                image_acquired[frame_index], VK_NULL_HANDLE,
+                                                &image_index)) == vk::Result::eTimeout ||
+           result == vk::Result::eNotReady) {
+        if (!told) {
+            told = true;
+            std::printf("Swapchain: no image from the compositor in 10 s (it holds all %zu)\n",
+                        images.size());
+            std::fflush(stdout);
+        }
+    }
+    if (told) {
+        std::printf("Swapchain: the compositor gave an image back\n");
+        std::fflush(stdout);
+    }
 
     switch (result) {
     case vk::Result::eSuccess:
