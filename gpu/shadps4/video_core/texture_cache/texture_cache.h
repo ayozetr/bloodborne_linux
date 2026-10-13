@@ -411,7 +411,7 @@ private:
     tsl::robin_map<u64, Sampler> samplers;
     std::unordered_set<ImageId> download_images;
     u64 total_used_memory = 0;
-    u64 gc_evictions = 0, gc_downloads = 0; ///< bbport: pressure report
+    u64 gc_evictions = 0, gc_downloads = 0, gc_dropped = 0; ///< bbport: pressure report
     std::chrono::steady_clock::time_point gc_report_time{};
     /// bbport: registered images and their guest size, for the once-a-minute memory line.
     u64 image_count = 0, image_bytes = 0;
