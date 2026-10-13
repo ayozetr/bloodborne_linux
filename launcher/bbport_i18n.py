@@ -521,8 +521,8 @@ EN = {
         'Recorded when the game unlocks them, and shown in the game',
     'Ключ трофеев':
         'Trophy key',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        "The PS4's trophy key (TrophyKey in shadPS4), 32 hexadecimal digits: with it, the names and descriptions show. Kept on this computer. Without it, only the icons show",
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        "The PS4's trophy key (TrophyKey in shadPS4), 32 hexadecimal digits: with it, the names and descriptions are in the game's language. Kept on this computer. Without it, they are in English",
     'Неверный ключ трофеев: названия недоступны':
         'Wrong trophy key: the names are unavailable',
     'Получен {}':
@@ -594,6 +594,7 @@ EN = {
     'Пусто: шейдеры соберутся при игре': 'Empty: the shaders are built as you play',
     'Очистить кэш шейдеров?': 'Clear the shader cache?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
+    'Названия трофеев на английском, когда нет ключа': 'Trophy names in English when there is no key',
 }
 
 PT_BR = {
@@ -1169,8 +1170,8 @@ PT_BR = {
         'Registrados quando o jogo os desbloqueia, e mostrados no jogo',
     'Ключ трофеев':
         'Chave de troféus',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        'A chave de troféus do PS4 (TrophyKey no shadPS4), 32 dígitos hexadecimais: com ela aparecem os nomes e as descrições. Fica neste computador. Sem ela, só aparecem os ícones',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'A chave de troféus do PS4 (TrophyKey no shadPS4), 32 dígitos hexadecimais: com ela, os nomes e as descrições ficam no idioma do jogo. Fica neste computador. Sem ela, ficam em inglês',
     'Неверный ключ трофеев: названия недоступны':
         'Chave de troféus incorreta: os nomes não estão disponíveis',
     'Получен {}':
@@ -1242,6 +1243,7 @@ PT_BR = {
     'Пусто: шейдеры соберутся при игре': 'Vazio: os shaders são gerados enquanto você joga',
     'Очистить кэш шейдеров?': 'Limpar o cache de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
+    'Названия трофеев на английском, когда нет ключа': 'Nomes dos troféus em inglês quando não há chave',
 }
 
 
@@ -1728,8 +1730,8 @@ ES = {
         'Se guardan cuando el juego los desbloquea, y se muestran en el juego',
     'Ключ трофеев':
         'Clave de trofeos',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        'La clave de trofeos de PS4 (TrophyKey en shadPS4), 32 dígitos hexadecimales: con ella se ven los nombres y las descripciones. Se guarda en este equipo. Sin ella solo se ven los iconos',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'La clave de trofeos de PS4 (TrophyKey en shadPS4), 32 dígitos hexadecimales: con ella, los nombres y las descripciones salen en el idioma del juego. Se guarda en este equipo. Sin ella salen en inglés',
     'Неверный ключ трофеев: названия недоступны':
         'Clave de trofeos incorrecta: los nombres no están disponibles',
     'Получен {}':
@@ -1801,6 +1803,7 @@ ES = {
     'Пусто: шейдеры соберутся при игре': 'Vacía: los shaders se generan mientras juegas',
     'Очистить кэш шейдеров?': '¿Borrar la caché de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
+    'Названия трофеев на английском, когда нет ключа': 'Los nombres de los trofeos en inglés cuando no hay clave',
 }
 
 
@@ -2287,8 +2290,8 @@ IT = {
         'Registrati quando il gioco li sblocca, e mostrati nel gioco',
     'Ключ трофеев':
         'Chiave dei trofei',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        'La chiave dei trofei PS4 (TrophyKey in shadPS4), 32 cifre esadecimali: con essa si vedono nomi e descrizioni. Resta su questo computer. Senza, si vedono solo le icone',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'La chiave dei trofei PS4 (TrophyKey in shadPS4), 32 cifre esadecimali: con essa nomi e descrizioni sono nella lingua del gioco. Resta su questo computer. Senza, sono in inglese',
     'Неверный ключ трофеев: названия недоступны':
         'Chiave dei trofei errata: i nomi non sono disponibili',
     'Получен {}':
@@ -2360,6 +2363,7 @@ IT = {
     'Пусто: шейдеры соберутся при игре': 'Vuota: gli shader vengono creati mentre giochi',
     'Очистить кэш шейдеров?': 'Svuotare la cache degli shader?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
+    'Названия трофеев на английском, когда нет ключа': 'I nomi dei trofei in inglese quando manca la chiave',
 }
 
 
@@ -2846,8 +2850,8 @@ FR = {
         'Enregistrés quand le jeu les débloque, et affichés dans le jeu',
     'Ключ трофеев':
         'Clé des trophées',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        'La clé des trophées PS4 (TrophyKey dans shadPS4), 32 chiffres hexadécimaux : avec elle, les noms et descriptions s’affichent. Conservée sur cet ordinateur. Sans elle, seules les icônes s’affichent',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'La clé des trophées PS4 (TrophyKey dans shadPS4), 32 chiffres hexadécimaux : avec elle, les noms et descriptions sont dans la langue du jeu. Conservée sur cet ordinateur. Sans elle, ils sont en anglais',
     'Неверный ключ трофеев: названия недоступны':
         'Clé des trophées incorrecte : les noms ne sont pas disponibles',
     'Получен {}':
@@ -2919,6 +2923,7 @@ FR = {
     'Пусто: шейдеры соберутся при игре': 'Vide : les shaders sont construits pendant que vous jouez',
     'Очистить кэш шейдеров?': 'Vider le cache des shaders ?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
+    'Названия трофеев на английском, когда нет ключа': 'Les noms des trophées en anglais sans la clé',
 }
 
 
@@ -3405,8 +3410,8 @@ DE = {
         'Werden gespeichert, wenn das Spiel sie freischaltet, und im Spiel angezeigt',
     'Ключ трофеев':
         'Trophäen-Schlüssel',
-    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки':
-        'Der Trophäen-Schlüssel der PS4 (TrophyKey in shadPS4), 32 Hexadezimalziffern: damit erscheinen Namen und Beschreibungen. Bleibt auf diesem Computer. Ohne ihn erscheinen nur die Symbole',
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'Der Trophäen-Schlüssel der PS4 (TrophyKey in shadPS4), 32 Hexadezimalziffern: damit sind Namen und Beschreibungen in der Sprache des Spiels. Bleibt auf diesem Computer. Ohne ihn sind sie auf Englisch',
     'Неверный ключ трофеев: названия недоступны':
         'Falscher Trophäen-Schlüssel: die Namen sind nicht verfügbar',
     'Получен {}':
@@ -3478,6 +3483,7 @@ DE = {
     'Пусто: шейдеры соберутся при игре': 'Leer: Die Shader werden beim Spielen erstellt',
     'Очистить кэш шейдеров?': 'Shader-Cache leeren?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
+    'Названия трофеев на английском, когда нет ключа': 'Trophäennamen auf Englisch, wenn kein Schlüssel da ist',
 }
 
 
@@ -3877,7 +3883,8 @@ ZH_CN = {
     "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "shadNet 账号名，不是邮箱。请在 shadnet.shadps4.net 注册，或向私人服务器的主人索取。密码会和启动器设置一起保存在这台电脑上",
     "Как запустить свой сервер": "如何搭建自己的服务器",
     "Ключ трофеев": "奖杯密钥",
-    "Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны названия и описания. Хранится на этом компьютере. Без него видны только значки": "PS4 的奖杯密钥（shadPS4 中的 TrophyKey），32 位十六进制数：填写后会显示奖杯名称和说明。仅保存在本机。未填写时只显示图标",
+    'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
+        'PS4 的奖杯密钥（shadPS4 中的 TrophyKey），32 位十六进制数：填写后奖杯名称和说明使用游戏语言。仅保存在本机。未填写时为英文',
     "Копировать": "复制",
     "Меню жестов без значков управления движением": "手势菜单不显示体感操作图标",
     "Монитор": "显示器",
@@ -3979,6 +3986,7 @@ ZH_CN = {
     'Пусто: шейдеры соберутся при игре': '空：着色器会在游玩时生成',
     'Очистить кэш шейдеров?': '清除着色器缓存？',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
+    'Названия трофеев на английском, когда нет ключа': '没有密钥时的英文奖杯名称',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

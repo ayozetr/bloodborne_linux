@@ -5,7 +5,8 @@
 The dump's sce_sys/trophy/trophy00.trp holds the icons (PNG) and the trophy lists (TROPCONF.ESFM,
 TROP.ESFM and TROP_xx.ESFM per language). The lists are encrypted: AES-128-CBC with a key made by
 encrypting the game's NP communication id (sce_sys/npbind.dat, NPWR05818_00) with the PS4's trophy
-key, which the player supplies (shadPS4's TrophyKey). Without it, only the icons are known.
+key, which the player supplies (shadPS4's TrophyKey). Without it, the icons, and for Bloodborne
+PSN's English names (BLOODBORNE_ENGLISH).
 
 `trophies.py prepare --game DIR --user DIR [--language N]` (key in BB_TROPHY_KEY) writes
 DIR/trophies/<NP communication id>/: icons/ (the PNGs, and TROPxxx.rgba for the overlay's notice:
@@ -193,13 +194,67 @@ def parse_sfm(xml):
     return (root.findtext('title-name') or '').strip(), trophies
 
 
+# Bloodborne's trophies in English (PSN's list, ids 0-39; 34-39 are The Old Hunters') for a
+# player without the trophy key: grade, hidden, name, detail. From GerasimosKan's list in
+# deadinside28/bloodborne_pc#127.
+BLOODBORNE = 'NPWR05818_00'
+BLOODBORNE_ENGLISH = (
+    ('P', False, 'Bloodborne', 'All trophies acquired. Hats off!'),
+    ('G', True, 'Yharnam Sunrise', 'You lived through the hunt, and saw another day.'),
+    ('G', True, 'Honoring Wishes', "Captivated by the Moon Presence, you pledge to watch over the Hunter's Dream."),
+    ('G', True, "Childhood's Beginning", 'You became an infant Great One, lifting humanity into its next childhood.'),
+    ('G', True, 'Yharnam, Pthumerian Queen', 'Defeat Yharnam, Blood Queen of the Old Labyrinth.'),
+    ('G', False, "Hunter's Essence", 'Acquire all hunter weapons.'),
+    ('G', False, "Hunter's Craft", 'Acquire all special hunter tools.'),
+    ('S', False, 'Weapon Master', 'Acquire a weapon of the highest level.'),
+    ('S', False, 'Blood Gem Master', 'Acquire an extremely precious blood gem.'),
+    ('S', False, 'Rune Master', 'Acquire an extremely precious Caryll Rune.'),
+    ('S', True, 'Cainhurst', 'Gain entry to Cainhurst, the lost and ruined castle.'),
+    ('S', True, 'The Choir', 'Gain entry to the realm of the Choir, the high stratum of the Healing Church.'),
+    ('S', True, 'The Source of the Dream', "Discover the abandoned old workshop, the source of the Hunter's Dream."),
+    ('S', True, 'Nightmare Lecture Building', 'Gain entry into the Byrgenwerth lecture building, that drifts within the realm of nightmare.'),
+    ('B', True, 'Father Gascoigne', 'Defeat the beast that once was Father Gascoigne.'),
+    ('B', True, 'Vicar Amelia', 'Defeat the beast that once was Vicar Amelia.'),
+    ('B', True, 'Shadow of Yharnam', 'Defeat the Shadow of Yharnam.'),
+    ('B', True, 'Rom, the Vacuous Spider', 'Defeat Great One: Rom, the Vacuous Spider.'),
+    ('B', True, 'The One Reborn', 'Defeat the One Reborn.'),
+    ('B', True, 'Micolash, Host of the Nightmare', 'Defeat Micolash, Host of the Nightmare.'),
+    ('B', True, "Mergo's Wet Nurse", "Defeat Great One: Mergo's Wet Nurse."),
+    ('B', True, 'Cleric Beast', 'Defeat Cleric Beast.'),
+    ('B', True, 'Blood-starved Beast', 'Defeat Blood-starved Beast.'),
+    ('B', True, 'The Witch of Hemwick', 'Defeat the Witch of Hemwick.'),
+    ('B', True, 'Darkbeast Paarl', 'Defeat Darkbeast Paarl.'),
+    ('B', True, 'Amygdala', 'Defeat Great One: Amygdala.'),
+    ('B', True, 'Martyr Logarius', 'Defeat Martyr Logarius.'),
+    ('B', True, 'Celestial Emissary', 'Defeat Great One: Celestial Emissary.'),
+    ('B', True, 'Ebrietas, Daughter of the Cosmos', 'Defeat Great One: Ebrietas, Daughter of the Cosmos.'),
+    ('B', False, 'Blood Gem Contact', 'Acquire a blood gem that imbues hunter weapons with special strength.'),
+    ('B', False, 'Rune Contact', 'Acquire a Caryll Rune that endows hunters with special strength.'),
+    ('B', False, 'Chalice of Pthumeru', 'Acquire the Chalice of Pthumeru that seals the catacombs that form a web deep below Yharnam.'),
+    ('B', True, 'Chalice of Ailing Loran', 'Acquire the Chalice of Ailing Loran that seals the tragic land lost to the sands.'),
+    ('B', True, 'Chalice of Isz', 'Acquire the Great Chalice of Isz that seals the home of the cosmic kin.'),
+    ('G', False, "Old Hunter's Essence", 'Acquire all old hunter weapons.'),
+    ('S', True, 'Orphan of Kos', 'Defeat Great One: Orphan of Kos.'),
+    ('B', True, 'Ludwig, the Holy Blade', 'Defeat the beast that was once Ludwig, the Holy Blade.'),
+    ('B', True, 'Lady Maria of the Astral Clocktower', 'Defeat Lady Maria of the Astral Clocktower.'),
+    ('B', True, 'Living Failures', 'Defeat the failed attempts to become Great Ones.'),
+    ('B', True, 'Laurence, the First Vicar', 'Defeat the beast that was once Laurence, the First Vicar.'),
+)
+
+
 def trophy_list(entries, key=None, comm_id=None, language=None):
     """{id: {grade, hidden, name, detail, platinum}} from a TRP's entries: names in the game language
-    (TROP_xx, xx the PS4 language number) or the default list; without a key, the icons' ids."""
+    (TROP_xx, xx the PS4 language number) or the default list; without a key, the icons' ids
+    (Bloodborne's with PSN's English names)."""
     icons = sorted(int(n[4:7]) for n in entries if re.fullmatch(r'TROP\d{3}\.PNG', n))
     trophies = {i: {'grade': '-', 'hidden': False, 'name': '', 'detail': '', 'platinum': False}
                 for i in icons}
     if key is None or comm_id is None:
+        if comm_id == BLOODBORNE:  # without the key: PSN's English list, the platinum's 1-33
+            for i, (grade, hidden, name, detail) in enumerate(BLOODBORNE_ENGLISH):
+                if i in trophies:
+                    trophies[i] = {'grade': grade, 'hidden': hidden, 'name': name,
+                                   'detail': detail, 'platinum': 1 <= i <= 33}
         return trophies
     _title, config = parse_sfm(decrypt_esfm(entries['TROPCONF.ESFM'], key, comm_id))
     trophies.update(config)

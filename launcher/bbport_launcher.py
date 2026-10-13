@@ -610,6 +610,7 @@ THANKS = (
         _github("Qiming-Liu", "Перевод на упрощённый китайский"),
         _github("andrecabralgit", "Звук игры на полной громкости"),
         _github("Jgamrot", "Флажки и ползунки внутриигрового меню"),
+        _github("GerasimosKan", "Названия трофеев на английском, когда нет ключа"),
     )),
     ("Помощь и тесты", (
         _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
@@ -1964,8 +1965,8 @@ class LauncherWindow(Adw.ApplicationWindow):
     def build_trophies_page(self):
         page = Adw.PreferencesPage()
         key = Adw.PreferencesGroup(title=tr("Ключ трофеев"), description=tr(
-            "Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним видны "
-            "названия и описания. Хранится на этом компьютере. Без него видны только значки"))
+            "Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и "
+            "описания на языке игры. Хранится на этом компьютере. Без него они на английском"))
         self.trophy_key_row = Adw.PasswordEntryRow(title=tr("Ключ трофеев"),
                                                    text=self.settings.get("trophy_key", ""),
                                                    show_apply_button=True)

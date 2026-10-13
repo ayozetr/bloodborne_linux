@@ -114,6 +114,16 @@ class TrophyFileTests(unittest.TestCase):
             (directory / 'trophies.tsv').write_text('1\tB\t1\tOld\tFive fields\n')
             self.assertFalse(trophies.read_list(directory)[1]['platinum'])
 
+    def test_bloodborne_without_the_key_in_english(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            entries = trophies.read_trp(self.game(tmp) / 'sce_sys' / 'trophy' / 'trophy00.trp')
+            listed = trophies.trophy_list(entries, None, trophies.BLOODBORNE)
+            self.assertEqual(listed[0]['name'], 'Bloodborne')
+            self.assertEqual((listed[1]['grade'], listed[1]['hidden'], listed[1]['platinum']),
+                             ('G', True, True))
+            self.assertEqual(len(trophies.BLOODBORNE_ENGLISH), 40)
+            self.assertFalse(trophies.trophy_list(entries, None, COMM_ID)[1]['name'])
+
     def test_wrong_key(self):
         with tempfile.TemporaryDirectory() as tmp:
             entries = trophies.read_trp(self.game(tmp) / 'sce_sys' / 'trophy' / 'trophy00.trp')
