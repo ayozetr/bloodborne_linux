@@ -303,6 +303,10 @@ private:
         std::chrono::milliseconds backoff{0};
     };
     std::unordered_map<s32, ReconnectState> m_reconnect;
+    // bbport: how each user's latest connection attempt ended (ConnectUser), so a failure
+    // retrying cannot fix (wrong name or password, an incompatible server) is not retried.
+    std::unordered_map<s32, ShadNet::ShadNetState> m_last_connect_state;
+    bool RetryableFailure(s32 user_id) const;
 
     mutable std::mutex m_mutex_pending_invites;
     std::unordered_map<s32, std::vector<PendingInvitation>> m_pending_invites;

@@ -106,6 +106,26 @@ void NpHandler::Initialize() {
     {
         const auto [host, port] = ParseServerAddress();
         const ShadNet::ProbeInfo probe = ShadNet::ProbeServer(host, port);
+        if (probe.result == ShadNet::ProbeResult::Unreachable) {
+            // bbport: a server that does not answer yet (still starting, Tailscale not up, a
+            // short outage) is tried again in the background, as after a dropped connection,
+            // instead of leaving the game offline for the whole run.
+            LOG_WARNING(NpHandler,
+                        "shadNet server {}:{} is offline/unreachable; retrying in the background",
+                        host, port);
+            ImGui::ShadNetNotify::Push(
+                ImGui::ShadNetNotify::Kind::Info,
+                fmt::format("shadNet server ({}:{}) is offline. Retrying in the background.",
+                            host, port));
+            const auto logged_in = UserManagement.GetLoggedInUsers();
+            for (int i = 0; i < Libraries::UserService::ORBIS_USER_SERVICE_MAX_LOGIN_USERS; ++i) {
+                if (logged_in[i]) {
+                    MarkForReconnect(logged_in[i]->user_id);
+                }
+            }
+            StartWorker();
+            return;
+        }
         if (probe.result != ShadNet::ProbeResult::Ok) {
             EmulatorSettings.SetShadNetSessionDisabled(true);
             switch (probe.result) {
@@ -132,16 +152,7 @@ void NpHandler::Initialize() {
                                 "features are disabled for this session.",
                                 host, port));
                 break;
-            default: // Unreachable
-                LOG_WARNING(NpHandler,
-                            "shadNet server {}:{} is offline/unreachable; disabling shadNet for "
-                            "this run (saved setting unchanged)",
-                            host, port);
-                ImGui::ShadNetNotify::Push(
-                    ImGui::ShadNetNotify::Kind::Info,
-                    fmt::format("shadNet server ({}:{}) is offline. Online features are disabled "
-                                "for this session.",
-                                host, port));
+            default:
                 break;
             }
             return;
@@ -259,7 +270,12 @@ bool NpHandler::ConnectUser(s32 user_id, const std::string& host, u16 port, cons
         }
     };
 
+    const auto note_state = [this, user_id](ShadNet::ShadNetState st) {
+        std::lock_guard lock(m_mutex_clients);
+        m_last_connect_state[user_id] = st;
+    };
     const ShadNet::ShadNetState conn_state = client->WaitForConnection();
+    note_state(conn_state);
     if (conn_state != ShadNet::ShadNetState::Ok) {
         LOG_ERROR(NpHandler, "user_id={} connection failed (state={})", user_id,
                   static_cast<int>(conn_state));
@@ -269,6 +285,7 @@ bool NpHandler::ConnectUser(s32 user_id, const std::string& host, u16 port, cons
     }
 
     const ShadNet::ShadNetState auth_state = client->WaitForAuthenticated();
+    note_state(auth_state);
     if (auth_state != ShadNet::ShadNetState::Ok) {
         LOG_ERROR(NpHandler, "user_id={} authentication failed (state={})", user_id,
                   static_cast<int>(auth_state));
@@ -329,8 +346,36 @@ void NpHandler::DisconnectUser(s32 user_id) {
 }
 
 void NpHandler::OnUserLoggedIn(s32 user_id) {
-    if (ConnectUserById(user_id))
+    if (ConnectUserById(user_id)) {
         StartWorker();
+        return;
+    }
+    // bbport: a server that does not answer at start (still starting, Tailscale not up yet, a
+    // short outage) left the game offline for the whole run: the worker that retries dropped
+    // connections only ran after a first success. It now keeps trying in the background, as
+    // after a drop, unless retrying cannot help.
+    if (RetryableFailure(user_id)) {
+        LOG_WARNING(NpHandler, "user_id={} could not reach shadNet at start; will retry", user_id);
+        MarkForReconnect(user_id);
+        StartWorker();
+    }
+}
+
+bool NpHandler::RetryableFailure(s32 user_id) const {
+    std::lock_guard lock(m_mutex_clients);
+    const auto it = m_last_connect_state.find(user_id);
+    if (it == m_last_connect_state.end()) {
+        return false; // no attempt made: shadNet off, or no account
+    }
+    switch (it->second) {
+    case ShadNet::ShadNetState::FailureResolve:
+    case ShadNet::ShadNetState::FailureConnect:
+    case ShadNet::ShadNetState::FailureServerInfo:
+    case ShadNet::ShadNetState::FailureOther:
+        return true;
+    default:
+        return false;
+    }
 }
 
 void NpHandler::OnUserLoggedOut(s32 user_id) {
@@ -400,10 +445,16 @@ void NpHandler::TryReconnect() {
         }
         // ConnectUserById locks m_mutex_clients internally; call it unlocked.
         const bool ok = ConnectUserById(uid);
+        const bool retryable = ok || RetryableFailure(uid);
         std::lock_guard lock(m_mutex_clients);
         if (ok || m_clients.count(uid)) {
             m_reconnect.erase(uid);
             LOG_INFO(NpHandler, "user_id={} reconnected to shadNet", uid);
+        } else if (!retryable) {
+            // The server answered and refused (a password changed meanwhile, another protocol):
+            // retrying cannot help.
+            m_reconnect.erase(uid);
+            LOG_WARNING(NpHandler, "user_id={} shadNet refused the sign-in; no more retries", uid);
         } else if (auto it = m_reconnect.find(uid); it != m_reconnect.end()) {
             it->second.backoff = std::min(it->second.backoff * 2, kMaxBackoff);
             it->second.next_attempt = std::chrono::steady_clock::now() + it->second.backoff;
