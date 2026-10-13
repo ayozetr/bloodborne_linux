@@ -67,7 +67,6 @@ struct OnScreenKeyboard {
     u64 last_stick_ms = 0;
 } osk;
 std::vector<TextEdit> text_edits; // under prompt_mutex
-constexpr int OskRows = 5;
 constexpr const char* OskKeys[4][2][12] = {
     {{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "_"},
      {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "_"}},
@@ -75,6 +74,26 @@ constexpr const char* OskKeys[4][2][12] = {
     {{"A", "S", "D", "F", "G", "H", "J", "K", "L", "'"}, {"a", "s", "d", "f", "g", "h", "j", "k", "l", "'"}},
     {{"Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"}, {"z", "x", "c", "v", "b", "n", "m", ",", ".", "/"}},
 };
+// The letters of the menu's language that the English rows lack (the game takes them in a name:
+// ñ typed on a physical keyboard worked, not on this one), a row of their own above the actions.
+struct OskExtraRow {
+    int count;
+    const char* keys[2][12];
+};
+constexpr OskExtraRow OskExtras[] = {
+    {0, {}},                                                                      // English
+    {0, {}},                                                                      // Russian
+    {9, {{"Ñ", "Á", "É", "Í", "Ó", "Ú", "Ü", "¿", "¡"},
+         {"ñ", "á", "é", "í", "ó", "ú", "ü", "¿", "¡"}}},                         // Spanish
+    {6, {{"À", "È", "É", "Ì", "Ò", "Ù"}, {"à", "è", "é", "ì", "ò", "ù"}}},       // Italian
+    {12, {{"À", "Â", "Ç", "É", "È", "Ê", "Ë", "Î", "Ï", "Ô", "Ù", "Û"},
+          {"à", "â", "ç", "é", "è", "ê", "ë", "î", "ï", "ô", "ù", "û"}}},          // French
+    {4, {{"Ä", "Ö", "Ü", "ß"}, {"ä", "ö", "ü", "ß"}}},                           // German
+    {12, {{"Á", "Â", "Ã", "À", "Ç", "É", "Ê", "Í", "Ó", "Ô", "Õ", "Ú"},
+          {"á", "â", "ã", "à", "ç", "é", "ê", "í", "ó", "ô", "õ", "ú"}}},         // Portuguese
+    {0, {}},                                                                      // Chinese
+};
+static_assert(std::size(OskExtras) == size_t(BbSettings::MenuLanguage::Count));
 enum OskAction { OskCaps, OskSpace, OskBackspace, OskClear, OskConfirm, OskCancel, OskActions };
 
 // Present rate for the FPS counter.
@@ -781,8 +800,21 @@ void TrophyCard() {
                   IM_COL32(255, 255, 255, int(255 * alpha)), notice.name.c_str(), nullptr, text_w);
 }
 
+const OskExtraRow& OskExtra() {
+    return OskExtras[size_t(BbSettings::Get().menu_language.load())];
+}
+
+/// The rows of characters: the four English ones, and the language's own when it has any.
+int OskKeyRows() {
+    return OskExtra().count ? 5 : 4;
+}
+
 int OskRowLength(int row) {
-    return row == 0 ? 12 : row < 4 ? 10 : OskActions;
+    return row == 0 ? 12 : row < 4 ? 10 : row < OskKeyRows() ? OskExtra().count : OskActions;
+}
+
+const char* OskKey(int row, int col) {
+    return row < 4 ? OskKeys[row][osk.caps ? 0 : 1][col] : OskExtra().keys[osk.caps ? 0 : 1][col];
 }
 
 const char* OskActionLabel(int action) {
@@ -802,8 +834,8 @@ void OskEdit(TextEdit::Kind kind, std::string text = {}) {
 }
 
 void OskPress(int row, int col) {
-    if (row < 4) {
-        OskEdit(TextEdit::Append, OskKeys[row][osk.caps ? 0 : 1][col]);
+    if (row < OskKeyRows()) {
+        OskEdit(TextEdit::Append, OskKey(row, col));
         return;
     }
     switch (col) {
@@ -817,7 +849,8 @@ void OskPress(int row, int col) {
 }
 
 void OskMove(int d_row, int d_col) {
-    osk.row = (osk.row + d_row + OskRows) % OskRows;
+    const int rows = OskKeyRows() + 1;
+    osk.row = (osk.row + d_row + rows) % rows;
     const int length = OskRowLength(osk.row);
     osk.col = d_col ? (osk.col + d_col + length) % length : std::min(osk.col, length - 1);
 }
@@ -887,13 +920,14 @@ void TextPrompt() {
         ImGui::Button(label, ImVec2(width, key.y));
         ImGui::PopStyleColor();
     };
-    for (int row = 0; row < 4; ++row) {
+    osk.row = std::min(osk.row, OskKeyRows()); // the language changed: its row went
+    for (int row = 0; row < OskKeyRows(); ++row) {
         for (int col = 0; col < OskRowLength(row); ++col) {
             if (col) {
                 ImGui::SameLine();
             }
             ImGui::PushID(row * 16 + col);
-            key_button(OskKeys[row][osk.caps ? 0 : 1][col], key.x, osk.row == row && osk.col == col);
+            key_button(OskKey(row, col), key.x, osk.row == row && osk.col == col);
             ImGui::PopID();
         }
     }
@@ -904,7 +938,7 @@ void TextPrompt() {
         const char* label = OskActionLabel(action);
         const bool caps_on = action == OskCaps && osk.caps;
         key_button(label, std::max(key.x * 1.4f, ImGui::CalcTextSize(label).x + 18.0f * s),
-                   (osk.row == 4 && osk.col == action) || caps_on);
+                   (osk.row == OskKeyRows() && osk.col == action) || caps_on);
     }
     ImGui::Separator();
     ImGui::TextUnformatted(BbSettings::MenuText(
