@@ -578,6 +578,57 @@ class FolderList:
         self.rows.append((key, row))
 
 
+# About → Thanks: everyone whose work is in this fork (code, translations, patches) or who helped
+# it with reports and tests. Someone whose work is only looked at, not brought in, is not listed;
+# add whoever a commit brings something from, in that commit.
+def _github(user, what):
+    return ("@" + user, what, "https://github.com/" + user)
+
+
+THANKS = (
+    ("Порт и его код", (
+        _github("deadinside28", "bbport — порт, на котором построен весь этот проект"),
+        _github("Supermedo", "Игра по сети, DLSS, страница читов, добавление в Steam и значок"),
+        _github("0xCydral", "Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные "
+                            "изображения, апскейлер, строка производительности в журнале"),
+        _github("yumlevi", "Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша "
+                           "текстур"),
+        _github("devilismyfriend", "Кэш текстур вовремя освобождает видеопамять"),
+        _github("GoncaloLobo0", "Вылеты при загрузке областей"),
+        _github("bmy", "Интерфейс, пропадавший не в 1080p, векторы движения больших чудовищ и "
+                       "ошибка памяти"),
+        _github("Mrsuss60", "Вылеты при загрузке некоторых карт"),
+        _github("SrShadowy", "Экранная клавиатура для имени персонажа и уведомление о компиляции "
+                             "шейдеров"),
+        _github("droogie", "Быстрая загрузка после смерти и перемещения (bbhost) и сервер "
+                           "The Hunter's Dream"),
+        _github("Wozzardman", "Сетевые библиотеки игры по сети и сервер для своего кооператива"),
+        _github("IFreemz", "Основа поддержки DLSS"),
+        _github("FireBurn", "Апскейлер FSR 3.1"),
+        _github("Obrikash", "Игра запускается, когда DLSS нельзя использовать"),
+        _github("Qiming-Liu", "Перевод на упрощённый китайский"),
+        _github("andrecabralgit", "Звук игры на полной громкости"),
+        _github("Jgamrot", "Флажки и ползунки внутриигрового меню"),
+    )),
+    ("Помощь и тесты", (
+        _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
+        _github("Joomzie", "Идея поменять местами A и B на контроллерах в стиле Nintendo"),
+        _github("Kaka556Kevin", "Проверка исправления видеопамяти"),
+    )),
+    ("Другие благодарности", (
+        ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",
+         "https://www.nexusmods.com/bloodborne/mods/30"),
+        ("Abken", "Показал, какие текстуры нужны иконкам клавиатуры (Nexus Mods)",
+         "https://www.nexusmods.com/bloodborne/mods/537"),
+        ("Kyo, Lance McDonald, auser1337, illusion, emoose", "Патчи игры: высокий FPS, разрешение и другое",
+         "https://github.com/ayozetr/bloodborne_linux#credits"),
+        ("shadPS4", "Рендерер и компилятор шейдеров", "https://github.com/shadps4-emu/shadPS4"),
+        ("pkgforge-dev", "Инструмент для сборки AppImage",
+         "https://github.com/pkgforge-dev/Anylinux-AppImages"),
+    )),
+)
+
+
 class LauncherWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="Bloodborne")
@@ -1721,6 +1772,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         support.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
         support.connect("activated", lambda _row: self.open_uri(bbport_update.KOFI_URL))
         about.add(support)
+        thanks = Adw.ActionRow(title=tr("Благодарности"), subtitle=tr("Без них ничего этого не было бы"),
+                               activatable=True)
+        thanks.add_prefix(Gtk.Image(icon_name="system-users-symbolic"))
+        thanks.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
+        thanks.connect("activated", lambda _row: self.show_thanks())
+        about.add(thanks)
         page.add(about)
 
         updates = Adw.PreferencesGroup(title=tr("Обновления"))
@@ -1738,6 +1795,23 @@ class LauncherWindow(Adw.ApplicationWindow):
         updates.add(self.update_row)
         page.add(updates)
         return page
+
+    def show_thanks(self):
+        """Everyone whose work is in this fork or who helped it: their GitHub profile on a click."""
+        page = Adw.PreferencesPage()
+        for title, people in THANKS:
+            group = Adw.PreferencesGroup(title=tr(title))
+            for name, what, url in people:
+                row = Adw.ActionRow(title=GLib.markup_escape_text(name), subtitle=tr(what),
+                                    activatable=True)
+                row.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
+                row.connect("activated", lambda _row, link=url: self.open_uri(link))
+                group.add(row)
+            page.add(group)
+        page.set_description(tr("Без них ничего этого не было бы"))
+        dialog = Adw.PreferencesDialog(title=tr("Благодарности"))
+        dialog.add(page)
+        dialog.present(self)
 
     def open_uri(self, uri):
         Gtk.UriLauncher.new(uri).launch(self, None, None, None)
