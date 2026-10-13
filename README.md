@@ -1,5 +1,11 @@
 # Bloodborne for Linux
 
+[![Total Download Count](https://img.shields.io/github/downloads/ayozetr/bloodborne_linux/total.svg?color=2ea44f)](https://github.com/ayozetr/bloodborne_linux/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/ayozetr/bloodborne_linux.svg?color=8a2be2)](https://github.com/ayozetr/bloodborne_linux/releases/latest)
+[![License: GPL-2.0](https://img.shields.io/github/license/ayozetr/bloodborne_linux.svg?color=d73a49)](LICENSE)
+[![Platform: Linux | Steam Deck](https://img.shields.io/badge/platform-Linux%20%7C%20Steam%20Deck-blue.svg)](#features)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/ayozetr)
+
 The PlayStation 4 version of *Bloodborne* running natively on Linux. The game's own x86-64 code
 runs directly on the CPU and its graphics are translated to Vulkan. It is not an emulator.
 
