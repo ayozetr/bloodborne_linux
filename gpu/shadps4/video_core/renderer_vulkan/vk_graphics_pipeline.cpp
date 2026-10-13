@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <cstdio>
 #include <algorithm>
 #include <utility>
 #include <boost/container/small_vector.hpp>
@@ -429,8 +430,15 @@ GraphicsPipeline::GraphicsPipeline(
         throw Serialization::CorruptData{"cached graphics pipeline rejected by the driver: " +
                                          vk::to_string(pipeline_result)};
     }
-    ASSERT_MSG(pipeline_result == vk::Result::eSuccess, "Failed to create graphics pipeline: {}",
-               vk::to_string(pipeline_result));
+    // bbport: a driver that cannot build one pipeline ("ErrorUnknown" on some AMD and older
+    // drivers) stopped the game here (code 23). The pipeline stays empty instead, and the draws
+    // that use it are skipped (PipelineCache): a missing effect rather than a closed game.
+    if (pipeline_result != vk::Result::eSuccess) {
+        std::printf("GPU: the driver could not create graphics pipeline %s (%s): its draws are "
+                    "skipped\n",
+                    debug_str.c_str(), vk::to_string(pipeline_result).c_str());
+        return;
+    }
     pipeline = std::move(pipe);
     SetObjectName(device, *pipeline, "Graphics Pipeline {}", debug_str);
 }

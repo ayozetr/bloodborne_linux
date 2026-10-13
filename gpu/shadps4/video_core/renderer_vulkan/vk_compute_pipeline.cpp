@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <cstdio>
 #include <boost/container/small_vector.hpp>
 
 #include "common/serdes.h"
@@ -115,8 +116,13 @@ ComputePipeline::ComputePipeline(const Instance& instance, Scheduler& scheduler,
         throw Serialization::CorruptData{"cached compute pipeline rejected by the driver: " +
                                          vk::to_string(pipeline_result)};
     }
-    ASSERT_MSG(pipeline_result == vk::Result::eSuccess, "Failed to create compute pipeline: {}",
-               vk::to_string(pipeline_result));
+    // bbport: as for graphics pipelines, one the driver cannot build skips its dispatches.
+    if (pipeline_result != vk::Result::eSuccess) {
+        std::printf("GPU: the driver could not create compute pipeline %s (%s): its dispatches "
+                    "are skipped\n",
+                    debug_str.c_str(), vk::to_string(pipeline_result).c_str());
+        return;
+    }
     pipeline = std::move(pipe);
     SetObjectName(device, *pipeline, "Compute Pipeline {}", debug_str);
 }
