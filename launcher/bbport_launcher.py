@@ -27,9 +27,13 @@ import bbport_update
 
 import gi
 
+# GTK's GPU renderers cut the top row of pixels off text at fractional display scales (115 %:
+# the "I" of "Idioma" lost its serif); cairo draws it whole, and a settings window needs no GPU.
+# The game draws with its own Vulkan. GSK_RENDERER set by the user still wins.
+os.environ.setdefault("GSK_RENDERER", "cairo")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
@@ -586,6 +590,17 @@ def _github(user, what):
     return ("@" + user, what, "https://github.com/" + user)
 
 
+def themed_icon(name):
+    """The desktop icon theme's symbolic icon, or the launcher's own (launcher/icons/bbport-<name>.svg:
+    GitHub's, Steam's and Discord's marks) for a theme without it. Not GTK's own fallback: for
+    "steam-symbolic" it takes the installed app's colour icon."""
+    display = Gdk.Display.get_default()
+    if display and not Gtk.IconTheme.get_for_display(display).has_icon(name) and \
+            (PORT_DIR / "launcher" / "icons" / f"bbport-{name}.svg").is_file():
+        name = "bbport-" + name
+    return Gtk.Image(icon_name=name)
+
+
 THANKS = (
     ("Порт и его код", (
         _github("deadinside28", "bbport — порт, на котором построен весь этот проект"),
@@ -652,7 +667,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         toolbar = Adw.ToolbarView()
         header = Adw.HeaderBar()
         self.stack = Adw.ViewStack()
-        switcher = Adw.ViewSwitcher(stack=self.stack, policy=Adw.ViewSwitcherPolicy.WIDE)
+        switcher = Adw.ViewSwitcher(stack=self.stack, policy=Adw.ViewSwitcherPolicy.NARROW)
         header.set_title_widget(switcher)
         self.launch_button = Gtk.Button()
         self.launch_button.connect("clicked", self.on_launch)
@@ -709,7 +724,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         page = Adw.PreferencesPage()
 
         launcher = Adw.PreferencesGroup()
-        self.ui_language_row = combo_row(tr("Язык лаунчера") + " / Launcher language", None,
+        # In English too, so that a language one cannot read still leads back here; once.
+        title = tr("Язык лаунчера")
+        if title != "Launcher language":
+            title += " / Launcher language"
+        self.ui_language_row = combo_row(title, None,
                                          UI_LANGUAGES, self.settings.get("ui_language", ""))
         self.ui_language_row.connect("notify::selected", self.on_ui_language)
         launcher.add(self.ui_language_row)
@@ -760,11 +779,13 @@ class LauncherWindow(Adw.ApplicationWindow):
                                           "этого лаунчера"))
         steam_button = Gtk.Button(label=tr("Добавить"), valign=Gtk.Align.CENTER)
         steam_button.connect("clicked", self.on_add_to_steam)
+        steam.add_prefix(themed_icon("steam-symbolic"))
         steam.add_suffix(steam_button)
         game.add(steam)
         self.discord_row = Adw.SwitchRow(title=tr("Статус в Discord"),
                                          subtitle=tr("«Играет в Bloodborne» в профиле Discord, онлайн или офлайн"),
                                          active=self.settings.get("discord", True))
+        self.discord_row.add_prefix(themed_icon("discord-symbolic"))
         game.add(self.discord_row)
         page.add(game)
 
@@ -1791,16 +1812,17 @@ class LauncherWindow(Adw.ApplicationWindow):
                             subtitle=tr("Версия {}").format(bbport_update.VERSION))
         app.add_prefix(Gtk.Image(file=str(PORT_DIR / "launcher" / "bloodborne.png"), pixel_size=48))
         about.add(app)
-        for title, subtitle, url in (
-                (tr("Этот проект"), bbport_update.REPOSITORY_URL, bbport_update.REPOSITORY_URL),
+        for title, subtitle, url, icon in (
+                (tr("Этот проект"), bbport_update.REPOSITORY_URL, bbport_update.REPOSITORY_URL,
+                 "github-symbolic"),
                 (tr("Основано на bbport от deadinside28"), bbport_update.UPSTREAM_URL,
-                 bbport_update.UPSTREAM_URL),
+                 bbport_update.UPSTREAM_URL, "github-symbolic"),
                 (tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,
-                 bbport_update.WINDOWS_URL),
-                (tr("Лицензия"), tr("GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит "
-                                    "Sony Interactive Entertainment и FromSoftware"),
-                 bbport_update.LICENSE_URL)):
+                 bbport_update.WINDOWS_URL, "github-symbolic"),
+                (tr("Лицензия"), tr("GNU GPL v2 или новее · Файлы игры не входят."),
+                 bbport_update.LICENSE_URL, "application-certificate-symbolic")):
             row = Adw.ActionRow(title=title, subtitle=subtitle, activatable=True)
+            row.add_prefix(themed_icon(icon))
             row.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
             row.connect("activated", lambda _row, link=url: self.open_uri(link))
             about.add(row)
@@ -1832,6 +1854,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_row.add_suffix(self.update_button)
         updates.add(self.update_row)
         page.add(updates)
+        # The game's owners, under everything, as plain text.
+        owners = Adw.PreferencesGroup()
+        owners.add(Gtk.Label(label=tr("Bloodborne принадлежит Sony Interactive Entertainment и "
+                                      "FromSoftware."),
+                             wrap=True, justify=Gtk.Justification.CENTER,
+                             css_classes=["dim-label", "caption"]))
+        page.add(owners)
         return page
 
     def show_thanks(self):
@@ -2472,6 +2501,10 @@ class LauncherApp(Adw.Application):
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
 
     def do_activate(self):
+        # The launcher's own icons (launcher/icons: GitHub's mark), symbolic like the theme's.
+        display = Gdk.Display.get_default()
+        if display:
+            Gtk.IconTheme.get_for_display(display).add_search_path(str(PORT_DIR / "launcher" / "icons"))
         window = self.get_active_window() or LauncherWindow(self)
         window.present()
 

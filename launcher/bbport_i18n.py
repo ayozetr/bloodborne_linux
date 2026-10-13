@@ -476,8 +476,8 @@ EN = {
         "Windows port by Supermedo",
     "Лицензия":
         "License",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 or later. No game files included: Bloodborne belongs to Sony Interactive Entertainment and FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 or later · No game files included.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne belongs to Sony Interactive Entertainment and FromSoftware.',
     "Проверить сейчас":
         "Check now",
     # Online page: your own shadNet server, the co-op port, seamless co-op, the UDP test
@@ -1078,8 +1078,8 @@ PT_BR = {
         "Port para Windows de Supermedo",
     "Лицензия":
         "Licença",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 ou posterior. Não inclui arquivos do jogo: Bloodborne pertence à Sony Interactive Entertainment e à FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 ou posterior · Não inclui arquivos do jogo.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne pertence à Sony Interactive Entertainment e à FromSoftware.',
     "Проверить сейчас":
         "Verificar agora",
     # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
@@ -1638,8 +1638,8 @@ ES = {
         "Port para Windows, de Supermedo",
     "Лицензия":
         "Licencia",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 o posterior. No incluye archivos del juego: Bloodborne pertenece a Sony Interactive Entertainment y FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 o posterior · No incluye archivos del juego.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne pertenece a Sony Interactive Entertainment y FromSoftware.',
     "Проверить сейчас":
         "Comprobar ahora",
     # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
@@ -2198,8 +2198,8 @@ IT = {
         "Port per Windows di Supermedo",
     "Лицензия":
         "Licenza",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 o successiva. Nessun file del gioco incluso: Bloodborne appartiene a Sony Interactive Entertainment e FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 o successiva · Nessun file del gioco incluso.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne appartiene a Sony Interactive Entertainment e FromSoftware.',
     "Проверить сейчас":
         "Controlla ora",
     # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
@@ -2758,8 +2758,8 @@ FR = {
         "Portage Windows de Supermedo",
     "Лицензия":
         "Licence",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 ou ultérieure. Aucun fichier du jeu inclus : Bloodborne appartient à Sony Interactive Entertainment et FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 ou ultérieure · Aucun fichier du jeu inclus.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne appartient à Sony Interactive Entertainment et FromSoftware.',
     "Проверить сейчас":
         "Vérifier maintenant",
     # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
@@ -3318,8 +3318,8 @@ DE = {
         "Windows-Port von Supermedo",
     "Лицензия":
         "Lizenz",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 oder neuer. Keine Spieldateien enthalten: Bloodborne gehört Sony Interactive Entertainment und FromSoftware",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 oder neuer · Keine Spieldateien enthalten.',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne gehört Sony Interactive Entertainment und FromSoftware.',
     "Проверить сейчас":
         "Jetzt prüfen",
     # 0.51: mouse look, choosing NVIDIA's DLSS library, the online module
@@ -3838,8 +3838,8 @@ ZH_CN = {
         "Supermedo 的 Windows 移植版",
     "Лицензия":
         "许可证",
-    "GNU GPL v2 или новее. Файлов игры нет: Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware":
-        "GNU GPL v2 或更高版本。不含游戏文件：Bloodborne 归 Sony Interactive Entertainment 和 FromSoftware 所有",
+    'GNU GPL v2 или новее · Файлы игры не входят.': 'GNU GPL v2 或更高版本 · 不含游戏文件。',
+    'Bloodborne принадлежит Sony Interactive Entertainment и FromSoftware.': 'Bloodborne 归 Sony Interactive Entertainment 和 FromSoftware 所有。',
     "Проверить сейчас":
         "立即检查",
     # Texts added after the upstream translation
