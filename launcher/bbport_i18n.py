@@ -594,7 +594,7 @@ EN = {
     'Пусто: шейдеры соберутся при игре': 'Empty: the shaders are built as you play',
     'Очистить кэш шейдеров?': 'Clear the shader cache?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
-    'Названия трофеев на английском, когда нет ключа': 'Trophy names in English when there is no key',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophy names in English without the key, and the sound when one is earned',
 }
 
 PT_BR = {
@@ -1243,7 +1243,7 @@ PT_BR = {
     'Пусто: шейдеры соберутся при игре': 'Vazio: os shaders são gerados enquanto você joga',
     'Очистить кэш шейдеров?': 'Limpar o cache de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
-    'Названия трофеев на английском, когда нет ключа': 'Nomes dos troféus em inglês quando não há chave',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'Nomes dos troféus em inglês sem a chave e o som ao conquistar um',
 }
 
 
@@ -1803,7 +1803,7 @@ ES = {
     'Пусто: шейдеры соберутся при игре': 'Vacía: los shaders se generan mientras juegas',
     'Очистить кэш шейдеров?': '¿Borrar la caché de shaders?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
-    'Названия трофеев на английском, когда нет ключа': 'Los nombres de los trofeos en inglés cuando no hay clave',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'Los nombres de los trofeos en inglés sin la clave y el sonido al conseguir uno',
 }
 
 
@@ -2363,7 +2363,7 @@ IT = {
     'Пусто: шейдеры соберутся при игре': 'Vuota: gli shader vengono creati mentre giochi',
     'Очистить кэш шейдеров?': 'Svuotare la cache degli shader?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
-    'Названия трофеев на английском, когда нет ключа': 'I nomi dei trofei in inglese quando manca la chiave',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'I nomi dei trofei in inglese senza la chiave e il suono quando se ne ottiene uno',
 }
 
 
@@ -2923,7 +2923,7 @@ FR = {
     'Пусто: шейдеры соберутся при игре': 'Vide : les shaders sont construits pendant que vous jouez',
     'Очистить кэш шейдеров?': 'Vider le cache des shaders ?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
-    'Названия трофеев на английском, когда нет ключа': 'Les noms des trophées en anglais sans la clé',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'Les noms des trophées en anglais sans la clé et le son à l’obtention d’un trophée',
 }
 
 
@@ -3483,7 +3483,7 @@ DE = {
     'Пусто: шейдеры соберутся при игре': 'Leer: Die Shader werden beim Spielen erstellt',
     'Очистить кэш шейдеров?': 'Shader-Cache leeren?',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
-    'Названия трофеев на английском, когда нет ключа': 'Trophäennamen auf Englisch, wenn kein Schlüssel da ist',
+    'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophäennamen auf Englisch ohne Schlüssel und der Ton beim Erhalt einer Trophäe',
 }
 
 
@@ -3986,7 +3986,7 @@ ZH_CN = {
     'Пусто: шейдеры соберутся при игре': '空：着色器会在游玩时生成',
     'Очистить кэш шейдеров?': '清除着色器缓存？',
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
-    'Названия трофеев на английском, когда нет ключа': '没有密钥时的英文奖杯名称',
+    'Названия трофеев на английском без ключа и звук при получении трофея': '无密钥时的英文奖杯名称与获得奖杯时的音效',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
