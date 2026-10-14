@@ -1,25 +1,37 @@
 # Online play and co-op
 
 Online play is a beta. Messages, bloodstains and ghosts come from the community game server,
-[The Hunter's Dream](https://thehuntersdream.com). Bells and summons go through a shadNet server,
-and then the players' games connect to each other directly. Linux and Windows players can play
-together: everyone needs the game at version 1.09 and the same servers.
+[The Hunter's Dream](https://thehuntersdream.com). Bells and summons go through a co-op pool,
+and then the players' games connect to each other. Linux and Windows players can play together:
+everyone needs the game at version 1.09 and the same pool.
 
-> **Co-op does not connect through shadPS4's public server.** It does not answer the UDP ping
-> that tells it each player's address, so a summon times out
-> ([deadinside28/bloodborne_pc#121](https://github.com/deadinside28/bloodborne_pc/issues/121));
-> the shadPS4 team does not support forks. Messages, bloodstains and ghosts work. For co-op, a
-> group runs its own server: [SERVER.md](SERVER.md). *Test the connection* tells which case
-> yours is: the shadNet server's UDP line is red on the public server.
+> **shadPS4's public shadNet server no longer accepts bbport builds**: it signs the game out
+> right after the login ("This shadNet server doesn't accept your shadPS4 build" in the log), and
+> the launcher says so. The two pools for bbport are The Hunter's Dream's and a server of your own.
 
-## Account
+## The Hunter's Dream (with bbhost's players)
 
-1. On shadPS4's public server, register at [shadnet.shadps4.net](https://shadnet.shadps4.net).
-   On your own server, its owner creates the account ([SERVER.md](SERVER.md)).
-2. In the launcher's **Online** page, turn on **Play online**, choose the **shadNet server**
-   (shadPS4's public one or your own, with its address), and enter the **account name** (not the
-   email) and the password. The password is kept on this computer with the launcher's settings.
-3. **Test the connection**: the game server, the shadNet server, its UDP port and its WebAPI
+Choose **The Hunter's Dream (with bbhost players)** in the launcher's **Online** page.
+[bbbridge](../bbbridge/README.md) by MaskZeus starts with the game, stands in for a shadNet server
+on this computer and talks to The Hunter's Dream the way bbhost does, its relay included, so no
+router port is needed. The account is The Hunter's Dream's, kept in `user/bbbridge` (no password):
+
+- **Sign in with Discord**: the launcher shows a code and opens The Hunter's Dream's page; approve
+  it there. The account is the same one bbhost uses.
+- **Without Discord**: type a name and **Create**. Keep the recovery code the launcher shows:
+  with the name, it brings the account back on another computer (**Recover**).
+
+The game's play log (its own telemetry) stays blocked, so The Hunter's Dream's live map does not
+show you.
+
+## Your own server
+
+Its owner creates the account ([SERVER.md](SERVER.md)).
+
+1. In the launcher's **Online** page, turn on **Play online**, choose **Your own server** with
+   its address, and enter the **account name** (not the email) and the password. The password is
+   kept on this computer with the launcher's settings.
+2. **Test the connection**: the game server, the shadNet server, its UDP port and its WebAPI
    should all answer, and with the account filled in, the sign-in should work. A wrong name or
    password shows there (the server does not say which of the two).
 
@@ -73,5 +85,6 @@ Run with `BB_GPU_LOG=info` in the extra variables for the online details. In a s
 | `Logged in npid='...'` | The shadNet login worked. |
 | `summon_messenger/create` | Your sign is placed (helper). |
 | `summon_messenger/get`, `sceNpMatching2CreateJoinRoom`, `summon_messenger/request` | The host found the sign, made the room and sent the summon. |
-| `peer '...' endpoint unresolved` | shadNet has no address for the other player: its UDP port did not answer (the public server, above). |
+| `peer '...' endpoint unresolved` | shadNet has no address for the other player: its UDP port did not answer. |
+| `Online: the shadNet server ... does not accept this build` | The server refuses bbport (shadPS4's public one): use The Hunter's Dream or your own server. |
 | `event=0(DEAD)` | The connection gave up. |

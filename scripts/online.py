@@ -11,6 +11,11 @@ server -> the community server; summon signs -> the shadNet WebAPI when it has t
 summon service) and prints its path for SHADPS4_HTTP_HOST_OVERRIDES_JSON. A player who needs
 other addresses puts them in DIR/host_overrides.custom.json, which is then used as it is.
 `online.py check` tests the servers, the shadNet server's UDP port included (docs/SERVER.md).
+
+The Hunter's Dream's co-op pool (online_server_kind "thd"), with bbhost's players: bbbridge
+(bbbridge/, by MaskZeus) stands in for the shadNet server on this PC and talks to The Hunter's
+Dream as bbhost does; its account is a Discord sign-in. `online.py bridge --user DIR` writes the
+bridge's config and the game's overrides for it into DIR/bbbridge and prints both paths.
 """
 import argparse
 import json
@@ -69,7 +74,7 @@ def server_kind(settings):
     """'public' (shadPS4's server) or 'own'; settings from before the choice existed are 'own'
     when they name another server."""
     kind = settings.get('online_server_kind')
-    if kind in ('public', 'own'):
+    if kind in ('public', 'own', 'thd'):
         return kind
     server = str(settings.get('online_server') or '').strip()
     return 'own' if server and server != SHADNET_SERVER else 'public'
@@ -101,6 +106,19 @@ def addresses(settings):
 
 def environment(settings):
     """The game's online variables (run.sh and the online module) for the launcher's settings."""
+    if server_kind(settings) == 'thd':
+        # bbbridge on this PC (run.sh starts it): the online ID is the Discord sign-in's.
+        return {
+            'BB_ONLINE': '1',
+            'BB_BRIDGE': '1',
+            'BB_SHADNET_SERVER': BRIDGE_SERVER,
+            'BB_SHADNET_WEBAPI': BRIDGE_WEBAPI,
+            'BB_SHADNET_NPID': str(settings.get('online_npid') or '').strip(),
+            'BB_SHADNET_PASSWORD': BRIDGE_PASSWORD,
+            'BB_UPNP': '0',   # the bridge's gateway talks to the internet, not the game
+            'BB_COMMUNITY_SERVER': COMMUNITY_SERVER,
+            'SHADPS4_P2P_PORT': str(BRIDGE_P2P_PORT),
+        }
     server, webapi, community = addresses(settings)
     env = {
         'BB_ONLINE': '1',
@@ -178,6 +196,65 @@ def write_overrides(user_dir, community, webapi):
 
 # The co-op port the launcher suggests pinning (SHADPS4_P2P_PORT) and opening.
 P2P_PORT = 3658
+
+# bbbridge on this PC: its shadNet port, its WebAPI and its two game-server proxies (bbbridge's
+# setup.cpp, overrides()). The game's play log (FromSoftware's telemetry, which feeds The Hunter's
+# Dream's live map through the bridge) stays blocked (gpu/bbnet net_util.cpp), so it is not here.
+BRIDGE_SERVER = '127.0.0.1:31313'
+BRIDGE_WEBAPI = 'http://127.0.0.1:31315'
+BRIDGE_P2P_PORT = 3658   # the game's P2P port, as the bridge's gateway expects it
+BRIDGE_OVERRIDES = {
+    GAME_SERVER: 'http://127.0.0.1:31316',
+    f'https://thehuntersdream.com:20443': 'http://127.0.0.1:31316',
+    f'https://thehuntersdream.com:{COMMUNITY_API_PORT}': 'http://127.0.0.1:31317',
+    f'http://thehuntersdream.com:{COMMUNITY_API_PORT}': 'http://127.0.0.1:31317',
+    f'https://thehuntersdream.com:{COMMUNITY_API_PORT}/summon_messenger': BRIDGE_WEBAPI,
+    f'http://thehuntersdream.com:{COMMUNITY_API_PORT}/summon_messenger': BRIDGE_WEBAPI,
+}
+# The game signs in to the bridge with a password, which the bridge never reads.
+BRIDGE_PASSWORD = 'bbbridge'
+
+
+def bridge_dir(user_dir):
+    return Path(user_dir) / 'bbbridge'
+
+
+def bridge_accounts(user_dir):
+    """The Hunter's Dream online IDs signed in on this PC (bbbridge's account file)."""
+    try:
+        state = json.loads((bridge_dir(user_dir) / 'bbbridge_state.json').read_text(encoding='utf-8'))
+        return [name for name in state.get('accounts', {}) if isinstance(name, str)]
+    except (OSError, ValueError, AttributeError):
+        return []
+
+
+def bridge_recovery_code(user_dir, name):
+    """The recovery code of an account created on this PC (none for a Discord sign-in)."""
+    try:
+        state = json.loads((bridge_dir(user_dir) / 'bbbridge_state.json').read_text(encoding='utf-8'))
+        return str(state['accounts'][name].get('recovery_code') or '')
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return ''
+
+
+def write_bridge_files(user_dir):
+    """DIR/bbbridge/bbbridge_config.json (the account file next to it; other keys a player added
+    stay) and the game's host overrides for the bridge. Returns (config, overrides)."""
+    folder = bridge_dir(user_dir)
+    folder.mkdir(parents=True, exist_ok=True)
+    config = folder / 'bbbridge_config.json'
+    try:
+        current = json.loads(config.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        current = {}
+    if not isinstance(current, dict):
+        current = {}
+    wanted = {**current, 'state_file': str(folder / 'bbbridge_state.json')}
+    if wanted != current:
+        config.write_text(json.dumps(wanted, indent=2) + '\n', encoding='utf-8')
+    overrides = folder / 'host_overrides.json'
+    overrides.write_text(json.dumps(BRIDGE_OVERRIDES, indent=2) + '\n', encoding='utf-8')
+    return config, overrides
 
 
 def active_firewalls(ufw_conf=Path('/etc/ufw/ufw.conf'), systemctl='/usr/bin/systemctl'):
@@ -322,12 +399,18 @@ def main():
     sub = parser.add_subparsers(dest='command', required=True)
     overrides = sub.add_parser('overrides')
     overrides.add_argument('--user', required=True)
+    bridge = sub.add_parser('bridge')
+    bridge.add_argument('--user', required=True)
     sub.add_parser('check')
     a = parser.parse_args()
     server = os.environ.get('BB_SHADNET_SERVER') or SHADNET_SERVER
     community = community_address(os.environ.get('BB_COMMUNITY_SERVER'))
     webapi = webapi_setting(os.environ.get('BB_SHADNET_WEBAPI'), server, community)
-    if a.command == 'overrides':
+    if a.command == 'bridge':
+        config, overrides = write_bridge_files(a.user)
+        print(config)
+        print(overrides)
+    elif a.command == 'overrides':
         print(write_overrides(a.user, community, webapi))
     else:
         for name, address, ok, detail in check(server, webapi, community):

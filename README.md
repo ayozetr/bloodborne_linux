@@ -19,9 +19,9 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
 
 ## Features
 
-- **Online play (beta)** through [The Hunter's Dream](https://thehuntersdream.com) and shadNet:
-  messages, bloodstains, ghosts, bells and summons. Linux and Windows players can play together,
-  through shadPS4's public server or [one of your own](docs/SERVER.md).
+- **Online play (beta)** through [The Hunter's Dream](https://thehuntersdream.com): messages,
+  bloodstains, ghosts, bells and summons, with bbhost's players and Windows players of bbport, or
+  with your group on [a server of your own](docs/SERVER.md).
 - **Upscaling:** AMD FSR 3.1, FSR 4 and FSR 4.1.1, **NVIDIA DLSS** on GeForce RTX, and
   native-resolution TAA.
 - **Unlocked frame rate**, capped at your display's refresh rate up to 120 FPS (above that the
@@ -82,22 +82,23 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency from `shell
 
 ### Online play
 
-1. Register a shadNet account at [shadnet.shadps4.net](https://shadnet.shadps4.net), or get one
-   from the owner of your group's own server.
-2. In the launcher, open **Online**, turn on **Play online**, choose the shadNet server and enter
-   your account name (not your email) and password. **Test the connection**: every line should
-   be green.
+1. In the launcher, open **Online**, turn on **Play online** and choose the co-op server:
+   - **The Hunter's Dream (with bbhost players)**: sign in with Discord, or create an account
+     with just a name and keep the recovery code it shows (it brings the account back on
+     another PC). [bbbridge](bbbridge/README.md) by MaskZeus runs with the game and talks to
+     The Hunter's Dream the way bbhost does, so you play with bbhost's players and with Windows
+     players of bbport on the same pool.
+   - **Your own server**: your group's shadNet server and your account on it
+     ([docs/SERVER.md](docs/SERVER.md), Docker and Tailscale; tested with a Linux and a Windows
+     player).
+2. **Test the connection**: every line should be green.
 3. Start the game and choose online at the title screen.
 
-Everyone in a session needs game version 1.09 and the same servers. Turn cheats off when you
-play with others.
+Everyone in a session needs game version 1.09 and the same pool. Turn cheats off when you play
+with others. shadPS4's public shadNet server no longer accepts bbport builds: it signs them out
+right after the login, and the launcher says so.
 
-**Co-op needs your own server for now:** shadPS4's public server does not answer on its UDP port,
-so summons do not connect through it (messages, bloodstains and ghosts do).
-[docs/SERVER.md](docs/SERVER.md) sets one up with Docker and Tailscale; it has been tested with a
-Linux and a Windows player.
-
-Co-op connects the players directly over UDP. UPnP opens the port on the router by itself; with
+With your own server, co-op connects the players directly over UDP. UPnP opens the port on the router by itself; with
 ufw or firewalld on, the launcher's **Online** page says so and gives the commands: pin the
 **Co-op port** (for example 3658), open it (`sudo ufw allow 3658/udp`), and for UPnP let the
 router's answers in (`sudo ufw allow from <router> proto udp`). [More in docs/ONLINE.md](docs/ONLINE.md).
@@ -152,6 +153,8 @@ If this fork is useful to you and you would like to support it, you can on
 - [shadp2p](https://github.com/Wozzardman/shadp2p) by Wozzardman: the network and PSN libraries
   for online play. Servers by the [shadPS4](https://shadps4.net) team and
   [The Hunter's Dream](https://thehuntersdream.com) by droogie and its team.
+- [bbbridge](https://github.com/MaskZeus/bbbridge) by MaskZeus (GPL-3.0-or-later): The Hunter's
+  Dream's co-op pool for bbport, built for Linux here ([bbbridge/](bbbridge/)).
 - [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR):
   the DLSS bridge, and the [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS).
 - [FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) by FireBurn and the AMD FidelityFX SDK.

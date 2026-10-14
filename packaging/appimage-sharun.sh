@@ -47,6 +47,12 @@ font=$(fc-match -f '%{file}' 'DejaVu Sans:bold')
 install -Dm644 "$font" "$d/fonts/DejaVuSans-Bold.ttf"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
+# bbbridge (GPL-3.0-or-later): its licence and notices next to the port; its source is bbbridge/.
+if [[ -x out/bbbridge/bbbridge-cli ]]; then
+    install -Dm644 bbbridge/LICENSE "$d/bbbridge/LICENSE"
+    install -Dm644 bbbridge/README.md "$d/bbbridge/README.md"
+    install -Dm644 bbbridge/THIRD_PARTY_NOTICES.txt "$d/bbbridge/THIRD_PARTY_NOTICES.txt"
+fi
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
 
@@ -59,6 +65,7 @@ export PYTHON="$APPDIR/bin/python3"
 export BB_VULKANINFO="$APPDIR/bin/vulkaninfo"
 export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet.so"
+[ -x "$APPDIR/bin/bbbridge-cli" ] && export BB_BRIDGE_CLI="$APPDIR/bin/bbbridge-cli"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 # deadinside28#172: Steam's Game Mode runs a non-Steam game in pressure-vessel, which points
@@ -96,8 +103,11 @@ export OUTPUT_APPIMAGE=0
 # The online module (gpu/bbnet), when the build has it: named so that its libraries (protobuf,
 # OpenSSL, miniupnpc) come along; the runtime dlopens it at BB_NET_MODULE (below).
 net=$(ls "$root/out/gpu/libbbnet.so" 2>/dev/null || true)
+# The Hunter's Dream's bridge (bbbridge/, GPL-3.0-or-later), when the build has it: with libcurl and
+# OpenSSL, named here so that they come along.
+bridge=$(ls "$root/out/bbbridge/bbbridge-cli" 2>/dev/null || true)
 "$quick" \
-    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} \
+    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} ${bridge:+"$bridge"} \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
