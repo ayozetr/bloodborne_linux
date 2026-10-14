@@ -347,6 +347,9 @@ private:
     std::pair<vk::DeviceMemory, u64> AllocateResidency(u64 bytes);
     /// bbport: BbStats::residency_unused_bytes after the free list or the current block changed.
     void NoteResidencyUnused();
+    /// Chunks without blocks back to the driver once the GPU is done with them; `min_seconds`
+    /// empty first (0: at once, VRAM full). Returns the bytes freed.
+    u64 ReleaseEmptyResidencyChunks(u32 now, u32 min_seconds);
     /// bbport: idle VRAM blocks (see group_use).
     void NoteUse(VAddr address, u64 size);
     /// bbport BB_RESIDENCY_MIX=1 (diagnostics): bindings over blocks in VRAM and in place at once.

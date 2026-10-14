@@ -1567,6 +1567,9 @@ void BufferCache::EnsureResident(const Buffer* arena, u64 first_block, u64 last_
     runtime.CopyBuffer(staging.buffer, bda_pagetable_buffer.get(), copies);
 }
 
+// bbport: VRAM taken by residency chunks, for BB_RESIDENCY_VRAM_LIMIT_MB (tests).
+static std::atomic<u64> residency_vram_bytes{0};
+
 std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
     if (bytes == block_size && free_slot_count != 0) {
         // bbport: a slot of the fullest chunk: the emptier ones drain and go back to the driver.
@@ -1600,7 +1603,6 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
             const char* env = std::getenv("BB_RESIDENCY_VRAM_LIMIT_MB");
             return env ? std::strtoull(env, nullptr, 10) << 20 : 0;
         }();
-        static std::atomic<u64> vram_bytes{0};
         const auto device = instance.GetDevice();
         vk::Result result = vk::Result::eErrorOutOfDeviceMemory;
         vk::DeviceMemory memory{};
@@ -1612,14 +1614,14 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
             BbStats::residency_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
             return memory;
         }
-        if (!test_limit || vram_bytes.load(std::memory_order_relaxed) + size <= test_limit) {
+        if (!test_limit || residency_vram_bytes.load(std::memory_order_relaxed) + size <= test_limit) {
             auto vram = device.allocateMemory({.allocationSize = size,
                                                .memoryTypeIndex = arena_memory_type_index});
             result = vram.result;
             memory = vram.value;
         }
         if (result == vk::Result::eSuccess) {
-            vram_bytes.fetch_add(size, std::memory_order_relaxed);
+            residency_vram_bytes.fetch_add(size, std::memory_order_relaxed);
         } else if ((result == vk::Result::eErrorOutOfDeviceMemory ||
                     result == vk::Result::eErrorOutOfHostMemory) &&
                    arena_fallback_type_index) {
@@ -1661,6 +1663,38 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
             size = bytes;
             memory = allocate(size);
         }
+        // bbport (deadinside28#163, a 4 GB card: "Failed to allocate 1 MiB for guest memory copies"
+        // while an area loads): chunks emptied in the last 5 s were still held, waiting to go back
+        // to the driver. VRAM full, they go now (the GPU done with them), and the spare block
+        // being allocated in the background is taken if it came; then the request again.
+        u64 released = 0;
+        if (!memory) {
+            released = ReleaseEmptyResidencyChunks(
+                BbStats::coarse_second.load(std::memory_order_relaxed), 0);
+            if (spare_residency.valid()) {
+                const vk::DeviceMemory spare = spare_residency.get();
+                if (spare && size <= ResidencyBlock) {
+                    memory = spare;
+                    size = ResidencyBlock;
+                } else if (spare) {
+                    instance.GetDevice().freeMemory(spare);
+                    residency_vram_bytes.fetch_sub(std::min(ResidencyBlock, residency_vram_bytes.load()),
+                                                   std::memory_order_relaxed);
+                    BbStats::residency_alloc_bytes.fetch_sub(ResidencyBlock, std::memory_order_relaxed);
+                    BbStats::device_free_bytes.fetch_add(ResidencyBlock, std::memory_order_relaxed);
+                    released += ResidencyBlock;
+                }
+            }
+            if (!memory && released != 0) {
+                memory = allocate(size);
+            }
+            static std::atomic<u32> told_release{0};
+            if (released != 0 && told_release.fetch_add(1, std::memory_order_relaxed) < 8) {
+                std::printf("Guest memory: VRAM is full: %llu MiB of empty copies freed at once, %s\n",
+                            (unsigned long long)(released >> 20),
+                            memory ? "the request fits now" : "still not enough");
+            }
+        }
         const auto& types = instance.GetMemoryProperties();
         for (u32 i = 0; !memory && i < types.memoryTypeCount; ++i) {
             if (((arena_memory_type_bits >> i) & 1) && i != arena_memory_type_index) {
@@ -1672,7 +1706,10 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
                 }
             }
         }
-        ASSERT_MSG(memory, "Failed to allocate {} MiB for guest memory copies: VRAM is full", size >> 20);
+        ASSERT_MSG(memory,
+                   "Failed to allocate {} MiB for guest memory copies: VRAM is full ({} MiB of "
+                   "empty copies freed, not enough)",
+                   size >> 20, released >> 20);
         residency_memory = memory;
         residency_size = size;
         residency_used = 0;
@@ -1896,23 +1933,32 @@ void BufferCache::ProcessIdleBlocks() {
         }
     }
     // Chunks without blocks for 5 s, the rebinds away from them long done: back to the driver.
+    ReleaseEmptyResidencyChunks(now, 5);
+}
+
+u64 BufferCache::ReleaseEmptyResidencyChunks(u32 now, u32 min_seconds) {
+    u64 freed = 0;
     for (auto it = residency_chunks.begin(); it != residency_chunks.end();) {
         const ResidencyChunk& chunk = it->second;
         const VkDeviceMemory memory = it->first;
         if (chunk.used != 0 || memory == static_cast<VkDeviceMemory>(residency_memory) ||
-            now - chunk.empty_second < 5 || !pending_binds.empty() ||
+            now - chunk.empty_second < min_seconds || !pending_binds.empty() ||
             !scheduler.GetWorkSemaphore()->IsFree(chunk.empty_tick + 1)) {
             ++it;
             continue;
         }
         free_slot_count -= chunk.free_offsets.size();
         instance.GetDevice().freeMemory(vk::DeviceMemory{memory});
+        freed += chunk.size;
+        residency_vram_bytes.fetch_sub(std::min(chunk.size, residency_vram_bytes.load()),
+                                       std::memory_order_relaxed);
         BbStats::residency_alloc_bytes.fetch_sub(chunk.size, std::memory_order_relaxed);
         BbStats::device_free_bytes.fetch_add(chunk.size, std::memory_order_relaxed);
         BbStats::vram_chunks_freed_bytes.fetch_add(chunk.size, std::memory_order_relaxed);
         it = residency_chunks.erase(it);
         NoteResidencyUnused();
     }
+    return freed;
 }
 
 bool BufferCache::VramEligible(u64 block, bool garlic_known) {
