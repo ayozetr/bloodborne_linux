@@ -1,9 +1,9 @@
 # Hosting your own co-op server
 
-Bells and summons go through a shadNet server. Players who connect through shadPS4's public one
-(`srv.shadps4.net`) get no co-op at the moment: it does not answer on its UDP port, so a summon
-never connects ([deadinside28/bloodborne_pc#121](https://github.com/deadinside28/bloodborne_pc/issues/121)).
-A group of friends can run their own server instead:
+Bells and summons go through a shadNet server. shadPS4's public one (`srv.shadps4.net`) no longer
+accepts bbport builds, and the public pool for bbport is now The Hunter's Dream's, through
+bbbridge (the launcher's **Online** page; [README](../README.md#online-play)). A group of friends
+can also run their own server:
 [shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) by Wozzardman, the shadNet server with
 that UDP port working and a summon service of its own.
 

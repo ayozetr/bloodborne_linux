@@ -646,6 +646,7 @@ THANKS = (
         _github("pmwork-personal", "Сверхширокие мониторы без растянутой картинки"),
         _github("Jhony-Jhansen", "Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша"),
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
+        _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
     )),
     ("Помощь и тесты", (
         _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
