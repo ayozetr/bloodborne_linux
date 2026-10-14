@@ -31,9 +31,11 @@ typedef int net_socket;
 #include <sstream>
 #endif
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string_view>
 #include <vector>
 #include <string.h>
 #include "common/assert.h"
@@ -388,6 +390,15 @@ bool NetUtilInternal::RetrieveIp() {
 }
 
 int NetUtilInternal::ResolveHostname(const char* hostname, Libraries::Net::OrbisNetInAddr* addr) {
+    // bbport: the game's "Playlog" telemetry (FromSoftware's bb-playlog-prod / bb-playlog-test
+    // buckets on Amazon S3) is not sent anywhere: its host does not resolve, as with no network.
+    if (std::string_view(hostname).find("bb-playlog") != std::string_view::npos) {
+        static std::atomic_flag told = ATOMIC_FLAG_INIT;
+        if (!told.test_and_set()) {
+            LOG_INFO(Lib_Net, "{}: the game's play log upload is blocked", hostname);
+        }
+        return ORBIS_NET_ERETURN;
+    }
     const addrinfo hints = {
         .ai_flags = AI_V4MAPPED | AI_ADDRCONFIG,
         .ai_family = AF_INET,
