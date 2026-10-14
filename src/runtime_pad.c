@@ -29,6 +29,7 @@
 #define _GNU_SOURCE
 #include "runtime.h"
 #include "gpu/bbgpu.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -214,6 +215,28 @@ static void touch_click(PadData *d, int right) {
     d->touches[0]=(PadTouch){.x=right ? 1440 : 480,.y=471,.id=touch_id};
 }
 
+/* Issue #7: on a DualShock 4 the camera turned two or three times faster at one point of a
+ * diagonal, more so at a higher frame rate. Some sticks report a diagonal near the corner of the
+ * square, up to ~1.41x the full deflection of one axis, which a stick with a round gate (as the
+ * game expects) never does. A stick past the round gate is brought back onto it, keeping its
+ * direction; the log says once how far past it each stick went (and again when further). */
+static void round_gate(int stick, uint8_t *x, uint8_t *y) {
+    static float reported[2];
+    const float dx=(float)*x-128.0f, dy=(float)*y-128.0f;
+    const float reach=sqrtf(dx*dx+dy*dy);
+    if (reach<=128.0f) return; /* one axis all the way: 0 is 128 from the centre, 255 is 127 */
+    const float past=reach/127.0f;
+    if (past>=1.05f && past>=reported[stick]+0.05f) {
+        reported[stick]=past;
+        printf("Runtime: pad %s stick at %.2fx the round gate's reach, brought back onto it\n",
+               stick ? "right" : "left",(double)past);
+        fflush(stdout);
+    }
+    const float scale=127.0f/reach;
+    *x=(uint8_t)lrintf(128.0f+dx*scale);
+    *y=(uint8_t)lrintf(128.0f+dy*scale);
+}
+
 /* BB_GAMEPAD (the launcher's controller choice): its SDL GUID, or part of its name. Issue #15:
  * wheels and other controllers connected for good came first. */
 static const char *preferred_gamepad(void) {
@@ -370,11 +393,14 @@ static float mouse_sensitivity=1.0f;
  * (default: the one pressed last wins); stick_circular=0 leaves a diagonal of the movement keys at
  * the corner of the square (default: within a round gate, as a thumbstick). */
 static int stick_socd_last=1, stick_circular=1;
+/* pad_round_gate=0 (bbport.ini) passes a controller's sticks on as they come (default: within a
+ * round gate, see round_gate). */
+static int pad_round_gate=1;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f;
-    stick_socd_last=1; stick_circular=1;
+    stick_socd_last=1; stick_circular=1; pad_round_gate=1;
     const char *path=getenv("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -388,6 +414,7 @@ static void load_bindings(void) {
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
             else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
             else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
+            else if (!strncmp(line,"pad_round_gate=",15)) pad_round_gate=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -570,6 +597,10 @@ static void sample_host(PadData *d) {
         uint8_t *axis_out[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
         for (int i=0;i<4;++i)
             *axis_out[i]=stick_axis(i,raw[i]); /* center 0 until the neutral is known */
+        if (pad_round_gate) {
+            round_gate(0,&d->left_x,&d->left_y);
+            round_gate(1,&d->right_x,&d->right_y);
+        }
         if (SDL_GetNumGamepadTouchpads(g)>0) {
             const int fingers=SDL_GetNumGamepadTouchpadFingers(g,0);
             for (int finger=0;finger<fingers && d->touch_count<2;++finger) {
