@@ -148,5 +148,15 @@ int main(void) {
         assert(m.left_x==0 && m.left_y==0);
         stick_circular=1; keys[w_key]=keys[a_key]=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement");
+    /* Issue #7: a controller stick past the round gate comes back onto it, keeping its direction;
+     * one axis all the way (0 or 255) stays as it is. */
+    {
+        uint8_t x=255, y=255; round_gate(1,&x,&y);
+        assert(x==128+90 && y==128+90);
+        x=0; y=128; round_gate(1,&x,&y); assert(x==0 && y==128);
+        x=255; y=128; round_gate(1,&x,&y); assert(x==255 && y==128);
+        x=255; y=200; round_gate(0,&x,&y);
+        assert(x>=237 && x<=239 && y>=190 && y<=192); /* (127,72) scaled to reach 127 */
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate");
 }
