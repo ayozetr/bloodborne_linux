@@ -1,6 +1,7 @@
 // Shared helpers: logging, endpoints, Winsock, tolerant JSON field access.
 #pragma once
 
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -10,8 +11,37 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#else
+// Linux: BSD sockets under Winsock's names, so the bridge's code is the same on both.
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <chrono>
+#include <ctime>
+#include <thread>
+
+using SOCKET = int;
+constexpr SOCKET INVALID_SOCKET = -1;
+constexpr int SD_BOTH = SHUT_RDWR;
+// Closing a socket does not wake a thread blocked in accept() or recvfrom() on it on Linux
+// (Windows does): shutdown() first, which does, also for listening and unconnected UDP sockets.
+inline int closesocket(SOCKET s) {
+    ::shutdown(s, SHUT_RDWR);
+    return ::close(s);
+}
+inline int WSAGetLastError() { return errno; }
+inline void Sleep(unsigned ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
+inline void localtime_s(std::tm* out, const std::time_t* t) { localtime_r(t, out); }
+#endif
 
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <string>
 
@@ -87,5 +117,10 @@ std::string jstr(const J& j, const char* key, const std::string& def = "") {
 
 std::string narrow(const std::wstring& w);
 std::wstring widen(const std::string& s);
+// A file name kept as UTF-16/32 text (std::wstring) as a path to open: on Linux file names are bytes,
+// UTF-8 here.
+std::filesystem::path fspath(const std::wstring& w);
+// Replaces `to` with `from` in one step (MoveFileExW with MOVEFILE_REPLACE_EXISTING, rename()).
+bool replace_file(const std::wstring& from, const std::wstring& to);
 
 }  // namespace bb

@@ -9,6 +9,10 @@
 #include <memory>
 #include <mutex>
 
+#ifndef _WIN32
+#include <csignal>
+#endif
+
 namespace bb {
 
 namespace {
@@ -58,8 +62,8 @@ void set_log_file(const std::wstring& path) {
     std::wstring prev = path;
     const size_t dot = prev.rfind(L".log");
     prev = (dot == std::wstring::npos ? prev : prev.substr(0, dot)) + L".prev.log";
-    MoveFileExW(path.c_str(), prev.c_str(), MOVEFILE_REPLACE_EXISTING);
-    g_file = std::make_unique<std::ofstream>(path, std::ios::out | std::ios::trunc);
+    replace_file(path, prev);
+    g_file = std::make_unique<std::ofstream>(fspath(path), std::ios::out | std::ios::trunc);
 }
 
 double now() {
@@ -69,8 +73,15 @@ double now() {
 
 bool net_init() {
     static bool ok = [] {
+#ifdef _WIN32
         WSADATA wsa;
         return WSAStartup(MAKEWORD(2, 2), &wsa) == 0;
+#else
+        // A send to a peer that already closed raises SIGPIPE on Linux, which ends the process;
+        // Windows returns an error, which the bridge handles.
+        std::signal(SIGPIPE, SIG_IGN);
+        return true;
+#endif
     }();
     return ok;
 }
@@ -97,7 +108,7 @@ std::string detect_lan_addr() {
     std::string out = "127.0.0.1";
     if (connect(s, reinterpret_cast<sockaddr*>(&target), sizeof(target)) == 0) {
         sockaddr_in local{};
-        int len = sizeof(local);
+        socklen_t len = sizeof(local);
         if (getsockname(s, reinterpret_cast<sockaddr*>(&local), &len) == 0) out = from_sockaddr(local).ip;
     }
     closesocket(s);
@@ -114,6 +125,7 @@ std::string resolve_ipv4(const std::string& host) {
     return ip;
 }
 
+#ifdef _WIN32
 std::string narrow(const std::wstring& w) {
     if (w.empty()) return {};
     const int n = WideCharToMultiByte(CP_UTF8, 0, w.data(), static_cast<int>(w.size()), nullptr, 0, nullptr, nullptr);
@@ -129,5 +141,57 @@ std::wstring widen(const std::string& s) {
     MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), out.data(), n);
     return out;
 }
+
+std::filesystem::path fspath(const std::wstring& w) { return std::filesystem::path(w); }
+
+bool replace_file(const std::wstring& from, const std::wstring& to) {
+    return MoveFileExW(from.c_str(), to.c_str(), MOVEFILE_REPLACE_EXISTING) != 0;
+}
+#else
+// wchar_t holds a whole code point (UTF-32) on Linux.
+std::string narrow(const std::wstring& w) {
+    std::string out;
+    for (const wchar_t wc : w) {
+        const uint32_t c = static_cast<uint32_t>(wc);
+        if (c < 0x80) {
+            out += static_cast<char>(c);
+        } else if (c < 0x800) {
+            out += static_cast<char>(0xC0 | (c >> 6));
+            out += static_cast<char>(0x80 | (c & 0x3F));
+        } else if (c < 0x10000) {
+            out += static_cast<char>(0xE0 | (c >> 12));
+            out += static_cast<char>(0x80 | ((c >> 6) & 0x3F));
+            out += static_cast<char>(0x80 | (c & 0x3F));
+        } else {
+            out += static_cast<char>(0xF0 | (c >> 18));
+            out += static_cast<char>(0x80 | ((c >> 12) & 0x3F));
+            out += static_cast<char>(0x80 | ((c >> 6) & 0x3F));
+            out += static_cast<char>(0x80 | (c & 0x3F));
+        }
+    }
+    return out;
+}
+
+std::wstring widen(const std::string& s) {
+    std::wstring out;
+    for (size_t i = 0; i < s.size();) {
+        const unsigned char b = static_cast<unsigned char>(s[i]);
+        const int extra = b < 0x80 ? 0 : b < 0xE0 ? 1 : b < 0xF0 ? 2 : 3;
+        uint32_t c = extra == 0 ? b : extra == 1 ? (b & 0x1F) : extra == 2 ? (b & 0x0F) : (b & 0x07);
+        size_t j = 1;
+        for (; j <= static_cast<size_t>(extra) && i + j < s.size(); ++j)
+            c = (c << 6) | (static_cast<unsigned char>(s[i + j]) & 0x3F);
+        out += static_cast<wchar_t>(c);
+        i += j;
+    }
+    return out;
+}
+
+std::filesystem::path fspath(const std::wstring& w) { return std::filesystem::path(narrow(w)); }
+
+bool replace_file(const std::wstring& from, const std::wstring& to) {
+    return std::rename(narrow(from).c_str(), narrow(to).c_str()) == 0;
+}
+#endif
 
 }  // namespace bb

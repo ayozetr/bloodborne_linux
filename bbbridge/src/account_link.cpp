@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 
 #include "http.hpp"
@@ -39,7 +40,7 @@ bool auth_call(const std::string& base, const std::string& path, const json& bod
 
 namespace {
 json read_state(const std::wstring& path) {
-    std::ifstream in(path);
+    std::ifstream in(fspath(path));
     if (!in) return json::object();
     json j = json::parse(in, nullptr, false);
     return j.is_object() ? j : json::object();
@@ -74,11 +75,11 @@ namespace {
 bool write_state(const std::wstring& path, const json& state) {
     const std::wstring tmp = path + L".tmp";
     {
-        std::ofstream out(tmp, std::ios::trunc);
+        std::ofstream out(fspath(tmp), std::ios::trunc);
         if (!out) return false;
         out << state.dump(2);
     }
-    return MoveFileExW(tmp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING) != 0;
+    return replace_file(tmp, path);
 }
 }  // namespace
 
@@ -138,8 +139,12 @@ std::string account_sign_out(const std::string& auth_server, const std::wstring&
 
 std::string device_name() {
     char host[256] = {};
+#ifdef _WIN32
     size_t n = 0;
     getenv_s(&n, host, sizeof(host), "COMPUTERNAME");
+#else
+    const size_t n = gethostname(host, sizeof(host) - 1) == 0 ? std::strlen(host) + 1 : 0;
+#endif
     return n > 1 ? "bbbridge on " + std::string(host).substr(0, 48) : "bbbridge";
 }
 
@@ -220,7 +225,7 @@ void DiscordLink::run() {
 bool DiscordLink::save(const std::string& online_id, const std::string& token) {
     json state = json::object();
     {
-        std::ifstream in(state_file_);
+        std::ifstream in(fspath(state_file_));
         if (in) {
             state = json::parse(in, nullptr, false);
             if (!state.is_object()) state = json::object();
@@ -233,11 +238,11 @@ bool DiscordLink::save(const std::string& online_id, const std::string& token) {
                                     {"linked", "discord"}};
     const std::wstring tmp = state_file_ + L".tmp";
     {
-        std::ofstream out(tmp, std::ios::trunc);
+        std::ofstream out(fspath(tmp), std::ios::trunc);
         if (!out) return false;
         out << state.dump(2);
     }
-    return MoveFileExW(tmp.c_str(), state_file_.c_str(), MOVEFILE_REPLACE_EXISTING) != 0;
+    return replace_file(tmp, state_file_);
 }
 
 }  // namespace bb

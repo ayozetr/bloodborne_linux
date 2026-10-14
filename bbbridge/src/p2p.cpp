@@ -1,11 +1,14 @@
 #include "p2p.hpp"
 
+#ifdef _WIN32
 #include <mstcpip.h>
 
 #ifndef SIO_UDP_CONNRESET
 #define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
 #endif
+#endif
 
+#include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <random>
@@ -57,11 +60,15 @@ uint64_t wall_micros() {
     return static_cast<uint64_t>(duration_cast<microseconds>(system_clock::now().time_since_epoch()).count());
 }
 void no_udp_connreset(SOCKET s) {
+#ifdef _WIN32
     // Without this, an ICMP "port unreachable" for an earlier send makes the
     // next recvfrom fail with WSAECONNRESET (10054).
     BOOL off = FALSE;
     DWORD ret = 0;
     WSAIoctl(s, SIO_UDP_CONNRESET, &off, sizeof(off), nullptr, 0, &ret, nullptr, nullptr);
+#else
+    (void)s;   // Linux reports ICMP errors only on connected UDP sockets; these are not
+#endif
 }
 SOCKET udp_bind(const std::string& ip, int port, Endpoint* bound) {
     SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -72,7 +79,7 @@ SOCKET udp_bind(const std::string& ip, int port, Endpoint* bound) {
         return INVALID_SOCKET;
     }
     no_udp_connreset(s);
-    int len = sizeof(a);
+    socklen_t len = sizeof(a);
     getsockname(s, reinterpret_cast<sockaddr*>(&a), &len);
     if (bound) *bound = from_sockaddr(a);
     return s;
@@ -550,7 +557,7 @@ void Gateway::outer_main() {
     std::string buf(65536, '\0');
     while (!stop_) {
         sockaddr_in from{};
-        int flen = sizeof(from);
+        socklen_t flen = sizeof(from);
         const int n = recvfrom(outer_, buf.data(), static_cast<int>(buf.size()), 0,
                                reinterpret_cast<sockaddr*>(&from), &flen);
         if (n < 0) {
@@ -607,13 +614,17 @@ void Gateway::inner_main() {
         }
         fd_set rd;
         FD_ZERO(&rd);
-        for (auto& [s, l] : links) FD_SET(s, &rd);
+        SOCKET highest = 0;   // select()'s first argument: ignored on Windows, the highest fd + 1 elsewhere
+        for (auto& [s, l] : links) {
+            FD_SET(s, &rd);
+            highest = std::max(highest, s);
+        }
         timeval tv{0, 100000};
-        if (select(0, &rd, nullptr, nullptr, &tv) <= 0) continue;   // a socket closed under us: rebuild
+        if (select(static_cast<int>(highest) + 1, &rd, nullptr, nullptr, &tv) <= 0) continue;   // a socket closed under us: rebuild
         for (auto& [s, link] : links) {
             if (!FD_ISSET(s, &rd)) continue;
             sockaddr_in from{};
-            int flen = sizeof(from);
+            socklen_t flen = sizeof(from);
             const int n = recvfrom(s, buf.data(), static_cast<int>(buf.size()), 0,
                                    reinterpret_cast<sockaddr*>(&from), &flen);
             if (n < 0) continue;

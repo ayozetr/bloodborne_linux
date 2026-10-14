@@ -1,6 +1,10 @@
 #include "bridge.hpp"
 
+#ifdef _WIN32
 #include <bcrypt.h>
+#else
+#include <openssl/evp.h>
+#endif
 
 #include <algorithm>
 #include <cctype>
@@ -13,7 +17,9 @@
 #include "proto3.hpp"
 #include "shadnet.hpp"
 
+#ifdef _WIN32
 #pragma comment(lib, "bcrypt.lib")
+#endif
 
 namespace bb {
 
@@ -38,13 +44,19 @@ std::string lower(std::string s) {
 std::string repr(const std::string& s) { return "'" + s + "'"; }
 
 std::string sha256(const std::string& data) {
-    BCRYPT_ALG_HANDLE alg = nullptr;
     std::string out(32, '\0');
+#ifdef _WIN32
+    BCRYPT_ALG_HANDLE alg = nullptr;
     if (BCryptOpenAlgorithmProvider(&alg, BCRYPT_SHA256_ALGORITHM, nullptr, 0) == 0) {
         BCryptHash(alg, nullptr, 0, reinterpret_cast<PUCHAR>(const_cast<char*>(data.data())),
                    static_cast<ULONG>(data.size()), reinterpret_cast<PUCHAR>(out.data()), 32);
         BCryptCloseAlgorithmProvider(alg, 0);
     }
+#else
+    unsigned int size = 0;
+    EVP_Digest(data.data(), data.size(), reinterpret_cast<unsigned char*>(out.data()), &size, EVP_sha256(),
+               nullptr);
+#endif
     return out;
 }
 
@@ -774,7 +786,7 @@ void Session::shutdown() {
 
 json Bridge::load_state() {
     std::lock_guard<std::mutex> lk(state_mu_);
-    std::ifstream in(widen(cfg.state_file));
+    std::ifstream in(fspath(widen(cfg.state_file)));
     if (!in) return json::object();
     json j = json::parse(in, nullptr, false);
     if (j.is_discarded()) {
@@ -789,10 +801,10 @@ void Bridge::save_state(const json& state) {
     const std::wstring path = widen(cfg.state_file);
     const std::wstring tmp = path + L".tmp";
     {
-        std::ofstream out(tmp, std::ios::trunc);
+        std::ofstream out(fspath(tmp), std::ios::trunc);
         out << state.dump(2);
     }
-    MoveFileExW(tmp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING);   // never a half-written account file
+    replace_file(tmp, path);   // never a half-written account file
 }
 
 std::optional<Endpoint> Bridge::registry_get(const std::string& npid) const {
@@ -841,8 +853,15 @@ bool Bridge::start(std::string* error) {
         if (!gateway->start(&why)) return fail(why);
     }
     tcp_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#ifdef _WIN32
     BOOL exclusive = TRUE;
     setsockopt(tcp_, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, reinterpret_cast<const char*>(&exclusive), sizeof(exclusive));
+#else
+    // Linux keeps a port that just closed (TIME_WAIT) from being bound again without SO_REUSEADDR,
+    // which Windows allows; it still never lets a second program listen on it.
+    int reuse = 1;
+    setsockopt(tcp_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+#endif
     sockaddr_in addr = to_sockaddr(Endpoint{cfg.bind_host, cfg.tcp_port});
     if (bind(tcp_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0 || listen(tcp_, 8) != 0)
         return fail(fmt("cannot listen on tcp %s:%d - is another bridge running? (error %d)", cfg.bind_host.c_str(),
@@ -924,10 +943,10 @@ BridgeStatus Bridge::status() const {
 void Bridge::tcp_accept_loop() {
     while (running_) {
         sockaddr_in from{};
-        int len = sizeof(from);
+        socklen_t len = sizeof(from);
         SOCKET s = accept(tcp_, reinterpret_cast<sockaddr*>(&from), &len);
         if (s == INVALID_SOCKET) break;
-        BOOL nodelay = TRUE;
+        int nodelay = 1;
         setsockopt(s, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&nodelay), sizeof(nodelay));
         log("tcp: connection from " + from_sockaddr(from).str());
         ++tcp_active_;
@@ -979,7 +998,7 @@ void Bridge::stun_loop() {
     char buf[4096];
     while (running_) {
         sockaddr_in from{};
-        int len = sizeof(from);
+        socklen_t len = sizeof(from);
         const int n = recvfrom(stun_, buf, sizeof(buf), 0, reinterpret_cast<sockaddr*>(&from), &len);
         if (n < 0) {
             if (!running_) return;
@@ -1177,17 +1196,22 @@ void Bridge::capture(const std::string& name, const std::string& request, int st
                      const std::string& note) {
     // Trace mode keeps each exchange under captures/ next to the state file.
     try {
-        const fs::path dir = fs::absolute(fs::path(widen(cfg.state_file))).parent_path() / L"captures";
+        const fs::path dir = fs::absolute(fspath(widen(cfg.state_file))).parent_path() / "captures";
         fs::create_directories(dir);
         std::time_t t = std::time(nullptr);
         std::tm tm{};
         localtime_s(&tm, &t);
         char stamp[32];
         std::strftime(stamp, sizeof(stamp), "%Y%m%d-%H%M%S", &tm);
-        const std::wstring stem = (dir / widen(std::string(stamp) + "-" + name)).wstring();
-        std::ofstream(stem + L"-request.bin", std::ios::binary) << request;
-        std::ofstream(stem + L"-response.bin", std::ios::binary) << response;
-        std::ofstream(stem + L".txt") << "name=" << name << "\nstatus=" << status << "\n" << note << "\n";
+        const fs::path stem = dir / fspath(widen(std::string(stamp) + "-" + name));
+        const auto with = [&stem](const char* suffix) {
+            fs::path p = stem;
+            p += suffix;
+            return p;
+        };
+        std::ofstream(with("-request.bin"), std::ios::binary) << request;
+        std::ofstream(with("-response.bin"), std::ios::binary) << response;
+        std::ofstream(with(".txt")) << "name=" << name << "\nstatus=" << status << "\n" << note << "\n";
     } catch (const std::exception& e) {
         log(std::string("capture failed: ") + e.what());
     }

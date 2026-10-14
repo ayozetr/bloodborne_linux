@@ -21,10 +21,22 @@ add_library(bbbridge_core STATIC
     src/bridge.cpp
 )
 target_include_directories(bbbridge_core PUBLIC src third_party)
-target_link_libraries(bbbridge_core PUBLIC ws2_32 winhttp bcrypt)
+target_sources(bbbridge_core PRIVATE src/account_link.cpp)
+if(WIN32)
+    target_link_libraries(bbbridge_core PUBLIC ws2_32 winhttp bcrypt)
+    # Pointing bbport for Windows at the bridge (its launcher's settings, host overrides).
+    target_sources(bbbridge_core PRIVATE src/setup.cpp)
+else()
+    # Linux: BSD sockets, libcurl for HTTPS, OpenSSL for SHA-256. The bbport launcher points the
+    # game at the bridge itself, so there is no setup.cpp, and no window (bbbridge-cli only).
+    find_package(Threads REQUIRED)
+    find_package(CURL REQUIRED)
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+    target_link_libraries(bbbridge_core PUBLIC Threads::Threads CURL::libcurl OpenSSL::Crypto)
+    target_compile_options(bbbridge_core PRIVATE -Wall -Wextra)
+endif()
 
-target_sources(bbbridge_core PRIVATE src/setup.cpp src/account_link.cpp)
-
+if(WIN32)
 # Dear ImGui (third_party/imgui, v1.91.5) with the Win32 + DirectX 11 backends.
 add_library(imgui STATIC
     third_party/imgui/imgui.cpp
@@ -43,6 +55,7 @@ add_executable(bbbridge WIN32 src/app.cpp src/app.rc)
 target_link_libraries(bbbridge PRIVATE bbbridge_core imgui d3d11 dxgi)
 add_custom_command(TARGET bbbridge POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:bbbridge> ${CMAKE_SOURCE_DIR}/bbbridge.exe)
+endif()
 
 # Headless bridge: tests, servers, troubleshooting.
 add_executable(bbbridge-cli src/main_cli.cpp)
@@ -59,8 +72,10 @@ if(MSVC)
     endforeach()
 endif()
 
-# The CLI and the unit tests land in bin\.
+# The CLI and the unit tests land in bin\ (on Windows; elsewhere they stay in the build folder).
+if(WIN32)
 foreach(target bbbridge-cli bbbridge-unit)
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${target}> ${CMAKE_SOURCE_DIR}/bin/$<TARGET_FILE_NAME:${target}>)
 endforeach()
+endif()

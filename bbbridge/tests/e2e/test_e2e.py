@@ -7,7 +7,7 @@ STUN/relay server, a shadNet client, fake port and peer UDP sockets. The
 protobuf / shadNet codecs used to read the bridge's answers are the Python
 bridge's own (proto3.py, shadnet_proto.py) - an independent implementation.
 
-    python tests/e2e/test_e2e.py [path\\to\\bbbridge-cli.exe]
+    python tests/e2e/test_e2e.py [path\\to\\bbbridge-cli.exe]   (Linux: the path to bbbridge-cli)
 """
 import hashlib
 import json
@@ -753,7 +753,8 @@ def main():
     part_b()
     part_c()
     part_d()
-    part_e()
+    if os.name == "nt":   # routing bbport for Windows (setup.cpp); on Linux the bbport launcher does it
+        part_e()
     print("\n%d passed, %d failed" % (len(PASSED), len(FAILED)))
     sys.exit(1 if FAILED else 0)
 

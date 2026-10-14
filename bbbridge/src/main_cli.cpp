@@ -1,23 +1,32 @@
 // bbbridge-cli: the bridge without a window (tests, servers, troubleshooting).
-//   bbbridge-cli.exe [--config bbbridge_config.json] [--log bbbridge.log]
+//   bbbridge-cli[.exe] [--config bbbridge_config.json] [--log bbbridge.log]
 #include <atomic>
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "account_link.hpp"
 #include "bridge.hpp"
+#ifdef _WIN32
 #include "setup.hpp"
+#else
+#include <csignal>
+#endif
 
 namespace {
 std::atomic<bool> g_quit{false};
+#ifdef _WIN32
 BOOL WINAPI on_ctrl(DWORD) {
     g_quit = true;
     return TRUE;
 }
-}  // namespace
+#else
+void on_signal(int) { g_quit = true; }
+#endif
 
-int wmain(int argc, wchar_t** argv) {
+int run(const std::vector<std::wstring>& argv) {
+    const int argc = static_cast<int>(argv.size());
     std::wstring config_path = L"bbbridge_config.json", log_path, web_code_npid;
     bool link = false;
     std::wstring route, bbport_dir;
@@ -48,7 +57,7 @@ int wmain(int argc, wchar_t** argv) {
     }
     if (!log_path.empty()) bb::set_log_file(log_path);
     bb::json j = bb::json::object();
-    std::ifstream in(config_path);
+    std::ifstream in(bb::fspath(config_path));
     if (in) {
         j = bb::json::parse(in, nullptr, false);
         if (j.is_discarded()) {
@@ -77,6 +86,10 @@ int wmain(int argc, wchar_t** argv) {
         return 0;
     }
     if (!route.empty()) {   // point bbport at the bridge (on) or back (off), as the app's checkbox
+#ifndef _WIN32
+        std::printf("failed: --route is for bbport for Windows; on Linux the bbport launcher routes the game\n");
+        return 1;
+#else
         try {
             wchar_t self[MAX_PATH];
             GetModuleFileNameW(nullptr, self, MAX_PATH);
@@ -89,6 +102,7 @@ int wmain(int argc, wchar_t** argv) {
             std::printf("failed: %s\n", e.what());
             return 1;
         }
+#endif
     }
     if (!account_op.op.empty()) {
         const std::wstring state = bb::widen(cfg.state_file);
@@ -114,9 +128,25 @@ int wmain(int argc, wchar_t** argv) {
     bb::Bridge bridge(cfg);
     std::string error;
     if (!bridge.start(&error)) return 1;
+#ifdef _WIN32
     SetConsoleCtrlHandler(on_ctrl, TRUE);
+#else
+    std::signal(SIGINT, on_signal);
+    std::signal(SIGTERM, on_signal);
+#endif
     while (!g_quit) Sleep(200);
     bb::log("stopping");
     bridge.stop();
     return 0;
 }
+}  // namespace
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) { return run(std::vector<std::wstring>(argv, argv + argc)); }
+#else
+int main(int argc, char** argv) {
+    std::vector<std::wstring> args;
+    for (int i = 0; i < argc; ++i) args.push_back(bb::widen(argv[i]));
+    return run(args);
+}
+#endif

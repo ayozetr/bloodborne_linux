@@ -8,7 +8,9 @@
 #include "bridge.hpp"
 #include "p2p.hpp"
 #include "proto3.hpp"
+#ifdef _WIN32
 #include "setup.hpp"
+#endif
 #include "shadnet.hpp"
 
 using namespace bb;
@@ -174,6 +176,7 @@ int main() {
     check("account id matches the Python bridge (tester01)", account_id_for("tester01") == 4533768973479740ull,
           std::to_string(account_id_for("tester01")));
 
+#ifdef _WIN32   // bbport for Windows' folder (setup.cpp); on Linux the launcher routes the game
     // where bbport is found: chosen > the folder bbbridge is in > the launcher's game folder
     {
         const fs::path root = fs::temp_directory_path() / L"bbbridge-unit-find";
@@ -199,6 +202,7 @@ int main() {
               find_bbport(other / L"bbbridge", {}, "", &src).empty() && src == BbportSource::None);
         fs::remove_all(root, ec);
     }
+#endif
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
