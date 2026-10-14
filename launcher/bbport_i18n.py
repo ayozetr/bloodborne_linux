@@ -587,6 +587,7 @@ EN = {
     'Рендерер и компилятор шейдеров': 'The renderer and shader recompiler',
     'Инструмент для сборки AppImage': 'The tool that builds the AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Found the bug that kept the game from starting on some graphics cards',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': "Found why the game did not start in the Steam Deck's Game Mode",
     # Shader cache
     'Кэш шейдеров': 'Shader cache',
     'Очистить': 'Clear',
@@ -1245,6 +1246,7 @@ PT_BR = {
     'Рендерер и компилятор шейдеров': 'O renderizador e o recompilador de shaders',
     'Инструмент для сборки AppImage': 'A ferramenta que gera a AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontrou o erro que impedia o jogo de iniciar em algumas placas de vídeo',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': 'Descobriu por que o jogo não iniciava no Modo de Jogo do Steam Deck',
     # Shader cache
     'Кэш шейдеров': 'Cache de shaders',
     'Очистить': 'Limpar',
@@ -1814,6 +1816,7 @@ ES = {
     'Рендерер и компилятор шейдеров': 'El renderizador y el recompilador de shaders',
     'Инструмент для сборки AppImage': 'La herramienta que crea la AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Encontró el fallo que impedía arrancar el juego en algunas gráficas',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': 'Descubrió por qué el juego no arrancaba en el modo de juego de la Steam Deck',
     # Shader cache
     'Кэш шейдеров': 'Caché de shaders',
     'Очистить': 'Borrar',
@@ -2383,6 +2386,7 @@ IT = {
     'Рендерер и компилятор шейдеров': 'Il renderer e il ricompilatore degli shader',
     'Инструмент для сборки AppImage': 'Lo strumento che crea l’AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Ha trovato il bug che impediva l’avvio del gioco su alcune schede video',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': 'Ha scoperto perché il gioco non si avviava nella modalità gioco di Steam Deck',
     # Shader cache
     'Кэш шейдеров': 'Cache degli shader',
     'Очистить': 'Svuota',
@@ -2952,6 +2956,7 @@ FR = {
     'Рендерер и компилятор шейдеров': 'Le moteur de rendu et le recompilateur de shaders',
     'Инструмент для сборки AppImage': 'L’outil qui crée l’AppImage',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'A trouvé le bug qui empêchait le jeu de démarrer sur certaines cartes graphiques',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': 'A trouvé pourquoi le jeu ne démarrait pas en mode Jeu sur le Steam Deck',
     # Shader cache
     'Кэш шейдеров': 'Cache des shaders',
     'Очистить': 'Vider',
@@ -3521,6 +3526,7 @@ DE = {
     'Рендерер и компилятор шейдеров': 'Der Renderer und der Shader-Recompiler',
     'Инструмент для сборки AppImage': 'Das Werkzeug, das das AppImage baut',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': 'Hat den Fehler gefunden, der den Spielstart auf manchen Grafikkarten verhinderte',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': 'Hat herausgefunden, warum das Spiel im Spielmodus des Steam Deck nicht startete',
     # Shader cache
     'Кэш шейдеров': 'Shader-Cache',
     'Очистить': 'Leeren',
@@ -4033,6 +4039,7 @@ ZH_CN = {
     'Рендерер и компилятор шейдеров': '渲染器与着色器重编译器',
     'Инструмент для сборки AppImage': '构建 AppImage 的工具',
     'Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах': '发现了导致游戏在部分显卡上无法启动的错误',
+    'Нашёл, почему игра не запускалась в игровом режиме Steam Deck': '找出了游戏在 Steam Deck 游戏模式下无法启动的原因',
     # Shader cache
     'Кэш шейдеров': '着色器缓存',
     'Очистить': '清除',

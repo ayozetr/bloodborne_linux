@@ -61,6 +61,18 @@ export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet.so"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
+# deadinside28#172: Steam's Game Mode runs a non-Steam game in pressure-vessel, which points
+# Vulkan at its own driver and layer manifests. They are not the user's choice: dropped (kept as
+# BB_HOST_* for the log), so sharun registers the package's Mesa and the host's NVIDIA driver as
+# anywhere else. The host's gamescope WSI layer, a host library too, is turned off with them.
+for name in VK_DRIVER_FILES VK_ICD_FILENAMES VK_ADD_DRIVER_FILES VK_IMPLICIT_LAYER_PATH \
+            VK_LAYER_PATH VK_ADD_LAYER_PATH; do
+    eval "value=\${$name-}"
+    case $value in
+    */pressure-vessel/*) export "BB_HOST_$name=$value"; unset "$name"; pressure_vessel=1 ;;
+    esac
+done
+[ -n "${pressure_vessel-}" ] && export DISABLE_GAMESCOPE_WSI=1
 exec "$APPDIR/bin/python3" "$APPDIR/share/bbport/launcher/bbport_launcher.py" "$@"
 EOF
 chmod +x "$appdir/bin/bloodborne"

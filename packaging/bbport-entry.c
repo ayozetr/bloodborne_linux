@@ -9,6 +9,7 @@
 // package; Steam's Vulkan layers (overlay, fossilize) are host libraries too.
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #ifndef TARGET
@@ -28,6 +29,26 @@ static void drop(const char* name) {
     unsetenv(name);
 }
 
+// deadinside28#172: in Steam's Game Mode a non-Steam game runs in pressure-vessel, which points
+// Vulkan at its own driver and layer manifests. They are not the user's choice, and with them the
+// package's Mesa was never registered and the window had no VK_KHR_surface. Dropped like the
+// variables above; the host's gamescope WSI layer, a host library too, is turned off with them.
+static int drop_pressure_vessel(void) {
+    static const char* const vulkan[] = {
+        "VK_DRIVER_FILES", "VK_ICD_FILENAMES", "VK_ADD_DRIVER_FILES", "VK_IMPLICIT_LAYER_PATH",
+        "VK_LAYER_PATH", "VK_ADD_LAYER_PATH",
+    };
+    int dropped = 0;
+    for (size_t i = 0; i < sizeof vulkan / sizeof vulkan[0]; ++i) {
+        const char* value = getenv(vulkan[i]);
+        if (value && strstr(value, "/pressure-vessel/")) {
+            drop(vulkan[i]);
+            dropped = 1;
+        }
+    }
+    return dropped;
+}
+
 int main(int argc, char** argv) {
     (void)argc;
     static const char* const host_only[] = {
@@ -36,6 +57,9 @@ int main(int argc, char** argv) {
     };
     for (size_t i = 0; i < sizeof host_only / sizeof host_only[0]; ++i) {
         drop(host_only[i]);
+    }
+    if (drop_pressure_vessel()) {
+        setenv("DISABLE_GAMESCOPE_WSI", "1", 1);
     }
     setenv("DISABLE_VK_LAYER_VALVE_steam_overlay_1", "1", 1);
     setenv("DISABLE_VK_LAYER_VALVE_steam_fossilize_1", "1", 1);
