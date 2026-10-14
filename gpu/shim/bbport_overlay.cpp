@@ -239,6 +239,12 @@ void Menu() {
     }
     ImGui::SetNextWindowPos(pos, ImGuiCond_Appearing);
     ImGui::SetNextWindowSize(ImVec2(620.0f * base_scale, 0.0f), ImGuiCond_Appearing);
+    // A menu taller than the screen would leave its last row (Close, Quit game) off screen: its
+    // height stays within the screen below where it opens, and the contents scroll.
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(0.0f, 0.0f),
+        ImVec2(FLT_MAX, std::max(viewport->WorkPos.y + viewport->WorkSize.y - pos.y - 20.0f * base_scale,
+                                 200.0f * base_scale)));
     bool keep_open = true;
     if (!ImGui::Begin(
             BbSettings::MenuText("Bloodborne - Graphics  (Insert / L3+R3)###bbport_settings",
@@ -622,10 +628,15 @@ void Menu() {
     }
     // Issues #74, #116: leaving the game from the pad (this menu opens with L3+R3). A second
     // press confirms; the window thread then closes like the window's own close button.
+    // One ID for both labels ("###bb_quit"): with a new ID the button lost the pad's or keyboard's
+    // focus at the first press, which disarmed it at once.
     static bool quit_armed;
     ImGui::SameLine();
-    if (ImGui::Button(quit_armed ? BbSettings::MenuText("Press again to quit", "Нажмите ещё раз для выхода")
-                                 : BbSettings::MenuText("Quit game", "Выйти из игры"))) {
+    const std::string quit_label =
+        std::string(quit_armed ? BbSettings::MenuText("Press again to quit", "Нажмите ещё раз для выхода")
+                               : BbSettings::MenuText("Quit game", "Выйти из игры")) +
+        "###bb_quit";
+    if (ImGui::Button(quit_label.c_str())) {
         if (quit_armed) {
             SDL_Event quit{};
             quit.type = SDL_EVENT_QUIT;

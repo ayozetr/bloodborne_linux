@@ -596,6 +596,7 @@ EN = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophy names in English without the key, and the sound when one is earned',
     'Вход на публичный сервер shadNet без отключения': 'Staying signed in on the public shadNet server',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitting from the menu with a controller, and the menu kept within the screen',
 }
 
 PT_BR = {
@@ -1246,6 +1247,7 @@ PT_BR = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Nomes dos troféus em inglês sem a chave e o som ao conquistar um',
     'Вход на публичный сервер shadNet без отключения': 'Continuar conectado no servidor público do shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Sair do jogo pelo menu com o controle e o menu dentro da tela',
 }
 
 
@@ -1807,6 +1809,7 @@ ES = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Los nombres de los trofeos en inglés sin la clave y el sonido al conseguir uno',
     'Вход на публичный сервер shadNet без отключения': 'Seguir conectado en el servidor público de shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Salir del juego desde el menú con el mando y el menú dentro de la pantalla',
 }
 
 
@@ -2368,6 +2371,7 @@ IT = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'I nomi dei trofei in inglese senza la chiave e il suono quando se ne ottiene uno',
     'Вход на публичный сервер shadNet без отключения': 'Restare connessi al server pubblico di shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Uscire dal gioco dal menu con il controller e il menu entro lo schermo',
 }
 
 
@@ -2929,6 +2933,7 @@ FR = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Les noms des trophées en anglais sans la clé et le son à l’obtention d’un trophée',
     'Вход на публичный сервер shadNet без отключения': 'Rester connecté au serveur public shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitter le jeu depuis le menu à la manette et le menu qui tient dans l’écran',
 }
 
 
@@ -3490,6 +3495,7 @@ DE = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophäennamen auf Englisch ohne Schlüssel und der Ton beim Erhalt einer Trophäe',
     'Вход на публичный сервер shadNet без отключения': 'Auf dem öffentlichen shadNet-Server angemeldet bleiben',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Das Spiel im Menü mit dem Controller beenden und das Menü innerhalb des Bildschirms',
 }
 
 
@@ -3994,6 +4000,7 @@ ZH_CN = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
     'Названия трофеев на английском без ключа и звук при получении трофея': '无密钥时的英文奖杯名称与获得奖杯时的音效',
     'Вход на публичный сервер shadNet без отключения': '在公共 shadNet 服务器上保持登录',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': '用手柄从菜单退出游戏，以及菜单不超出屏幕',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
