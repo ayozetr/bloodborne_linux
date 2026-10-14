@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <thread>
 
@@ -944,6 +945,11 @@ void ShadNetClient::HandleNotification(u16 cmd_raw, const std::vector<u8>& paylo
         }
         LOG_ERROR(ShadNet, "Server rejected this client (reason={}, version='{}'): {}",
                   pb.reason(), pb.version(), pb.message());
+        m_rejected = true;
+        // bbport: for the launcher, which tells the player (the game only says it is signed out).
+        std::printf("Online: the shadNet server %s does not accept this build: %s\n", m_host.c_str(),
+                    pb.message().c_str());
+        std::fflush(stdout);
         break;
     }
     default:
