@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <chrono>
+#include <atomic>
 #include <cstdio>
 #include <time.h>
 #include <sys/resource.h>
@@ -753,8 +754,19 @@ void VideoOutDriver::Flip(const Request& req) {
         presenter->WaitRendered(req.frame);
     }
 
-    // Update flip status.
     auto* port = req.port;
+    // bbport: release the buffer this flip replaced before the game can learn of the flip (flip
+    // status, flip events), not after: the game renders into that buffer next and sets its label
+    // to 1 again, which a later reset here cleared (the flip IRQ then found no label: "Out of
+    // order flip IRQ", video_out.cpp). Frames are prepared at submission (SubmitFlipInternal),
+    // so the buffer is no longer read here. From Awaken's BloodBorneButPc.
+    if (port->prev_index != -1) {
+        port->buffer_labels[port->prev_index] = 0;
+        port->SignalVoLabel();
+    }
+    port->prev_index = req.index;
+
+    // Update flip status.
     {
         std::unique_lock lock{port->port_mutex};
         auto& flip_status = port->flip_status;
@@ -780,14 +792,6 @@ void VideoOutDriver::Flip(const Request& req) {
                                         (req.flip_arg << 16)));
         }
     }
-
-    // Reset prev flip label
-    if (port->prev_index != -1) {
-        port->buffer_labels[port->prev_index] = 0;
-        port->SignalVoLabel();
-    }
-    // save to prev buf index
-    port->prev_index = req.index;
 }
 
 void VideoOutDriver::DrawBlankFrame() {
@@ -811,8 +815,18 @@ bool VideoOutDriver::SubmitFlip(VideoOutPort* port, s32 index, s64 flip_arg,
     {
         std::unique_lock lock{port->port_mutex};
         if (index != -1 && port->flip_status.flip_pending_num > 16) {
-            LOG_ERROR(Lib_VideoOut, "Flip queue is full");
-            return false;
+            // bbport: an EOP flip has nobody to return the error to: refusing it ended the game
+            // (assertion, exit 23), and dropping it would keep its buffer's label (the game may
+            // wait for it). It is queued anyway; frame preparation waits for a free frame.
+            if (!is_eop) {
+                LOG_ERROR(Lib_VideoOut, "Flip queue is full");
+                return false;
+            }
+            static std::atomic<u32> notes{0};
+            if (notes.fetch_add(1, std::memory_order_relaxed) < 4) {
+                std::printf("VideoOut: %d flips pending; EOP flip queued anyway\n",
+                            port->flip_status.flip_pending_num);
+            }
         }
 
         if (is_eop) {
