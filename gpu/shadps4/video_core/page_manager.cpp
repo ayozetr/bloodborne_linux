@@ -341,7 +341,9 @@ struct PageManager::Impl {
         } else {
             BbStats::read_faults.fetch_add(1, std::memory_order_relaxed);
             BbStats::Timer timer{BbStats::t_read_faults};
-            return rasterizer->ReadMemory(addr, 8, is_gpu_thread);
+            // bbport: within the faulting page (see Rasterizer::OnWriteFault).
+            return rasterizer->ReadMemory(addr, std::min<u64>(8, GetNextPageAddr(addr) - addr),
+                                          is_gpu_thread);
         }
         return false;
     }

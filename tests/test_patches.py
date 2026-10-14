@@ -101,9 +101,9 @@ class StreamingPatchTests(unittest.TestCase):
 
 
 class GxCommandHeapTests(unittest.TestCase):
-    def test_off_unless_asked_and_only_the_two_heap_sizes(self):
-        self.assertFalse(patches.gx_command_heap({}))
-        self.assertTrue(patches.gx_command_heap({'BB_GX_COMMAND_HEAP': '1'}))
+    def test_on_unless_turned_off_and_only_the_two_heap_sizes(self):
+        self.assertTrue(patches.gx_command_heap({}))
+        self.assertFalse(patches.gx_command_heap({'BB_GX_COMMAND_HEAP': '0'}))
         writes = compile_patches(XML, [patches.GX_COMMAND_HEAP], '01.09', SEGMENTS)
         # The imm32 of `mov $0x40000,%edx` (ba 00 00 04 00) before each heap's init call.
         self.assertEqual(writes, [(0x2195c0a, struct.pack('<I', 0x100000)),
@@ -194,6 +194,18 @@ class ExternalPatchTests(unittest.TestCase):
             config.write_text('{"enabled": ["extra.xml/Off"], "disabled": ["extra.xml/On"]}')
             writes = compile_external(external_selection(found, config), SEGMENTS)
             self.assertEqual(writes, [(0x2000, (0x12345678).to_bytes(4, 'little'))])
+
+    def test_short_version_and_copies_of_the_built_in_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            # "1.09" is "01.09"; a copy of Bloodborne.xml (any case) is the built-in one.
+            (folder / 'short.xml').write_text(EXTERNAL.replace('AppVer="01.09"', 'AppVer="1.09"'))
+            (folder / 'BLOODBORNE.xml').write_text(EXTERNAL)
+            found = external_patches(folder)
+            self.assertEqual([key for key, _, _ in found],
+                             ['short.xml/On', 'short.xml/Off', 'short.xml/Mask'])
+            self.assertFalse(patches.same_app_version('1.08', '01.09'))
+            self.assertFalse(patches.same_app_version('v1', '01.09'))
 
     def test_a_file_for_any_retail_release_applies(self):
         import game_check

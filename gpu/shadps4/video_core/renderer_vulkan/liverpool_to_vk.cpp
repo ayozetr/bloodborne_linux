@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024-2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <atomic>
 #include "common/assert.h"
 #include "common/number_utils.h"
 #include "video_core/amdgpu/pixel_format.h"
@@ -786,10 +787,30 @@ vk::Format TrySurfaceFormat(AmdGpu::DataFormat data_format, AmdGpu::NumberFormat
 
 vk::Format SurfaceFormat(AmdGpu::DataFormat data_format, AmdGpu::NumberFormat num_format) {
     vk::Format result = surface_format_table[GetSurfaceFormatTableIndex(data_format, num_format)];
-    bool found =
-        result != vk::Format::eUndefined || data_format == AmdGpu::DataFormat::FormatInvalid;
-    ASSERT_MSG(found, "Unknown data_format={} and num_format={}", static_cast<u32>(data_format),
-               static_cast<u32>(num_format));
+    if (result != vk::Format::eUndefined || data_format == AmdGpu::DataFormat::FormatInvalid)
+        [[likely]] {
+        return result;
+    }
+    // bbport: a combination the table lacks (a garbage descriptor) ended the game (assertion,
+    // exit 23). The same data format with another number format keeps the texel size; reported
+    // a few times. At worst that surface renders wrong.
+    using AmdGpu::NumberFormat;
+    for (const NumberFormat other : {NumberFormat::Unorm, NumberFormat::Uint, NumberFormat::Float,
+                                     NumberFormat::Snorm, NumberFormat::Sint}) {
+        result = surface_format_table[GetSurfaceFormatTableIndex(data_format, other)];
+        if (result != vk::Format::eUndefined) {
+            break;
+        }
+    }
+    if (result == vk::Format::eUndefined) {
+        result = vk::Format::eR8G8B8A8Unorm;
+    }
+    static std::atomic<u32> notes{0};
+    if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+        LOG_ERROR(Render_Vulkan, "Unknown data_format={} and num_format={}, using {}",
+                  static_cast<u32>(data_format), static_cast<u32>(num_format),
+                  vk::to_string(result));
+    }
     return result;
 }
 
@@ -1177,8 +1198,15 @@ vk::SampleCountFlagBits RawNumSamples(u32 num_samples) {
         return vk::SampleCountFlagBits::e8;
     case 16:
         return vk::SampleCountFlagBits::e16;
-    default:
-        UNREACHABLE();
+    default: {
+        // bbport: not a sample count (a garbage register or sharp): one sample, reported a few
+        // times; this ended the game (UNREACHABLE, exit 23).
+        static std::atomic<u32> notes{0};
+        if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+            LOG_ERROR(Render_Vulkan, "Invalid sample count {}, using 1", num_samples);
+        }
+        return vk::SampleCountFlagBits::e1;
+    }
     }
 }
 

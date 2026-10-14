@@ -601,6 +601,37 @@ struct SubmissionBatch {
 class RecordChunk {
 public:
     static constexpr size_t Capacity = 128 * 1024;
+    /// Room kept free in the chunk for the command that consumes reserved data.
+    static constexpr size_t CommandReserve = 1024;
+
+    /// Makes room for `bytes` of Allocate() data. Groups that fit stay inline (no allocation);
+    /// a group larger than an empty chunk (e.g. thousands of buffer copies or barriers) gets
+    /// one uninitialized heap block owned by this chunk, freed when the chunk is recycled, so
+    /// no span outlives the commands that read it. False: retire this chunk and retry.
+    /// From AwesomeObserver/bloodborne_pc 54bd756 (Evgeniy Doronin, GPL-2.0-or-later), via
+    /// Awaken's BloodBorneButPc; it replaces an ASSERT that ended the game with exit code 23.
+    bool ReserveData(size_t bytes) {
+        const size_t remaining = Capacity - used;
+        if (remaining < CommandReserve) {
+            return false;
+        }
+        if (spill_remaining >= bytes) {
+            return true;
+        }
+        if (bytes <= remaining - CommandReserve) {
+            spill_cursor = nullptr;
+            spill_remaining = 0;
+            return true;
+        }
+        if (bytes <= Capacity - CommandReserve) {
+            return false;
+        }
+        std::unique_ptr<std::byte[]> block{new std::byte[bytes]};
+        spill_cursor = block.get();
+        spill_remaining = bytes;
+        spill_blocks.push_back(std::move(block));
+        return true;
+    }
 
     /// Returns false (and leaves `func` untouched) when the chunk has no room.
     template <typename Func>
@@ -625,8 +656,19 @@ public:
 
     /// Raw storage in the chunk for a command's variable-length data; null when full.
     void* Allocate(size_t bytes, size_t align) {
+        if (spill_cursor) {
+            void* result = spill_cursor;
+            size_t remaining = spill_remaining;
+            if (!std::align(align, bytes, result, remaining)) {
+                return nullptr;
+            }
+            spill_used += spill_remaining - remaining + bytes;
+            spill_cursor = static_cast<std::byte*>(result) + bytes;
+            spill_remaining = remaining - bytes;
+            return result;
+        }
         const size_t offset = (used + align - 1) & ~(align - 1);
-        if (offset + bytes > Capacity) {
+        if (offset > Capacity || bytes > Capacity - offset) {
             return nullptr;
         }
         used = offset + bytes;
@@ -643,6 +685,9 @@ public:
         }
         first = last = nullptr;
         used = 0;
+        spill_cursor = nullptr;
+        spill_remaining = spill_used = 0;
+        spill_blocks.clear();
     }
 
     [[nodiscard]] bool Empty() const noexcept {
@@ -650,7 +695,7 @@ public:
     }
 
     [[nodiscard]] size_t Size() const noexcept {
-        return used;
+        return used + spill_used;
     }
 
     u32 segment = 0; ///< the command buffer segment the chunk is recorded into (Scheduler)
@@ -687,6 +732,9 @@ private:
 
     alignas(64) std::byte storage[Capacity];
     size_t used = 0;
+    std::vector<std::unique_ptr<std::byte[]>> spill_blocks; ///< oversized data (ReserveData)
+    std::byte* spill_cursor = nullptr;
+    size_t spill_remaining = 0, spill_used = 0;
     CommandBase* first{};
     CommandBase* last{};
 };
@@ -867,9 +915,11 @@ public:
         if (!IsRecordingDeferred()) {
             return;
         }
-        ASSERT(bytes + 1024 <= RecordChunk::Capacity);
-        if (RecordChunk::Capacity - CurrentChunk().Size() < bytes + 1024) {
+        // Oversized groups spill into a block owned by the chunk (AwesomeObserver 54bd756).
+        if (!CurrentChunk().ReserveData(bytes)) {
             RetireChunk();
+            const bool reserved = CurrentChunk().ReserveData(bytes);
+            ASSERT_MSG(reserved, "Cannot reserve {} bytes in an empty recording chunk", bytes);
         }
     }
 

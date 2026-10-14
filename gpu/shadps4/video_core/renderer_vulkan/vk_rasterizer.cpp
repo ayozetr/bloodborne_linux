@@ -4244,7 +4244,10 @@ void Rasterizer::OnCpuWrite(VAddr addr, u64 size) {
 
 bool Rasterizer::OnWriteFault(VAddr addr, bool assume_locks, u64 guest_rip) {
     DrainDrawPipe();
-    if (!InvalidateMemory(addr, 8, assume_locks)) {
+    // bbport: within the faulting page. 8 bytes from a write to the last bytes of a mapping
+    // reached past its end: IsMapped failed and the fault went unhandled (the game ended).
+    const u64 fault_size = std::min<u64>(8, VideoCore::PageManager::GetNextPageAddr(addr) - addr);
+    if (!InvalidateMemory(addr, fault_size, assume_locks)) {
         return false;
     }
     buffer_cache.ExtendWriteFault(addr, guest_rip);

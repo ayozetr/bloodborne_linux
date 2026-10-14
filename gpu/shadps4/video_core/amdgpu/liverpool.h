@@ -316,7 +316,8 @@ private:
         }
 
         [[nodiscard]] u32 Diff() const {
-            ASSERT_MSG(ce_count >= de_count, "DE counter is ahead of CE");
+            // bbport: compared as a signed distance, right across the u32 wrap.
+            ASSERT_MSG(static_cast<s32>(ce_count - de_count) >= 0, "DE counter is ahead of CE");
             return ce_count - de_count;
         }
 

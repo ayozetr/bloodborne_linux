@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
 #include <limits>
 #include "common/assert.h"
@@ -10,9 +11,21 @@
 #include "imgui/renderer/imgui_core.h"
 #include "sdl_window.h"
 #include "video_core/renderer_vulkan/vk_instance.h"
+#include "video_core/renderer_vulkan/vk_platform.h"
+#include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_swapchain.h"
 
 namespace Vulkan {
+
+/// bbport (from Awaken's BloodBorneButPc): display events (a lost surface, a failed swapchain)
+/// are reported a few times and the presenter skips frames until a new swapchain works; they
+/// ended the game (exit 23).
+static void NoteDisplayEvent(const char* what, vk::Result result) {
+    static std::atomic<u32> notes{0};
+    if (notes.fetch_add(1, std::memory_order_relaxed) < 16) {
+        std::printf("Display: %s: %s\n", what, vk::to_string(result).c_str());
+    }
+}
 
 static constexpr vk::SurfaceFormatKHR SURFACE_FORMAT_HDR = {
     .format = vk::Format::eA2B10G10R10UnormPack32,
@@ -38,9 +51,18 @@ void Swapchain::Create(u32 width_, u32 height_) {
     height = height_;
     needs_recreation = false;
 
+    // bbport: a lost surface (VK_ERROR_SURFACE_LOST_KHR: a display or driver reset) is made again
+    // on the same window before a swapchain can be created on it.
+    if (surface_lost) {
+        RecreateSurface();
+    }
+
     // bbport: a minimised window has a 0x0 surface (issue #31); no swapchain can have that extent.
     // The old one stays (presents are skipped) until the window is back.
-    SetSurfaceProperties();
+    if (!SetSurfaceProperties()) {
+        needs_recreation = true;
+        return;
+    }
     if (extent.width == 0 || extent.height == 0) {
         zero_extent = true;
         needs_recreation = true;
@@ -85,15 +107,24 @@ void Swapchain::Create(u32 width_, u32 height_) {
     };
 
     auto [swapchain_result, chain] = instance.GetDevice().createSwapchainKHR(swapchain_info);
-    ASSERT_MSG(swapchain_result == vk::Result::eSuccess, "Failed to create swapchain: {}",
-               vk::to_string(swapchain_result));
-    swapchain = chain;
+    // The old swapchain is retired by the call even when it fails.
     if (old_swapchain) {
         instance.GetDevice().destroySwapchainKHR(old_swapchain);
     }
+    if (swapchain_result != vk::Result::eSuccess) {
+        // bbport: no swapchain now (IsPresentable is false): presents are skipped and the next
+        // one tries again (this was an assertion, exit 23).
+        NoteDisplayEvent("creating the swapchain failed", swapchain_result);
+        surface_lost = swapchain_result == vk::Result::eErrorSurfaceLostKHR;
+        needs_recreation = true;
+        return;
+    }
+    swapchain = chain;
 
     SetupImages();
     RefreshSemaphores();
+    // The new chain may have fewer images (AwesomeObserver b3164c1): start the indices over.
+    frame_index = image_index = 0;
 }
 
 void Swapchain::Recreate(u32 width_, u32 height_) {
@@ -107,11 +138,7 @@ void Swapchain::SetHDR(bool hdr) {
         return;
     }
 
-    auto result = instance.GetDevice().waitIdle();
-    if (result != vk::Result::eSuccess) {
-        LOG_WARNING(ImGui, "Failed to wait for Vulkan device idle on mode change: {}",
-                    vk::to_string(result));
-    }
+    WaitIdle();
 
     needs_hdr = hdr;
     Recreate(width, height);
@@ -120,6 +147,10 @@ void Swapchain::SetHDR(bool hdr) {
 }
 
 bool Swapchain::AcquireNextImage() {
+    if (!swapchain) {
+        needs_recreation = true; // the last Create failed
+        return false;
+    }
     vk::Device device = instance.GetDevice();
     // bbport: in 10 s slices, saying so once when the compositor holds every image that long
     // (issue #5: a frozen game with nothing in the log).
@@ -145,15 +176,25 @@ bool Swapchain::AcquireNextImage() {
     case vk::Result::eSuccess:
         break;
     case vk::Result::eSuboptimalKHR:
+        // A suboptimal acquire still owns an image and signals the semaphore: present it in the
+        // normal submission, then recreate (Present() returns false). Dropping it left the
+        // semaphore signalled and never waited on. From AwesomeObserver b3164c1 (E. Doronin).
+        needs_recreation = true;
+        return true;
     case vk::Result::eErrorSurfaceLostKHR:
+        NoteDisplayEvent("acquiring a swapchain image", result);
+        surface_lost = true;
+        needs_recreation = true;
+        break;
     case vk::Result::eErrorOutOfDateKHR:
     case vk::Result::eErrorUnknown:
         needs_recreation = true;
         break;
     default:
-        LOG_CRITICAL(Render_Vulkan, "Swapchain acquire returned unknown result {}",
-                     vk::to_string(result));
-        UNREACHABLE();
+        // bbport: e.g. a lost exclusive fullscreen: recreated like out-of-date (this was
+        // UNREACHABLE, exit 23).
+        NoteDisplayEvent("acquiring a swapchain image", result);
+        needs_recreation = true;
         break;
     }
 
@@ -171,6 +212,12 @@ bool Swapchain::Present() {
 
     auto result = instance.GetPresentQueue().presentKHR(present_info);
     if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR) {
+        needs_recreation = true;
+    } else if (result != vk::Result::eSuccess && result != vk::Result::eErrorDeviceLost) {
+        // bbport: a lost surface (display or driver reset) or another display event: recreated
+        // like out-of-date (this was an assertion, exit 23). A lost device still stops below.
+        NoteDisplayEvent("presenting", result);
+        surface_lost = result == vk::Result::eErrorSurfaceLostKHR;
         needs_recreation = true;
     } else {
         ASSERT_MSG(result == vk::Result::eSuccess, "Swapchain presentation failed: {}",
@@ -253,11 +300,15 @@ void Swapchain::FindPresentMode() {
     }
 }
 
-void Swapchain::SetSurfaceProperties() {
+bool Swapchain::SetSurfaceProperties() {
     const auto [capabilities_result, capabilities] =
         instance.GetPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
-    ASSERT_MSG(capabilities_result == vk::Result::eSuccess,
-               "Failed to query surface capabilities: {}", vk::to_string(capabilities_result));
+    if (capabilities_result != vk::Result::eSuccess) {
+        // bbport: e.g. a lost surface: no swapchain until it is back (this was an assertion).
+        NoteDisplayEvent("querying the surface", capabilities_result);
+        surface_lost = capabilities_result == vk::Result::eErrorSurfaceLostKHR;
+        return false;
+    }
 
     extent = capabilities.currentExtent;
     if (capabilities.currentExtent.width == std::numeric_limits<u32>::max()) {
@@ -284,23 +335,41 @@ void Swapchain::SetSurfaceProperties() {
     if (!(capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eOpaque)) {
         composite_alpha = vk::CompositeAlphaFlagBitsKHR::eInherit;
     }
+    return true;
 }
 
-void Swapchain::Destroy() {
-    vk::Device device = instance.GetDevice();
-    const auto wait_result = device.waitIdle();
+void Swapchain::WaitIdle() {
+    // bbport: vkDeviceWaitIdle needs every queue of the device externally synchronized: the
+    // recording threads submit to the same queue under this lock (Scheduler::submit_mutex).
+    std::scoped_lock submit_lock{Scheduler::submit_mutex};
+    const auto wait_result = instance.GetDevice().waitIdle();
     if (wait_result != vk::Result::eSuccess) {
         LOG_WARNING(Render_Vulkan, "Failed to wait for device to become idle: {}",
                     vk::to_string(wait_result));
     }
+}
+
+void Swapchain::RecreateSurface() {
+    Destroy(); // a swapchain goes before its surface
+    instance.GetInstance().destroySurfaceKHR(surface);
+    surface = CreateSurface(instance.GetInstance(), window);
+    surface_lost = false;
+    std::printf("Display: the window's surface was lost; created again\n");
+}
+
+void Swapchain::Destroy() {
+    vk::Device device = instance.GetDevice();
+    WaitIdle();
 
     for (auto& image_view : images_view) {
         device.destroyImageView(image_view);
     }
     images_view.clear();
+    images.clear();
 
     if (swapchain) {
         device.destroySwapchainKHR(swapchain);
+        swapchain = nullptr; // bbport: a failed Create leaves none (IsPresentable)
     }
 
     for (const auto& sem : image_acquired) {

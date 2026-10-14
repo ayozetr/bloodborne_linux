@@ -752,11 +752,14 @@ void Presenter::Present(Frame* frame, bool is_reusing_frame, bool is_game_frame)
     scheduler.Flush(info);
 
     // Present to swapchain.
+    // bbport: Recreate outside the lock: it waits for the device under it (Swapchain::WaitIdle).
+    bool presented;
     {
         std::scoped_lock submit_lock{Scheduler::submit_mutex};
-        if (!swapchain.Present()) {
-            swapchain.Recreate(window.GetWidth(), window.GetHeight());
-        }
+        presented = swapchain.Present();
+    }
+    if (!presented) {
+        swapchain.Recreate(window.GetWidth(), window.GetHeight());
     }
 
     free_frame();

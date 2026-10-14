@@ -314,9 +314,12 @@ static void run_job(Context *ctx, uint32_t id, Job *job) {
     const unsigned char *input=NULL;
     if (job->input_count==1) input=job->inputs[0].address;
     else if (job->input_count>1) {
-        joined=malloc(in_size ? in_size : 1);
-        uint64_t at=0;
-        for (int i=0;i<job->input_count;++i) { memcpy(joined+at,job->inputs[i].address,job->inputs[i].size); at+=job->inputs[i].size; }
+        /* The sizes come from the game: a bad job must not take the engine down. */
+        joined=in_size<=(UINT64_C(64)<<20) ? malloc(in_size ? in_size : 1) : NULL;
+        if (joined) {
+            uint64_t at=0;
+            for (int i=0;i<job->input_count;++i) { memcpy(joined+at,job->inputs[i].address,job->inputs[i].size); at+=job->inputs[i].size; }
+        } else { in_size=0; flags_result|=RESULT_INVALID_PARAMETER; }
         input=joined;
     }
     Output out={job->outputs,job->output_count,0,0};
