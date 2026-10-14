@@ -125,5 +125,28 @@ int main(void) {
     assert(!mouse_key_down(MOUSE_WHEEL_DOWN));
     mouse_wheel_step(1140000,0,0);
     assert(mouse_key_down(MOUSE_WHEEL_DOWN) && wheel_pending[1]==0);
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse");
+    /* Keyboard movement: opposite keys, the last pressed wins (or cancel out with
+     * stick_socd=neutral); a diagonal stays within a round gate (unless stick_circular=0). */
+    {
+        bool keys[SDL_SCANCODE_COUNT]={0};
+        const int a_key=bindings[IN_MOVE_LEFT].keys[0], d_key=bindings[IN_MOVE_RIGHT].keys[0];
+        const int w_key=bindings[IN_MOVE_UP].keys[0];
+        PadData m={0};
+        m.left_x=m.left_y=128;
+        keys[a_key]=1; apply_keyboard(&m,keys); assert(m.left_x==0);
+        keys[d_key]=1; apply_keyboard(&m,keys); assert(m.left_x==255); /* D pressed last */
+        keys[a_key]=0; apply_keyboard(&m,keys); assert(m.left_x==255);
+        keys[a_key]=1; apply_keyboard(&m,keys); assert(m.left_x==0);   /* now A is the last */
+        keys[a_key]=keys[d_key]=0;
+        stick_socd_last=0;
+        keys[a_key]=1; apply_keyboard(&m,keys);
+        keys[d_key]=1; apply_keyboard(&m,keys); assert(m.left_x==128);
+        stick_socd_last=1; keys[a_key]=keys[d_key]=0;
+        keys[w_key]=keys[a_key]=1; apply_keyboard(&m,keys);
+        assert(m.left_x==128-90 && m.left_y==128-90);
+        stick_circular=0; apply_keyboard(&m,keys);
+        assert(m.left_x==0 && m.left_y==0);
+        stick_circular=1; keys[w_key]=keys[a_key]=0;
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement");
 }

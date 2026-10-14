@@ -366,10 +366,15 @@ static int key_from_name(const char *name) {
  * ~1000 pixels/s turn the camera at full speed), mouse_invert_y=1. */
 static int mouse_look=1, mouse_invert_y;
 static float mouse_sensitivity=1.0f;
+/* Keyboard movement (bbport.ini): stick_socd=neutral makes opposite keys held together cancel out
+ * (default: the one pressed last wins); stick_circular=0 leaves a diagonal of the movement keys at
+ * the corner of the square (default: within a round gate, as a thumbstick). */
+static int stick_socd_last=1, stick_circular=1;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f;
+    stick_socd_last=1; stick_circular=1;
     const char *path=getenv("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -381,6 +386,8 @@ static void load_bindings(void) {
             const char *value=eq+1;
             if (!strncmp(line,"mouse_look=",11)) mouse_look=atoi(value)!=0;
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
+            else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
+            else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -451,9 +458,23 @@ static int pad_value(SDL_Gamepad *g, int input) {
     return value;
 }
 
-/* key held for the negative / positive direction: the stick all the way, else the gamepad's. */
-static uint8_t key_axis(uint8_t value, int negative, int positive) {
-    return negative || positive ? (uint8_t)(128-(negative ? 128 : 0)+(positive ? 127 : 0)) : value;
+/* The direction of one stick axis from its two keys: -1, 0 or 1. Opposite keys held together
+ * gave the centre, so switching A <-> D (both down for a moment) let go of the stick and ended a
+ * sprint; now the one pressed last wins, unless stick_socd=neutral. From João Pedro Valadares's
+ * keyboard movement in Supermedo/bloodborne_pc. */
+static int key_direction(int axis, int negative, int positive) {
+    static int was_negative[4], was_positive[4], last[4];
+    if (negative && !was_negative[axis]) last[axis]=-1;
+    if (positive && !was_positive[axis]) last[axis]=1;
+    was_negative[axis]=negative; was_positive[axis]=positive;
+    if (negative && positive) return stick_socd_last ? last[axis] : 0;
+    return positive-negative;
+}
+/* keys held for the axis: the stick all the way that way (offset from 128 by `reach`), else the
+ * gamepad's value. */
+static uint8_t key_axis(uint8_t value, int held, int direction, int reach) {
+    if (!held) return value;
+    return (uint8_t)(direction<0 ? 128-reach : direction>0 ? 128+(reach>127 ? 127 : reach) : 128);
 }
 static void apply_keyboard(PadData *d, const bool *k) {
     for (int i=IN_CROSS;i<=IN_RIGHT;++i)
@@ -462,10 +483,18 @@ static void apply_keyboard(PadData *d, const bool *k) {
     if (key_down(k,IN_TOUCHPAD_RIGHT)) touch_click(d,1);
     if (key_down(k,IN_L2)) d->l2=255;
     if (key_down(k,IN_R2)) d->r2=255;
-    d->left_x=key_axis(d->left_x,key_down(k,IN_MOVE_LEFT),key_down(k,IN_MOVE_RIGHT));
-    d->left_y=key_axis(d->left_y,key_down(k,IN_MOVE_UP),key_down(k,IN_MOVE_DOWN));
-    d->right_x=key_axis(d->right_x,key_down(k,IN_LOOK_LEFT),key_down(k,IN_LOOK_RIGHT));
-    d->right_y=key_axis(d->right_y,key_down(k,IN_LOOK_UP),key_down(k,IN_LOOK_DOWN));
+    const int left=key_down(k,IN_MOVE_LEFT), right=key_down(k,IN_MOVE_RIGHT);
+    const int up=key_down(k,IN_MOVE_UP), down=key_down(k,IN_MOVE_DOWN);
+    const int move_x=key_direction(0,left,right), move_y=key_direction(1,up,down);
+    /* W+A gave the square's corner, ~1.41x a thumbstick's reach: a diagonal is full deflection
+     * within a round gate instead, as on a controller (127 / sqrt 2 on each axis). */
+    const int reach=stick_circular && move_x && move_y ? 90 : 128;
+    d->left_x=key_axis(d->left_x,left||right,move_x,reach);
+    d->left_y=key_axis(d->left_y,up||down,move_y,reach);
+    const int look_left=key_down(k,IN_LOOK_LEFT), look_right=key_down(k,IN_LOOK_RIGHT);
+    const int look_up=key_down(k,IN_LOOK_UP), look_down=key_down(k,IN_LOOK_DOWN);
+    d->right_x=key_axis(d->right_x,look_left||look_right,key_direction(2,look_left,look_right),128);
+    d->right_y=key_axis(d->right_y,look_up||look_down,key_direction(3,look_up,look_down),128);
 }
 
 /* Mouse look: the game turns its camera at a rate set by the right stick, so the stick follows
