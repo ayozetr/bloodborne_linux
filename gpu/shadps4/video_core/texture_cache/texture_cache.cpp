@@ -1036,6 +1036,8 @@ void TextureCache::RegisterImage(ImageId image_id) {
     image.flags |= ImageFlagBits::Registered;
     ++registry_generation;
     total_used_memory += Common::AlignUp(image.info.guest_size, 1024);
+    ++image_count;
+    image_bytes += image.info.guest_size;
     BbStats::live_image_bytes.fetch_add(Common::AlignUp(image.info.guest_size, 1024),
                                         std::memory_order_relaxed);
     BbStats::live_images.fetch_add(1, std::memory_order_relaxed);
@@ -1053,6 +1055,8 @@ void TextureCache::UnregisterImage(ImageId image_id) {
     ++registry_generation;
     lru_cache.Free(image.lru_id);
     total_used_memory -= Common::AlignUp(image.info.guest_size, 1024);
+    --image_count;
+    image_bytes -= image.info.guest_size;
     BbStats::live_image_bytes.fetch_sub(Common::AlignUp(image.info.guest_size, 1024),
                                         std::memory_order_relaxed);
     BbStats::live_images.fetch_sub(1, std::memory_order_relaxed);
@@ -1180,6 +1184,56 @@ void TextureCache::UntrackImageTail(ImageId image_id) {
     tracker.UpdatePageWatchers<false>(addr, size);
 }
 
+// bbport: once a minute, what the game holds: VRAM, the texture cache, the old GPU-written tiled
+// images the collector cannot free, and the process's memory (resident, and of it anonymous: the
+// game's own allocations). A log ending in a crash after hours of play then shows what was
+// growing. After Supermedo/bloodborne_pc 5dc1f11; on Linux from /proc/self/status (statm's first
+// field is the address space, huge with the game's reservations).
+void TextureCache::ReportMemory() {
+    const auto now = std::chrono::steady_clock::now();
+    if (now - memory_report_time < std::chrono::seconds(60)) {
+        return;
+    }
+    const bool first = memory_report_time == std::chrono::steady_clock::time_point{};
+    memory_report_time = now;
+    if (first) {
+        return; // a minute after the first submission, not at once
+    }
+    // Unused for a minute: the tick at the start of the second a minute ago.
+    const u64 minute_tick = gc_tick_at_second[(gc_second - 60) % gc_tick_at_second.size()];
+    u64 idle = 0, idle_bytes = 0, kept = 0, kept_bytes = 0;
+    {
+        std::scoped_lock lock{mutex};
+        lru_cache.ForEachItemBelow(minute_tick, [&](ImageId image_id) {
+            const auto& image = slot_images[image_id];
+            ++idle;
+            idle_bytes += image.info.guest_size;
+            if (image.info.IsTiled() && image.SafeToDownload()) {
+                ++kept;
+                kept_bytes += image.info.guest_size;
+            }
+        });
+    }
+    unsigned long long resident_kb = 0, anonymous_kb = 0;
+    if (std::FILE* status = std::fopen("/proc/self/status", "r")) {
+        char line[128];
+        while (std::fgets(line, sizeof(line), status)) {
+            std::sscanf(line, "VmRSS: %llu", &resident_kb);
+            std::sscanf(line, "RssAnon: %llu", &anonymous_kb);
+        }
+        std::fclose(status);
+    }
+    const u64 vram = instance.CanReportMemoryUsage() ? instance.GetDeviceMemoryUsage() : 0;
+    std::printf("Memory: VRAM %llu MiB; textures %llu (%llu MiB), unused for a minute %llu "
+                "(%llu MiB), of them GPU-written tiled %llu (%llu MiB); process %llu MiB in RAM, "
+                "%llu MiB of it anonymous\n",
+                (unsigned long long)(vram >> 20), (unsigned long long)image_count,
+                (unsigned long long)(image_bytes >> 20), (unsigned long long)idle,
+                (unsigned long long)(idle_bytes >> 20), (unsigned long long)kept,
+                (unsigned long long)(kept_bytes >> 20), resident_kb >> 10, anonymous_kb >> 10);
+    std::fflush(stdout);
+}
+
 void TextureCache::GarbageCollectImages() {
     if (instance.CanReportMemoryUsage()) {
         total_used_memory = instance.GetDeviceMemoryUsage();
@@ -1227,6 +1281,7 @@ void TextureCache::GarbageCollectImages() {
         BbStats::coarse_second.store(u32(second), std::memory_order_relaxed);
         gc_tick_at_second[second % gc_tick_at_second.size()] = gc_tick;
     }
+    ReportMemory();
     if (BbToggle::Disabled(BbToggle::TextureCollector)) {
         return;
     }
