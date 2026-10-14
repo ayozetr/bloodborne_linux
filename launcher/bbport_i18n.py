@@ -596,6 +596,12 @@ EN = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'The game builds the shaders again: some stutter in each area for the first minutes. Saves and settings are not touched.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophy names in English without the key, and the sound when one is earned',
     'Буфер трафарета, в который писали цветные изображения': 'The stencil buffer that colour images were writing into',
+    'Вход на публичный сервер shadNet без отключения': 'Staying signed in on the public shadNet server',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitting from the menu with a controller, and the menu kept within the screen',
+    'Вылет видеоплеера при его остановке': 'A video player crash when it stops',
+    'Язык внутриигрового меню при запуске без окна лаунчера': "The in-game menu's language when starting without the launcher window",
+    'DLSS в AppImage на NVIDIA': 'DLSS in the AppImage on NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Ultrawide monitors without a stretched picture',
 }
 
 PT_BR = {
@@ -1246,6 +1252,12 @@ PT_BR = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'O jogo gera os shaders de novo: pode haver travadas nos primeiros minutos de cada área. Saves e configurações não são afetados.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Nomes dos troféus em inglês sem a chave e o som ao conquistar um',
     'Буфер трафарета, в который писали цветные изображения': 'O buffer de estêncil em que imagens de cor escreviam',
+    'Вход на публичный сервер shadNet без отключения': 'Continuar conectado no servidor público do shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Sair do jogo pelo menu com o controle e o menu dentro da tela',
+    'Вылет видеоплеера при его остановке': 'Um travamento do reprodutor de vídeo ao parar',
+    'Язык внутриигрового меню при запуске без окна лаунчера': 'O idioma do menu do jogo ao iniciar sem a janela do launcher',
+    'DLSS в AppImage на NVIDIA': 'DLSS no AppImage em NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrawide sem imagem esticada',
 }
 
 
@@ -1807,6 +1819,12 @@ ES = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'El juego volverá a generar los shaders: puede haber tirones los primeros minutos en cada zona. Las partidas y los ajustes no se tocan.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Los nombres de los trofeos en inglés sin la clave y el sonido al conseguir uno',
     'Буфер трафарета, в который писали цветные изображения': 'El búfer de estarcido en el que escribían imágenes de color',
+    'Вход на публичный сервер shadNet без отключения': 'Seguir conectado en el servidor público de shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Salir del juego desde el menú con el mando y el menú dentro de la pantalla',
+    'Вылет видеоплеера при его остановке': 'Un cierre del reproductor de vídeo al detenerse',
+    'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',
+    'DLSS в AppImage на NVIDIA': 'DLSS en la AppImage con NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrapanorámicos sin la imagen estirada',
 }
 
 
@@ -2368,6 +2386,12 @@ IT = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Il gioco ricrea gli shader: possibili scatti nei primi minuti di ogni area. Salvataggi e impostazioni non vengono toccati.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'I nomi dei trofei in inglese senza la chiave e il suono quando se ne ottiene uno',
     'Буфер трафарета, в который писали цветные изображения': 'Lo stencil buffer in cui scrivevano immagini a colori',
+    'Вход на публичный сервер shadNet без отключения': 'Restare connessi al server pubblico di shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Uscire dal gioco dal menu con il controller e il menu entro lo schermo',
+    'Вылет видеоплеера при его остановке': 'Un crash del lettore video quando si ferma',
+    'Язык внутриигрового меню при запуске без окна лаунчера': 'La lingua del menu di gioco avviando senza la finestra del launcher',
+    'DLSS в AppImage на NVIDIA': "DLSS nell'AppImage su NVIDIA",
+    'Сверхширокие мониторы без растянутой картинки': 'Monitor ultrawide senza immagine stirata',
 }
 
 
@@ -2929,6 +2953,12 @@ FR = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Le jeu reconstruit les shaders : quelques saccades les premières minutes dans chaque zone. Les sauvegardes et les réglages ne sont pas touchés.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Les noms des trophées en anglais sans la clé et le son à l’obtention d’un trophée',
     'Буфер трафарета, в который писали цветные изображения': 'Le tampon de stencil dans lequel écrivaient des images couleur',
+    'Вход на публичный сервер shadNet без отключения': 'Rester connecté au serveur public shadNet',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitter le jeu depuis le menu à la manette et le menu qui tient dans l’écran',
+    'Вылет видеоплеера при его остановке': 'Un plantage du lecteur vidéo à son arrêt',
+    'Язык внутриигрового меню при запуске без окна лаунчера': 'La langue du menu en jeu au lancement sans la fenêtre du launcher',
+    'DLSS в AppImage на NVIDIA': 'DLSS dans l’AppImage sur NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Les écrans ultra-larges sans image étirée',
 }
 
 
@@ -3490,6 +3520,12 @@ DE = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': 'Das Spiel erstellt die Shader neu: In den ersten Minuten jedes Gebiets kann es ruckeln. Spielstände und Einstellungen bleiben unberührt.',
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophäennamen auf Englisch ohne Schlüssel und der Ton beim Erhalt einer Trophäe',
     'Буфер трафарета, в который писали цветные изображения': 'Der Stencil-Puffer, in den Farbbilder schrieben',
+    'Вход на публичный сервер shadNet без отключения': 'Auf dem öffentlichen shadNet-Server angemeldet bleiben',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': 'Das Spiel im Menü mit dem Controller beenden und das Menü innerhalb des Bildschirms',
+    'Вылет видеоплеера при его остановке': 'Ein Absturz des Videoplayers beim Anhalten',
+    'Язык внутриигрового меню при запуске без окна лаунчера': 'Die Sprache des Spielmenüs beim Start ohne Launcher-Fenster',
+    'DLSS в AppImage на NVIDIA': 'DLSS im AppImage auf NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Ultrawide-Monitore ohne gestrecktes Bild',
 }
 
 
@@ -3994,6 +4030,12 @@ ZH_CN = {
     'Игра соберёт шейдеры заново: первые минуты в каждой зоне возможны рывки. Сохранения и настройки не затрагиваются.': '游戏会重新生成着色器：每个区域的前几分钟可能卡顿。存档和设置不受影响。',
     'Названия трофеев на английском без ключа и звук при получении трофея': '无密钥时的英文奖杯名称与获得奖杯时的音效',
     'Буфер трафарета, в который писали цветные изображения': '被颜色图像写入的模板缓冲区',
+    'Вход на публичный сервер shadNet без отключения': '在公共 shadNet 服务器上保持登录',
+    'Выход из игры из меню с контроллера и меню в пределах экрана': '用手柄从菜单退出游戏，以及菜单不超出屏幕',
+    'Вылет видеоплеера при его остановке': '视频播放器停止时的崩溃',
+    'Язык внутриигрового меню при запуске без окна лаунчера': '不经启动器窗口启动时游戏内菜单的语言',
+    'DLSS в AppImage на NVIDIA': 'NVIDIA 上 AppImage 中的 DLSS',
+    'Сверхширокие мониторы без растянутой картинки': '超宽屏显示器画面不再被拉伸',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

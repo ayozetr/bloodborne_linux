@@ -239,6 +239,12 @@ void Menu() {
     }
     ImGui::SetNextWindowPos(pos, ImGuiCond_Appearing);
     ImGui::SetNextWindowSize(ImVec2(620.0f * base_scale, 0.0f), ImGuiCond_Appearing);
+    // A menu taller than the screen would leave its last row (Close, Quit game) off screen: its
+    // height stays within the screen below where it opens, and the contents scroll.
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(0.0f, 0.0f),
+        ImVec2(FLT_MAX, std::max(viewport->WorkPos.y + viewport->WorkSize.y - pos.y - 20.0f * base_scale,
+                                 200.0f * base_scale)));
     bool keep_open = true;
     if (!ImGui::Begin(
             BbSettings::MenuText("Bloodborne - Graphics  (Insert / L3+R3)###bbport_settings",
@@ -263,6 +269,7 @@ void Menu() {
     if (ImGui::Combo("Language", &language, BbSettings::MenuLanguageNames,
                      int(BbSettings::MenuLanguage::Count))) {
         s.menu_language = BbSettings::MenuLanguage(language);
+        s.menu_language_chosen = true;
         BbSettings::Save();
     }
     ImGui::Text(BbSettings::MenuText("%.0f FPS  (%.1f ms)", "%.0f FPS  (%.1f мс)"),
@@ -371,13 +378,14 @@ void Menu() {
         for (int i = 0; i < BbSettings::PresetCount; ++i) {
             char label[64];
             const float scale = BbSettings::PresetScale(i);
-            const int output = s.output_res;
+            int output_width = BbSettings::OutputWidths[s.output_res];
+            int output_height = BbSettings::OutputHeights[s.output_res];
+            BbSettings::CustomOutput(output_width, output_height);
             std::snprintf(
                 label, sizeof(label),
                 BbSettings::MenuText("%s (x%.1f, render %dx%d)", "%s (x%.1f, рендер %dx%d)"),
-                BbSettings::PresetName(i), scale,
-                int(std::lround(BbSettings::OutputWidths[output] / scale / 2) * 2),
-                int(std::lround(BbSettings::OutputHeights[output] / scale / 2) * 2));
+                BbSettings::PresetName(i), scale, int(std::lround(output_width / scale / 2) * 2),
+                int(std::lround(output_height / scale / 2) * 2));
             if (ImGui::Selectable(label, i == preset)) {
                 Store(s.preset, i, true);
             }
@@ -500,10 +508,19 @@ void Menu() {
     ImGui::SeparatorText(BbSettings::MenuText("Output resolution", "Разрешение вывода"));
     static const char* outputs[] = {"1280 x 720", "1920 x 1080", "2560 x 1440", "3840 x 2160"};
     int output = s.output_res;
+    // A size from bbport.ini that the list does not have stays until another one is chosen.
+    int custom_width = 0, custom_height = 0;
+    const bool custom = BbSettings::CustomOutput(custom_width, custom_height);
+    char custom_label[32];
+    std::snprintf(custom_label, sizeof(custom_label), "%d x %d", custom_width, custom_height);
     if (ImGui::BeginCombo(BbSettings::MenuText("Output resolution", "Разрешение вывода"),
-                          outputs[output])) {
+                          custom ? custom_label : outputs[output])) {
+        if (custom) {
+            ImGui::Selectable(custom_label, true);
+        }
         for (int i = 0; i < BbSettings::OutputCount; ++i) {
-            if (ImGui::Selectable(outputs[i], i == output)) {
+            if (ImGui::Selectable(outputs[i], !custom && i == output)) {
+                s.custom_output_width = 0; // a listed size replaces the one from bbport.ini
                 Store(s.output_res, i, true);
             }
         }
@@ -622,10 +639,15 @@ void Menu() {
     }
     // Issues #74, #116: leaving the game from the pad (this menu opens with L3+R3). A second
     // press confirms; the window thread then closes like the window's own close button.
+    // One ID for both labels ("###bb_quit"): with a new ID the button lost the pad's or keyboard's
+    // focus at the first press, which disarmed it at once.
     static bool quit_armed;
     ImGui::SameLine();
-    if (ImGui::Button(quit_armed ? BbSettings::MenuText("Press again to quit", "Нажмите ещё раз для выхода")
-                                 : BbSettings::MenuText("Quit game", "Выйти из игры"))) {
+    const std::string quit_label =
+        std::string(quit_armed ? BbSettings::MenuText("Press again to quit", "Нажмите ещё раз для выхода")
+                               : BbSettings::MenuText("Quit game", "Выйти из игры")) +
+        "###bb_quit";
+    if (ImGui::Button(quit_label.c_str())) {
         if (quit_armed) {
             SDL_Event quit{};
             quit.type = SDL_EVENT_QUIT;

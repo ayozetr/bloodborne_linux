@@ -7,6 +7,7 @@ image places eboot vaddr 0 at image offset 0. Only literal writes are supported
 import argparse
 import json
 import os
+import re
 import struct
 import sys
 import xml.etree.ElementTree as ET
@@ -170,6 +171,14 @@ SCENE_WIDTH=0x02196A6B-EBOOT_BASE
 SCENE_HEIGHT=0x02196A7A-EBOOT_BASE
 UI_WIDTH=0x02358554-EBOOT_BASE
 UI_HEIGHT=0x0235855D-EBOOT_BASE
+# Outputs wider than 16:9: the community resolution patch for that size (Kyo's "Resolution Patch
+# WxH (21:9)" etc. in patches/Bloodborne.xml) also widens the game's logical screen -- the
+# projection aspect, the 2D layout width and the lock-on/HP-bar coordinates -- so the view
+# gets wider instead of stretched. bbport keeps its own scene/UI sizes (resolution_writes) and
+# heap patch, so only that patch's remaining writes are applied. bbport.ini aspect_patch=0
+# turns this off.
+HEAP_SITES={0x04B36DDA-EBOOT_BASE,0x04B36DE2-EBOOT_BASE}
+RESOLUTION_PATCH=re.compile(r'Resolution Patch (\d+)x(\d+) \(')
 
 
 def read_settings(path):
@@ -240,6 +249,33 @@ def resolution_writes(xml,size,app_version,segments,ui=OUTPUT_SIZE):
     if seen!=replacements.keys():
         raise ValueError('resolution patch is missing scene/UI viewport instructions')
     return out
+
+
+def aspect_patch_name(xml,app_version,output):
+    """The community resolution patch for an output wider than 16:9: the one for this exact
+    size, else the closest-width one of the same aspect ratio. None for 16:9 and narrower
+    outputs, and for an aspect ratio no patch covers (that output is still stretched)."""
+    w,h=output
+    if w*9<=h*16: return None
+    same_aspect=[]
+    for meta in ET.parse(xml).getroot().iter('Metadata'):
+        m=RESOLUTION_PATCH.match(meta.get('Name',''))
+        if not m or meta.get('AppVer')!=app_version: continue
+        pw,ph=int(m[1]),int(m[2])
+        if pw*9<=ph*16: continue
+        if (pw,ph)==(w,h): return meta.get('Name')
+        if abs(pw/ph-w/h)<0.005: same_aspect.append((abs(pw-w),meta.get('Name')))
+    return min(same_aspect)[1] if same_aspect else None
+
+
+def aspect_writes(xml,output,app_version,segments):
+    """(patch name, writes) widening the game's view to the output's aspect, or (None, [])."""
+    name=aspect_patch_name(xml,app_version,output)
+    if not name: return None,[]
+    template=dict(compile_patches(xml,[RESOLUTION_TEMPLATE],app_version,segments))
+    skip={SCENE_WIDTH,SCENE_HEIGHT,UI_WIDTH,UI_HEIGHT}|HEAP_SITES
+    return name,[(offset,data) for offset,data in compile_patches(xml,[name],app_version,segments)
+                 if offset not in skip and template.get(offset)!=data]
 
 
 def eboot_segments(elf):
@@ -390,6 +426,13 @@ def main():
             writes+=compile_patches(a.xml,[heap],a.app_version,segments)
             names.append(heap)
         print(f'Patches: scene {size[0]}x{size[1]}; UI {ui[0]}x{ui[1]}')
+    settings=read_settings(a.settings)
+    output=tuple(int(v) for v in a.output_res.lower().split('x')) if a.output_res else output_size(settings)
+    if settings.get('aspect_patch','1')!='0':
+        aspect_name,aspect=aspect_writes(a.xml,output,a.app_version,segments)
+        if aspect:
+            writes+=aspect
+            print(f'Patches: aspect {output[0]}x{output[1]} from {aspect_name!r} ({len(aspect)} writes)')
     if a.patches_dir:
         # After the built-in ones: an external patch of the same bytes wins.
         writes+=compile_external(external_selection(external_patches(a.patches_dir,a.app_version,a.xml),

@@ -627,6 +627,12 @@ THANKS = (
         _github("Jgamrot", "Флажки и ползунки внутриигрового меню"),
         _github("GerasimosKan", "Названия трофеев на английском без ключа и звук при получении трофея"),
         _github("artemkaVG", "Буфер трафарета, в который писали цветные изображения"),
+        _github("Vorshim92", "Вход на публичный сервер shadNet без отключения"),
+        _github("parsifal295", "Выход из игры из меню с контроллера и меню в пределах экрана"),
+        _github("emurphy04", "Вылет видеоплеера при его остановке"),
+        _github("AyrtonSanabio", "Язык внутриигрового меню при запуске без окна лаунчера"),
+        _github("Aryxa", "DLSS в AppImage на NVIDIA"),
+        _github("pmwork-personal", "Сверхширокие мониторы без растянутой картинки"),
     )),
     ("Помощь и тесты", (
         _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
@@ -834,9 +840,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(self.patches_group)
 
         screen = Adw.PreferencesGroup(title=tr("Экран"))
+        # A size written by hand in bbport.ini (5120x2160, ...) stays a choice instead of 720p.
+        output = self.ini.get("output_res", "1920x1080")
+        outputs = OUTPUT_RES + ([(output.replace("x", "×"), output)]
+                                if output not in [value for _, value in OUTPUT_RES] else [])
         self.output_row = combo_row(tr("Разрешение вывода"),
                                     tr("Апскейлер дорисовывает кадр; Steam Deck — 720p"),
-                                    OUTPUT_RES, self.ini.get("output_res", "1920x1080"))
+                                    outputs, output)
         screen.add(self.output_row)
         self.live_row = combo_row(tr("Смена разрешения на лету"),
                                   tr("Без перезапуска, но медленнее на Steam Deck и старых GPU"),
@@ -2513,6 +2523,8 @@ class LauncherApp(Adw.Application):
 def play():
     """--play: the game with the saved settings, no window (Steam Deck game mode)."""
     settings = load_settings()
+    # No window sets the launcher's language here, and the in-game menu takes it (BB_MENU_LANGUAGE).
+    set_language(settings.get("ui_language", ""))
     if not (Path(settings["game_dir"]).expanduser() / "eboot.bin").is_file():
         print("bbport: choose the game folder in the launcher first", file=sys.stderr)
         return 1
