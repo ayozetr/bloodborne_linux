@@ -1688,11 +1688,23 @@ class LauncherWindow(Adw.ApplicationWindow):
             title=tr("Учётная запись The Hunter's Dream"),
             description=tr("Вход через Discord: учётная запись The Hunter's Dream (та же, что у "
                            "bbhost) становится вашим Online ID. Пароль не хранится"))
+        # Or, as in bbhost, an account held by this PC: a name, and a recovery code to get it
+        # back on another PC.
         self.thd_account_row = Adw.ActionRow(title=tr("Учётная запись"))
         self.thd_button = Gtk.Button(label=tr("Войти через Discord"), valign=Gtk.Align.CENTER)
         self.thd_button.connect("clicked", self.on_discord_sign_in)
         self.thd_account_row.add_suffix(self.thd_button)
         self.thd_group.add(self.thd_account_row)
+        self.thd_name_row = Adw.EntryRow(title=tr("Имя новой учётной записи (без Discord)"))
+        self.thd_create_button = Gtk.Button(label=tr("Создать"), valign=Gtk.Align.CENTER)
+        self.thd_create_button.connect("clicked", lambda _b: self.bridge_account("create"))
+        self.thd_name_row.add_suffix(self.thd_create_button)
+        self.thd_group.add(self.thd_name_row)
+        self.thd_code_row = Adw.EntryRow(title=tr("Код восстановления (имя выше)"))
+        self.thd_recover_button = Gtk.Button(label=tr("Восстановить"), valign=Gtk.Align.CENTER)
+        self.thd_recover_button.connect("clicked", lambda _b: self.bridge_account("recover"))
+        self.thd_code_row.add_suffix(self.thd_recover_button)
+        self.thd_group.add(self.thd_code_row)
         page.add(self.thd_group)
 
         account = Adw.PreferencesGroup(
@@ -1801,6 +1813,46 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.npid_row.set_text(accounts[0])
             name = self.npid_row.get_text().strip()
             self.thd_account_row.set_subtitle(name if name in accounts else tr("Вход не выполнен"))
+
+    def bridge_account(self, action):
+        """bbbridge-cli --create NAME / --recover NAME CODE: an account held by this PC, without
+        Discord. A new one's recovery code is shown once to be kept."""
+        cli = bridge_cli()
+        name = self.thd_name_row.get_text().strip()
+        code = self.thd_code_row.get_text().strip()
+        if not cli or not name or (action == "recover" and not code):
+            return
+        config, _overrides = online.write_bridge_files(self.user_dir())
+        args = ["--create", name] if action == "create" else ["--recover", name, code]
+        buttons = (self.thd_button, self.thd_create_button, self.thd_recover_button)
+        for button in buttons:
+            button.set_sensitive(False)
+
+        def done(output):
+            for button in buttons:
+                button.set_sensitive(True)
+            if output.strip() != "ok":
+                self.thd_account_row.set_subtitle(
+                    tr("Не удалось войти: {}").format(output.strip().removeprefix("failed: ")))
+                return False
+            self.npid_row.set_text(name)
+            self.thd_account_row.set_subtitle(name)
+            self.thd_code_row.set_text("")
+            recovery = online.bridge_recovery_code(self.user_dir(), name)
+            self.alert(tr("Учётная запись The Hunter's Dream"), tr(
+                "Вход выполнен: {}. Сохраните код восстановления: только с ним эту учётную запись "
+                "можно вернуть на другом компьютере.\n\n{}").format(name, recovery))
+            return False
+
+        def work():
+            try:
+                run = subprocess.run([str(cli), "--config", str(config), *args], cwd=config.parent,
+                                     stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
+                output = run.stdout.strip().splitlines()[-1] if run.stdout.strip() else f"failed: {run.returncode}"
+            except (OSError, subprocess.TimeoutExpired) as error:
+                output = f"failed: {error}"
+            GLib.idle_add(done, output)
+        threading.Thread(target=work, daemon=True).start()
 
     def on_discord_sign_in(self, _button):
         """bbbridge-cli --link-discord: it prints a code to approve on The Hunter's Dream's page,

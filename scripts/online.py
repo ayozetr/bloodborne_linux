@@ -228,6 +228,15 @@ def bridge_accounts(user_dir):
         return []
 
 
+def bridge_recovery_code(user_dir, name):
+    """The recovery code of an account created on this PC (none for a Discord sign-in)."""
+    try:
+        state = json.loads((bridge_dir(user_dir) / 'bbbridge_state.json').read_text(encoding='utf-8'))
+        return str(state['accounts'][name].get('recovery_code') or '')
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return ''
+
+
 def write_bridge_files(user_dir):
     """DIR/bbbridge/bbbridge_config.json (the account file next to it; other keys a player added
     stay) and the game's host overrides for the bridge. Returns (config, overrides)."""
