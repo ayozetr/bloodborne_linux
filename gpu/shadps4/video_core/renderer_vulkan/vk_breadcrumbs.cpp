@@ -65,6 +65,13 @@ void Init(const Instance& instance) {
                     "located\n");
         return;
     }
+    // deadinside28#177: a build against other Vulkan headers left the extension's function null
+    // although the extension was on; the first marker then crashed.
+    if (!VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdWriteBufferMarkerAMD) {
+        std::printf("GPU breadcrumbs: VK_AMD_buffer_marker has no function, GPU hangs will not be "
+                    "located\n");
+        return;
+    }
     const VkBufferCreateInfo buffer_ci = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .size = ArgsOffset + ArgSlots * 16,
