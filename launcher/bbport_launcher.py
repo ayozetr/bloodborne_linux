@@ -379,6 +379,15 @@ SERVER_KINDS = [
 SERVER_GUIDE_URL = f"{bbport_update.REPOSITORY_URL}/blob/main/docs/SERVER.md"
 
 
+def pkg_extractor():
+    """pkgextract for Install from PKG (scripts/pkg_install.py): BB_PKGEXTRACT (the AppImage's
+    copy), build.sh's, else on PATH; None without it."""
+    for candidate in (os.environ.get("BB_PKGEXTRACT"), PORT_DIR / "out/pkgextract/bin/pkgextract"):
+        if candidate and Path(candidate).is_file():
+            return str(candidate)
+    return shutil.which("pkgextract")
+
+
 def online_module():
     """The online module beside the GPU library (gpu/bbnet; a build without its libraries has none),
     or BB_NET_MODULE (the AppImage's copy)."""
@@ -755,6 +764,14 @@ class LauncherWindow(Adw.ApplicationWindow):
                                              tr("Открыть в файловом менеджере"),
                                              lambda _b: open_folder(self, self.game_dir())))
         game.add(self.game_row)
+        # The game from your own PS4 packages: extracted, the update merged, the add-ons apart.
+        self.pkg_row = Adw.ActionRow(title=tr("Установить из PKG"),
+                                     subtitle=tr("Игра, обновление 1.09 и DLC из ваших файлов .pkg"))
+        self.pkg_button = Gtk.Button(label=tr("Выбрать .pkg…"), valign=Gtk.Align.CENTER)
+        self.pkg_button.connect("clicked", self.on_install_pkg)
+        self.pkg_row.add_suffix(self.pkg_button)
+        self.pkg_row.set_visible(pkg_extractor() is not None)
+        game.add(self.pkg_row)
         # Saves and the shader cache: user/ in the data directory unless chosen.
         self.user_row = Adw.ActionRow(title=tr("Папка сохранений"))
         self.user_status = Gtk.Image()
@@ -1270,6 +1287,71 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.game_status.set_from_icon_name("object-select-symbolic" if ok and not problem else "dialog-warning-symbolic")
         self.game_status.set_tooltip_text(tooltip)
         self.launch_button.set_sensitive(ok or self.process is not None)
+
+    def on_install_pkg(self, _button):
+        """The packages, then the folder to install into; scripts/pkg_install.py does the rest."""
+        dialog = Gtk.FileDialog(title=tr("Файлы .pkg: игра, обновление, DLC"))
+        pkg_filter = Gtk.FileFilter(name="PS4 .pkg")
+        pkg_filter.add_pattern("*.pkg")
+        pkg_filter.add_pattern("*.PKG")
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(pkg_filter)
+        dialog.set_filters(filters)
+
+        def picked(dialog, result):
+            try:
+                files = dialog.open_multiple_finish(result)
+            except GLib.Error:
+                return
+            pkgs = [files.get_item(i).get_path() for i in range(files.get_n_items())]
+            if pkgs:
+                self.choose_folder(tr("Куда установить игру"), Path(pkgs[0]).parent,
+                                   lambda dest: self.install_pkg(pkgs, dest))
+        dialog.open_multiple(self, None, picked)
+
+    def install_pkg(self, pkgs, dest):
+        self.pkg_button.set_sensitive(False)
+        self.pkg_row.set_subtitle(tr("Установка…"))
+        command = [sys.executable, str(PORT_DIR / "scripts/pkg_install.py"), "--dest", dest,
+                   "--extractor", pkg_extractor(), *pkgs]
+
+        def line(text):
+            self.append_log(text + "\n")
+            if text.startswith("Install: "):
+                self.pkg_row.set_subtitle(GLib.markup_escape_text(text[len("Install: "):]))
+            return False
+
+        def finished(status, found):
+            self.pkg_button.set_sensitive(True)
+            if "GAME_DIR" in found:
+                self.settings["game_dir"] = found["GAME_DIR"]
+                if "DLC_DIR" in found:
+                    self.settings["dlc_dir"] = found["DLC_DIR"]
+                self.update_game_status()
+                self.update_dlc_status()
+                self.store()
+            if status == 0:
+                self.toasts.add_toast(Adw.Toast(title=tr("Игра установлена: {}").format(found["GAME_DIR"])))
+            elif status != 3:   # 3: installed, and the game check says what is missing
+                self.pkg_row.set_subtitle(tr("Не удалось установить: подробности в журнале"))
+            return False
+
+        def work():
+            found, status = {}, 1
+            try:
+                with subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT, text=True) as process:
+                    for text in process.stdout:
+                        text = text.rstrip("\n")
+                        key, sep, value = text.partition("=")
+                        if sep and key in ("GAME_DIR", "DLC_DIR"):
+                            found[key] = value
+                        GLib.idle_add(line, text)
+                status = process.returncode
+            except OSError as error:
+                GLib.idle_add(line, f"Install failed: {error}")
+            GLib.idle_add(finished, status, found)
+        threading.Thread(target=work, daemon=True).start()
 
     def on_choose_game(self, _button):
         def chosen(path):

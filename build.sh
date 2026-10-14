@@ -69,6 +69,19 @@ if [[ -n ${DLSS_SDK_ROOT:-} ]]; then
     cp "$DLSS_SDK_ROOT/LICENSE.txt" out/NVIDIA-DLSS-LICENSE.txt
     echo "DLSS bridge: out/libbbport_dlss.so"
 fi
+# Installing from PS4 packages (launcher: Install from PKG, scripts/pkg_install.py): pkgextract
+# (github.com/paulomanrique/ps4-pkg-extractor, Unlicense) at a reviewed revision, with its
+# Cargo.lock. Needs cargo; without it the launcher asks for a game folder only.
+pkgextract_rev=f430ce1634fc7953834b545a3946bfbd5fa216fa
+if [[ ! -x out/pkgextract/bin/pkgextract ]] && command -v cargo >/dev/null; then
+    if cargo install --quiet --locked --root out/pkgextract \
+        --git https://github.com/paulomanrique/ps4-pkg-extractor --rev "$pkgextract_rev" pkgextract \
+        >out/pkgextract-build.log 2>&1; then
+        echo 'PKG extractor: out/pkgextract/bin/pkgextract'
+    else
+        echo 'pkgextract build failed (out/pkgextract-build.log): Install from PKG is not offered' >&2
+    fi
+fi
 # $ORIGIN/gpu: packaged copies keep the library next to the binary without patching it.
 gpu=(-Lout/gpu -lbbgpu -Wl,-rpath,'$ORIGIN/gpu' -Wl,-rpath,"$PWD/out/gpu" -rdynamic)
 runtime=(src/runtime*.c)
