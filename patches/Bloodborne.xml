@@ -325,7 +325,7 @@
             <Line Type="bytes" Address="0x04b36de2" Value="00a0"/>
         </PatchList>
     </Metadata>
-    <Metadata Title="Bloodborne" Name="Larger GX Command Heap (1 MiB)" Author="bbport" Note="The two per-frame GX command heaps grow from 256 KiB to 1 MiB each. When one fills up its allocator returns NULL and the game writes through it unchecked (Guest fault at 0x2199310, or a host fault in memcpy from 0x21d5b40; deadinside28/bloodborne_pc#162, #169). Experimental: BB_GX_COMMAND_HEAP=1." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+    <Metadata Title="Bloodborne" Name="Larger GX Command Heap (1 MiB)" Author="bbport" Note="The two per-frame GX command heaps grow from 256 KiB to 1 MiB each. When one fills up its allocator returns NULL and the game writes through it unchecked (Guest fault at 0x2199310, or a host fault in memcpy from 0x21d5b40; deadinside28/bloodborne_pc#162, #169). Applied by the port unless BB_GX_COMMAND_HEAP=0." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
         <PatchList>
             <Line Type="bytes" Address="0x02595c0a" Value="00001000"/>
             <Line Type="bytes" Address="0x02595c47" Value="00001000"/>

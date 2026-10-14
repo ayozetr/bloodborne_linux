@@ -81,12 +81,14 @@ def skip_network_choice(env=os.environ):
 
 
 # The game's two per-frame GX command heaps are 256 KiB; a frame that fills one writes through a
-# NULL allocation (deadinside28/bloodborne_pc#162, #169). Experimental and off: BB_GX_COMMAND_HEAP=1.
+# NULL allocation (deadinside28/bloodborne_pc#162, #169). On by default, as Awaken's
+# BloodBorneButPc has it since 0.9.16 (the same two sites, for a GXWorker crash in a boss intro
+# with Model LOD -2 at 2560x1440); BB_GX_COMMAND_HEAP=0 keeps the game's size.
 GX_COMMAND_HEAP='Larger GX Command Heap (1 MiB)'
 
 
 def gx_command_heap(env=os.environ):
-    return env.get('BB_GX_COMMAND_HEAP','0')=='1'
+    return env.get('BB_GX_COMMAND_HEAP','1')!='0'
 
 
 def intel_tonemap_fix(env=os.environ, cpuinfo='/proc/cpuinfo'):

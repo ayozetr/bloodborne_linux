@@ -101,9 +101,9 @@ class StreamingPatchTests(unittest.TestCase):
 
 
 class GxCommandHeapTests(unittest.TestCase):
-    def test_off_unless_asked_and_only_the_two_heap_sizes(self):
-        self.assertFalse(patches.gx_command_heap({}))
-        self.assertTrue(patches.gx_command_heap({'BB_GX_COMMAND_HEAP': '1'}))
+    def test_on_unless_turned_off_and_only_the_two_heap_sizes(self):
+        self.assertTrue(patches.gx_command_heap({}))
+        self.assertFalse(patches.gx_command_heap({'BB_GX_COMMAND_HEAP': '0'}))
         writes = compile_patches(XML, [patches.GX_COMMAND_HEAP], '01.09', SEGMENTS)
         # The imm32 of `mov $0x40000,%edx` (ba 00 00 04 00) before each heap's init call.
         self.assertEqual(writes, [(0x2195c0a, struct.pack('<I', 0x100000)),
