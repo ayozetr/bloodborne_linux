@@ -105,7 +105,14 @@ private:
     void FindPresentMode();
 
     /// Sets the surface properties according to device capabilities
-    void SetSurfaceProperties();
+    /// (bbport: false when they cannot be queried, e.g. a lost surface)
+    bool SetSurfaceProperties();
+
+    /// bbport: vkDeviceWaitIdle under Scheduler::submit_mutex (the callers must not hold it).
+    void WaitIdle();
+
+    /// bbport: destroys the swapchain and the lost surface, and creates a new surface.
+    void RecreateSurface();
 
     /// Destroys current swapchain resources
     void Destroy();
@@ -138,6 +145,7 @@ private:
     u32 frame_index = 0;
     bool needs_recreation = true;
     bool zero_extent = false; ///< bbport: the surface was 0x0 (minimised) at the last Create
+    bool surface_lost = false; ///< bbport: VK_ERROR_SURFACE_LOST_KHR seen: Create makes a new one
     bool needs_hdr = false;    // The game requested HDR swapchain
     bool supports_hdr = false; // SC supports HDR output
 };
