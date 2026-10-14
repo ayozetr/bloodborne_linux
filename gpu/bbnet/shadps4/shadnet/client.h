@@ -269,6 +269,10 @@ public:
     ShadNetState WaitForAuthenticated();
 
     bool IsConnected() const;
+    /// The server refused this client's version (ClientRejected): signing in again cannot help.
+    bool WasRejected() const {
+        return m_rejected.load();
+    }
     bool IsAuthenticated() const;
     ShadNetState GetState() const;
 
@@ -354,6 +358,7 @@ private:
 
     std::atomic<bool> m_terminate{false};
     std::atomic<bool> m_connected{false};
+    std::atomic<bool> m_rejected{false};
     std::atomic<bool> m_authenticated{false};
     std::atomic<ShadNetState> m_state{ShadNetState::Ok};
 

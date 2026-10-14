@@ -2208,6 +2208,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.toasts.add_toast(Adw.Toast(title=tr("Не удалось запустить: {}").format(error.message)))
             return
         self.stream = Gio.DataInputStream.new(self.process.get_stdout_pipe())
+        self.server_refused = False
         self.read_line()
         self.process.wait_async(None, self.on_exit)
         self.update_launch_button()
@@ -2224,6 +2225,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         if line is None:
             return
         self.append_log(line + "\n")
+        # The shadNet server refused this build (the game itself only says it is signed out).
+        if line.startswith("Online: the shadNet server ") and not self.server_refused:
+            self.server_refused = True
+            self.alert(tr("Игра по сети"), tr(
+                "Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети "
+                "используйте свой сервер (страница «Онлайн»)."))
         self.read_line()
 
     def stop_game(self):

@@ -403,6 +403,20 @@ void NpHandler::WorkerThread() {
         }
 
         for (s32 uid : dropped) {
+            // bbport: a server that refused this build's version refuses every sign-in after it
+            // (LoginError for a while), and each try makes that wait longer: no reconnect.
+            bool rejected = false;
+            {
+                std::lock_guard lock(m_mutex_clients);
+                if (auto it = m_clients.find(uid); it != m_clients.end() && it->second)
+                    rejected = it->second->WasRejected();
+            }
+            if (rejected) {
+                LOG_WARNING(NpHandler, "user_id={} signed out: the server does not accept this "
+                            "build; not reconnecting", uid);
+                DisconnectUser(uid);
+                continue;
+            }
             LOG_WARNING(NpHandler, "user_id={} connection dropped (network); will retry", uid);
             DisconnectUser(uid);   // reports SignedOut + stops/removes the dead client
             MarkForReconnect(uid); // schedule transparent reconnect (network drop, not logout)
