@@ -86,10 +86,18 @@ void Set(Values& v, const std::string& key, const std::string& value) {
     } else if (key == "live_resolution") {
         v.live_resolution = value == "auto" ? -1 : std::clamp(i, 0, 1);
     } else if (key == "output_res") {
+        bool listed = false;
         for (int r = 0; r < OutputCount; ++r) {
             if (value == std::to_string(OutputWidths[r]) + "x" + std::to_string(OutputHeights[r])) {
                 v.output_res = r;
+                listed = true;
             }
+        }
+        int width = 0, height = 0;
+        if (!listed && std::sscanf(value.c_str(), "%dx%d", &width, &height) == 2 && width > 0 &&
+            height > 0) {
+            v.custom_output_width = width;
+            v.custom_output_height = height;
         }
     } else {
         for (int e = 0; e < EffectCount; ++e) {
@@ -136,6 +144,7 @@ MenuLanguage MenuLanguageFromCode(const char* code) {
 
 void Load() {
     auto& v = Get();
+    v.custom_output_width = v.custom_output_height = 0;
     for (int e = 0; e < EffectCount; ++e) {
         v.effects[e] = Effects[e].default_on;
     }
@@ -194,6 +203,7 @@ void Load() {
     }
     v.startup_model_lod = v.model_lod;
     v.startup_output_res = v.output_res;
+    v.startup_custom_output_width = v.custom_output_width;
     v.startup_live_resolution = v.live_resolution;
 }
 
@@ -235,11 +245,22 @@ int RenderPreset() {
         v.upscaler == UpscalerTaa ? NativeAA : v.preset.load();
 }
 
+bool CustomOutput(int& width, int& height) {
+    const auto& v = Get();
+    if (v.custom_output_width <= 0 || v.output_res != v.startup_output_res) {
+        return false;
+    }
+    width = v.custom_output_width;
+    height = v.custom_output_height;
+    return true;
+}
+
 bool ResolutionNeedsRestart() {
     const auto& v = Get();
     // TAA needs the live path (native guest targets): run.sh selects it on restart.
     return FixedRenderSession() &&
         (v.preset != v.startup_preset || v.output_res != v.startup_output_res ||
+         v.custom_output_width != v.startup_custom_output_width ||
          (v.upscaler == UpscalerOff) != (v.startup_upscaler == UpscalerOff) ||
          (v.upscaler == UpscalerTaa) != (v.startup_upscaler == UpscalerTaa));
 }
@@ -282,8 +303,13 @@ void Save() {
         put(Effects[e].key, flag(v.effects[e]));
     }
     put("model_lod", std::to_string(v.model_lod.load()));
-    put("output_res", std::to_string(OutputWidths[v.output_res]) + "x" +
-                          std::to_string(OutputHeights[v.output_res]));
+    int custom_width = 0, custom_height = 0;
+    if (CustomOutput(custom_width, custom_height)) {
+        put("output_res", std::to_string(custom_width) + "x" + std::to_string(custom_height));
+    } else {
+        put("output_res", std::to_string(OutputWidths[v.output_res]) + "x" +
+                              std::to_string(OutputHeights[v.output_res]));
+    }
     // Read by run.sh at start.
     put("live_resolution", v.live_resolution < 0 ? "auto" : flag(v.live_resolution != 0));
     if (v.menu_x >= 0.0f && v.menu_y >= 0.0f) {

@@ -97,6 +97,9 @@ struct Values {
     std::atomic<bool> effects[EffectCount]{};
     std::atomic<int> model_lod{0}; ///< -2 highest .. 2 lowest, 0 the game's
     std::atomic<int> output_res{OutputDefault}; ///< index into OutputWidths
+    /// An output_res in bbport.ini that the list does not have (5120x2160, ...): run.sh and
+    /// patches.py use it, and the menu keeps it until another size is chosen.
+    int custom_output_width = 0, custom_output_height = 0;
     /// Live resolution and preset changes (run.sh): 0 off by default (startup patch, fastest
     /// on the Steam Deck and older GPUs), -1 auto (strong discrete GPUs), 1 on. On restart.
     std::atomic<int> live_resolution{0};
@@ -114,6 +117,7 @@ struct Values {
     bool startup_effects[EffectCount]{};
     int startup_model_lod = 0;
     int startup_output_res = OutputDefault;
+    int startup_custom_output_width = 0;
     int startup_live_resolution = 0;
 };
 
@@ -136,6 +140,8 @@ void ConfigureDlssSupport(bool available, const char* problem);
 bool FixedRenderSession();
 int RenderPreset();
 bool ResolutionNeedsRestart();
+/// The output size from bbport.ini that the menu does not list, while it is still the choice.
+bool CustomOutput(int& width, int& height);
 /// Writes the file (menu changes).
 void Save();
 

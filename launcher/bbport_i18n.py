@@ -600,6 +600,7 @@ EN = {
     'Вылет видеоплеера при его остановке': 'A video player crash when it stops',
     'Язык внутриигрового меню при запуске без окна лаунчера': "The in-game menu's language when starting without the launcher window",
     'DLSS в AppImage на NVIDIA': 'DLSS in the AppImage on NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Ultrawide monitors without a stretched picture',
 }
 
 PT_BR = {
@@ -1254,6 +1255,7 @@ PT_BR = {
     'Вылет видеоплеера при его остановке': 'Um travamento do reprodutor de vídeo ao parar',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'O idioma do menu do jogo ao iniciar sem a janela do launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS no AppImage em NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrawide sem imagem esticada',
 }
 
 
@@ -1819,6 +1821,7 @@ ES = {
     'Вылет видеоплеера при его остановке': 'Un cierre del reproductor de vídeo al detenerse',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS en la AppImage con NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrapanorámicos sin la imagen estirada',
 }
 
 
@@ -2384,6 +2387,7 @@ IT = {
     'Вылет видеоплеера при его остановке': 'Un crash del lettore video quando si ferma',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La lingua del menu di gioco avviando senza la finestra del launcher',
     'DLSS в AppImage на NVIDIA': "DLSS nell'AppImage su NVIDIA",
+    'Сверхширокие мониторы без растянутой картинки': 'Monitor ultrawide senza immagine stirata',
 }
 
 
@@ -2949,6 +2953,7 @@ FR = {
     'Вылет видеоплеера при его остановке': 'Un plantage du lecteur vidéo à son arrêt',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La langue du menu en jeu au lancement sans la fenêtre du launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS dans l’AppImage sur NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Les écrans ultra-larges sans image étirée',
 }
 
 
@@ -3514,6 +3519,7 @@ DE = {
     'Вылет видеоплеера при его остановке': 'Ein Absturz des Videoplayers beim Anhalten',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'Die Sprache des Spielmenüs beim Start ohne Launcher-Fenster',
     'DLSS в AppImage на NVIDIA': 'DLSS im AppImage auf NVIDIA',
+    'Сверхширокие мониторы без растянутой картинки': 'Ultrawide-Monitore ohne gestrecktes Bild',
 }
 
 
@@ -4022,6 +4028,7 @@ ZH_CN = {
     'Вылет видеоплеера при его остановке': '视频播放器停止时的崩溃',
     'Язык внутриигрового меню при запуске без окна лаунчера': '不经启动器窗口启动时游戏内菜单的语言',
     'DLSS в AppImage на NVIDIA': 'NVIDIA 上 AppImage 中的 DLSS',
+    'Сверхширокие мониторы без растянутой картинки': '超宽屏显示器画面不再被拉伸',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

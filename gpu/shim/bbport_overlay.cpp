@@ -378,13 +378,14 @@ void Menu() {
         for (int i = 0; i < BbSettings::PresetCount; ++i) {
             char label[64];
             const float scale = BbSettings::PresetScale(i);
-            const int output = s.output_res;
+            int output_width = BbSettings::OutputWidths[s.output_res];
+            int output_height = BbSettings::OutputHeights[s.output_res];
+            BbSettings::CustomOutput(output_width, output_height);
             std::snprintf(
                 label, sizeof(label),
                 BbSettings::MenuText("%s (x%.1f, render %dx%d)", "%s (x%.1f, рендер %dx%d)"),
-                BbSettings::PresetName(i), scale,
-                int(std::lround(BbSettings::OutputWidths[output] / scale / 2) * 2),
-                int(std::lround(BbSettings::OutputHeights[output] / scale / 2) * 2));
+                BbSettings::PresetName(i), scale, int(std::lround(output_width / scale / 2) * 2),
+                int(std::lround(output_height / scale / 2) * 2));
             if (ImGui::Selectable(label, i == preset)) {
                 Store(s.preset, i, true);
             }
@@ -507,10 +508,19 @@ void Menu() {
     ImGui::SeparatorText(BbSettings::MenuText("Output resolution", "Разрешение вывода"));
     static const char* outputs[] = {"1280 x 720", "1920 x 1080", "2560 x 1440", "3840 x 2160"};
     int output = s.output_res;
+    // A size from bbport.ini that the list does not have stays until another one is chosen.
+    int custom_width = 0, custom_height = 0;
+    const bool custom = BbSettings::CustomOutput(custom_width, custom_height);
+    char custom_label[32];
+    std::snprintf(custom_label, sizeof(custom_label), "%d x %d", custom_width, custom_height);
     if (ImGui::BeginCombo(BbSettings::MenuText("Output resolution", "Разрешение вывода"),
-                          outputs[output])) {
+                          custom ? custom_label : outputs[output])) {
+        if (custom) {
+            ImGui::Selectable(custom_label, true);
+        }
         for (int i = 0; i < BbSettings::OutputCount; ++i) {
-            if (ImGui::Selectable(outputs[i], i == output)) {
+            if (ImGui::Selectable(outputs[i], !custom && i == output)) {
+                s.custom_output_width = 0; // a listed size replaces the one from bbport.ini
                 Store(s.output_res, i, true);
             }
         }

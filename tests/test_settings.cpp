@@ -66,6 +66,26 @@ int main() {
     s.show_fps = false;
     BbSettings::Save();
     assert(Read(path).find("menu_language=ru\n") != std::string::npos);
+
+    // An output size the menu does not list (deadinside28#183) survives a save...
+    {
+        FILE* f = std::fopen(path, "a");
+        std::fputs("output_res=5120x2160\n", f);
+        std::fclose(f);
+    }
+    BbSettings::Load();
+    int width = 0, height = 0;
+    assert(BbSettings::CustomOutput(width, height) && width == 5120 && height == 2160);
+    s.show_fps = true;
+    BbSettings::Save();
+    assert(Read(path).find("output_res=5120x2160\n") != std::string::npos);
+    // ...until a listed one is chosen.
+    s.custom_output_width = 0;
+    s.output_res = 2;
+    BbSettings::Save();
+    assert(Read(path).find("output_res=2560x1440\n") != std::string::npos);
+    assert(!BbSettings::CustomOutput(width, height));
     unlink(path);
-    std::puts("PASS: settings save keeps other keys, menu position, only a chosen menu language");
+    std::puts("PASS: settings save keeps other keys, menu position, only a chosen menu language, "
+              "a custom output size");
 }
