@@ -717,13 +717,22 @@ static void touch_ids(PadData *d) {
     else if (!since) since=d->timestamp;
     d->touch_held_time=d->touch_count ? (uint32_t)(d->timestamp-since) : 0;
 }
+/* After the menu or the text dialog closes, buttons still held (the Cross that accepted a
+ * name, the button that closed the menu) stay hidden until all are released: the game would
+ * take them as a new press. From Supermedo/bloodborne_pc 1d34202 (hold_after_capture), via
+ * Awaken's BloodBorneButPc. */
+static int hold_after_capture;
 static void sample(PadData *d) {
     sample_host(d);
-    if (bbgpu_overlay_captures_input()) return;
+    if (bbgpu_overlay_captures_input()) { hold_after_capture=1; return; }
     record_sample(d);
     read_inject();
     replay_sample(d);
     d->buttons|=injected.buttons;
+    if (hold_after_capture) {
+        if (d->buttons) { d->buttons=0; d->l2=d->r2=0; }
+        else hold_after_capture=0;
+    }
     if (injected.touch_side>=0) touch_click(d,injected.touch_side);
     else if ((d->buttons & BTN_TOUCHPAD) && !d->touch_count) touch_click(d,0);
     if (!d->touch_count) touch_down=0;
