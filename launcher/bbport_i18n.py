@@ -607,6 +607,8 @@ EN = {
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide monitors without a stretched picture',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Keyboard movement: a round diagonal and the last key pressed',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Crash debugging: the process waits for a debugger (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Large recorded command groups and the swapchain after display changes',
 }
 
 PT_BR = {
@@ -1268,6 +1270,8 @@ PT_BR = {
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrawide sem imagem esticada',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuração de travamentos: o processo espera um depurador (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Grandes grupos de comandos gravados e a swapchain após mudanças de tela',
 }
 
 
@@ -1840,6 +1844,8 @@ ES = {
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrapanorámicos sin la imagen estirada',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuración de cierres: el proceso espera a un depurador (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Grupos grandes de comandos grabados y el swapchain tras cambios de pantalla',
 }
 
 
@@ -2412,6 +2418,8 @@ IT = {
     'Сверхширокие мониторы без растянутой картинки': 'Monitor ultrawide senza immagine stirata',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Debug dei crash: il processo attende un debugger (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Grandi gruppi di comandi registrati e la swapchain dopo i cambi di schermo',
 }
 
 
@@ -2984,6 +2992,8 @@ FR = {
     'Сверхширокие мониторы без растянутой картинки': 'Les écrans ultra-larges sans image étirée',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Déplacement au clavier : diagonale ronde et dernière touche pressée',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Débogage des plantages : le processus attend un débogueur (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Grands groupes de commandes enregistrées et la swapchain après un changement d’affichage',
 }
 
 
@@ -3556,6 +3566,8 @@ DE = {
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide-Monitore ohne gestrecktes Bild',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Absturz-Debugging: Der Prozess wartet auf einen Debugger (BB_FAULT_WAIT)',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler',
+    'Большие группы команд записи и swapchain после изменений экрана': 'Große aufgezeichnete Befehlsgruppen und die Swapchain nach Anzeigeänderungen',
 }
 
 
@@ -4071,6 +4083,8 @@ ZH_CN = {
     'Сверхширокие мониторы без растянутой картинки': '超宽屏显示器画面不再被拉伸',
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': '键盘移动：圆形斜向与最后按下的键',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': '崩溃调试：进程等待调试器（BB_FAULT_WAIT）',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误',
+    'Большие группы команд записи и swapchain после изменений экрана': '大型录制命令组以及显示变化后的交换链',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
