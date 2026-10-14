@@ -163,6 +163,9 @@ If this fork is useful to you and you would like to support it, you can on
   which textures keyboard prompts need (after the idea of
   [mod 460](https://www.nexusmods.com/bloodborne/mods/460)); bbport draws its own.
 - [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages) for the AppImage.
+- [ps4-pkg-extractor](https://github.com/paulomanrique/ps4-pkg-extractor) by paulomanrique
+  (Unlicense), on [orbis-pkg-util](https://crates.io/crates/orbis-pkg-util): the launcher's
+  *Install from PKG*.
 - Game patches by Kyo, Lance McDonald, auser1337, illusion, emoose and the Bloodborne community.
 
 Full list of components and licenses: [BBPORT.md](BBPORT.md#credits-and-licenses).
