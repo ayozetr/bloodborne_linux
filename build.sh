@@ -69,6 +69,17 @@ if [[ -n ${DLSS_SDK_ROOT:-} ]]; then
     cp "$DLSS_SDK_ROOT/LICENSE.txt" out/NVIDIA-DLSS-LICENSE.txt
     echo "DLSS bridge: out/libbbport_dlss.so"
 fi
+# The Hunter's Dream co-op pool (launcher: Online): bbbridge (MaskZeus, GPL-3.0-or-later) stands in
+# for the shadNet server on this PC and talks to The Hunter's Dream as bbhost does. Needs libcurl and
+# OpenSSL's development files; without them the launcher offers shadNet servers only.
+if pkg-config --exists libcurl openssl; then
+    if cmake -S bbbridge -B out/bbbridge -G Ninja -DCMAKE_BUILD_TYPE=Release >out/bbbridge-build.log 2>&1 &&
+        ninja -C out/bbbridge bbbridge-cli >>out/bbbridge-build.log 2>&1; then
+        echo "The Hunter's Dream bridge: out/bbbridge/bbbridge-cli"
+    else
+        echo "bbbridge build failed (out/bbbridge-build.log): The Hunter's Dream is not offered" >&2
+    fi
+fi
 # $ORIGIN/gpu: packaged copies keep the library next to the binary without patching it.
 gpu=(-Lout/gpu -lbbgpu -Wl,-rpath,'$ORIGIN/gpu' -Wl,-rpath,"$PWD/out/gpu" -rdynamic)
 runtime=(src/runtime*.c)

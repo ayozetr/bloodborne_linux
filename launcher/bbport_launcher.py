@@ -376,7 +376,17 @@ SERVER_KINDS = [
     ("Публичный сервер shadPS4", "public", "srv.shadps4.net:31313"),
     ("Свой сервер", "own", "shadnet-p2p: на вашем ПК или VPS"),
 ]
+# The Hunter's Dream, with bbhost's players: bbbridge on this PC (scripts/online.py, run.sh).
+THD_KIND = ("The Hunter's Dream (с игроками bbhost)", "thd",
+            "Вход через Discord; мост bbbridge запускается вместе с игрой")
 SERVER_GUIDE_URL = f"{bbport_update.REPOSITORY_URL}/blob/main/docs/SERVER.md"
+
+
+def bridge_cli():
+    """bbbridge-cli (bbbridge/, built by build.sh), or BB_BRIDGE_CLI (the AppImage's copy); None
+    when this build has none."""
+    path = Path(os.environ.get("BB_BRIDGE_CLI") or binaries_dir() / "bbbridge" / "bbbridge-cli")
+    return path if path.is_file() else None
 
 
 def online_module():
@@ -1650,7 +1660,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(game)
 
         coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
-        self.server_kind_row = combo_row(tr("Сервер shadNet"), None, SERVER_KINDS, online.server_kind(s))
+        kinds = SERVER_KINDS + ([THD_KIND] if bridge_cli() else [])
+        kind = online.server_kind(s)
+        self.server_kind_row = combo_row(tr("Сервер shadNet"), None, kinds,
+                                         kind if kind in (k[1] for k in kinds) else "public")
         coop.add(self.server_kind_row)
         own = s["online_server"] if s["online_server"] != online.SHADNET_SERVER else ""
         self.server_row = Adw.EntryRow(title=tr("Адрес сервера (host:port)"), text=own)
@@ -1668,24 +1681,35 @@ class LauncherWindow(Adw.ApplicationWindow):
         for row in (self.server_row, self.webapi_row, self.seamless_row, guide):
             coop.add(row)
         self.own_server_rows = (self.server_row, self.webapi_row, self.seamless_row)
-        self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
-        self.show_server_kind()
         page.add(coop)
+
+        # The Hunter's Dream: a Discord sign-in through bbbridge; its account is the online ID.
+        self.thd_group = Adw.PreferencesGroup(
+            title=tr("Учётная запись The Hunter's Dream"),
+            description=tr("Вход через Discord: учётная запись The Hunter's Dream (та же, что у "
+                           "bbhost) становится вашим Online ID. Пароль не хранится"))
+        self.thd_account_row = Adw.ActionRow(title=tr("Учётная запись"))
+        self.thd_button = Gtk.Button(label=tr("Войти через Discord"), valign=Gtk.Align.CENTER)
+        self.thd_button.connect("clicked", self.on_discord_sign_in)
+        self.thd_account_row.add_suffix(self.thd_button)
+        self.thd_group.add(self.thd_account_row)
+        page.add(self.thd_group)
 
         account = Adw.PreferencesGroup(
             title=tr("Учётная запись"),
             description=tr("Имя учётной записи shadNet, не email. Зарегистрируйтесь на "
                            "shadnet.shadps4.net или спросите владельца частного сервера. Пароль "
                            "хранится на этом компьютере вместе с настройками лаунчера"))
-        self.account_kind = online.server_kind(s)
+        self.account_kind = combo_value(self.server_kind_row)
         self.online_accounts = {kind: dict(zip(("npid", "password"), online.account(s, kind)))
-                                for kind in ("public", "own")}
+                                for kind in ("public", "own", "thd")}
         npid, password = online.account(s, self.account_kind)
         self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=npid)
         self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=password)
         account.add(self.npid_row)
         account.add(self.password_row)
         self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
+        self.account_group = account
         page.add(account)
 
         connection = Adw.PreferencesGroup(
@@ -1722,6 +1746,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.test_rows = []
         self.connection_group = connection
         page.add(connection)
+        self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
+        self.show_server_kind()
         return page
 
     def online_settings(self):
@@ -1760,9 +1786,58 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.password_row.set_text(kept.get("password", ""))
 
     def show_server_kind(self):
-        own = combo_value(self.server_kind_row) == "own"
+        kind = combo_value(self.server_kind_row)
         for row in self.own_server_rows:
-            row.set_visible(own)
+            row.set_visible(kind == "own")
+        # The Hunter's Dream: the bridge reaches the internet, the game only the bridge on this PC.
+        thd = kind == "thd"
+        self.thd_group.set_visible(thd)
+        self.account_group.set_visible(not thd)
+        for row in (self.upnp_row, self.p2p_port_row, *(row for row, _f, _g in self.firewall_rows)):
+            row.set_visible(not thd)
+        if thd:
+            accounts = online.bridge_accounts(self.user_dir())
+            if accounts and self.npid_row.get_text().strip() not in accounts:
+                self.npid_row.set_text(accounts[0])
+            name = self.npid_row.get_text().strip()
+            self.thd_account_row.set_subtitle(name if name in accounts else tr("Вход не выполнен"))
+
+    def on_discord_sign_in(self, _button):
+        """bbbridge-cli --link-discord: it prints a code to approve on The Hunter's Dream's page,
+        then the online ID it signed in as."""
+        cli = bridge_cli()
+        if not cli:
+            return
+        config, _overrides = online.write_bridge_files(self.user_dir())
+        self.thd_button.set_sensitive(False)
+        self.thd_account_row.set_subtitle(tr("Ожидание входа…"))
+
+        def on_line(line):
+            line = line.strip()
+            if line.startswith("Open ") and " and enter the code " in line:
+                uri, code = line[len("Open "):].split(" and enter the code ", 1)
+                self.thd_account_row.set_subtitle(tr("Откройте {} и введите код {}").format(uri, code))
+                self.open_uri(uri)
+            elif line.startswith("signed in as "):
+                name = line[len("signed in as "):]
+                self.npid_row.set_text(name)
+                self.thd_account_row.set_subtitle(name)
+                self.toasts.add_toast(Adw.Toast(title=tr("Вход выполнен: {}").format(name)))
+            elif line.startswith("failed: "):
+                self.thd_account_row.set_subtitle(tr("Не удалось войти: {}").format(line[len("failed: "):]))
+            return False
+
+        def work():
+            try:
+                with subprocess.Popen([str(cli), "--config", str(config), "--link-discord"],
+                                      cwd=config.parent, stdin=subprocess.DEVNULL,
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True) as process:
+                    for line in process.stdout:
+                        GLib.idle_add(on_line, line)
+            except OSError as error:
+                GLib.idle_add(on_line, f"failed: {error}")
+            GLib.idle_add(lambda: self.thd_button.set_sensitive(True) and False)
+        threading.Thread(target=work, daemon=True).start()
 
     def show_firewall_rows(self):
         port = int(self.p2p_port_row.get_value())
@@ -1814,7 +1889,10 @@ class LauncherWindow(Adw.ApplicationWindow):
             return False
 
         def work():
-            results = online.check(server, webapi, community, account)
+            # The Hunter's Dream: the bridge starts with the game, so only the game server is checked.
+            results = (online.check(server, webapi, community, account)[:1]
+                       if combo_value(self.server_kind_row) == "thd"
+                       else online.check(server, webapi, community, account))
             GLib.idle_add(show, results)
         threading.Thread(target=work, daemon=True).start()
 

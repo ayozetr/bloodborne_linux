@@ -250,8 +250,36 @@ if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
         done
     fi
     [[ -n ${BB_SHADNET_WEBAPI:-} ]] || export BB_SHADNET_WEBAPI=http://${BB_SHADNET_SERVER%:*}:31315
-    SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}") || true
-    export SHADPS4_HTTP_HOST_OVERRIDES_JSON
+    if [[ ${BB_BRIDGE:-0} == 1 ]]; then
+        # The Hunter's Dream (launcher: Online): bbbridge on this PC is the shadNet server
+        # (scripts/online.py). One already listening (a test, another launch) is used as it is;
+        # else bbbridge-cli runs for this launch and a watcher stops it once the game ($$, after the
+        # exec below) has ended.
+        bridge_cli=${BB_BRIDGE_CLI:-out/bbbridge/bbbridge-cli}
+        { read -r bridge_config; read -r SHADPS4_HTTP_HOST_OVERRIDES_JSON; } < <("$PYTHON" scripts/online.py bridge --user "${BB_USER_DIR:-$data/user}")
+        export SHADPS4_HTTP_HOST_OVERRIDES_JSON
+        bridge_up() { (exec 9<>/dev/tcp/127.0.0.1/31313) 2>/dev/null; }
+        if bridge_up; then
+            echo "Co-op: The Hunter's Dream as ${BB_SHADNET_NPID:-?}, through the bbbridge already running"
+        elif [[ ! -x $bridge_cli ]]; then
+            echo "STOP: The Hunter's Dream needs bbbridge-cli ($bridge_cli), not in this build" >&2; exit 1
+        else
+            bridge_log=${bridge_config%/*}/bbbridge.log
+            "$bridge_cli" --config "$bridge_config" --log "$bridge_log" </dev/null >/dev/null 2>&1 &
+            bridge_pid=$!
+            for _ in $(seq 100); do
+                bridge_up && break
+                kill -0 "$bridge_pid" 2>/dev/null || { echo "STOP: bbbridge stopped at start:" >&2; tail -5 "$bridge_log" >&2; exit 1; }
+                sleep 0.1
+            done
+            game_pid=$$
+            ( while kill -0 "$game_pid" 2>/dev/null; do sleep 2; done; kill -TERM "$bridge_pid" 2>/dev/null ) </dev/null >/dev/null 2>&1 &
+            echo "Co-op: The Hunter's Dream as ${BB_SHADNET_NPID:-?}, through bbbridge (log: $bridge_log)"
+        fi
+    else
+        SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}") || true
+        export SHADPS4_HTTP_HOST_OVERRIDES_JSON
+    fi
 fi
 # Trophies (scripts/trophies.py): the dump's list and icons in the user directory, for the
 # runtime's notices and the launcher; BB_TROPHY_KEY (the PS4's trophy key) decrypts the names.
