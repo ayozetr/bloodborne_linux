@@ -491,7 +491,9 @@ struct Sampler {
         case AnisoRatio::Sixteen:
             return 16.0f;
         default:
-            UNREACHABLE();
+            // bbport: 5-7 (reserved, a stale or garbage sharp) clamp to 16x as the hardware's
+            // maximum; this ended the game (UNREACHABLE, exit 23).
+            return 16.0f;
         }
     }
 };

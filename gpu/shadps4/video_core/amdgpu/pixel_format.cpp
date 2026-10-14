@@ -74,7 +74,7 @@ std::string_view NameOf(DataFormat fmt) {
     case DataFormat::FormatBc7:
         return "FormatBc7";
     default:
-        UNREACHABLE();
+        return "Unknown"; // bbport: reached while logging a garbage descriptor (was exit 23)
     }
 }
 
@@ -107,7 +107,7 @@ std::string_view NameOf(NumberFormat fmt) {
     case NumberFormat::Ubscaled:
         return "Unscaled";
     default:
-        UNREACHABLE();
+        return "Unknown"; // bbport: as above
     }
 }
 
