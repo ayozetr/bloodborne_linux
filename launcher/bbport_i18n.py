@@ -597,6 +597,7 @@ EN = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophy names in English without the key, and the sound when one is earned',
     'Вход на публичный сервер shadNet без отключения': 'Staying signed in on the public shadNet server',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitting from the menu with a controller, and the menu kept within the screen',
+    'Вылет видеоплеера при его остановке': 'A video player crash when it stops',
 }
 
 PT_BR = {
@@ -1248,6 +1249,7 @@ PT_BR = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Nomes dos troféus em inglês sem a chave e o som ao conquistar um',
     'Вход на публичный сервер shadNet без отключения': 'Continuar conectado no servidor público do shadNet',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Sair do jogo pelo menu com o controle e o menu dentro da tela',
+    'Вылет видеоплеера при его остановке': 'Um travamento do reprodutor de vídeo ao parar',
 }
 
 
@@ -1810,6 +1812,7 @@ ES = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Los nombres de los trofeos en inglés sin la clave y el sonido al conseguir uno',
     'Вход на публичный сервер shadNet без отключения': 'Seguir conectado en el servidor público de shadNet',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Salir del juego desde el menú con el mando y el menú dentro de la pantalla',
+    'Вылет видеоплеера при его остановке': 'Un cierre del reproductor de vídeo al detenerse',
 }
 
 
@@ -2372,6 +2375,7 @@ IT = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'I nomi dei trofei in inglese senza la chiave e il suono quando se ne ottiene uno',
     'Вход на публичный сервер shadNet без отключения': 'Restare connessi al server pubblico di shadNet',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Uscire dal gioco dal menu con il controller e il menu entro lo schermo',
+    'Вылет видеоплеера при его остановке': 'Un crash del lettore video quando si ferma',
 }
 
 
@@ -2934,6 +2938,7 @@ FR = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Les noms des trophées en anglais sans la clé et le son à l’obtention d’un trophée',
     'Вход на публичный сервер shadNet без отключения': 'Rester connecté au serveur public shadNet',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Quitter le jeu depuis le menu à la manette et le menu qui tient dans l’écran',
+    'Вылет видеоплеера при его остановке': 'Un plantage du lecteur vidéo à son arrêt',
 }
 
 
@@ -3496,6 +3501,7 @@ DE = {
     'Названия трофеев на английском без ключа и звук при получении трофея': 'Trophäennamen auf Englisch ohne Schlüssel und der Ton beim Erhalt einer Trophäe',
     'Вход на публичный сервер shadNet без отключения': 'Auf dem öffentlichen shadNet-Server angemeldet bleiben',
     'Выход из игры из меню с контроллера и меню в пределах экрана': 'Das Spiel im Menü mit dem Controller beenden und das Menü innerhalb des Bildschirms',
+    'Вылет видеоплеера при его остановке': 'Ein Absturz des Videoplayers beim Anhalten',
 }
 
 
@@ -4001,6 +4007,7 @@ ZH_CN = {
     'Названия трофеев на английском без ключа и звук при получении трофея': '无密钥时的英文奖杯名称与获得奖杯时的音效',
     'Вход на публичный сервер shadNet без отключения': '在公共 shadNet 服务器上保持登录',
     'Выход из игры из меню с контроллера и меню в пределах экрана': '用手柄从菜单退出游戏，以及菜单不超出屏幕',
+    'Вылет видеоплеера при его остановке': '视频播放器停止时的崩溃',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
