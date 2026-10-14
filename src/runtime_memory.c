@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <ucontext.h>
 #include <unistd.h>
 /* sceKernelGetDirectMemorySize on retail PS4: 5056 MiB. BB_DMEM_MB raises it (the resolution
  * patches above 1080p need about 4 GiB more; run.sh sets it). */
@@ -1023,6 +1024,42 @@ void runtime_memory_gpu_protect(uintptr_t address, uint64_t size, int read, int 
         mprotect((void *)a,b-a,guest & want);
     }
     read_unlock();
+}
+/* bbport: the fault handler's last resort (bbgpu_handle_fault). An access the guest's own
+ * protection allows faulted on a page GPU tracking protected, and the tracking did not resolve
+ * it (repeated: it claimed the fault, yet the same access keeps faulting; else: no record of the
+ * page). An unhandled fault ends the game without a trace, so the page gets the guest's
+ * protection back: the GPU may miss writes there until it protects the page again. No locks
+ * beyond the table's (nested per thread) and no allocation: this runs in the fault handler.
+ * From Awaken's BloodBorneButPc. */
+int runtime_memory_restore_access(void *context, uintptr_t address, int repeated) {
+    const greg_t error=((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR];
+    if (error & 0x10) return 0; /* instruction fetch: never a tracking fault */
+    const int is_write=(error & 2)!=0;
+    const uintptr_t page=address&~(uintptr_t)4095;
+    int restored=0;
+    read_lock();
+    const size_t i=vma_index(address);
+    if (i<vma_count && vmas[i].start<=address && vmas[i].kind!=KIND_RESERVED) {
+        const int guest=host_prot(vmas[i].prot);
+        if (guest & (is_write ? PROT_WRITE : PROT_READ)) restored=!mprotect((void *)page,4096,guest);
+    }
+    read_unlock();
+    if (restored) {
+        static _Atomic unsigned notes;
+        const unsigned n=atomic_fetch_add(&notes,1)+1;
+        if (n<=8 || !(n&(n-1))) { /* the first ones, then at powers of two */
+            char line[256];
+            int length=snprintf(line,sizeof(line),
+                "Runtime: %s fault at %#llx: guest page left protected by GPU tracking (%s); "
+                "access restored (%u so far)\n", is_write ? "write" : "read", (unsigned long long)address,
+                repeated ? "the fault repeats" : "not handled", n);
+            if (length<0) length=0;
+            if (length>=(int)sizeof(line)) length=(int)sizeof(line)-1;
+            { ssize_t written_=write(2,line,(size_t)length); (void)written_; }
+        }
+    }
+    return restored;
 }
 /* Host view of a guest range, for the GPU backend: the range must be mapped. */
 int runtime_memory_is_mapped(uintptr_t address, uint64_t size) {

@@ -27,6 +27,7 @@
 #include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "common/rdtsc.h"
+#include "common/signal_context.h"
 #include "core/libraries/kernel/orbis_error.h"
 #include "core/libraries/libs.h"
 #include "core/emulator_settings.h"
@@ -53,6 +54,7 @@ int32_t* runtime_errno(void);
 void runtime_memory_set_gpu_hooks(RuntimeGpuRange map, RuntimeGpuRange unmap, RuntimeGpuRange invalidate);
 void runtime_memory_set_note_write_hook(RuntimeGpuRange note);
 void runtime_memory_set_cpu_write_hook(RuntimeGpuRange hook);
+int runtime_memory_restore_access(void* context, uintptr_t address, int repeated);
 }
 
 Frontend::WindowSDL* g_window = nullptr;
@@ -322,6 +324,37 @@ extern "C" uintptr_t bbgpu_resolve(const char* scoped_nid) {
     return 0;
 }
 
+namespace {
+// bbport (from Awaken's BloodBorneButPc): the same access (instruction and address) faulting
+// again within microseconds, many times in a row: the tracking claimed the fault but left the
+// page protected, and the thread would retry forever. A write the game repeats each frame comes
+// milliseconds apart.
+struct RepeatedFault {
+    u64 rip = 0, address = 0, last_tsc = 0;
+    u32 count = 0;
+};
+thread_local RepeatedFault repeated_fault;
+
+bool FaultRepeats(void* ucontext, void* address) {
+    constexpr u64 RepeatCycles = 4'000'000; // ~1 ms
+    constexpr u32 RepeatLimit = 64;
+    auto& r = repeated_fault;
+    const u64 rip = reinterpret_cast<u64>(Common::GetRip(ucontext));
+    const u64 now = Common::FencedRDTSC();
+    if (rip != r.rip || reinterpret_cast<u64>(address) != r.address ||
+        now - r.last_tsc > RepeatCycles) {
+        r = {rip, reinterpret_cast<u64>(address), now, 0};
+        return false;
+    }
+    r.last_tsc = now;
+    if (++r.count < RepeatLimit) {
+        return false;
+    }
+    r.count = 0;
+    return true;
+}
+} // namespace
+
 extern "C" int bbgpu_handle_fault(void* ucontext, void* address) {
     // BB_LABEL_TRAP (diagnostic): its read-only label pages first. Not passed on to GPU page
     // tracking (a write fault drains the draw pipe: thousands a second would change the timing
@@ -330,9 +363,18 @@ extern "C" int bbgpu_handle_fault(void* ucontext, void* address) {
         return 1;
     }
     if (Core::Signals::Instance()->DispatchAccessViolation(ucontext, address)) {
+        if (FaultRepeats(ucontext, address)) {
+            runtime_memory_restore_access(ucontext, reinterpret_cast<uintptr_t>(address), 1);
+        }
         return 1;
     }
-    return BbFreeCheck::OnStaleTrapFault(reinterpret_cast<std::uint64_t>(address)) ? 1 : 0;
+    if (BbFreeCheck::OnStaleTrapFault(reinterpret_cast<std::uint64_t>(address))) {
+        return 1;
+    }
+    // bbport: nobody claimed it. A guest page the guest may access but GPU tracking left
+    // protected (a stale protection, a page it no longer knows) gets its access back; ending the
+    // game for it is worse than a GPU copy that may miss a write. Real faults stay unhandled.
+    return runtime_memory_restore_access(ucontext, reinterpret_cast<uintptr_t>(address), 0);
 }
 
 extern "C" void bbgpu_patch_image(unsigned char* image, uint64_t size) {
@@ -364,11 +406,13 @@ static void KernelServiceThread(std::stop_token stoken) {
         {
             std::unique_lock lock{m_asio_req};
             cv_asio_req.wait(lock, stoken, [] { return asio_requests != 0; });
+            // Taken before the run: a request made while it runs (a timer armed after run()
+            // found no work) wakes the next one instead of being cleared after it.
+            asio_requests.exchange(0);
         }
         if (stoken.stop_requested()) break;
         io_context.run();
         io_context.restart();
-        asio_requests = 0;
     }
 }
 
