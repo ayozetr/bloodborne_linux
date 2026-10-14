@@ -66,6 +66,7 @@ export BB_VULKANINFO="$APPDIR/bin/vulkaninfo"
 export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet.so"
 [ -x "$APPDIR/bin/bbbridge-cli" ] && export BB_BRIDGE_CLI="$APPDIR/bin/bbbridge-cli"
+[ -x "$APPDIR/bin/pkgextract" ] && export BB_PKGEXTRACT="$APPDIR/bin/pkgextract"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 # deadinside28#172: Steam's Game Mode runs a non-Steam game in pressure-vessel, which points
@@ -106,8 +107,10 @@ net=$(ls "$root/out/gpu/libbbnet.so" 2>/dev/null || true)
 # The Hunter's Dream's bridge (bbbridge/, GPL-3.0-or-later), when the build has it: with libcurl and
 # OpenSSL, named here so that they come along.
 bridge=$(ls "$root/out/bbbridge/bbbridge-cli" 2>/dev/null || true)
+# Install from PKG (scripts/pkg_install.py): pkgextract (Unlicense), when the build has it.
+pkgextract=$(ls "$root/out/pkgextract/bin/pkgextract" 2>/dev/null || true)
 "$quick" \
-    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} ${bridge:+"$bridge"} \
+    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} ${bridge:+"$bridge"} ${pkgextract:+"$pkgextract"} \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
