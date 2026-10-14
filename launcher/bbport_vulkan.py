@@ -91,8 +91,10 @@ def configure(env, manifest_dirs=MANIFEST_DIRS, library_dirs=LIBRARY_DIRS,
     libraries.mkdir(parents=True, exist_ok=True)
     # NVIDIA dlopens versioned shader/compiler libraries at runtime, so expose
     # the driver's siblings as well as its ICD. Never link generic host libs.
+    # libcuda.so.1 is NVIDIA's too: with DLSS loaded, NGX makes the driver load it, and
+    # without it vkCreateDevice fails with VK_ERROR_INITIALIZATION_FAILED (#135).
     sources = [driver]
-    for pattern in ("libnvidia-*.so*", "libGLX_nvidia.so*", "libEGL_nvidia.so*"):
+    for pattern in ("libnvidia-*.so*", "libGLX_nvidia.so*", "libEGL_nvidia.so*", "libcuda.so*"):
         sources.extend(sorted(driver.parent.glob(pattern)))
     for source in sources:
         if not elf64(source):

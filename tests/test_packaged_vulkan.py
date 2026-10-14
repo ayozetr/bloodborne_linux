@@ -60,6 +60,8 @@ class PackagedVulkanTests(unittest.TestCase):
         driver = self.library("libGLX_nvidia.so.580.1")
         (self.libs / "libGLX_nvidia.so.0").symlink_to(driver.name)
         compiler = self.library("libnvidia-glvkspirv.so.580.1")
+        cuda = self.library("libcuda.so.580.1")
+        (self.libs / "libcuda.so.1").symlink_to(cuda.name)
         self.library("libc.so.6")
         self.manifest()
         self.assertIn("host NVIDIA", self.configure())
@@ -69,6 +71,8 @@ class PackagedVulkanTests(unittest.TestCase):
         self.assertEqual(Path(data["ICD"]["library_path"]).resolve(), driver)
         cache = Path(self.env["LD_LIBRARY_PATH"].split(":")[0])
         self.assertEqual((cache / compiler.name).resolve(), compiler)
+        # DLSS (NGX) makes the driver load libcuda.so.1 (#135).
+        self.assertEqual((cache / "libcuda.so.1").resolve(), cuda)
         self.assertFalse((cache / "libc.so.6").exists())
         self.assertTrue(self.env["VK_DRIVER_FILES"].endswith(":/bundled/radeon.json:/bundled/intel.json"))
         # Repeated starts reuse valid links and do not accumulate per-launch caches.
