@@ -33,6 +33,7 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         const auto it = std::find(std::begin(MenuLanguageCodes), std::end(MenuLanguageCodes), value);
         if (it != std::end(MenuLanguageCodes)) {
             v.menu_language = MenuLanguage(it - std::begin(MenuLanguageCodes));
+            v.menu_language_chosen = true;
         } else {
             std::printf("Settings: unknown menu_language '%s' (expected en, ru, es, it, fr, de, pt_BR or zh_CN)\n",
                         value.c_str());
@@ -151,6 +152,7 @@ void Load() {
             }
         }
         v.menu_language = MenuLanguageFromCode(lang);
+        v.menu_language_chosen = false;
     }
     if (FILE* file = std::fopen(Path(), "r")) {
         char line[256];
@@ -254,7 +256,11 @@ void Save() {
         return std::string(text);
     };
     const auto flag = [](bool value) { return std::string(value ? "1" : "0"); };
-    put("menu_language", MenuLanguageCodes[int(v.menu_language.load())]);
+    // Not the launcher's or the system's language the menu started with: that one is not a choice,
+    // and once in the file it would stay whatever the launcher's language becomes.
+    if (v.menu_language_chosen) {
+        put("menu_language", MenuLanguageCodes[int(v.menu_language.load())]);
+    }
     put("upscaler", UpscalerName(v.upscaler));
     put("preset", std::to_string(v.preset.load()));
     put("sharpen", flag(v.sharpen));

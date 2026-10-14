@@ -269,6 +269,7 @@ void Menu() {
     if (ImGui::Combo("Language", &language, BbSettings::MenuLanguageNames,
                      int(BbSettings::MenuLanguage::Count))) {
         s.menu_language = BbSettings::MenuLanguage(language);
+        s.menu_language_chosen = true;
         BbSettings::Save();
     }
     ImGui::Text(BbSettings::MenuText("%.0f FPS  (%.1f ms)", "%.0f FPS  (%.1f мс)"),

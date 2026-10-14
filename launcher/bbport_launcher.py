@@ -629,6 +629,7 @@ THANKS = (
         _github("Vorshim92", "Вход на публичный сервер shadNet без отключения"),
         _github("parsifal295", "Выход из игры из меню с контроллера и меню в пределах экрана"),
         _github("emurphy04", "Вылет видеоплеера при его остановке"),
+        _github("AyrtonSanabio", "Язык внутриигрового меню при запуске без окна лаунчера"),
     )),
     ("Помощь и тесты", (
         _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
@@ -2515,6 +2516,8 @@ class LauncherApp(Adw.Application):
 def play():
     """--play: the game with the saved settings, no window (Steam Deck game mode)."""
     settings = load_settings()
+    # No window sets the launcher's language here, and the in-game menu takes it (BB_MENU_LANGUAGE).
+    set_language(settings.get("ui_language", ""))
     if not (Path(settings["game_dir"]).expanduser() / "eboot.bin").is_file():
         print("bbport: choose the game folder in the launcher first", file=sys.stderr)
         return 1

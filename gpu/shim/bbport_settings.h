@@ -69,6 +69,8 @@ inline constexpr int OutputDefault = 1; ///< 1920x1080, the game's own size
 
 struct Values {
     std::atomic<MenuLanguage> menu_language{MenuLanguage::Russian};
+    /// Chosen in the menu or read from the file: only then Save() writes menu_language.
+    std::atomic<bool> menu_language_chosen{false};
     std::atomic<int> upscaler{UpscalerFsr3};
     std::atomic<int> preset{NativeAA};
     std::atomic<bool> sharpen{true};
