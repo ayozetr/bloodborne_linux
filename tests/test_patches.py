@@ -100,6 +100,21 @@ class StreamingPatchTests(unittest.TestCase):
                                              '01.09', SEGMENTS)), 3)
 
 
+class GxCommandHeapTests(unittest.TestCase):
+    def test_off_unless_asked_and_only_the_two_heap_sizes(self):
+        self.assertFalse(patches.gx_command_heap({}))
+        self.assertTrue(patches.gx_command_heap({'BB_GX_COMMAND_HEAP': '1'}))
+        writes = compile_patches(XML, [patches.GX_COMMAND_HEAP], '01.09', SEGMENTS)
+        # The imm32 of `mov $0x40000,%edx` (ba 00 00 04 00) before each heap's init call.
+        self.assertEqual(writes, [(0x2195c0a, struct.pack('<I', 0x100000)),
+                                  (0x2195c47, struct.pack('<I', 0x100000))])
+        eboot = ROOT / 'out/eboot.elf'
+        if eboot.is_file():   # the dump's executable, after a build
+            data = eboot.read_bytes()
+            for offset, _value in writes:
+                self.assertEqual(data[offset + 0x4000 - 1:offset + 0x4000 + 4], b'\xba\x00\x00\x04\x00')
+
+
 class DebugPatchTests(unittest.TestCase):
     def test_camera_patch_is_optional_and_compatible_with_fps_and_debug_menu(self):
         self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0',
