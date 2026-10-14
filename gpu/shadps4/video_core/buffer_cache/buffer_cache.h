@@ -355,6 +355,12 @@ private:
     /// bbport BB_RESIDENCY_MIX=1 (diagnostics): bindings over blocks in VRAM and in place at once.
     void NoteResidencyMix(u64 first_block, u64 last_block, u64 size, bool is_written);
     void ProcessIdleBlocks();
+    /// bbport: vram_level from the driver's usage and budget (BB_VRAM_PRESSURE_PERCENT, 85).
+    void UpdateVramLevel(u32 now);
+    /// bbport: without the PC memory model, while VRAM is tight (vram_level): VRAM copies of the
+    /// game's data unused for 30 s (10 s when full) leave VRAM; their slots take the next blocks
+    /// instead of new VRAM, and they are uploaded again from the game's memory when bound.
+    void EvictIdleCopies(u32 now);
     /// A VRAM slot of a block that left it: reused by the next move to VRAM.
     void ReleaseResidencySlot(vk::DeviceMemory memory, u64 offset);
     /// Unbinds a VRAM block of memory the game unmapped (uploaded again if mapped and used).
@@ -621,6 +627,21 @@ private:
     std::unordered_map<VkDeviceMemory, ResidencyChunk> residency_chunks;
     u32 idle_scan_second = 0;
     u32 last_evacuation = 0; ///< ProcessIdleBlocks: when a chunk was last emptied
+    /// bbport: how full VRAM is against the driver's budget, once a second (UpdateVramLevel):
+    /// 0 room, 1 tight (idle VRAM copies go back sooner), 2 full (no new ones either).
+    std::atomic<int> vram_level{0};
+    std::atomic<u32> vram_full_until{0}; ///< a failed VRAM allocation counts as full until then
+    u32 vram_level_reports = 0;
+    /// bbport: the second a shader last read the game's memory through the page table
+    /// (SynchronizeDmaBuffers). Those reads do not mark blocks as used, so nothing leaves VRAM
+    /// while such shaders run (EvictIdleCopies).
+    std::atomic<u32> dma_second{0};
+    u64 evicted_bytes = 0;
+    /// Blocks EvictIdleCopies took out of VRAM: they come back with their whole 2 MiB group.
+    TrackedIntervalList<> evicted_blocks;
+    u32 evict_reports = 0, dma_kept_reports = 0, dma_kept_second = 0;
+    /// The seconds a VRAM copy may go unused before it goes back in place, at this level.
+    u32 idle_seconds_now = 60;
     u32 block_size{};
     u32 block_shift{};
     u32 blocks_per_arena_page{};
