@@ -1307,6 +1307,8 @@ void TextureCache::GarbageCollectImages() {
         return gc_tick_at_second[(second - seconds) % gc_tick_at_second.size()];
     };
     const u64 idle_tick = tick_seconds_ago(idle_seconds);
+    // Last used a minute ago or more (lru_touched_tick: real use, not the collector's Touch).
+    const u64 minute_tick = tick_seconds_ago(60);
     std::scoped_lock lock{mutex};
     bool pressured = false;
     bool aggresive = false;
@@ -1340,13 +1342,18 @@ void TextureCache::GarbageCollectImages() {
         // tiled ones cannot be written back at all) neither use up the deletions nor stay first
         // in line. The oldest ten being such render targets stopped the collector for good, and
         // VRAM grew with every area visited up to the pressure mark (~10 GB on 16 GB).
-        if ((tiled && download) || (download && !pressured)) {
+        // Past the critical mark, one unused for a minute goes all the same, unwritten (render
+        // targets of an area left behind): out of VRAM the game would stop instead.
+        const bool drop = tiled && download && aggresive && image.lru_touched_tick < minute_tick;
+        if (!drop && ((tiled && download) || (download && !pressured))) {
             lru_cache.Touch(image.lru_id, gc_tick);
             BbStats::gc_kept_images.fetch_add(1, std::memory_order_relaxed);
             return false;
         }
         --num_deletions;
-        if (download) {
+        if (drop) {
+            ++gc_dropped;
+        } else if (download) {
             // bbport: synchronously, while the image still protects its pages. A deferred
             // write-back landed after FreeImage had unprotected them, over whatever the game
             // had meanwhile stored there (e.g. its heap after unloading an area).
@@ -1385,17 +1392,19 @@ void TextureCache::GarbageCollectImages() {
         lru_cache.ForEachItemBelow(below_tick, clean_up);
     }
     // bbport: evictions under memory pressure, at most every 5 s (BB_FRAME_STATS or not).
-    if (pressured || gc_downloads != 0) {
+    if (pressured || gc_downloads != 0 || gc_dropped != 0) {
         const auto now = std::chrono::steady_clock::now();
         if (now - gc_report_time >= std::chrono::seconds(5)) {
             std::printf("Texture cache: memory pressure, %llu of %llu MiB (critical %llu): "
-                        "%llu images evicted, %llu written back since the last report\n",
+                        "%llu images evicted, %llu written back, %llu GPU-written dropped "
+                        "since the last report\n",
                         (unsigned long long)(total_used_memory >> 20),
                         (unsigned long long)(pressure_gc_memory >> 20),
                         (unsigned long long)(critical_gc_memory >> 20),
-                        (unsigned long long)gc_evictions, (unsigned long long)gc_downloads);
+                        (unsigned long long)gc_evictions, (unsigned long long)gc_downloads,
+                        (unsigned long long)gc_dropped);
             gc_report_time = now;
-            gc_evictions = gc_downloads = 0;
+            gc_evictions = gc_downloads = gc_dropped = 0;
         }
     }
 }
