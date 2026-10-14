@@ -217,7 +217,13 @@ public:
 
 private:
     NpHandler() = default;
-    ~NpHandler() = default;
+    // bbport: Shutdown() is never called; at exit() (an error stop, a test) a joinable worker
+    // made std::thread's destructor abort the process. The worker is told to stop and let go.
+    ~NpHandler() {
+        m_worker_running = false;
+        if (m_worker_thread.joinable())
+            m_worker_thread.detach();
+    }
 
     /// Connect one user.  Blocks until connected+authenticated or failed.
     bool ConnectUser(s32 user_id, const std::string& host, u16 port, const std::string& npid,
