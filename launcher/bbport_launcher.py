@@ -664,8 +664,10 @@ THANKS = (
         _github("willthehuman", "Подробные отчёты с журналами и проверка исправлений"),
         _github("Joomzie", "Идея поменять местами A и B на контроллерах в стиле Nintendo"),
         _github("Kaka556Kevin", "Проверка исправления видеопамяти"),
-        _github("nr1971", "Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах"),
+        _github("nr1971", "Нашёл ошибку, из-за которой игра не запускалась на некоторых видеокартах, "
+                          "и ускорение камеры на DualShock 4"),
         _github("segasonicye", "Нашёл, почему игра не запускалась в игровом режиме Steam Deck"),
+        _github("Monochrome0907", "Нашёл, при каких эффектах зависают загрузки на NVIDIA"),
     )),
     ("Другие благодарности", (
         ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",
@@ -677,6 +679,8 @@ THANKS = (
         ("shadPS4", "Рендерер и компилятор шейдеров", "https://github.com/shadps4-emu/shadPS4"),
         ("pkgforge-dev", "Инструмент для сборки AppImage",
          "https://github.com/pkgforge-dev/Anylinux-AppImages"),
+        ("paulomanrique", "ps4-pkg-extractor: установка игры из файлов .pkg",
+         "https://github.com/paulomanrique/ps4-pkg-extractor"),
     )),
 )
 
@@ -769,6 +773,14 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(launcher)
 
         game = Adw.PreferencesGroup(title=tr("Игра"))
+        # The game from your own PS4 packages: extracted, the update merged, the add-ons apart.
+        self.pkg_row = Adw.ActionRow(title=tr("Установить из PKG"),
+                                     subtitle=tr("Игра, обновление 1.09 и DLC из ваших файлов .pkg"))
+        self.pkg_button = Gtk.Button(label=tr("Выбрать .pkg…"), valign=Gtk.Align.CENTER)
+        self.pkg_button.connect("clicked", self.on_install_pkg)
+        self.pkg_row.add_suffix(self.pkg_button)
+        self.pkg_row.set_visible(pkg_extractor() is not None)
+        game.add(self.pkg_row)
         self.game_row = Adw.ActionRow(title=tr("Папка игры"))
         self.game_status = Gtk.Image()
         self.game_row.add_suffix(self.game_status)
@@ -778,14 +790,6 @@ class LauncherWindow(Adw.ApplicationWindow):
                                              tr("Открыть в файловом менеджере"),
                                              lambda _b: open_folder(self, self.game_dir())))
         game.add(self.game_row)
-        # The game from your own PS4 packages: extracted, the update merged, the add-ons apart.
-        self.pkg_row = Adw.ActionRow(title=tr("Установить из PKG"),
-                                     subtitle=tr("Игра, обновление 1.09 и DLC из ваших файлов .pkg"))
-        self.pkg_button = Gtk.Button(label=tr("Выбрать .pkg…"), valign=Gtk.Align.CENTER)
-        self.pkg_button.connect("clicked", self.on_install_pkg)
-        self.pkg_row.add_suffix(self.pkg_button)
-        self.pkg_row.set_visible(pkg_extractor() is not None)
-        game.add(self.pkg_row)
         # Saves and the shader cache: user/ in the data directory unless chosen.
         self.user_row = Adw.ActionRow(title=tr("Папка сохранений"))
         self.user_status = Gtk.Image()
@@ -2084,6 +2088,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_button.connect("clicked", self.on_update_button)
         self.update_row.add_suffix(self.update_button)
         updates.add(self.update_row)
+        # What changed in the version installed: its release notes on GitHub.
+        notes_url = f"{bbport_update.REPOSITORY_URL}/releases/tag/{bbport_update.VERSION}"
+        notes = Adw.ActionRow(title=tr("Что нового в этой версии"),
+                              subtitle=tr("Изменения версии {} на GitHub").format(bbport_update.VERSION),
+                              activatable=True)
+        notes.add_prefix(Gtk.Image(icon_name="text-x-generic-symbolic"))
+        notes.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
+        notes.connect("activated", lambda _row: self.open_uri(notes_url))
+        updates.add(notes)
         page.add(updates)
         # The game's owners, under everything, as plain text.
         owners = Adw.PreferencesGroup()
