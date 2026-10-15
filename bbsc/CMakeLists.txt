@@ -22,6 +22,7 @@ set(FMT_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include)
 add_library(bbsc SHARED
     emulator/src/core/bloodborne_re.cpp
     emulator/src/core/bbsc_memscan.cpp
+    emulator/src/core/bbsc_i18n.cpp
     emulator/mod/bbsc_relay.cpp
     emulator/mod/bbsc_channel.cpp
     emulator/mod/bbsc_http.cpp

@@ -31,6 +31,7 @@
 #include "common/memory_patcher.h"
 #include "common/path_util.h"
 #include "common/singleton.h"
+#include "core/bbsc_i18n.h" // bbport: BBSC's texts in the game's language
 #include "core/bbsc_memscan.h"
 #include "core/bbsc_persistence.h"
 #include "core/bbsc_cinematic.h"
@@ -11009,7 +11010,7 @@ void TickBbscMessages() {
         if (slot == 0) {
             continue;
         }
-        const u64 wanted = reinterpret_cast<u64>(message.text) - fmg;
+        const u64 wanted = reinterpret_cast<u64>(::Core::Bbsc::Text(message.text)) - fmg;
         if (ReadValue<u64>(slot, 0) == wanted) {
             ++in_place;
         } else if (WriteValue<u64>(slot, 0, wanted)) {
@@ -11080,12 +11081,15 @@ void TickBbscBossLine() {
     if (boss != written_for) {
         written_for = boss;
         const char* name = boss != -1 ? BbscBossNameById(boss) : nullptr;
-        const std::string text = name != nullptr
-                                     ? fmt::format("The host started the battle against\n{}.", name)
-                                     : std::string{"The host started a boss battle."};
+        // bbport: in the game's language (the boss name stays as BbscBossNameById has it).
+        const std::u16string text =
+            name != nullptr
+                ? ::Core::Bbsc::TextWith(u"The host started the battle against\n{boss}.",
+                                         std::u16string(name, name + std::strlen(name)))
+                : std::u16string{::Core::Bbsc::Text(u"The host started a boss battle.")};
         bbsc_boss_line_text = {};
         for (size_t i = 0; i < text.size() && i + 1 < bbsc_boss_line_text.size(); ++i) {
-            bbsc_boss_line_text[i] = static_cast<unsigned char>(text[i]);
+            bbsc_boss_line_text[i] = text[i];
         }
         if (name != nullptr) {
             LOG_INFO(Debug, "BBSC boss line: \"{}\" (boss {})", name, boss);
@@ -11228,6 +11232,7 @@ void BbscAnnounce(const char16_t* text, std::string_view what) {
     if (image_base == 0 || !BbscMessagesEnabled()) {
         return;
     }
+    text = ::Core::Bbsc::Text(text); // bbport: in the game's language
     if (ReadValue<u64>(image_base + BannerPointerOffset, 0) == 0 ||
         ReadValue<u64>(image_base + PlaylogSystemPointerOffset, 0) == 0 ||
         ReadValue<u64>(image_base + MsgRepositoryPointerOffset, 0) == 0 || !SaveBbscRoleLines()) {
@@ -12595,7 +12600,7 @@ void TickBbscDuelBellGive() {
     using Fits = s32 PS4_SYSV_ABI (*)(u64 inventory, const u32* code, s32 count);
     using Add = s32 PS4_SYSV_ABI (*)(u64 inventory, const u32* key, s32 count);
     static std::u16string notice;
-    notice = u"BBSC items added:";
+    notice = ::Core::Bbsc::Text(u"BBSC items added:");
     size_t given = 0;
     for (const BbscKitItem* item : missing) {
         alignas(16) static u32 code = 0;
@@ -12612,7 +12617,7 @@ void TickBbscDuelBellGive() {
         if (now_there) {
             ++given;
             notice += given == 1 ? u"\n" : u", ";
-            notice += item->name;
+            notice += ::Core::Bbsc::Text(item->name);
         }
     }
     if (given != 0) {
