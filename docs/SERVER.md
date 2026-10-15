@@ -158,21 +158,35 @@ Windows players set the same server, WebAPI and account in the Windows port's la
 For [BBSC](ONLINE.md#seamless-co-op-bbsc) with everything on (summons across areas, 5 hunters),
 the group also runs BBSC's game server next to shadNet. It is in this repository,
 `bbsc/server/gameserver/bbsc_gameserver.py` (Python 3, nothing to install), and it takes the
-place of The Hunter's Dream for messages, bloodstains and the server list:
+place of The Hunter's Dream for messages, bloodstains and the server list.
 
-```sh
-python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z
-```
+1. Turn on shadNet's seamless mode: run the shadNet container again with
+   `-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` (it is kept in its `shadnet.cfg`).
+2. Build and start the game server on the same computer, with the same Tailscale address:
+
+   ```sh
+   mkdir bbsc-server && cd bbsc-server
+   for f in Dockerfile entrypoint.sh; do
+       curl -fsSLO "https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/bbsc-server/$f"
+   done
+   docker build -t bbport-bbsc-server .
+   docker run -d --name bbsc-server --restart unless-stopped --network host \
+       -v bbsc-data:/data -e BBSC_HOST=100.x.y.z bbport-bbsc-server
+   docker logs bbsc-server
+   ```
+
+   `BBSC_SHADNET` is the shadNet server's address when it is on another computer. Messages,
+   bloodstains and its logs live in the `bbsc-data` volume. Without Docker:
+   `python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z`.
 
 | Port | Protocol | What |
 |---|---|---|
 | 20443 | TCP | The game server (messages, bloodstains, ghosts) |
 | 20444 | TCP | BBSC's relay (warps, world sync, scaling) |
-| 18671 | TCP | Its bbhost-compatible service (`--no-bbhost` turns it off) |
-| 3478 | UDP | That service's relay |
+| 18671 | TCP | Its bbhost-compatible service (`BBSC_BBHOST=0`, `--no-bbhost`, turns it off) |
+| 3478 | UDP | The relay BBSC players fall back to when they cannot reach each other directly |
 
-shadNet itself needs `BloodborneSeamlessCoop=true` (`-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` with
-Docker). Each player then sets **Game server** to `http://100.x.y.z:20443` in the launcher's
+Each player then sets **Game server** to `http://100.x.y.z:20443` in the launcher's
 Online page, keeps the same shadNet server and account, and turns on **Seamless co-op (BBSC)**.
 BBSC finds its relay at the game server's address (or `BBSC_RELAY`, the relay address in BBSC's
 settings).

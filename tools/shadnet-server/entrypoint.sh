@@ -27,6 +27,20 @@ if [ -n "${SHADNET_HOST:-}" ]; then
         done
     fi
 fi
+# Seamless co-op (BBSC, docs/SERVER.md): the summon broker's seamless mode, on with
+# SHADNET_BLOODBORNE_SEAMLESS_COOP=1 and off with 0; kept in shadnet.cfg otherwise.
+case "${SHADNET_BLOODBORNE_SEAMLESS_COOP:-}" in
+    1|true) seamless=true ;;
+    0|false) seamless=false ;;
+    *) seamless= ;;
+esac
+if [ -n "$seamless" ]; then
+    if grep -q '^BloodborneSeamlessCoop=' shadnet.cfg; then
+        sed -i "s|^BloodborneSeamlessCoop=.*|BloodborneSeamlessCoop=$seamless|" shadnet.cfg
+    else
+        echo "BloodborneSeamlessCoop=$seamless" >> shadnet.cfg
+    fi
+fi
 # The signup code for new accounts (shadnet-sample ... register): kept in shadnet.cfg.
 if [ -n "${SHADNET_REGISTRATION_KEY:-}" ]; then
     sed -i "s|^RegistrationSecretKey=.*|RegistrationSecretKey=${SHADNET_REGISTRATION_KEY}|" shadnet.cfg
