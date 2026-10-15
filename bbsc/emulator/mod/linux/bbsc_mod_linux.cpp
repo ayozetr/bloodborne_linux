@@ -115,8 +115,37 @@ void OpenLog() {
     if (user == nullptr || *user == '\0') {
         user = std::getenv("BB_GPU_USER_DIR");
     }
-    data_dir = std::filesystem::path{user != nullptr && *user != '\0' ? user : "user"} / "bbsc";
+    const std::filesystem::path user_dir{user != nullptr && *user != '\0' ? user : "user"};
+    data_dir = user_dir / "bbsc";
     std::error_code ignored;
+    // BBSC looks for its saves in shadPS4's layout under the US id (user/home/<user>/savedata/
+    // CUSA00207/SPRJ0005); bbport keeps them in user/savedata/<user>/<the game's id>/SPRJ0005 (EU
+    // CUSA00900 and the others). Without them its kit is never given (it backs the saves up first)
+    // and the own-world, loot and progress features have no save slot: point BBSC_SAVE_DIR, BBSC's
+    // own setting for a save folder elsewhere, at the most recently written one.
+    if (const char* set = std::getenv("BBSC_SAVE_DIR"); set == nullptr || *set == '\0') {
+        std::filesystem::path newest;
+        std::filesystem::file_time_type newest_time{};
+        try { // a directory walk's ++ throws even with an error_code
+            for (const auto& owner : std::filesystem::directory_iterator(user_dir / "savedata", ignored)) {
+                for (const auto& title : std::filesystem::directory_iterator(owner.path(), ignored)) {
+                    const auto dir = title.path() / "SPRJ0005";
+                    const auto written = std::filesystem::last_write_time(dir, ignored);
+                    if (!ignored && (newest.empty() || written > newest_time)) {
+                        newest = dir;
+                        newest_time = written;
+                    }
+                    ignored.clear();
+                }
+                ignored.clear();
+            }
+        } catch (const std::exception&) {
+        }
+        ignored.clear();
+        if (!newest.empty()) {
+            setenv("BBSC_SAVE_DIR", newest.c_str(), 1);
+        }
+    }
     std::filesystem::create_directories(data_dir / "captures" / "bloodborne-re", ignored);
     if (ignored) {
         data_dir = std::filesystem::temp_directory_path(ignored) / "bbport-bbsc";
@@ -314,6 +343,11 @@ DWORD WINAPI Worker(void*) {
         return 0;
     }
     LOG_INFO(Mod, "BBSC mod in pid {}", static_cast<int>(getpid()));
+    if (const char* saves = std::getenv("BBSC_SAVE_DIR"); saves != nullptr && *saves != '\0') {
+        LOG_INFO(Mod, "Saves: {}", saves);
+    } else {
+        LOG_WARNING(Mod, "Saves: none found - no co-op kit, own world or shared progress");
+    }
     {
         std::string server;
         if (BbscMod::GameServerIsPublic(&server)) {
