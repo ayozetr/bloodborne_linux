@@ -13,7 +13,7 @@ import re
 import tempfile
 import urllib.request
 
-VERSION = "0.51-linux.7"
+VERSION = "0.51-linux.8"
 REPOSITORY = "ayozetr/bloodborne_linux"
 REPOSITORY_URL = f"https://github.com/{REPOSITORY}"
 UPSTREAM_URL = "https://github.com/deadinside28/bloodborne_pc"
