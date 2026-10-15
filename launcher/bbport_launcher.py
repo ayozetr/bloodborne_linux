@@ -1501,7 +1501,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         """The controller choices: the first connected one, the connected ones, and the saved
         choice while it is not connected."""
         current = self.settings.get("gamepad", "")
-        choices = [(tr("Авто"), "", tr("Первый подключённый"))]
+        choices = [(tr("Авто"), "", tr("Тот, которым играете"))]
         choices += [(name, guid, name) for guid, name in connected_gamepads()]
         if current and current not in [guid for _, guid, _ in choices]:
             name = self.settings.get("gamepad_name") or current

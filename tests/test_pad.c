@@ -141,9 +141,33 @@ int main(void) {
     SDL_UpdateJoysticks();
     SDL_UpdateGamepads();
     assert(pad_read_state(1,&data)==0 && (data.buttons & BTN_LEFT)); /* d-pad alone: as before */
+    assert(SDL_SetJoystickVirtualButton(joystick,SDL_GAMEPAD_BUTTON_DPAD_LEFT,false));
+    /* Two pads, none chosen: the one used takes over (a second pad whose trigger rests at one
+     * end of its axis does not), checked every 200 ms. */
+    desc.name="bbport test second controller";
+    SDL_JoystickID second_id=SDL_AttachVirtualJoystick(&desc);
+    assert(second_id!=0);
+    SDL_Joystick *second=SDL_OpenJoystick(second_id);
+    assert(second && SDL_SetJoystickVirtualAxis(second,SDL_GAMEPAD_AXIS_LEFT_TRIGGER,-32768));
+    SDL_UpdateJoysticks();
+    SDL_UpdateGamepads();
+    SDL_Gamepad *first=gamepad;
+    for (int i=0;i<3;++i) { usleep(210000); assert(pad_read_state(1,&data)==0 && gamepad==first); }
+    assert(SDL_SetJoystickVirtualButton(second,SDL_GAMEPAD_BUTTON_SOUTH,true));
+    SDL_UpdateJoysticks();
+    SDL_UpdateGamepads();
+    usleep(210000);
+    assert(pad_read_state(1,&data)==0);
+    assert(gamepad!=first && SDL_GetGamepadID(gamepad)==second_id);
+    usleep(210000);
+    assert(pad_read_state(1,&data)==0 && (data.buttons & BTN_CIRCLE)); /* pad.circle=a above */
+    assert(SDL_SetJoystickVirtualButton(second,SDL_GAMEPAD_BUTTON_SOUTH,false));
+    SDL_CloseJoystick(second);
+    for (int s=0;s<MAX_OTHER_PADS;++s) if (other_pads[s].pad) { SDL_CloseGamepad(other_pads[s].pad); other_pads[s].pad=NULL; }
     SDL_CloseJoystick(joystick);
     if (gamepad) SDL_CloseGamepad(gamepad);
     gamepad=NULL;
+    assert(SDL_DetachVirtualJoystick(second_id));
     assert(SDL_DetachVirtualJoystick(id));
     SDL_Quit();
     unlink(path);
@@ -218,5 +242,5 @@ int main(void) {
         assert(m.right_x==128 && m.right_y==255);
         pad_invert_look_x=pad_invert_look_y=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options");
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options, pad in use");
 }

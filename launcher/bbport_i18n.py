@@ -76,7 +76,7 @@ EN = {
     "Камера вправо": "Camera right",
     "Контроллер": "Controller",
     "Выбранный берётся, как только подключится": "The chosen one is used as soon as it connects",
-    "Первый подключённый": "First connected",
+    "Тот, которым играете": "The one you play with",
     "{} (не подключён)": "{} (not connected)",
     "Монитор": "Monitor",
     "Пропускать выбор «по сети / вне сети»": "Skip the \u201cplay online / offline\u201d choice",
@@ -1030,8 +1030,8 @@ PT_BR = {
         "Controle",
     "Выбранный берётся, как только подключится":
         "O escolhido é usado assim que se conectar",
-    "Первый подключённый":
-        "O primeiro conectado",
+    "Тот, которым играете":
+        "O que você estiver usando",
     "{} (не подключён)":
         "{} (não conectado)",
     "Монитор":
@@ -1434,7 +1434,7 @@ ES = {
     "Камера вправо": "Cámara a la derecha",
     "Контроллер": "Mando",
     "Выбранный берётся, как только подключится": "Se usa el elegido en cuanto se conecta",
-    "Первый подключённый": "El primero conectado",
+    "Тот, которым играете": "El que estés usando",
     "{} (не подключён)": "{} (no conectado)",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Se necesita la actualización 1.09: copia la actualización 1.09 volcada en la carpeta del juego, reemplazando los archivos (versión encontrada: {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin no es de la 1.09: copia eboot.bin de la actualización 1.09 volcada en la carpeta del juego, reemplazándolo",
@@ -2057,7 +2057,7 @@ IT = {
     "Камера вправо": "Camera a destra",
     "Контроллер": "Controller",
     "Выбранный берётся, как только подключится": "Quello scelto viene usato non appena si connette",
-    "Первый подключённый": "Il primo connesso",
+    "Тот, которым играете": "Quello che stai usando",
     "{} (не подключён)": "{} (non connesso)",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Serve l'aggiornamento 1.09: copia l'aggiornamento 1.09 estratto nella cartella del gioco, sostituendo i file (versione trovata {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin non è della 1.09: copia eboot.bin dall'aggiornamento 1.09 estratto nella cartella del gioco, sostituendolo",
@@ -2680,7 +2680,7 @@ FR = {
     "Камера вправо": "Caméra vers la droite",
     "Контроллер": "Manette",
     "Выбранный берётся, как только подключится": "Celle choisie est utilisée dès qu'elle se connecte",
-    "Первый подключённый": "Première connectée",
+    "Тот, которым играете": "Celle que vous utilisez",
     "{} (не подключён)": "{} (non connectée)",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "La mise à jour 1.09 est nécessaire : copiez la mise à jour 1.09 extraite dans le dossier du jeu, en remplaçant les fichiers (version trouvée : {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "eboot.bin n'est pas celui de la 1.09 : copiez eboot.bin de la mise à jour 1.09 extraite dans le dossier du jeu, en le remplaçant",
@@ -3303,7 +3303,7 @@ DE = {
     "Камера вправо": "Kamera nach rechts",
     "Контроллер": "Controller",
     "Выбранный берётся, как только подключится": "Der ausgewählte Controller wird verwendet, sobald er verbunden ist",
-    "Первый подключённый": "Zuerst verbundener",
+    "Тот, которым играете": "Der, mit dem du spielst",
     "{} (не подключён)": "{} (nicht verbunden)",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})": "Das Update 1.09 wird benötigt: Kopiere das extrahierte Update 1.09 in den Spielordner und ersetze dabei die Dateien (gefundene Version {})",
     "eboot.bin не от версии 1.09: скопируйте eboot.bin из дампа обновления 1.09 в папку игры с заменой": "Die eboot.bin ist nicht von 1.09: Kopiere die eboot.bin aus dem extrahierten Update 1.09 in den Spielordner und ersetze sie",
@@ -3924,7 +3924,7 @@ ZH_CN = {
     "Камера вправо": "镜头向右",
     "Контроллер": "控制器",
     "Выбранный берётся, как только подключится": "所选手柄一旦连接即会被使用",
-    "Первый подключённый": "第一个已连接的手柄",
+    "Тот, которым играете": "你正在使用的手柄",
     "{} (не подключён)": "{}（未连接）",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})":
         "需要 1.09 更新：请将转储出的 1.09 更新文件复制到游戏文件夹并覆盖（当前检测到版本 {}）",
