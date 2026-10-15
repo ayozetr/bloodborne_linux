@@ -132,10 +132,16 @@ fi
 # prompts and the gestures menu, made from the game's files (scripts/menu_prompts.py).
 ui_mods=$("$PYTHON" scripts/menu_prompts.py "$game" --out "$out" --prompts "${BB_PROMPTS:-playstation}" \
     --gestures "${BB_GESTURES_NO_MOTION:-0}" --config "$BB_CONFIG")
+# Quit to Desktop in the title and System menus (bbport.ini quit_to_desktop, on by default): the
+# entries' texts in every language and six-row title and System menus, a layer after the prompts;
+# patches.py adds the menu code. Optional: without the layer (turned off, or its files could not be
+# made) the code is left out too and the game starts without the entries (scripts/quit_menu.py).
+quit_layer=$("$PYTHON" scripts/quit_menu.py "$game" --out "$out/quit-menu" --config "$BB_CONFIG") || quit_layer=
+if [[ -n $quit_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$quit_layer; fi
 # Ultrawide (BB_UI_RES above): the menu movies with full-screen backdrops widened and the HUD's
 # corner groups toward the screen edges (bbport.ini hud_position, 0 centred .. 100 edges), laid
-# after the prompts (its gestures menu is built on theirs). Optional: without it the HUD stays in
-# the centred 16:9 area (scripts/hud_layout.py).
+# after the prompts and Quit to Desktop (its gestures menu and six-row menus are built on theirs).
+# Optional: without it the HUD stays in the centred 16:9 area (scripts/hud_layout.py).
 if [[ -n ${BB_UI_RES:-} ]]; then
     hud_layer=$("$PYTHON" scripts/hud_layout.py "$game" --out "$out/hud-layout" \
         --canvas-width "${BB_UI_RES%x*}" --config "$BB_CONFIG" --source "$ui_mods") || hud_layer=
@@ -168,6 +174,7 @@ fi
 # param.sfo says; it picks the regional text (Spanish from Spain or Latin American).
 "$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" --region "${BB_REGION:-}"
 "$PYTHON" scripts/patches.py --out "$out" --fps "$fps" --extra "${BB_PATCHES:-}" --settings "$BB_CONFIG" --game-dir "$game" --render-res "${BB_RENDER_RES:-}" --output-res "${BB_OUTPUT_RES:-}" \
+    --quit-to-desktop "$([[ -n $quit_layer ]] && echo 1 || echo 0)" \
     --patches-dir "${BB_PATCHES_DIR:-$data/patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}"
 # Background upload of the game's GPU memory into VRAM ahead of use (BufferCache::Preupload):
 # 1 = only memory already in VRAM that the game rewrote (no new VRAM), 2 = all of it (~3 GB more

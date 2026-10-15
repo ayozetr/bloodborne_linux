@@ -13,6 +13,7 @@
 #ifndef _WIN32
 #include <pthread.h>
 #include <time.h>
+#include <SDL3/SDL.h>
 #include <arpa/inet.h>
 
 #define USER_ID 1
@@ -89,7 +90,57 @@ static ABI int32_t system_status(unsigned char *status) {
 }
 static ABI int32_t system_event(void *event) { (void)event; return SYSTEM_NO_EVENT; }
 static ABI int32_t hide_splash(void) { note("SystemService: splash screen hidden"); return 0; }
-static ABI int32_t launch_browser(void) { note("SystemService: web browser request ignored (offline)"); return 0; }
+/* Quit to Desktop (bbport.ini quit_to_desktop, scripts/quit_menu.py): the patched menus call the
+ * browser with these addresses. "bb:q" (title menu) closes the game; "bb:p" (System menu, in the
+ * world) marks the Exit Game that follows, and "bb:d" (its confirmation dialog) answers 1 to show
+ * the Quit to Desktop question and arms the quit. The game then saves and leaves the world, and
+ * closes as soon as it starts the intro logos (a menu/logo_ file opens) with no save data mounted,
+ * or after the last save unmounts, or when the title screen is built ("bb:t", with the intro
+ * skipped). An unanswered dialog disarms it after two minutes. Closing is the window's own close
+ * (SDL_EVENT_QUIT: the window thread ends the process with exit code 0). */
+#define QUIT_ARMED_SECONDS 120
+static int quit_pending, quit_waiting;
+static time_t quit_armed;
+static pthread_mutex_t quit_lock=PTHREAD_MUTEX_INITIALIZER;
+static void quit_game(void) {
+    note("Quit to Desktop");
+    fflush(stdout);
+    SDL_Event quit={.type=SDL_EVENT_QUIT};
+    if (!SDL_PushEvent(&quit)) printf("Runtime: Quit to Desktop: %s\n",SDL_GetError());
+}
+static int quit_ready(void) { return quit_armed && time(NULL)-quit_armed<QUIT_ARMED_SECONDS; }
+void runtime_quit_on_open(const char *guest) {
+    if (!guest || !strstr(guest,"/menu/logo_")) return;
+    pthread_mutex_lock(&quit_lock);
+    if (quit_ready()) {
+        quit_armed=0;
+        /* A save still writing finishes first (runtime_quit_on_save_done). */
+        if (runtime_savedata_mounted()) quit_waiting=1; else quit_game();
+    }
+    pthread_mutex_unlock(&quit_lock);
+}
+void runtime_quit_on_save_done(void) {
+    pthread_mutex_lock(&quit_lock);
+    if (quit_waiting && !runtime_savedata_mounted()) { quit_waiting=0; quit_game(); }
+    pthread_mutex_unlock(&quit_lock);
+}
+static ABI int32_t launch_browser(const char *url) {
+    int32_t result=0;
+    pthread_mutex_lock(&quit_lock);
+    if (url && !strcmp(url,"bb:q")) quit_game();
+    else if (url && !strcmp(url,"bb:p")) quit_pending=1;
+    else if (url && !strcmp(url,"bb:d")) {
+        result=quit_pending;
+        quit_pending=0;
+        quit_armed=result ? time(NULL) : 0;
+    } else if (url && !strcmp(url,"bb:t")) {
+        if (quit_ready() || quit_waiting) quit_game();
+        quit_armed=0;
+        quit_waiting=0;
+    } else note("SystemService: web browser request ignored (offline)");
+    pthread_mutex_unlock(&quit_lock);
+    return result;
+}
 
 /* ---- NetCtl / Net / Http / Ssl: no network ---- */
 static int32_t net_errno;

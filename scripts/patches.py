@@ -317,6 +317,39 @@ def eboot_segments(elf):
     return segments
 
 
+def eboot_bytes(elf,start,end):
+    """The eboot's memory image at [start, end): its PT_LOAD file bytes, zero past their file size."""
+    phoff,=struct.unpack_from('<Q',elf,0x20)
+    phentsize,phnum=struct.unpack_from('<HH',elf,0x36)
+    out=bytearray(end-start)
+    for i in range(phnum):
+        kind,_,offset,vaddr,_,filesz,_,_=struct.unpack_from('<IIQQQQQQ',elf,phoff+i*phentsize)
+        low,high=max(start,vaddr),min(end,vaddr+filesz)
+        if kind==1 and low<high: out[low-start:high-start]=elf[offset+low-vaddr:offset+high-vaddr]
+    return bytes(out)
+
+
+def quit_to_desktop_writes(elf,others=()):
+    """Quit to Desktop in the title and System menus (scripts/quit_menu.py; its texts are a mod
+    layer that run.sh makes first): [] when the eboot is not the 01.09 code it was made for, or
+    when another enabled patch writes any of the same bytes (an external "Exit Game (title menu)"
+    patch, say: that one is kept, as the user chose it)."""
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    import quit_menu
+    try:
+        quit_menu.check_original(lambda start,end: eboot_bytes(elf,start,end))
+    except ValueError as error:
+        print(f'Patches: {error}; Quit to Desktop skipped')
+        return []
+    writes=quit_menu.code_writes()
+    for offset,data in others:
+        if any(offset<at+len(ours) and at<offset+len(data) for at,ours in writes):
+            print(f'Patches: another patch writes {offset+EBOOT_BASE:#x}, in the menu code of Quit to '
+                  'Desktop; Quit to Desktop skipped')
+            return []
+    return writes
+
+
 def encode(line):
     kind,value=line.get('Type'),line.get('Value')
     if kind=='bytes': return bytes.fromhex(value.replace(' ',''))
@@ -428,6 +461,8 @@ def main():
     p.add_argument('--render-res',default='',help='render resolution WxH (overrides the preset)')
     p.add_argument('--print-preset-size',action='store_true',help='print the selected preset size, if reduced')
     p.add_argument('--output-res',default='',help='output resolution WxH (the upscaler\'s; the UI stays 1080 high, wider for ultrawide)')
+    p.add_argument('--quit-to-desktop',choices=('0','1'),default='1',
+                   help='0: without the Quit to Desktop code (run.sh, when its menu texts are missing)')
     p.add_argument('--print-scaled',action='store_true',
                    help='print "RENDER OUTPUT UI" (WxH) when bbport.ini selects an output other than 1080p')
     a=p.parse_args()
@@ -475,10 +510,17 @@ def main():
             writes+=compile_patches(a.xml,[heap],a.app_version,segments)
             names.append(heap)
         print(f'Patches: scene {size[0]}x{size[1]}; UI {ui[0]}x{ui[1]}')
+    external=[]
     if a.patches_dir:
-        # After the built-in ones: an external patch of the same bytes wins.
-        writes+=compile_external(external_selection(external_patches(a.patches_dir,a.app_version,a.xml),
-                                                    a.patches_config),segments)
+        external=compile_external(external_selection(external_patches(a.patches_dir,a.app_version,a.xml),
+                                                     a.patches_config),segments)
+    if a.quit_to_desktop=='1' and settings.get('quit_to_desktop','1')!='0':
+        quit=quit_to_desktop_writes((a.out/'eboot.elf').read_bytes(),writes+external)
+        if quit:
+            writes+=quit
+            names.append('Quit to Desktop')
+    # After the built-in ones: an external patch of the same bytes wins.
+    writes+=external
     # BBPATCH2: the patch base, so the loader can rebase pointers the patches write into
     # relocated slots (60/90 FPS++ replace function pointers).
     blob=struct.pack('<8sQQ',b'BBPATCH2',EBOOT_BASE,len(writes))

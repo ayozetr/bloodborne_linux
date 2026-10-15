@@ -292,6 +292,9 @@ void DefineTexts() {
          "Включается Cross + L3", false},
         {"debug_menu", "Debug menu", "Debug menu", "The game's debug menu (requires font files)",
          "Отладочное меню игры (нужны файлы шрифтов)", false},
+        {"quit_to_desktop", "Quit to Desktop", "Выйти на рабочий стол",
+         "Quit to Desktop in the title and System menus",
+         "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»", false},
     };
     for (int e = 0; e < BbSettings::EffectCount; ++e) {
         const auto& effect = BbSettings::Effects[e];

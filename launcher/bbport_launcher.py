@@ -117,6 +117,8 @@ EFFECTS = [
     ("skip_intro", "Пропуск заставок при запуске", False),
     ("debug_camera", "Свободная камера (Cross + L3 / Space + Z)", False),
     ("debug_menu", "Debug menu (левый touchpad / Tab; нужны шрифты)", False),
+    # The menus' own entry (scripts/quit_menu.py: menu texts and a patch at start).
+    ("quit_to_desktop", "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»", True),
 ]
 # Cheats and gameplay tweaks (community patches for 1.09, applied at start): bbport.ini key, title,
 # subtitle. All off by default.
@@ -751,7 +753,8 @@ THANKS = (
         _github("parsifal295", "Выход из игры из меню с контроллера, меню в пределах экрана "
                                "и половины тачпада на Xbox"),
         _github("emurphy04", "Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: "
-                             "камера, интерфейс и его положение"),
+                             "камера, интерфейс и его положение; "
+                             "пункт «Выйти на рабочий стол» в меню игры"),
         _github("AyrtonSanabio", "Язык внутриигрового меню при запуске без окна лаунчера"),
         _github("Aryxa", "DLSS в AppImage на NVIDIA"),
         _github("pmwork-personal", "Сверхширокие мониторы без растянутой картинки"),
@@ -1173,6 +1176,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             if key == "debug_menu":
                 row.set_subtitle(tr("Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в "
                                     "dvdroot_ps4 игры или модом; без неё патч не применяется"))
+            elif key == "quit_to_desktop":
+                row.set_subtitle(tr("В меню «Система» игра сначала сохраняется, как при «Выходе из "
+                                    "игры», и потом закрывается"))
             self.effect_rows[key] = row
             effects.add(row)
         # The title's "play online / play offline": the port has no PSN.

@@ -9,6 +9,11 @@
 extern __thread sigjmp_buf *runtime_fault_recover;
 /* Restarts the game (in-game settings menu, render resolution change). */
 void runtime_restart(void);
+/* Quit to Desktop (runtime_services.c, scripts/quit_menu.py): a file the game opens, the end of a
+ * save, and the save data mounted now. */
+void runtime_quit_on_open(const char *guest);
+void runtime_quit_on_save_done(void);
+int runtime_savedata_mounted(void);
 #endif
 #define ABI __attribute__((sysv_abi))
 typedef void (ABI *GuestCallback)(void);

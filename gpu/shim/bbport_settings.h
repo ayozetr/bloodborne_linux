@@ -48,6 +48,9 @@ inline constexpr Effect Effects[] = {
     {"skip_intro", "Skip startup intros", "Пропуск заставок при запуске", false},
     {"debug_camera", "Free camera (Cross + L3)", "Свободная камера (Cross + L3)", false},
     {"debug_menu", "Debug menu (requires font files)", "Debug menu (нужны файлы шрифтов)", false},
+    // The menus' own entry rather than an effect, patched at start the same way (quit_menu.py).
+    {"quit_to_desktop", "Quit to Desktop in the title and System menus",
+     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»", true},
     // Cheats and gameplay tweaks (launcher "Cheats" page).
     {"cheat_no_death", "Cheat: never die (not below 1 HP)", "Чит: бессмертие (не ниже 1 HP)", false},
     {"cheat_stealth", "Cheat: enemies do not see you", "Чит: враги не замечают", false},

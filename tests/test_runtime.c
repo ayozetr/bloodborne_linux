@@ -14,6 +14,7 @@ void runtime_restart(void) { abort(); }
 #include <stdatomic.h>
 #include <unistd.h>
 #include <time.h>
+#include <SDL3/SDL.h>
 
 typedef int (ABI *Register)(GuestCallback);
 typedef int (ABI *RegisterCxa)(void (ABI *)(void *), void *, void *);
@@ -412,6 +413,40 @@ static int trophy_platinum(int legacy) {
     rmdir(dir);
     return platinum;
 }
+/* Quit to Desktop (scripts/quit_menu.py): the menus' browser messages and the closes they cause. */
+typedef int32_t (ABI *Browser)(const char *, const void *);
+static int quit_events(void) {
+    SDL_Event e;
+    int n=0;
+    while (SDL_PeepEvents(&e,1,SDL_GETEVENT,SDL_EVENT_QUIT,SDL_EVENT_QUIT)==1) ++n;
+    return n;
+}
+static void quit_to_desktop(void) {
+    assert(SDL_Init(SDL_INIT_EVENTS));
+    Browser browser=GET(Browser,"-+3hY+y8bNo#V#W");
+    assert(browser);
+    assert(browser("https://www.playstation.com",NULL)==0 && quit_events()==0);
+    /* Title menu: closes at once. */
+    assert(browser("bb:q",NULL)==0 && quit_events()==1);
+    /* The game's own Exit Game: its dialog stays the game's, nothing closes afterwards. */
+    assert(browser("bb:d",NULL)==0);
+    runtime_quit_on_open("/app0/dvdroot_ps4/menu/logo_01.tpf.dcx");
+    assert(browser("bb:t",NULL)==0 && quit_events()==0);
+    /* System menu: armed by the dialog, closes when the intro logos load (no save mounted). */
+    assert(browser("bb:p",NULL)==0 && browser("bb:d",NULL)==1);
+    runtime_quit_on_open("/app0/dvdroot_ps4/menu/title.gfx");
+    runtime_quit_on_save_done();
+    assert(quit_events()==0);
+    runtime_quit_on_open("/app0/dvdroot_ps4/menu/logo_01.tpf.dcx");
+    assert(quit_events()==1);
+    runtime_quit_on_open("/app0/dvdroot_ps4/menu/logo_01.tpf.dcx");
+    assert(browser("bb:t",NULL)==0 && quit_events()==0);
+    /* With the intro skipped: closes when the title screen is built. */
+    assert(browser("bb:p",NULL)==0 && browser("bb:d",NULL)==1);
+    assert(browser("bb:t",NULL)==0 && quit_events()==1);
+    assert(browser("bb:t",NULL)==0 && quit_events()==0);
+    SDL_Quit();
+}
 int main(int argc,char **argv) {
     runtime_start(0); assert(runtime_resolve("bzQExy189ZI#q#q",0)==0);
     runtime_start(1);
@@ -440,7 +475,7 @@ int main(int argc,char **argv) {
     if (argc>1 && !strcmp(argv[1],"--trophy-platinum")) { assert(trophy_platinum(0)==0); return 0; }
     if (argc>1 && !strcmp(argv[1],"--trophy-platinum-legacy")) { assert(trophy_platinum(1)==-1); return 0; }
     libc_support(); posix_mutexes(); wall_time(); exit_handlers(); guards(); mutexes(); direct_memory(); write_traps(); memory_primitives();
-    rw_lifecycle(); rw_concurrency(); rw_timeouts();
-    puts("PASS: callback lifecycle, guard ABI, mutex errors, shared direct memory, memory primitives, resolver scope");
+    rw_lifecycle(); rw_concurrency(); rw_timeouts(); quit_to_desktop();
+    puts("PASS: callback lifecycle, guard ABI, mutex errors, shared direct memory, memory primitives, resolver scope, Quit to Desktop");
     return 0;
 }

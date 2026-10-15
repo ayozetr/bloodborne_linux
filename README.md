@@ -27,6 +27,7 @@ projects ([credits](docs/CREDITS.md)).
 - **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
 - **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
   game**, and **keyboard and mouse**, with a direct 1:1 mouse camera and keys you can rebind.
+- **Quit to Desktop** from the game's title and System menus (it saves first).
 - **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
 - **Trophies and the platinum**, with a notice in the game like on the PS4.
 - **Add to Steam** in one click, and **Discord Rich Presence** with your area and co-op partners.

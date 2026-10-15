@@ -62,6 +62,26 @@ to the screen edges, and menu backdrops cover the whole width. These sizes need 
 changing them in the game restarts it, and TAA (which needs live resolution changes) leaves them
 stretched. `aspect_patch=0` in bbport.ini turns the wider view off.
 
+## Quit to Desktop is missing from the menus, or shows another name
+
+**Settings → Game effects → Quit to Desktop in the title and System menus** (also in the in-game
+menu; on by default) adds the entry to the title menu and to the System menu. The title entry
+closes the game at once; the System entry runs the game's own *Exit Game* first (it saves, and
+its confirmation asks to quit to the desktop), and the game closes when it is back at the intro
+or the title screen. The log then says `Runtime: Quit to Desktop`, and the game ends with exit
+code 0, as when the window is closed.
+
+- No entry, and the log says `Quit to Desktop: ...; the game starts without it` or
+  `Patches: ... Quit to Desktop skipped`: the menu texts could not be made from the game's files,
+  or the game's executable is not the 1.09 code the entry was made for.
+- A third-party *Exit Game (title menu)* patch (`Bloodborne_exit_game.xml` in the patches folder)
+  also adds a way out to the title menu. When it changes any of the code Quit to Desktop changes,
+  that patch is kept and Quit to Desktop's code is left out (`another patch writes ...` in the
+  log): the System menu has no entry then. Quit to Desktop does the same and saves first from
+  the System menu, so turn that patch off.
+- A mod that replaces `msg/<language>/menu.msgbnd.dcx` (a translation) is laid over Quit to
+  Desktop's texts: the entries keep that mod's names (*Opinion Box*, *Language*).
+
 ## The camera turns much faster on diagonals
 
 With the right stick pushed all the way, the game switches to its fast turn (about twice the
