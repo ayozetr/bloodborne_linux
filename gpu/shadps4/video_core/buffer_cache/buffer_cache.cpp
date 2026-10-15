@@ -1467,6 +1467,9 @@ void BufferCache::EnsureResident(const Buffer* arena, u64 first_block, u64 last_
                                  bool in_place) {
     BB_SECTION(EnsureResident);
     NoteUse(first_block << block_shift, (last_block - first_block + 1) << block_shift);
+    if (!promoted_reused.empty()) {
+        ClearPromotedSlots();
+    }
     if (maintained_epoch != packet_epoch) {
         Maintain();
     }
@@ -3142,6 +3145,9 @@ void BufferCache::QueuePromotions(u64 submitted) {
         }
         memory_tracker->UnmarkRegionAsGpuModified(address, block_size);
         gpu_modified_ranges.Subtract(address, block_size);
+        if (free_slot_count != 0) { // AllocateResidency hands out a slot another block left
+            promoted_reused.push_back(block);
+        }
         const auto [memory, offset] = AllocateResidency(block_size);
         Backing backing;
         backing.start = block;
@@ -3189,6 +3195,41 @@ void BufferCache::QueuePromotions(u64 submitted) {
                     (unsigned long long)((promoted_bytes + moved) >> 20));
     }
     promoted_bytes += moved;
+}
+
+void BufferCache::ClearPromotedSlots() {
+    // bbport: a block moved into VRAM gets only the ranges bound uploaded, and the rest of a slot
+    // another block left still held that block's data: draws reading past their range (vertex
+    // buffers bound without a size) read it, stretched polygons and flashing lights, as with the
+    // slots EnsureResident reuses. Cleared like new VRAM, before the uploads that follow. Only a
+    // block still in its VRAM copy: one back in place has the game's memory bound there.
+    std::sort(promoted_reused.begin(), promoted_reused.end());
+    promoted_reused.erase(std::unique(promoted_reused.begin(), promoted_reused.end()),
+                          promoted_reused.end());
+    const Buffer* run_arena = nullptr;
+    u64 run_start = 0, run_end = 0;
+    const auto flush = [&] {
+        if (run_arena && run_end > run_start) {
+            runtime.FillBuffer(run_arena, (run_start << block_shift) - run_arena->cpu_addr,
+                               (run_end - run_start) << block_shift, 0u);
+        }
+        run_arena = nullptr;
+    };
+    for (const u64 block : promoted_reused) {
+        const Buffer* arena = address_space[block >> (ARENA_PAGE_BITS - block_shift)];
+        if (!arena || in_place_blocks.Contains(block) || !resident_ranges.Contains(block)) {
+            flush();
+            continue;
+        }
+        if (arena != run_arena || block != run_end) {
+            flush();
+            run_arena = arena;
+            run_start = block;
+        }
+        run_end = block + 1;
+    }
+    flush();
+    promoted_reused.clear();
 }
 
 void BufferCache::UnmapInPlace(VAddr addr, u64 size) {
@@ -3291,6 +3332,9 @@ bool BufferCache::IsInPlace(VAddr addr, u64 size) const {
 
 bool BufferCache::SynchronizeMemory(const Buffer* arena, VAddr device_addr, u32 size,
                                     bool is_written, bool is_texel_buffer) {
+    if (!promoted_reused.empty()) {
+        ClearPromotedSlots(); // before any upload into them (SynchronizeDmaBuffers comes here too)
+    }
     boost::container::small_vector<std::pair<vk::Buffer, vk::BufferCopy>, 4> chunk_copies;
     // bbport BB_GUEST_IN_PLACE: the arena is the game's memory there: nothing to upload, no
     // write tracking, and GPU writes need no readback. Images aliasing it still sync.

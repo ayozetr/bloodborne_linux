@@ -342,6 +342,8 @@ private:
     /// next submission (once `submitted` is done).
     void QueueCopyBacks(u64 submitted);
     void QueuePromotions(u64 submitted);
+    /// Clears the VRAM slots QueuePromotions reused (see promoted_reused).
+    void ClearPromotedSlots();
     void ReportInPlaceBlocks(); ///< bbport BB_RESIDENCY_REPORT (diagnostics)
     /// Arena residency memory from the 64 MiB blocks: the memory and the byte offset in it.
     std::pair<vk::DeviceMemory, u64> AllocateResidency(u64 bytes);
@@ -639,6 +641,10 @@ private:
     u64 evicted_bytes = 0;
     /// Blocks EvictIdleCopies took out of VRAM: they come back with their whole 2 MiB group.
     TrackedIntervalList<> evicted_blocks;
+    /// Blocks QueuePromotions moved into slots other blocks left (the PC memory model on the
+    /// sparse arena): cleared at the next EnsureResident, from the next submission, which waits
+    /// for their bind (in QueuePromotions, a command would land before it, in the game's memory).
+    std::vector<u64> promoted_reused;
     u32 evict_reports = 0, dma_kept_reports = 0, dma_kept_second = 0;
     /// The seconds a VRAM copy may go unused before it goes back in place, at this level.
     u32 idle_seconds_now = 60;
