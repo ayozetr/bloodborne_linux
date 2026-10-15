@@ -34,6 +34,7 @@
 #include "core/memory.h"
 #include "core/signals.h"
 #include "sdl_window.h"
+#include "bloodborne_cam.h"
 #include "video_core/renderer_vulkan/vk_rasterizer.h"
 
 extern "C" {
@@ -482,6 +483,10 @@ extern "C" int bbgpu_mouse_captured(void) {
 
 extern "C" void bbgpu_mouse_look_enable(int enabled) {
     Frontend::WindowSDL::EnableMouseLook(enabled != 0);
+}
+
+extern "C" void bbgpu_mouse_camera_configure(int direct, float sensitivity) {
+    BbCamera::Configure(direct != 0, sensitivity);
 }
 
 extern "C" int bbgpu_text_input_begin(const char* initial, const char* prompt) {

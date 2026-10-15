@@ -7,6 +7,7 @@
 #include "common/logging/log.h"
 #include "sdl_window.h"
 #include "bbport_overlay.h"
+#include "bloodborne_cam.h"
 
 namespace Frontend {
 
@@ -205,9 +206,14 @@ bool WindowSDL::PollEvents() {
         if (event.type == SDL_EVENT_MOUSE_MOTION) {
             last_mouse_motion_ms = SDL_GetTicks();
             if (mouse_captured.load(std::memory_order_relaxed)) {
-                std::scoped_lock lock{mouse_mutex};
-                mouse_dx += event.motion.xrel;
-                mouse_dy += event.motion.yrel;
+                // mouse_camera=direct: the motion turns the camera itself, and goes to the stick
+                // only while locked on (a flick switches targets).
+                BbCamera::OnMouseMotion(event.motion.xrel, event.motion.yrel);
+                if (!BbCamera::Enabled() || BbCamera::LockedOn()) {
+                    std::scoped_lock lock{mouse_mutex};
+                    mouse_dx += event.motion.xrel;
+                    mouse_dy += event.motion.yrel;
+                }
             }
         }
         if (text_active && (event.type == SDL_EVENT_TEXT_INPUT || event.type == SDL_EVENT_KEY_DOWN)) {
@@ -272,8 +278,22 @@ bool WindowSDL::PollEvents() {
         (BbOverlay::MenuOpen() || text_active || !mouse_look.load(std::memory_order_relaxed))) {
         CaptureMouse(false);
     }
+    UpdateMouseCamera();
     UpdateCursor();
     return is_open;
+}
+
+// mouse_camera=direct: the camera hook is in while the window holds the mouse, and out otherwise
+// (its NOPs stop the game's own camera turning: the stick turns it again). Code the hook does not
+// know is reported once and left alone.
+void WindowSDL::UpdateMouseCamera() {
+    const bool wanted = BbCamera::Configured() && mouse_look.load(std::memory_order_relaxed) &&
+                        mouse_captured.load(std::memory_order_relaxed);
+    if (!wanted && BbCamera::Enabled()) {
+        BbCamera::SetEnabled(false);
+    } else if (wanted && !BbCamera::Enabled() && !camera_hook_failed) {
+        camera_hook_failed = !BbCamera::SetEnabled(true);
+    }
 }
 
 // Issue #3: the OS cursor over the game. Hidden in fullscreen, and in a window after 3 s without

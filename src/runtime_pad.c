@@ -442,6 +442,9 @@ static int key_from_name(const char *name) {
  * ~1000 pixels/s turn the camera at full speed), mouse_invert_y=1. */
 static int mouse_look=1, mouse_invert_y;
 static float mouse_sensitivity=1.0f;
+/* mouse_camera=direct: the mouse turns the game's camera itself, 1:1 (gpu/shim/bloodborne_cam.h),
+ * at mouse_sensitivity (1: 900 counts per radian); default stick, the motion as the right stick. */
+static int mouse_camera_direct;
 /* Keyboard movement (bbport.ini): stick_socd=neutral makes opposite keys held together cancel out
  * (default: the one pressed last wins); stick_circular=0 leaves a diagonal of the movement keys at
  * the corner of the square (default: within a round gate, as a thumbstick). */
@@ -456,7 +459,7 @@ static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
-    mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f;
+    mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=0;
     stick_socd_last=1; stick_circular=1; pad_round_gate=1;
     pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0;
     const char *path=getenv("BB_CONFIG");
@@ -470,6 +473,7 @@ static void load_bindings(void) {
             const char *value=eq+1;
             if (!strncmp(line,"mouse_look=",11)) mouse_look=atoi(value)!=0;
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
+            else if (!strncmp(line,"mouse_camera=",13)) mouse_camera_direct=!strncmp(value,"direct",6);
             else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
             else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
             else if (!strncmp(line,"pad_round_gate=",15)) pad_round_gate=atoi(value)!=0;
@@ -679,7 +683,11 @@ static void sample_host(PadData *d) {
     d->connected=1; d->connected_count=connected_count ? connected_count : 1;
     d->timestamp=now_us();
     SDL_Gamepad *g=current_gamepad();
-    if (!bindings_ready) { load_bindings(); bindings_ready=1; bbgpu_mouse_look_enable(mouse_look); }
+    if (!bindings_ready) {
+        load_bindings(); bindings_ready=1;
+        bbgpu_mouse_look_enable(mouse_look);
+        bbgpu_mouse_camera_configure(mouse_camera_direct,mouse_sensitivity);
+    }
     /* The mouse's motion and wheel since the last sample (always taken: none of it piles up while
      * the menu is open); it counts while the window holds the mouse. */
     double mouse_dx=0, mouse_dy=0;

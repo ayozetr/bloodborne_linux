@@ -8,6 +8,9 @@ int bbgpu_overlay_captures_input(void) { return capture; }
 void bbgpu_mouse_take(double *dx, double *dy, int *up, int *down) { *dx=*dy=0; *up=*down=0; }
 int bbgpu_mouse_captured(void) { return 0; }
 void bbgpu_mouse_look_enable(int enabled) { (void)enabled; }
+static int camera_direct=-1;
+static float camera_sensitivity;
+void bbgpu_mouse_camera_configure(int direct, float sensitivity) { camera_direct=direct; camera_sensitivity=sensitivity; }
 uintptr_t runtime_lookup(const RuntimeExport *table, size_t count, const char *name) {
     (void)table; (void)count; (void)name;
     return 0;
@@ -32,7 +35,8 @@ int main(void) {
     int config_fd=mkstemp(config);
     assert(config_fd>=0);
     const char controls[]="upscaler=fsr3\npad.cross=b\npad.circle=a\npad.r2=rightshoulder\n"
-                          "pad.r1=righttrigger\nkey.cross=X, Space\npad.bogus=a\n";
+                          "pad.r1=righttrigger\nkey.cross=X, Space\npad.bogus=a\n"
+                          "mouse_camera=direct\nmouse_sensitivity=1.5\n";
     assert(write(config_fd,controls,sizeof(controls)-1)==(ssize_t)(sizeof(controls)-1));
     close(config_fd);
     setenv("BB_CONFIG",config,1);
@@ -102,6 +106,8 @@ int main(void) {
     assert(data.buttons==(BTN_CROSS|BTN_R2|BTN_R1) && data.r2==255);
     assert(bindings[IN_CROSS].key_count==2 && bindings[IN_CROSS].keys[0]==SDL_SCANCODE_X &&
            bindings[IN_CROSS].keys[1]==SDL_SCANCODE_SPACE);
+    assert(camera_direct==1 && camera_sensitivity==1.5f); /* mouse_camera=direct */
+    mouse_sensitivity=1.0f; /* the mouse look checks below are at 1 */
     SDL_CloseJoystick(joystick);
     if (gamepad) SDL_CloseGamepad(gamepad);
     gamepad=NULL;
