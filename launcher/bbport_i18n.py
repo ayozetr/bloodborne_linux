@@ -408,6 +408,16 @@ EN = {
     "Поменять стики местами": "Swap the sticks",
     "Инвертировать камеру геймпада по горизонтали": "Invert the controller camera horizontally",
     "Инвертировать камеру геймпада по вертикали": "Invert the controller camera vertically",
+    "Импортировать сохранения…": "Import saves…",
+    "Импорт сохранений": "Import saves",
+    "Папка с сохранениями Bloodborne": "Folder with Bloodborne saves",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "This is a PS4 copy for a USB drive (sdimg_*): it is encrypted with the console's keys. Export the save unencrypted on the PS4 (Apollo Save Tool) or with Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "This folder has no Bloodborne saves (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "Import the saves?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "From {} (changed {}). The current saves are copied to {} first",
+    "Импортировать": "Import",
+    "Не удалось импортировать сохранения": "Could not import the saves",
+    "Сохранения импортированы": "Saves imported",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Flatpak Steam runs games inside its sandbox, which has neither the game folder nor the drivers: the shortcut has to start the game outside it (flatpak-spawn --host). For that, Steam needs the org.freedesktop.Flatpak permission, which lets it start programs on your system. Grant it?',
@@ -638,7 +648,7 @@ EN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Keyboard movement: a round diagonal and the last key pressed',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Crash debugging: the process waits for a debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: co-op on The Hunter's Dream's pool with bbhost players",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion, save import',
     'Большие группы команд записи и swapchain после изменений экрана': 'Large recorded command groups and the swapchain after display changes',
 }
 
@@ -939,6 +949,16 @@ PT_BR = {
     "Поменять стики местами": "Trocar os analógicos",
     "Инвертировать камеру геймпада по горизонтали": "Inverter a câmera do controle na horizontal",
     "Инвертировать камеру геймпада по вертикали": "Inverter a câmera do controle na vertical",
+    "Импортировать сохранения…": "Importar saves…",
+    "Импорт сохранений": "Importar saves",
+    "Папка с сохранениями Bloodborne": "Pasta com saves do Bloodborne",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Esta é uma cópia do PS4 para pendrive (sdimg_*): ela é criptografada com as chaves do console. Exporte o save sem criptografia no PS4 (Apollo Save Tool) ou com o Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "Esta pasta não tem saves do Bloodborne (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "Importar os saves?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "De {} (alterados em {}). Os saves atuais são copiados antes para {}",
+    "Импортировать": "Importar",
+    "Не удалось импортировать сохранения": "Não foi possível importar os saves",
+    "Сохранения импортированы": "Saves importados",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'O Steam do Flatpak roda os jogos dentro da sua sandbox, que não tem a pasta do jogo nem os drivers: o atalho precisa iniciar o jogo fora dela (flatpak-spawn --host). Para isso, o Steam precisa da permissão org.freedesktop.Flatpak, que permite iniciar programas no seu sistema. Conceder?',
@@ -1332,7 +1352,7 @@ PT_BR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuração de travamentos: o processo espera um depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo no pool do The Hunter's Dream com jogadores do bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera, importação de saves',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandes grupos de comandos gravados e a swapchain após mudanças de tela',
 }
 
@@ -1624,6 +1644,16 @@ ES = {
     "Поменять стики местами": "Intercambiar los sticks",
     "Инвертировать камеру геймпада по горизонтали": "Invertir la cámara del mando en horizontal",
     "Инвертировать камеру геймпада по вертикали": "Invertir la cámara del mando en vertical",
+    "Импортировать сохранения…": "Importar partidas…",
+    "Импорт сохранений": "Importar partidas",
+    "Папка с сохранениями Bloodborne": "Carpeta con partidas de Bloodborne",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Es una copia de PS4 para memoria USB (sdimg_*): está cifrada con las claves de la consola. Exporta la partida sin cifrar en la PS4 (Apollo Save Tool) o con Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "En esta carpeta no hay partidas de Bloodborne (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "¿Importar las partidas?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "Desde {} (modificadas el {}). Las partidas actuales se copian antes a {}",
+    "Импортировать": "Importar",
+    "Не удалось импортировать сохранения": "No se pudieron importar las partidas",
+    "Сохранения импортированы": "Partidas importadas",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'El Steam de Flatpak ejecuta los juegos dentro de su sandbox, donde no están ni la carpeta del juego ni los drivers: el atajo tiene que arrancar el juego fuera de ella (flatpak-spawn --host). Para eso Steam necesita el permiso org.freedesktop.Flatpak, que le permite ejecutar programas en tu sistema. ¿Concederlo?',
@@ -1937,7 +1967,7 @@ ES = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuración de cierres: el proceso espera a un depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo en el pool de The Hunter's Dream con jugadores de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara, importación de partidas',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grupos grandes de comandos grabados y el swapchain tras cambios de pantalla',
 }
 
@@ -2229,6 +2259,16 @@ IT = {
     "Поменять стики местами": "Scambiare gli stick",
     "Инвертировать камеру геймпада по горизонтали": "Invertire la telecamera del controller in orizzontale",
     "Инвертировать камеру геймпада по вертикали": "Invertire la telecamera del controller in verticale",
+    "Импортировать сохранения…": "Importa salvataggi…",
+    "Импорт сохранений": "Importa salvataggi",
+    "Папка с сохранениями Bloodborne": "Cartella con i salvataggi di Bloodborne",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "È una copia della PS4 per chiavetta USB (sdimg_*): è cifrata con le chiavi della console. Esporta il salvataggio non cifrato sulla PS4 (Apollo Save Tool) o con Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "In questa cartella non ci sono salvataggi di Bloodborne (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "Importare i salvataggi?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "Da {} (modificati il {}). I salvataggi attuali vengono prima copiati in {}",
+    "Импортировать": "Importa",
+    "Не удалось импортировать сохранения": "Impossibile importare i salvataggi",
+    "Сохранения импортированы": "Salvataggi importati",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Steam da Flatpak avvia i giochi nella sua sandbox, dove non ci sono né la cartella del gioco né i driver: il collegamento deve avviare il gioco fuori da essa (flatpak-spawn --host). Per questo Steam ha bisogno del permesso org.freedesktop.Flatpak, che gli consente di avviare programmi sul tuo sistema. Concederlo?',
@@ -2542,7 +2582,7 @@ IT = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Debug dei crash: il processo attende un debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativa nel pool di The Hunter's Dream con i giocatori di bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera, importazione dei salvataggi',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandi gruppi di comandi registrati e la swapchain dopo i cambi di schermo',
 }
 
@@ -2834,6 +2874,16 @@ FR = {
     "Поменять стики местами": "Inverser les sticks",
     "Инвертировать камеру геймпада по горизонтали": "Inverser la caméra de la manette horizontalement",
     "Инвертировать камеру геймпада по вертикали": "Inverser la caméra de la manette verticalement",
+    "Импортировать сохранения…": "Importer des sauvegardes…",
+    "Импорт сохранений": "Importer des sauvegardes",
+    "Папка с сохранениями Bloodborne": "Dossier des sauvegardes de Bloodborne",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "C’est une copie PS4 pour clé USB (sdimg_*) : elle est chiffrée avec les clés de la console. Exportez la sauvegarde non chiffrée sur la PS4 (Apollo Save Tool) ou avec Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "Ce dossier ne contient pas de sauvegardes de Bloodborne (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "Importer les sauvegardes ?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "Depuis {} (modifiées le {}). Les sauvegardes actuelles sont d’abord copiées dans {}",
+    "Импортировать": "Importer",
+    "Не удалось импортировать сохранения": "Impossible d’importer les sauvegardes",
+    "Сохранения импортированы": "Sauvegardes importées",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         "Steam en Flatpak lance les jeux dans son bac à sable, qui n'a ni le dossier du jeu ni les pilotes : le raccourci doit lancer le jeu en dehors (flatpak-spawn --host). Pour cela, Steam a besoin de l'autorisation org.freedesktop.Flatpak, qui lui permet de lancer des programmes sur votre système. L'accorder ?",
@@ -3147,7 +3197,7 @@ FR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Déplacement au clavier : diagonale ronde et dernière touche pressée',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Débogage des plantages : le processus attend un débogueur (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge : coopération sur le pool de The Hunter's Dream avec les joueurs de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée, import des sauvegardes',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grands groupes de commandes enregistrées et la swapchain après un changement d’affichage',
 }
 
@@ -3439,6 +3489,16 @@ DE = {
     "Поменять стики местами": "Sticks tauschen",
     "Инвертировать камеру геймпада по горизонтали": "Controller-Kamera horizontal invertieren",
     "Инвертировать камеру геймпада по вертикали": "Controller-Kamera vertikal invertieren",
+    "Импортировать сохранения…": "Spielstände importieren…",
+    "Импорт сохранений": "Spielstände importieren",
+    "Папка с сохранениями Bloodborne": "Ordner mit Bloodborne-Spielständen",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Das ist eine PS4-Kopie für einen USB-Stick (sdimg_*): Sie ist mit den Schlüsseln der Konsole verschlüsselt. Exportiere den Spielstand unverschlüsselt auf der PS4 (Apollo Save Tool) oder mit Save Wizard",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "In diesem Ordner sind keine Bloodborne-Spielstände (SPRJ0005, userdata)",
+    "Импортировать сохранения?": "Spielstände importieren?",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "Aus {} (geändert {}). Die aktuellen Spielstände werden zuerst nach {} kopiert",
+    "Импортировать": "Importieren",
+    "Не удалось импортировать сохранения": "Die Spielstände konnten nicht importiert werden",
+    "Сохранения импортированы": "Spielstände importiert",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Steam aus Flatpak startet Spiele in seiner Sandbox, in der weder der Spielordner noch die Treiber sind: Die Verknüpfung muss das Spiel außerhalb davon starten (flatpak-spawn --host). Dafür braucht Steam die Berechtigung org.freedesktop.Flatpak, mit der es Programme auf deinem System starten kann. Erteilen?',
@@ -3752,7 +3812,7 @@ DE = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Absturz-Debugging: Der Prozess wartet auf einen Debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: Koop im Pool von The Hunter's Dream mit bbhost-Spielern",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren, Spielstände importieren',
     'Большие группы команд записи и swapchain после изменений экрана': 'Große aufgezeichnete Befehlsgruppen und die Swapchain nach Anzeigeänderungen',
 }
 
@@ -4160,6 +4220,16 @@ ZH_CN = {
     "Поменять стики местами": "交换左右摇杆",
     "Инвертировать камеру геймпада по горизонтали": "手柄视角水平反转",
     "Инвертировать камеру геймпада по вертикали": "手柄视角垂直反转",
+    "Импортировать сохранения…": "导入存档…",
+    "Импорт сохранений": "导入存档",
+    "Папка с сохранениями Bloodborne": "Bloodborne 存档文件夹",
+    "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "这是 PS4 导出到 U 盘的副本（sdimg_*）：它用主机的密钥加密。请在 PS4 上（Apollo Save Tool）或用 Save Wizard 导出未加密的存档",
+    "В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)": "此文件夹中没有 Bloodborne 存档（SPRJ0005、userdata）",
+    "Импортировать сохранения?": "导入存档？",
+    "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "来自 {}（修改于 {}）。当前存档会先复制到 {}",
+    "Импортировать": "导入",
+    "Не удалось импортировать сохранения": "无法导入存档",
+    "Сохранения импортированы": "存档已导入",
     "Монитор": "显示器",
     "Найдено DLC: {}": "找到的 DLC：{}",
     "Не использовать DLC": "不使用 DLC",
@@ -4300,7 +4370,7 @@ ZH_CN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': '键盘移动：圆形斜向与最后按下的键',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': '崩溃调试：进程等待调试器（BB_FAULT_WAIT）',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge：在 The Hunter's Dream 池中与 bbhost 玩家合作",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转、导入存档',
     'Большие группы команд записи и swapchain после изменений экрана': '大型录制命令组以及显示变化后的交换链',
 }
 

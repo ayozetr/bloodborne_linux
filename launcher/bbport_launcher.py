@@ -42,6 +42,7 @@ from mods import discover as discover_mods  # noqa: E402
 from prepare import sfo  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
+import save_import  # noqa: E402
 from patches import external_patches  # noqa: E402
 import trophies  # noqa: E402
 # Packaged (AppImage): generated files, saves and bbport.ini live in BB_DATA_DIR.
@@ -662,7 +663,7 @@ THANKS = (
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
         _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
         _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
-                              "страниц; смена стиков и инверсия камеры"),
+                              "страниц; смена стиков и инверсия камеры, импорт сохранений"),
         _github("AwesomeObserver", "Большие группы команд записи и swapchain после изменений экрана"),
     )),
     ("Помощь и тесты", (
@@ -804,6 +805,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.user_row.add_suffix(flat_button("system-file-manager-symbolic",
                                              tr("Открыть в файловом менеджере"),
                                              lambda _b: open_folder(self, self.user_dir())))
+        self.user_row.add_suffix(flat_button("folder-download-symbolic", tr("Импортировать сохранения…"),
+                                             self.on_import_saves))
         self.user_reset = flat_button("edit-undo-symbolic", tr("Вернуть папку по умолчанию"),
                                       self.on_reset_user)
         self.user_row.add_suffix(self.user_reset)
@@ -1243,6 +1246,53 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.update_user_status()
             self.store()
         self.choose_folder(tr("Папка сохранений"), self.user_dir(), chosen)
+
+    def on_import_saves(self, _button):
+        """Saves from shadPS4, another port or a decrypted PS4 export (scripts/save_import.py)."""
+        if self.process is not None or save_import.game_running():
+            self.alert(tr("Импорт сохранений"), tr("Сначала закройте игру"))
+            return
+        shadps4 = Path.home() / ".local/share/shadPS4"
+        self.choose_folder(tr("Папка с сохранениями Bloodborne"),
+                           shadps4 if shadps4.is_dir() else Path.home(), self.confirm_import_saves)
+
+    def confirm_import_saves(self, folder):
+        found = save_import.find(folder)
+        if not found:
+            self.alert(tr("Импорт сохранений"), tr(
+                "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте "
+                "сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard")
+                if save_import.encrypted_ps4_save(folder)
+                else tr("В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)"))
+            return
+        source, when = found[0]
+        dialog = Adw.AlertDialog(heading=tr("Импортировать сохранения?"), body=tr(
+            "Из {} (изменены {}). Текущие сохранения сначала копируются в {}").format(
+                source, time.strftime("%Y-%m-%d %H:%M", time.localtime(when)),
+                self.user_dir() / "savedata-backups"))
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("import", tr("Импортировать"))
+        dialog.set_response_appearance("import", Adw.ResponseAppearance.SUGGESTED)
+
+        def answered(_dialog, response):
+            if response != "import":
+                return
+            if self.process is not None or save_import.game_running():
+                self.alert(tr("Импорт сохранений"), tr("Сначала закройте игру"))
+                return
+            try:
+                target, backup = save_import.import_saves(
+                    source, self.user_dir(), self.settings["game_dir"] or None)
+            except (save_import.SaveImportError, OSError) as error:
+                self.alert(tr("Не удалось импортировать сохранения"), str(error))
+                return
+            self.append_log(f"Saves imported from {source} into {target}"
+                            + (f"; previous saves in {backup}\n" if backup else "\n"))
+            self.update_user_status()
+            self.toasts.add_toast(Adw.Toast(title=tr("Сохранения импортированы")))
+
+        dialog.connect("response", answered)
+        dialog.present(self)
 
     def on_reset_user(self, _button):
         self.settings["user_dir"] = ""

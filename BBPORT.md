@@ -176,8 +176,9 @@ bash launcher/bb-launcher.sh         # launcher/install-desktop.sh adds it to th
 ```
 
 By default the game folder is expected next to the repository (`../CUSA03173`). Saves and the
-shader cache go to `user/` (the launcher lets you choose another folder); settings to
-`bbport.ini`. A gamepad is used through SDL3 (the launcher's *Controls → Controller* picks one
+shader cache go to `user/` (the launcher lets you choose another folder, and imports saves from
+shadPS4, another port or a PS4 save exported unencrypted, after backing up the current ones in
+`user/savedata-backups/`; `scripts/save_import.py`); settings to `bbport.ini`. A gamepad is used through SDL3 (the launcher's *Controls → Controller* picks one
 when several are connected; `BB_GAMEPAD=<GUID or part of the name>`). The keyboard works too,
 also next to a connected gamepad (the Steam Deck always has one); both are remapped in the
 launcher (*Controls*). The character name is typed on the keyboard in a box over the game.
