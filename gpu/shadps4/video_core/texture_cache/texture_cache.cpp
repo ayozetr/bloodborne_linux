@@ -1091,7 +1091,7 @@ void TextureCache::TrackImage(ImageId image_id) {
         // Re-track the whole image
         image.track_addr = image_begin;
         image.track_addr_end = image_end;
-        tracker.UpdatePageWatchers<1>(image_begin, image.info.guest_size);
+        WatchPages(image_begin, image.info.guest_size);
     } else {
         if (image_begin < image.track_addr) {
             TrackImageHead(image_id);
@@ -1114,7 +1114,7 @@ void TextureCache::TrackImageHead(ImageId image_id) {
     ASSERT(image.track_addr != 0 && image_begin < image.track_addr);
     const auto size = image.track_addr - image_begin;
     image.track_addr = image_begin;
-    tracker.UpdatePageWatchers<1>(image_begin, size);
+    WatchPages(image_begin, size);
 }
 
 void TextureCache::TrackImageTail(ImageId image_id) {
@@ -1130,7 +1130,17 @@ void TextureCache::TrackImageTail(ImageId image_id) {
     const auto addr = image.track_addr_end;
     const auto size = image_end - image.track_addr_end;
     image.track_addr_end = image_end;
+    WatchPages(addr, size);
+}
+
+void TextureCache::WatchPages(VAddr addr, u64 size) {
+    watched_pages.Add(addr, size, 1); // before the pages are protected
     tracker.UpdatePageWatchers<1>(addr, size);
+}
+
+void TextureCache::UnwatchPages(VAddr addr, u64 size) {
+    tracker.UpdatePageWatchers<false>(addr, size);
+    watched_pages.Add(addr, size, -1); // after they are unprotected
 }
 
 void TextureCache::UntrackImage(ImageId image_id) {
@@ -1143,7 +1153,7 @@ void TextureCache::UntrackImage(ImageId image_id) {
     image.track_addr = 0;
     image.track_addr_end = 0;
     if (size != 0) {
-        tracker.UpdatePageWatchers<false>(addr, size);
+        UnwatchPages(addr, size);
     }
 }
 
@@ -1162,7 +1172,7 @@ void TextureCache::UntrackImageHead(ImageId image_id) {
         // Cehck its hash later.
         MarkAsMaybeDirty(image_id, image);
     }
-    tracker.UpdatePageWatchers<false>(image_begin, size);
+    UnwatchPages(image_begin, size);
 }
 
 void TextureCache::UntrackImageTail(ImageId image_id) {
@@ -1181,7 +1191,7 @@ void TextureCache::UntrackImageTail(ImageId image_id) {
         // Cehck its hash later.
         MarkAsMaybeDirty(image_id, image);
     }
-    tracker.UpdatePageWatchers<false>(addr, size);
+    UnwatchPages(addr, size);
 }
 
 // bbport: once a minute, what the game holds: VRAM, the texture cache, the old GPU-written tiled

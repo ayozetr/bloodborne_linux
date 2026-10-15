@@ -4247,7 +4247,21 @@ bool Rasterizer::OnWriteFault(VAddr addr, bool assume_locks, u64 guest_rip) {
     // bbport: within the faulting page. 8 bytes from a write to the last bytes of a mapping
     // reached past its end: IsMapped failed and the fault went unhandled (the game ended).
     const u64 fault_size = std::min<u64>(8, VideoCore::PageManager::GetNextPageAddr(addr) - addr);
-    if (!InvalidateMemory(addr, fault_size, assume_locks)) {
+    // bbport: a page no tracked image protects (a buffer's page: most faults) needs nothing from
+    // the texture cache, whose lock the draw recording thread holds while it creates or uploads an
+    // image: a guest thread writing its constants waited for that (0.3-0.6 s with memory short,
+    // the frame with it). Images learn of CPU writes through their own pages' protection only.
+    // BB_FAULT_SKIP_TEXTURES=0: every fault takes the lock, as before. (Awaken's BloodBorneButPc.)
+    static const bool skip_textures = [] {
+        const char* env = std::getenv("BB_FAULT_SKIP_TEXTURES");
+        return !(env && env[0] == '0');
+    }();
+    if (skip_textures && !texture_cache.WatchesPages(addr, fault_size)) {
+        if (!IsMapped(addr, fault_size)) {
+            return false;
+        }
+        buffer_cache.InvalidateMemory(addr, fault_size, assume_locks);
+    } else if (!InvalidateMemory(addr, fault_size, assume_locks)) {
         return false;
     }
     buffer_cache.ExtendWriteFault(addr, guest_rip);

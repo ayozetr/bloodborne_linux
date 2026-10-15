@@ -20,6 +20,7 @@
 #include "common/slot_vector.h"
 #include "shader_recompiler/resource.h"
 #include "video_core/multi_level_page_table.h"
+#include "video_core/texture_cache/watched_pages.h"
 #include "video_core/texture_cache/blit_helper.h"
 #include "video_core/texture_cache/image.h"
 #include "video_core/texture_cache/image_view.h"
@@ -100,6 +101,12 @@ public:
 
     /// bbport: FindImage's access tick for an image found by a memoized lookup. The LRU touch
     /// FindImage also does happens in UpdateImage (FindTexture), which every binding reaches.
+    /// bbport: whether a tracked image protects a page of [addr, addr + size). Any thread, no
+    /// lock (watched_pages.h): a write fault elsewhere needs nothing from the texture cache.
+    [[nodiscard]] bool WatchesPages(VAddr addr, size_t size) const noexcept {
+        return watched_pages.Any(addr, size);
+    }
+
     void MarkFound(ImageId image_id) {
         slot_images[image_id].tick_accessed_last = scheduler.CurrentTick();
     }
@@ -378,6 +385,9 @@ private:
     void UntrackImage(ImageId image_id);
     void UntrackImageHead(ImageId image_id);
     void UntrackImageTail(ImageId image_id);
+    /// The page manager's watchers of an image's pages, and watched_pages with them.
+    void WatchPages(VAddr addr, u64 size);
+    void UnwatchPages(VAddr addr, u64 size);
 
     void MarkAsMaybeDirty(ImageId image_id, Image& image);
     static u64 MaybeDirtyHash(const Image& image);
@@ -404,6 +414,8 @@ private:
     AmdGpu::Liverpool* liverpool;
     BufferCache& buffer_cache;
     PageManager& tracker;
+    /// bbport: the pages tracked images protect, readable without `mutex` (WatchesPages).
+    WatchedPages watched_pages;
     BlitHelper blit_helper;
     TileManager tile_manager;
     Common::SlotVector<Image> slot_images;
