@@ -60,6 +60,11 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
      the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
      Its messages go straight between the players.
 
+   With BBSC and BBSC's game server, two players who cannot reach each other directly (CGNAT,
+   strict routers, two games on one PC) are connected through that server's UDP relay (port
+   3478); `SHADPS4_P2P_RELAY=0` turns it off. Without BBSC, and on The Hunter's Dream (bbbridge
+   relays by itself), the relay is off.
+
 Its log is in `user/bbsc/logs/` (in the AppImage, `~/.local/share/bbport/user/bbsc/logs/`), and
 the game's log has its warnings (`BBSC:` lines). Not in the Linux build: BBSC's cinematic camera
 (L3 + R3 opens bbport's menu) and its own Discord status (bbport has one).

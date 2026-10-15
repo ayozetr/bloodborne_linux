@@ -113,7 +113,8 @@ def environment(settings):
     """The game's online variables (run.sh and the online module) for the launcher's settings."""
     if server_kind(settings) == 'thd':
         # bbbridge on this PC (run.sh starts it): the online ID is the Discord sign-in's.
-        return bbsc.environment(settings) | {
+        # bbbridge's gateway relays by itself: BBSC's UDP relay (online module) stays off.
+        return bbsc.environment(settings) | {'SHADPS4_P2P_RELAY': '0'} | {
             'BB_ONLINE': '1',
             'BB_BRIDGE': '1',
             'BB_SHADNET_SERVER': BRIDGE_SERVER,
@@ -140,8 +141,12 @@ def environment(settings):
     # Summons through the server's WebAPI (http.cpp); the server needs BloodborneSeamlessCoop=true.
     if server_kind(settings) == 'own' and settings.get('online_seamless'):
         env['SHADPS4_BLOODBORNE_SEAMLESS_COOP'] = '1'
-    # Seamless co-op (BBSC), on any server.
+    # Seamless co-op (BBSC), on any server. The online module's UDP relay fallback (BBSC's, port
+    # 3478 on the server's address) is for BBSC's game server: off without BBSC, so other servers'
+    # co-op goes direct only, as before it.
     env.update(bbsc.environment(settings))
+    if not settings.get('bbsc'):
+        env['SHADPS4_P2P_RELAY'] = '0'
     return env
 
 

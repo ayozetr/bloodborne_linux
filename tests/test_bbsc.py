@@ -57,6 +57,13 @@ class BbscTests(unittest.TestCase):
             self.assertEqual(env['BB_BBSC'], '1')
             self.assertEqual(env['BB_ONLINE'], '1')
 
+    def test_relay_fallback_only_with_bbsc_on_its_server(self):
+        own = {'online_server_kind': 'own', 'online_server': '10.0.0.2:31313'}
+        self.assertEqual(online.environment(own)['SHADPS4_P2P_RELAY'], '0')
+        self.assertNotIn('SHADPS4_P2P_RELAY', online.environment(own | {'bbsc': True}))
+        thd = {'online_server_kind': 'thd', 'online_npid': 'hunter'}
+        self.assertEqual(online.environment(thd | {'bbsc': True})['SHADPS4_P2P_RELAY'], '0')
+
 
 if __name__ == '__main__':
     unittest.main()
