@@ -182,7 +182,8 @@ when several are connected; `BB_GAMEPAD=<GUID or part of the name>`). The keyboa
 also next to a connected gamepad (the Steam Deck always has one); both are remapped in the
 launcher (*Controls*). The character name is typed on the keyboard in a box over the game.
 The touchpad: its left half (Tab, Back/Select) opens the gestures, the right half (Backspace)
-the key items. There is no PSN: the *Play online / offline* screen is skipped and the game opens
+the key items. On a controller without a touchpad (Xbox), Back + d-pad left / right clicks the
+left / right half. There is no PSN: the *Play online / offline* screen is skipped and the game opens
 its main menu offline (a game patch; the launcher's *Game effects → Skip the “play online / offline” choice*,
 `BB_SKIP_NETWORK_CHOICE=0` shows it). With several monitors, *Screen → Monitor* in the launcher
 (`BB_DISPLAY=<number or part of the name>`) picks the one for the game.
@@ -242,7 +243,8 @@ For the game debug menu, install `DbgFont14h.ccm` and `DbgFont14h.tpf` from
 the unsafe patch. Open it with the left touchpad / Tab (with the debug menu on, the left half
 no longer opens the gestures); Backspace is the right touchpad.
 Touch coordinates are forwarded from SDL gamepads; Back/Select emulates a left click on
-pads without a touch surface. The port's settings menu remains Insert / L3+R3.
+pads without a touch surface, Back + d-pad left / right a click on that half (while Back is bound
+to the touchpad only, the default). The port's settings menu remains Insert / L3+R3.
 
 GPU occlusion queries still use synthetic pixel counters (`PixelPipeStatDump`), and
 `IT_SET_PREDICATION` is unimplemented. Free camera allows visual investigation; it does
