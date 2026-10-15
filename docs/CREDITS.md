@@ -8,7 +8,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 | Project | What this fork takes from it |
 |---|---|
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [BBPORT.md](../BBPORT.md). |
-| [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera and many fixes. |
+| [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
 | [Awakenchan/BloodBorneButPc](https://github.com/Awakenchan/BloodBorneButPc) | Video memory on 4 GB cards, crash fixes, fewer stutters while areas load, stick options, save import and the version selector. |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler, and the online code. |
 | [Wozzardman/shadp2p](https://github.com/Wozzardman/shadp2p) | The network and PSN libraries for online play. |
@@ -47,7 +47,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 - **[Jhony-Jhansen](https://github.com/Jhony-Jhansen)**: keyboard movement and the direct mouse camera.
 - **[mcrib884](https://github.com/mcrib884)**: the bbmouse mouse camera, the basis of the direct camera.
 - **[pmwork-personal](https://github.com/pmwork-personal)**: ultrawide monitors without a stretched picture.
-- **[emurphy04](https://github.com/emurphy04)**: a video player crash when it stops.
+- **[emurphy04](https://github.com/emurphy04)**: ultrawide output and the HUD position, Quit to
+  Desktop in the game's menus, and a video player crash when it stops.
 - **[cassioKenji](https://github.com/cassioKenji)**: the keyboard sprint measurements.
 - **[jpramosjp](https://github.com/jpramosjp)**: summons through the public shadNet server.
 - **[yumlevi](https://github.com/yumlevi)**: the black character preview, the loading screen's
