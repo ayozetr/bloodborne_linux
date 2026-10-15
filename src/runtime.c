@@ -8,6 +8,7 @@
 #include <stdatomic.h>
 #include <sched.h>
 #include <pthread.h>
+#include <unistd.h>
 
 typedef struct {
     union { GuestCallback plain; void (ABI *with_arg)(void *); } callback;
@@ -195,11 +196,16 @@ static ABI int guest_memcmp(const void *a, const void *b, size_t size) {
     atomic_fetch_add_explicit(&memory_calls,1,memory_order_relaxed); return memcmp(a, b, size);
 }
 static ABI size_t guest_strlen(const char *text) { return strlen(text); }
+/* The game's exit() ends the process as its _exit() does (hard_exit): its other threads keep
+ * running, so its static destructors (runtime_finalize) tore down Dantelion's mutexes under them
+ * ("DLLightMutex.cpp(126) Mutex is not initialized", then a fault and code 139: issue #7's log,
+ * with the "Exit Game" title menu patch), and the host's atexit handlers would free the GPU's
+ * objects while the render thread still used them. Saves are already on disk (written whole). */
 static ABI __attribute__((noreturn)) void guest_libc_exit(int status) {
     printf("Runtime: guest requested exit(%d)\n", status);
-    runtime_finalize(NULL);
     runtime_report();
-    exit(status);
+    fflush(stdout);
+    _exit(status);
 }
 uintptr_t runtime_resolve(const char *name, int is_data) {
     if (!(capabilities & 1)) return 0;
