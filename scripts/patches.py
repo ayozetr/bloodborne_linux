@@ -7,7 +7,6 @@ image places eboot vaddr 0 at image offset 0. Only literal writes are supported
 import argparse
 import json
 import os
-import re
 import struct
 import sys
 import xml.etree.ElementTree as ET
@@ -182,14 +181,16 @@ SCENE_WIDTH=0x02196A6B-EBOOT_BASE
 SCENE_HEIGHT=0x02196A7A-EBOOT_BASE
 UI_WIDTH=0x02358554-EBOOT_BASE
 UI_HEIGHT=0x0235855D-EBOOT_BASE
-# Outputs wider than 16:9: the community resolution patch for that size (Kyo's "Resolution Patch
-# WxH (21:9)" etc. in patches/Bloodborne.xml) also widens the game's logical screen -- the
-# projection aspect, the 2D layout width and the lock-on/HP-bar coordinates -- so the view
-# gets wider instead of stretched. bbport keeps its own scene/UI sizes (resolution_writes) and
-# heap patch, so only that patch's remaining writes are applied. bbport.ini aspect_patch=0
-# turns this off.
-HEAP_SITES={0x04B36DDA-EBOOT_BASE,0x04B36DE2-EBOOT_BASE}
-RESOLUTION_PATCH=re.compile(r'Resolution Patch (\d+)x(\d+) \(')
+# Outputs wider than 16:9: Kyo's 21:9 patch widens the camera's aspect ratio, the HUD canvas
+# (1080 high, wider), the HUD projection and the screen-to-HUD mapping of the lock-on and HP-bar
+# markers; ultrawide_writes recomputes those values for the output's own aspect ratio (Kyo's
+# 32:9 patches keep a 1080-high canvas 3840 or 5120 wide, a squeezed HUD, and 3840x1600 has
+# none). bbport.ini aspect_patch=0 turns it off: the 16:9 picture is stretched to the output.
+ULTRAWIDE_TEMPLATE='Resolution Patch 2560x1080 (21:9)'
+ULTRAWIDE_CANVAS=2560 # the HUD canvas width written by ULTRAWIDE_TEMPLATE
+CAMERA_ASPECT=0x0183A35D-EBOOT_BASE
+HUD_PROJECTION_WIDTH=0x04D26EA4-EBOOT_BASE
+MARKER_BIAS=(0x04CF9A10-EBOOT_BASE,0x04CF9A70-EBOOT_BASE,0x04CF9AE0-EBOOT_BASE)
 
 
 def read_settings(path):
@@ -235,9 +236,11 @@ def scaled_sizes(settings):
         preset=int(settings.get('preset','0') or 0)
         scale=PRESET_SCALES[max(0,min(preset,len(PRESET_SCALES)-1))]
     render=tuple(max(2,round(v/scale/2)*2) for v in out)
-    # A scene of exactly 1920x1080 (4K Performance) is indistinguishable from the game's UI
-    # coordinate space, which the port's UI composition recognizes by that size.
-    if render==OUTPUT_SIZE: render=(1916,1078)
+    # A scene of exactly the UI coordinate space's size (1920x1080 at 4K Performance, the
+    # ultrawide HUD canvas at 2560x1080 or 3840x1080 native) is indistinguishable from it: the
+    # port's UI composition recognizes UI draws by that size (HUD gauges came out too long).
+    ui=ui_size(settings,out)
+    if render==ui: render=(ui[0]-4,ui[1]-2)
     return render,out
 
 
@@ -262,31 +265,46 @@ def resolution_writes(xml,size,app_version,segments,ui=OUTPUT_SIZE):
     return out
 
 
-def aspect_patch_name(xml,app_version,output):
-    """The community resolution patch for an output wider than 16:9: the one for this exact
-    size, else the closest-width one of the same aspect ratio. None for 16:9 and narrower
-    outputs, and for an aspect ratio no patch covers (that output is still stretched)."""
+def hud_canvas(output):
+    """The HUD's coordinate space for an output: 1920x1080 up to 16:9, wider (still 1080 high,
+    even width) for ultrawide outputs, e.g. 2580x1080 for 3440x1440. The port scales it to the
+    output uniformly (UiComposition::Canvas, BB_UI_RES)."""
     w,h=output
-    if w*9<=h*16: return None
-    same_aspect=[]
-    for meta in ET.parse(xml).getroot().iter('Metadata'):
-        m=RESOLUTION_PATCH.match(meta.get('Name',''))
-        if not m or meta.get('AppVer')!=app_version: continue
-        pw,ph=int(m[1]),int(m[2])
-        if pw*9<=ph*16: continue
-        if (pw,ph)==(w,h): return meta.get('Name')
-        if abs(pw/ph-w/h)<0.005: same_aspect.append((abs(pw-w),meta.get('Name')))
-    return min(same_aspect)[1] if same_aspect else None
+    if w*OUTPUT_SIZE[1]<=h*OUTPUT_SIZE[0]: return OUTPUT_SIZE
+    return (round(OUTPUT_SIZE[1]*w/h/2)*2,OUTPUT_SIZE[1])
 
 
-def aspect_writes(xml,output,app_version,segments):
-    """(patch name, writes) widening the game's view to the output's aspect, or (None, [])."""
-    name=aspect_patch_name(xml,app_version,output)
-    if not name: return None,[]
-    template=dict(compile_patches(xml,[RESOLUTION_TEMPLATE],app_version,segments))
-    skip={SCENE_WIDTH,SCENE_HEIGHT,UI_WIDTH,UI_HEIGHT}|HEAP_SITES
-    return name,[(offset,data) for offset,data in compile_patches(xml,[name],app_version,segments)
-                 if offset not in skip and template.get(offset)!=data]
+def ui_size(settings,output):
+    """The UI coordinate space for this output: hud_canvas, or 1920x1080 with aspect_patch=0."""
+    return OUTPUT_SIZE if settings.get('aspect_patch','1')=='0' else hud_canvas(output)
+
+
+def ultrawide_writes(xml,output,app_version,segments):
+    """ULTRAWIDE_TEMPLATE for `output`'s aspect ratio, without its scene and UI viewport sizes
+    (resolution_writes). After resolution_writes: its 1920-wide HUD writes are replaced."""
+    canvas=hud_canvas(output)[0]
+    viewport={SCENE_WIDTH,SCENE_HEIGHT,UI_WIDTH,UI_HEIGHT}
+    floats={CAMERA_ASPECT:(ULTRAWIDE_CANVAS/1080,output[0]/output[1]),
+            HUD_PROJECTION_WIDTH:(ULTRAWIDE_CANVAS,canvas)}
+    floats.update({site:(0.5*1920/ULTRAWIDE_CANVAS,0.5*1920/canvas) for site in MARKER_BIAS})
+    old_width=ULTRAWIDE_CANVAS.to_bytes(3,'little')
+    out=[]
+    found=set()
+    for offset,data in compile_patches(xml,[ULTRAWIDE_TEMPLATE],app_version,segments):
+        if offset in viewport: continue
+        if offset in floats:
+            old,value=floats[offset]
+            if len(data)!=4 or abs(struct.unpack('<f',data)[0]-old)>1e-3:
+                raise ValueError(f'unexpected ultrawide value at {offset+EBOOT_BASE:#x}')
+            data=struct.pack('<f',value)
+            found.add(offset)
+        elif len(data)==4 and data[0] in (0xB8,0xB9,0xBE) and data[1:]==old_width:
+            # mov e?x, 2560 (the imm32's last byte is the next write's): the HUD canvas width.
+            data=bytes([data[0]])+canvas.to_bytes(3,'little')
+        out.append((offset,data))
+    if found!=floats.keys():
+        raise ValueError('ultrawide patch is missing camera/HUD values')
+    return out
 
 
 def eboot_segments(elf):
@@ -409,13 +427,15 @@ def main():
     p.add_argument('--game-dir',type=Path,default=Path(os.environ.get('BB_GAME_DIR','../CUSA03173')))
     p.add_argument('--render-res',default='',help='render resolution WxH (overrides the preset)')
     p.add_argument('--print-preset-size',action='store_true',help='print the selected preset size, if reduced')
-    p.add_argument('--output-res',default='',help='output resolution WxH (the upscaler\'s; the UI stays 1920x1080)')
+    p.add_argument('--output-res',default='',help='output resolution WxH (the upscaler\'s; the UI stays 1080 high, wider for ultrawide)')
     p.add_argument('--print-scaled',action='store_true',
-                   help='print "RENDER OUTPUT" (WxH) when bbport.ini selects an output other than 1080p')
+                   help='print "RENDER OUTPUT UI" (WxH) when bbport.ini selects an output other than 1080p')
     a=p.parse_args()
     if a.print_scaled:
         sizes=scaled_sizes(read_settings(a.settings))
-        if sizes: print(f'{sizes[0][0]}x{sizes[0][1]} {sizes[1][0]}x{sizes[1][1]}')
+        if sizes:
+            ui=ui_size(read_settings(a.settings),sizes[1])
+            print(f'{sizes[0][0]}x{sizes[0][1]} {sizes[1][0]}x{sizes[1][1]} {ui[0]}x{ui[1]}')
         return
     if a.print_preset_size:
         settings=read_settings(a.settings)
@@ -437,25 +457,24 @@ def main():
     names=validate_patch_requirements(names,a.game_dir)
     segments=eboot_segments((a.out/'eboot.elf').read_bytes())
     writes=compile_patches(a.xml,names,a.app_version,segments)
-    size=render_size(read_settings(a.settings),a.render_res) if a.render_res else None
+    settings=read_settings(a.settings)
+    size=render_size(settings,a.render_res) if a.render_res else None
     # The UI keeps the game's 1920x1080 coordinates even for a larger output: the port draws
     # it into the output-size image with a viewport scaled by output / 1920
-    # (UiComposition::NativeViewport), so it is rasterized at the output resolution.
-    ui=OUTPUT_SIZE
+    # (UiComposition::NativeViewport), so it is rasterized at the output resolution. Ultrawide
+    # outputs widen those coordinates (hud_canvas; run.sh passes the same size as BB_UI_RES).
+    output=tuple(int(v) for v in a.output_res.lower().split('x')) if a.output_res else OUTPUT_SIZE
+    ui=ui_size(settings,output)
     if size:
         writes+=resolution_writes(a.xml,size,a.app_version,segments,ui)
+        if ui!=OUTPUT_SIZE:
+            writes+=ultrawide_writes(a.xml,output,a.app_version,segments)
+            names.append(f'ultrawide {output[0]}x{output[1]} (HUD {ui[0]}x{ui[1]})')
         if size[0]*size[1]>OUTPUT_SIZE[0]*OUTPUT_SIZE[1]:
             heap='Increased Graphics Heap Sizes'
             writes+=compile_patches(a.xml,[heap],a.app_version,segments)
             names.append(heap)
         print(f'Patches: scene {size[0]}x{size[1]}; UI {ui[0]}x{ui[1]}')
-    settings=read_settings(a.settings)
-    output=tuple(int(v) for v in a.output_res.lower().split('x')) if a.output_res else output_size(settings)
-    if settings.get('aspect_patch','1')!='0':
-        aspect_name,aspect=aspect_writes(a.xml,output,a.app_version,segments)
-        if aspect:
-            writes+=aspect
-            print(f'Patches: aspect {output[0]}x{output[1]} from {aspect_name!r} ({len(aspect)} writes)')
     if a.patches_dir:
         # After the built-in ones: an external patch of the same bytes wins.
         writes+=compile_external(external_selection(external_patches(a.patches_dir,a.app_version,a.xml),

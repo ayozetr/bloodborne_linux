@@ -51,6 +51,17 @@ On a 6 GB card the texture cache can run out of video memory: the log then repea
 a lower output resolution, lower **Model detail** in the game's *Display* settings, and close
 other programs that use the GPU (browsers, video players, other games).
 
+## The picture is stretched on an ultrawide screen
+
+**Settings → Display → Output resolution** lists 2560×1080, 3440×1440, 3840×1600 and 5120×2160
+(21:9) and 3840×1080 and 5120×1440 (32:9); any other size written as `output_res=WxH` in
+bbport.ini works too. The view gets wider instead of stretched: the game's camera, its HUD and the
+lock-on and health-bar markers are patched at start for the screen's own aspect ratio. **HUD
+position** moves health, items and Blood Echoes from the centred 16:9 area (as on a 16:9 screen)
+to the screen edges, and menu backdrops cover the whole width. These sizes need the startup patch:
+changing them in the game restarts it, and TAA (which needs live resolution changes) leaves them
+stretched. `aspect_patch=0` in bbport.ini turns the wider view off.
+
 ## The camera turns much faster on diagonals
 
 With the right stick pushed all the way, the game switches to its fast turn (about twice the

@@ -722,7 +722,7 @@ EN = {
     'Игра по сети': 'Online play',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'The shadNet server does not accept bbport, so the game stayed offline. For online play, use your own server (Online page).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Quitting from the menu with a controller, the menu kept within the screen, and the touchpad halves on Xbox pads',
-    'Вылет видеоплеера при его остановке': 'A video player crash when it stops',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'A video player crash when it stops; 21:9 and 32:9 ultrawide screens: camera, HUD and its position',
     'Язык внутриигрового меню при запуске без окна лаунчера': "The in-game menu's language when starting without the launcher window",
     'DLSS в AppImage на NVIDIA': 'DLSS in the AppImage on NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide monitors without a stretched picture',
@@ -734,6 +734,11 @@ EN = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: co-op on The Hunter's Dream's pool with bbhost players",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; fewer stutters while areas load, swapped sticks and camera inversion, the controller in use, save import, the version selector',
     'Большие группы команд записи и swapchain после изменений экрана': 'Large recorded command groups and the swapchain after display changes',
+    'Положение интерфейса': 'HUD position',
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': 'Ultrawide screens: health, items and Blood Echoes at the screen edges or in the centred 16:9 area',
+    'У краёв экрана': 'Screen edges',
+    'Посередине': 'Halfway',
+    'По центру (16:9)': 'Centred (16:9)',
 }
 
 PT_BR = {
@@ -1510,7 +1515,7 @@ PT_BR = {
     'Игра по сети': 'Jogo online',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'O servidor shadNet não aceita o bbport, então o jogo ficou offline. Para jogar online, use seu próprio servidor (página Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Sair do jogo pelo menu com o controle, o menu dentro da tela e as metades do touchpad no controle Xbox',
-    'Вылет видеоплеера при его остановке': 'Um travamento do reprodutor de vídeo ao parar',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'Um travamento do reprodutor de vídeo ao parar; telas ultrawide 21:9 e 32:9: câmera, HUD e sua posição',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'O idioma do menu do jogo ao iniciar sem a janela do launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS no AppImage em NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrawide sem imagem esticada',
@@ -1522,6 +1527,11 @@ PT_BR = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo no pool do The Hunter's Dream com jogadores do bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; menos engasgos ao carregar áreas, troca dos analógicos e inversão da câmera, o controle em uso, importação de saves, seletor de versão',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandes grupos de comandos gravados e a swapchain após mudanças de tela',
+    'Положение интерфейса': 'Posição do HUD',
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': 'Telas ultrawide: vida, itens e Ecos de Sangue nas bordas da tela ou na área central 16:9',
+    'У краёв экрана': 'Bordas da tela',
+    'Посередине': 'No meio',
+    'По центру (16:9)': 'Centralizado (16:9)',
 }
 
 
@@ -2209,7 +2219,7 @@ ES = {
     'Игра по сети': 'Juego en línea',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Para jugar en línea, usa tu propio servidor (página Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Salir del juego desde el menú con el mando, el menú dentro de la pantalla y las mitades del panel táctil en mandos Xbox',
-    'Вылет видеоплеера при его остановке': 'Un cierre del reproductor de vídeo al detenerse',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'Un cierre del reproductor de vídeo al detenerse; pantallas ultrapanorámicas 21:9 y 32:9: cámara, HUD y su posición',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS en la AppImage con NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrapanorámicos sin la imagen estirada',
@@ -2221,6 +2231,11 @@ ES = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo en el pool de The Hunter's Dream con jugadores de bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; menos tirones al cargar zonas, intercambio de sticks e inversión de la cámara, el mando en uso, importación de partidas, selector de versión',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grupos grandes de comandos grabados y el swapchain tras cambios de pantalla',
+    'Положение интерфейса': 'Posición del HUD',
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': 'Pantallas ultrapanorámicas: salud, objetos y Ecos de sangre en los bordes de la pantalla o en el área centrada 16:9',
+    'У краёв экрана': 'Bordes de la pantalla',
+    'Посередине': 'A medio camino',
+    'По центру (16:9)': 'Centrado (16:9)',
 }
 
 
@@ -2908,7 +2923,7 @@ IT = {
     'Игра по сети': 'Gioco online',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Il server shadNet non accetta bbport, quindi il gioco è rimasto offline. Per giocare online usa un tuo server (pagina Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Uscire dal gioco dal menu con il controller, il menu entro lo schermo e le metà del touchpad sui controller Xbox',
-    'Вылет видеоплеера при его остановке': 'Un crash del lettore video quando si ferma',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'Un crash del lettore video quando si ferma; schermi ultrawide 21:9 e 32:9: telecamera, HUD e la sua posizione',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La lingua del menu di gioco avviando senza la finestra del launcher',
     'DLSS в AppImage на NVIDIA': "DLSS nell'AppImage su NVIDIA",
     'Сверхширокие мониторы без растянутой картинки': 'Monitor ultrawide senza immagine stirata',
@@ -2920,6 +2935,11 @@ IT = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativa nel pool di The Hunter's Dream con i giocatori di bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; meno scatti nel caricamento delle zone, scambio degli stick e inversione della telecamera, il controller in uso, importazione dei salvataggi, selettore di versione',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandi gruppi di comandi registrati e la swapchain dopo i cambi di schermo',
+    'Положение интерфейса': "Posizione dell'HUD",
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': "Schermi ultrawide: salute, oggetti ed Echi del sangue ai bordi dello schermo o nell'area centrale 16:9",
+    'У краёв экрана': 'Bordi dello schermo',
+    'Посередине': 'A metà',
+    'По центру (16:9)': 'Al centro (16:9)',
 }
 
 
@@ -3607,7 +3627,7 @@ FR = {
     'Игра по сети': 'Jeu en ligne',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Le serveur shadNet n’accepte pas bbport, le jeu est donc resté hors ligne. Pour jouer en ligne, utilisez votre propre serveur (page En ligne).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Quitter le jeu depuis le menu à la manette, le menu qui tient dans l’écran et les moitiés du pavé tactile sur les manettes Xbox',
-    'Вылет видеоплеера при его остановке': 'Un plantage du lecteur vidéo à son arrêt',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'Un plantage du lecteur vidéo à son arrêt ; écrans ultra-larges 21:9 et 32:9 : caméra, ATH et sa position',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La langue du menu en jeu au lancement sans la fenêtre du launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS dans l’AppImage sur NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Les écrans ultra-larges sans image étirée',
@@ -3619,6 +3639,11 @@ FR = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge : coopération sur le pool de The Hunter's Dream avec les joueurs de bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; moins de saccades au chargement des zones, sticks inversés et caméra inversée, la manette utilisée, import des sauvegardes, choix de version',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grands groupes de commandes enregistrées et la swapchain après un changement d’affichage',
+    'Положение интерфейса': "Position de l'ATH",
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': "Écrans ultra-larges : santé, objets et Échos de sang aux bords de l'écran ou dans la zone 16:9 centrée",
+    'У краёв экрана': "Bords de l'écran",
+    'Посередине': 'À mi-chemin',
+    'По центру (16:9)': 'Centré (16:9)',
 }
 
 
@@ -4306,7 +4331,7 @@ DE = {
     'Игра по сети': 'Online-Spiel',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Der shadNet-Server akzeptiert bbport nicht, daher blieb das Spiel offline. Für das Online-Spiel einen eigenen Server verwenden (Seite Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Das Spiel im Menü mit dem Controller beenden, das Menü innerhalb des Bildschirms und die Touchpad-Hälften auf Xbox-Controllern',
-    'Вылет видеоплеера при его остановке': 'Ein Absturz des Videoplayers beim Anhalten',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': 'Ein Absturz des Videoplayers beim Anhalten; Ultrawide-Bildschirme 21:9 und 32:9: Kamera, HUD und seine Position',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'Die Sprache des Spielmenüs beim Start ohne Launcher-Fenster',
     'DLSS в AppImage на NVIDIA': 'DLSS im AppImage auf NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide-Monitore ohne gestrecktes Bild',
@@ -4318,6 +4343,11 @@ DE = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: Koop im Pool von The Hunter's Dream mit bbhost-Spielern",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; weniger Ruckler beim Laden von Gebieten, Sticks tauschen und Kamera invertieren, der benutzte Controller, Spielstände importieren, Versionsauswahl',
     'Большие группы команд записи и swapchain после изменений экрана': 'Große aufgezeichnete Befehlsgruppen und die Swapchain nach Anzeigeänderungen',
+    'Положение интерфейса': 'HUD-Position',
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': 'Ultrawide-Bildschirme: Gesundheit, Gegenstände und Blutechos an den Bildschirmrändern oder im mittigen 16:9-Bereich',
+    'У краёв экрана': 'Bildschirmränder',
+    'Посередине': 'Auf halbem Weg',
+    'По центру (16:9)': 'Mittig (16:9)',
 }
 
 
@@ -4948,7 +4978,7 @@ ZH_CN = {
     'Игра по сети': '联机游戏',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'shadNet 服务器不接受 bbport，因此游戏保持离线。如需联机，请使用自己的服务器（“联机”页面）。',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': '用手柄从菜单退出游戏、菜单不超出屏幕，以及 Xbox 手柄上的触摸板左右两半',
-    'Вылет видеоплеера при его остановке': '视频播放器停止时的崩溃',
+    'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение': '视频播放器停止时的崩溃；21:9 与 32:9 超宽屏：镜头、HUD 及其位置',
     'Язык внутриигрового меню при запуске без окна лаунчера': '不经启动器窗口启动时游戏内菜单的语言',
     'DLSS в AppImage на NVIDIA': 'NVIDIA 上 AppImage 中的 DLSS',
     'Сверхширокие мониторы без растянутой картинки': '超宽屏显示器画面不再被拉伸',
@@ -4960,6 +4990,11 @@ ZH_CN = {
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge：在 The Hunter's Dream 池中与 bbhost 玩家合作",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; меньше рывков при загрузке зон, смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；加载区域时卡顿更少、交换摇杆与视角反转、正在使用的手柄、导入存档、版本选择',
     'Большие группы команд записи и swapchain после изменений экрана': '大型录制命令组以及显示变化后的交换链',
+    'Положение интерфейса': 'HUD 位置',
+    'Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв экрана или в центральной области 16:9': '超宽屏：生命值、道具和血之回响位于屏幕边缘或居中的 16:9 区域',
+    'У краёв экрана': '屏幕边缘',
+    'Посередине': '中间',
+    'По центру (16:9)': '居中（16:9）',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation

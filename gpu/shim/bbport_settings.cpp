@@ -85,6 +85,8 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         v.model_lod = std::clamp(i, -2, 2);
     } else if (key == "live_resolution") {
         v.live_resolution = value == "auto" ? -1 : std::clamp(i, 0, 1);
+    } else if (key == "hud_position") {
+        v.hud_position = std::clamp(i, 0, 100);
     } else if (key == "output_res") {
         bool listed = false;
         for (int r = 0; r < OutputCount; ++r) {
@@ -204,6 +206,8 @@ void Load() {
     v.startup_model_lod = v.model_lod;
     v.startup_output_res = v.output_res;
     v.startup_custom_output_width = v.custom_output_width;
+    v.startup_custom_output_height = v.custom_output_height;
+    v.startup_hud_position = v.hud_position;
     v.startup_live_resolution = v.live_resolution;
 }
 
@@ -255,9 +259,23 @@ bool CustomOutput(int& width, int& height) {
     return true;
 }
 
+bool UltrawideOutput() {
+    const auto& v = Get();
+    int width = OutputWidths[v.output_res], height = OutputHeights[v.output_res];
+    CustomOutput(width, height);
+    return Ultrawide(width, height);
+}
+
 bool ResolutionNeedsRestart() {
     const auto& v = Get();
-    // TAA needs the live path (native guest targets): run.sh selects it on restart.
+    // TAA needs the live path (native guest targets): run.sh selects it on restart. Ultrawide
+    // outputs patch the camera and HUD at startup.
+    const bool startup_ultrawide =
+        v.startup_custom_output_width > 0
+            ? Ultrawide(v.startup_custom_output_width, v.startup_custom_output_height)
+            : Ultrawide(v.startup_output_res);
+    if (UltrawideOutput() != startup_ultrawide) return true;
+    if (UltrawideOutput() && v.hud_position != v.startup_hud_position) return true;
     return FixedRenderSession() &&
         (v.preset != v.startup_preset || v.output_res != v.startup_output_res ||
          v.custom_output_width != v.startup_custom_output_width ||
@@ -310,6 +328,8 @@ void Save() {
         put("output_res", std::to_string(OutputWidths[v.output_res]) + "x" +
                               std::to_string(OutputHeights[v.output_res]));
     }
+    // Read by run.sh at start (hud_layout.py).
+    put("hud_position", std::to_string(v.hud_position.load()));
     // Read by run.sh at start.
     put("live_resolution", v.live_resolution < 0 ? "auto" : flag(v.live_resolution != 0));
     if (v.menu_x >= 0.0f && v.menu_y >= 0.0f) {

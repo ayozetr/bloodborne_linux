@@ -506,7 +506,11 @@ void Menu() {
     ImGui::EndDisabled(); // upscaler off
 
     ImGui::SeparatorText(BbSettings::MenuText("Output resolution", "Разрешение вывода"));
-    static const char* outputs[] = {"1280 x 720", "1920 x 1080", "2560 x 1440", "3840 x 2160"};
+    static const char* outputs[] = {"1280 x 720", "1920 x 1080", "2560 x 1440", "3840 x 2160",
+                                    "2560 x 1080 (21:9)", "3440 x 1440 (21:9)",
+                                    "3840 x 1600 (21:9)", "5120 x 2160 (21:9)",
+                                    "3840 x 1080 (32:9)", "5120 x 1440 (32:9)"};
+    static_assert(sizeof(outputs) / sizeof(*outputs) == BbSettings::OutputCount);
     int output = s.output_res;
     // A size from bbport.ini that the list does not have stays until another one is chosen.
     int custom_width = 0, custom_height = 0;
@@ -525,6 +529,20 @@ void Menu() {
             }
         }
         ImGui::EndCombo();
+    }
+    if (BbSettings::UltrawideOutput()) {
+        int hud = s.hud_position;
+        const char* format = hud == 0 ? BbSettings::MenuText("Centred (16:9)", "По центру (16:9)")
+                           : hud == 100 ? BbSettings::MenuText("Screen edges", "У краёв экрана")
+                                        : "%d%%";
+        Store(s.hud_position, hud,
+              ImGui::SliderInt(BbSettings::MenuText("HUD position", "Положение интерфейса"), &hud,
+                               0, 100, format));
+        Hint(BbSettings::MenuText(
+            "Ultrawide (21:9, 32:9): moves health, items and Blood Echoes from the centred 16:9 "
+            "area toward the screen edges. Applies after restarting the game.",
+            "Сверхширокие экраны (21:9, 32:9): переносит здоровье, предметы и Отголоски крови из "
+            "центральной области 16:9 к краям экрана. Применяется после перезапуска игры."));
     }
     if (BbSettings::FixedRenderSession()) {
         Hint(BbSettings::MenuText(

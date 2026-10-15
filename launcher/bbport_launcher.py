@@ -98,7 +98,13 @@ UPSCALERS = [("FSR 4", "fsr4"), ("FSR 4.1.1", "fsr411"), ("FSR 3", "fsr3"),
              ("TAA (нативное сглаживание)", "taa"), ("Выключен", "off")]
 PRESETS = [("Native AA", 0), ("Quality (x1.5)", 1), ("Balanced (x1.7)", 2),
            ("Performance (x2)", 3), ("Ultra Performance (x3)", 4)]
-OUTPUT_RES = [("1280×720 (Steam Deck)", "1280x720"), ("1920×1080", "1920x1080"), ("2560×1440", "2560x1440"), ("3840×2160", "3840x2160")]
+OUTPUT_RES = [("1280×720 (Steam Deck)", "1280x720"), ("1920×1080", "1920x1080"), ("2560×1440", "2560x1440"), ("3840×2160", "3840x2160"),
+              ("2560×1080 (21:9)", "2560x1080"), ("3440×1440 (21:9)", "3440x1440"),
+              ("3840×1600 (21:9)", "3840x1600"), ("5120×2160 (21:9)", "5120x2160"),
+              ("3840×1080 (32:9)", "3840x1080"), ("5120×1440 (32:9)", "5120x1440")]
+# Ultrawide outputs: where the HUD's corner groups go (bbport.ini hud_position, scripts/hud_layout.py).
+HUD_POSITIONS = [("У краёв экрана", "100"), ("75%", "75"), ("Посередине", "50"), ("25%", "25"),
+                 ("По центру (16:9)", "0")]
 # Game effects (patches applied at start): bbport.ini key, title, default.
 EFFECTS = [
     ("effect_chromatic_aberration", "Хроматическая аберрация", True),
@@ -235,6 +241,7 @@ INI_DEFAULTS = {
     "output_res": "1920x1080",
     "model_lod": "0",
     "live_resolution": "0",
+    "hud_position": "100",
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
@@ -599,6 +606,15 @@ def combo_value(row):
     return row.values[row.get_selected()]
 
 
+def ultrawide(output):
+    """An output_res wider than 16:9 (the startup patch widens the camera and the HUD)."""
+    try:
+        w, h = map(int, output.split("x"))
+    except ValueError:
+        return False
+    return w * 9 > h * 16
+
+
 # Controls (runtime_pad.c): input, label, default keyboard keys, default gamepad buttons (SDL names).
 # bbport.ini key.<input>= / pad.<input>= replace a default; no line keeps it. Mouse buttons and the
 # wheel are keys ("Mouse Left", "Wheel Down"); they act while the game holds the mouse.
@@ -734,7 +750,8 @@ THANKS = (
         _github("Vorshim92", "Вход на публичный сервер shadNet без отключения"),
         _github("parsifal295", "Выход из игры из меню с контроллера, меню в пределах экрана "
                                "и половины тачпада на Xbox"),
-        _github("emurphy04", "Вылет видеоплеера при его остановке"),
+        _github("emurphy04", "Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: "
+                             "камера, интерфейс и его положение"),
         _github("AyrtonSanabio", "Язык внутриигрового меню при запуске без окна лаунчера"),
         _github("Aryxa", "DLSS в AppImage на NVIDIA"),
         _github("pmwork-personal", "Сверхширокие мониторы без растянутой картинки"),
@@ -989,6 +1006,18 @@ class LauncherWindow(Adw.ApplicationWindow):
                                   tr("Без перезапуска, но медленнее на Steam Deck и старых GPU"),
                                   LIVE_RESOLUTION, self.ini.get("live_resolution", "0"))
         screen.add(self.live_row)
+        # A position written by hand in bbport.ini (33, ...) stays a choice too.
+        position = self.ini.get("hud_position", "100")
+        positions = HUD_POSITIONS + ([(f"{position}%", position)]
+                                     if position not in [value for _, value in HUD_POSITIONS] else [])
+        self.hud_row = combo_row(tr("Положение интерфейса"),
+                                 tr("Сверхширокие экраны: здоровье, предметы и Отголоски крови у краёв "
+                                    "экрана или в центральной области 16:9"),
+                                 positions, position)
+        screen.add(self.hud_row)
+        self.output_row.connect("notify::selected", lambda *_: self.hud_row.set_sensitive(
+            ultrawide(combo_value(self.output_row))))
+        self.hud_row.set_sensitive(ultrawide(combo_value(self.output_row)))
         self.fullscreen_row = Adw.SwitchRow(title=tr("Полноэкранный режим"),
                                             active=self.settings["fullscreen"])
         screen.add(self.fullscreen_row)
@@ -1670,6 +1699,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "output_res": combo_value(self.output_row),
             "model_lod": combo_value(self.lod_row),
             "live_resolution": combo_value(self.live_row),
+            "hud_position": combo_value(self.hud_row),
             "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",

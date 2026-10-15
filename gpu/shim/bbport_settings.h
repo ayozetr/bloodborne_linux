@@ -61,11 +61,19 @@ inline constexpr Effect Effects[] = {
     {"tweak_ragdoll", "Dark Souls ragdoll physics", "Физика тел как в Dark Souls", false},
 };
 inline constexpr int EffectCount = int(sizeof(Effects) / sizeof(Effects[0]));
-/// Live output resolutions: the upscaler's output and the UI host targets.
-inline constexpr int OutputWidths[] = {1280, 1920, 2560, 3840};
-inline constexpr int OutputHeights[] = {720, 1080, 1440, 2160};
-inline constexpr int OutputCount = 4;
+/// Output resolutions: the upscaler's output and the UI host targets. The 16:9 ones change
+/// live; the ultrawide ones need the startup patch (patches.py ultrawide_writes, run.sh).
+inline constexpr int OutputWidths[] = {1280, 1920, 2560, 3840, 2560, 3440, 3840, 5120, 3840, 5120};
+inline constexpr int OutputHeights[] = {720, 1080, 1440, 2160, 1080, 1440, 1600, 2160, 1080, 1440};
+inline constexpr int OutputCount = 10;
 inline constexpr int OutputDefault = 1; ///< 1920x1080, the game's own size
+/// Wider than 16:9: camera and HUD patched at startup.
+inline bool Ultrawide(int width, int height) {
+    return width * 9 > height * 16;
+}
+inline bool Ultrawide(int output) {
+    return Ultrawide(OutputWidths[output], OutputHeights[output]);
+}
 
 struct Values {
     std::atomic<MenuLanguage> menu_language{MenuLanguage::Russian};
@@ -100,6 +108,9 @@ struct Values {
     /// An output_res in bbport.ini that the list does not have (5120x2160, ...): run.sh and
     /// patches.py use it, and the menu keeps it until another size is chosen.
     int custom_output_width = 0, custom_output_height = 0;
+    /// Ultrawide outputs: the HUD's corner groups, 0 centred in 16:9 .. 100 at the screen edges
+    /// (hud_layout.py at start).
+    std::atomic<int> hud_position{100};
     /// Live resolution and preset changes (run.sh): 0 off by default (startup patch, fastest
     /// on the Steam Deck and older GPUs), -1 auto (strong discrete GPUs), 1 on. On restart.
     std::atomic<int> live_resolution{0};
@@ -117,7 +128,8 @@ struct Values {
     bool startup_effects[EffectCount]{};
     int startup_model_lod = 0;
     int startup_output_res = OutputDefault;
-    int startup_custom_output_width = 0;
+    int startup_custom_output_width = 0, startup_custom_output_height = 0;
+    int startup_hud_position = 100;
     int startup_live_resolution = 0;
 };
 
@@ -142,6 +154,8 @@ int RenderPreset();
 bool ResolutionNeedsRestart();
 /// The output size from bbport.ini that the menu does not list, while it is still the choice.
 bool CustomOutput(int& width, int& height);
+/// The chosen output (a listed or a custom one) is wider than 16:9.
+bool UltrawideOutput();
 /// Writes the file (menu changes).
 void Save();
 

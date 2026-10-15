@@ -64,10 +64,83 @@ if [[ -z ${PYTHON:-} ]]; then echo 'Install Python 3 or set PYTHON.' >&2; exit 1
 game=${BB_GAME_DIR:-../CUSA03173}
 if [[ ! -f $game/eboot.bin ]]; then echo "No eboot.bin in $game (set BB_GAME_DIR)." >&2; exit 1; fi
 original_game=$game
+# Sizes chosen below for the previous launch are recomputed after an in-game restart.
+if [[ ${BB_AUTO_RENDER_RES:-} == 1 ]]; then
+    unset BB_RENDER_RES BB_OUTPUT_RES BB_AUTO_RENDER_RES BB_UI_RES
+fi
+# BB_RENDER_RES=WxH explicitly sets the game's render resolution (a patch at start).
+# Frame rate: BB_FPS=uncap (default; delta-time patch, vblank 480 Hz, frames shown at once),
+# 60/90 (fixed-timestep patches) or 30 (unpatched). BB_PATCHES adds patch names ("a;b").
+fps=${BB_FPS:-uncap}
+# bbport.ini output_res other than 1080p (720p for the Steam Deck, 1440p, 2160p): the whole game
+# renders at the preset's size of the output (a patch), the upscaler fills the output, the UI is
+# drawn at the output size. Preset and output changes need a restart.
+# Live resolution changes keep the guest at 1920x1080 and scale host targets at run time instead
+# (output and presets change in the menu without a restart, but post-processing stays at 1080p
+# and scene targets are copied back: much slower on the Steam Deck and older GPUs). Chosen by
+# BB_LIVE_RES=0/1, else bbport.ini live_resolution=0/1/auto (auto: the GPU check, strong
+# discrete GPUs get them); off when unset. 1080p output and TAA always use the live path.
+# Outputs wider than 16:9 always use the startup patch: it widens the camera and the HUD canvas
+# (1080 high, BB_UI_RES wide; patches.py ultrawide_writes), unless bbport.ini aspect_patch=0
+# (the 16:9 picture stretched to the output).
+# The GPU tools (bb-gpu-capabilities: the game's GPU, its live resolution support).
+if [[ -n ${BB_PROBE:-} ]]; then caps=$(dirname -- "$BB_PROBE")/bb-gpu-capabilities
+elif [[ -n ${BB_PREBUILT:-} ]]; then caps=bin/bb-gpu-capabilities
+else caps=out/bb-gpu-capabilities; fi
+if [[ -z ${BB_RENDER_RES:-} ]]; then
+    read -r scaled_render scaled_output scaled_ui < <("$PYTHON" scripts/patches.py --print-scaled --settings "$BB_CONFIG") || true
+fi
+live=0
+if [[ -n ${scaled_output:-} ]]; then
+    live=${BB_LIVE_RES:-}
+    # Bash builtins only: the AppImage's PATH has no sed/grep (a missing one ended run.sh silently).
+    if [[ -z $live && -f $BB_CONFIG ]]; then
+        while IFS= read -r line || [[ -n $line ]]; do
+            [[ $line =~ ^live_resolution=([01]|auto)$ ]] && live=${BASH_REMATCH[1]}
+        done < "$BB_CONFIG"
+    fi
+    if [[ $live == auto ]]; then
+        live=$("$caps" --live-resolution 2> >(while IFS= read -r line; do
+            [[ $line == *MANGOHUD* ]] || printf '%s\n' "$line"; done >&2)) || live=0
+    fi
+    [[ $live == 1 ]] || live=0
+    if [[ $live == 1 && $scaled_output =~ ^([0-9]+)x([0-9]+)$ ]] &&
+            (( 10#${BASH_REMATCH[1]} * 9 > 10#${BASH_REMATCH[2]} * 16 )); then
+        echo "Output ${scaled_output}: ultrawide, no live resolution changes"
+        live=0
+    fi
+fi
+if [[ $live == 1 ]]; then
+    echo "Output ${scaled_output}: live resolution changes (live_resolution=0: startup patch)"
+elif [[ -n ${scaled_output:-} ]]; then
+    export BB_RENDER_RES=$scaled_render BB_OUTPUT_RES=$scaled_output BB_AUTO_RENDER_RES=1
+    export BB_DMEM_MB=${BB_DMEM_MB:-9152}
+    echo "Output ${scaled_output}: scene ${scaled_render}, direct memory ${BB_DMEM_MB} MiB (live_resolution=1: live changes)"
+    if [[ ${scaled_ui:-1920x1080} != 1920x1080 ]]; then
+        export BB_UI_RES=$scaled_ui
+        echo "Output ${scaled_output}: ultrawide, HUD ${BB_UI_RES}"
+    fi
+fi
+# An explicit render size above 1080p skips the scaled path above, but patches.py still grows the
+# graphics heap: the direct memory has to follow, or the game stops at start (exit 139).
+if [[ -z ${BB_DMEM_MB:-} && ${BB_RENDER_RES:-} =~ ^[[:space:]]*([0-9]+)[[:space:]]*[xX][[:space:]]*([0-9]+)[[:space:]]*$ ]] &&
+        (( 10#${BASH_REMATCH[1]} * 10#${BASH_REMATCH[2]} > 1920 * 1080 )); then
+    export BB_DMEM_MB=9152
+    echo "Render ${BB_RENDER_RES}: direct memory ${BB_DMEM_MB} MiB"
+fi
 # BB_PROMPTS (playstation, xbox, switch, keyboard) and BB_GESTURES_NO_MOTION=1: the menu's button
 # prompts and the gestures menu, made from the game's files (scripts/menu_prompts.py).
 ui_mods=$("$PYTHON" scripts/menu_prompts.py "$game" --out "$out" --prompts "${BB_PROMPTS:-playstation}" \
     --gestures "${BB_GESTURES_NO_MOTION:-0}" --config "$BB_CONFIG")
+# Ultrawide (BB_UI_RES above): the menu movies with full-screen backdrops widened and the HUD's
+# corner groups toward the screen edges (bbport.ini hud_position, 0 centred .. 100 edges), laid
+# after the prompts (its gestures menu is built on theirs). Optional: without it the HUD stays in
+# the centred 16:9 area (scripts/hud_layout.py).
+if [[ -n ${BB_UI_RES:-} ]]; then
+    hud_layer=$("$PYTHON" scripts/hud_layout.py "$game" --out "$out/hud-layout" \
+        --canvas-width "${BB_UI_RES%x*}" --config "$BB_CONFIG" --source "$ui_mods") || hud_layer=
+    if [[ -n $hud_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$hud_layer; fi
+fi
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
     --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods")
@@ -94,58 +167,6 @@ fi
 # BB_REGION=eu|na (the launcher's Region): the game's region for this launch, whatever the dump's
 # param.sfo says; it picks the regional text (Spanish from Spain or Latin American).
 "$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" --region "${BB_REGION:-}"
-# Sizes chosen below for the previous launch are recomputed after an in-game restart.
-if [[ ${BB_AUTO_RENDER_RES:-} == 1 ]]; then
-    unset BB_RENDER_RES BB_OUTPUT_RES BB_AUTO_RENDER_RES
-fi
-# BB_RENDER_RES=WxH explicitly sets the game's render resolution (a patch at start).
-# Frame rate: BB_FPS=uncap (default; delta-time patch, vblank 480 Hz, frames shown at once),
-# 60/90 (fixed-timestep patches) or 30 (unpatched). BB_PATCHES adds patch names ("a;b").
-fps=${BB_FPS:-uncap}
-# bbport.ini output_res other than 1080p (720p for the Steam Deck, 1440p, 2160p): the whole game
-# renders at the preset's size of the output (a patch), the upscaler fills the output, the UI is
-# drawn at the output size. Preset and output changes need a restart.
-# Live resolution changes keep the guest at 1920x1080 and scale host targets at run time instead
-# (output and presets change in the menu without a restart, but post-processing stays at 1080p
-# and scene targets are copied back: much slower on the Steam Deck and older GPUs). Chosen by
-# BB_LIVE_RES=0/1, else bbport.ini live_resolution=0/1/auto (auto: the GPU check, strong
-# discrete GPUs get them); off when unset. 1080p output and TAA always use the live path.
-# The GPU tools (bb-gpu-capabilities: the game's GPU, its live resolution support).
-if [[ -n ${BB_PROBE:-} ]]; then caps=$(dirname -- "$BB_PROBE")/bb-gpu-capabilities
-elif [[ -n ${BB_PREBUILT:-} ]]; then caps=bin/bb-gpu-capabilities
-else caps=out/bb-gpu-capabilities; fi
-if [[ -z ${BB_RENDER_RES:-} ]]; then
-    read -r scaled_render scaled_output < <("$PYTHON" scripts/patches.py --print-scaled --settings "$BB_CONFIG") || true
-fi
-live=0
-if [[ -n ${scaled_output:-} ]]; then
-    live=${BB_LIVE_RES:-}
-    # Bash builtins only: the AppImage's PATH has no sed/grep (a missing one ended run.sh silently).
-    if [[ -z $live && -f $BB_CONFIG ]]; then
-        while IFS= read -r line || [[ -n $line ]]; do
-            [[ $line =~ ^live_resolution=([01]|auto)$ ]] && live=${BASH_REMATCH[1]}
-        done < "$BB_CONFIG"
-    fi
-    if [[ $live == auto ]]; then
-        live=$("$caps" --live-resolution 2> >(while IFS= read -r line; do
-            [[ $line == *MANGOHUD* ]] || printf '%s\n' "$line"; done >&2)) || live=0
-    fi
-    [[ $live == 1 ]] || live=0
-fi
-if [[ $live == 1 ]]; then
-    echo "Output ${scaled_output}: live resolution changes (live_resolution=0: startup patch)"
-elif [[ -n ${scaled_output:-} ]]; then
-    export BB_RENDER_RES=$scaled_render BB_OUTPUT_RES=$scaled_output BB_AUTO_RENDER_RES=1
-    export BB_DMEM_MB=${BB_DMEM_MB:-9152}
-    echo "Output ${scaled_output}: scene ${scaled_render}, direct memory ${BB_DMEM_MB} MiB (live_resolution=1: live changes)"
-fi
-# An explicit render size above 1080p skips the scaled path above, but patches.py still grows the
-# graphics heap: the direct memory has to follow, or the game stops at start (exit 139).
-if [[ -z ${BB_DMEM_MB:-} && ${BB_RENDER_RES:-} =~ ^[[:space:]]*([0-9]+)[[:space:]]*[xX][[:space:]]*([0-9]+)[[:space:]]*$ ]] &&
-        (( 10#${BASH_REMATCH[1]} * 10#${BASH_REMATCH[2]} > 1920 * 1080 )); then
-    export BB_DMEM_MB=9152
-    echo "Render ${BB_RENDER_RES}: direct memory ${BB_DMEM_MB} MiB"
-fi
 "$PYTHON" scripts/patches.py --out "$out" --fps "$fps" --extra "${BB_PATCHES:-}" --settings "$BB_CONFIG" --game-dir "$game" --render-res "${BB_RENDER_RES:-}" --output-res "${BB_OUTPUT_RES:-}" \
     --patches-dir "${BB_PATCHES_DIR:-$data/patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}"
 # Background upload of the game's GPU memory into VRAM ahead of use (BufferCache::Preupload):

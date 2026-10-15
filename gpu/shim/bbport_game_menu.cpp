@@ -237,10 +237,16 @@ void DefineTexts() {
     row(Sharpness, "Sharpness", "Резкость", "RCAS after the upscaler: 0 off, 10 strongest",
         "RCAS после апскейлера: 0 выкл, 10 сильнее всего", {}, Kind::Slider);
     row(OutputRes, "Output resolution", "Разрешение вывода",
-        "Final frame: 0-1 1280x720, 2-4 1920x1080, 5-7 2560x1440, 8-10 3840x2160",
-        "Готовый кадр: 0-1 1280x720, 2-4 1920x1080, 5-7 2560x1440, 8-10 3840x2160",
+        "Final frame: 0-3 16:9 (720p to 4K), 4-8 21:9, 9-10 32:9 (ultrawide: after a restart)",
+        "Готовый кадр: 0-3 16:9 (от 720p до 4K), 4-8 21:9, 9-10 32:9 (сверхширокие: после перезапуска)",
         {AddText("1280 x 720", "1280 x 720"), AddText("1920 x 1080", "1920 x 1080"),
-         AddText("2560 x 1440", "2560 x 1440"), AddText("3840 x 2160", "3840 x 2160")},
+         AddText("2560 x 1440", "2560 x 1440"), AddText("3840 x 2160", "3840 x 2160"),
+         AddText("2560 x 1080 (21:9)", "2560 x 1080 (21:9)"),
+         AddText("3440 x 1440 (21:9)", "3440 x 1440 (21:9)"),
+         AddText("3840 x 1600 (21:9)", "3840 x 1600 (21:9)"),
+         AddText("5120 x 2160 (21:9)", "5120 x 2160 (21:9)"),
+         AddText("3840 x 1080 (32:9)", "3840 x 1080 (32:9)"),
+         AddText("5120 x 1440 (32:9)", "5120 x 1440 (32:9)")},
         Kind::Steps);
     row(ShowFps, "FPS counter", "Счётчик FPS", "Frame rate in the top right corner",
         "Частота кадров в правом верхнем углу", toggle);

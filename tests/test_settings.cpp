@@ -70,22 +70,38 @@ int main() {
     // An output size the menu does not list (deadinside28#183) survives a save...
     {
         FILE* f = std::fopen(path, "a");
-        std::fputs("output_res=5120x2160\n", f);
+        std::fputs("output_res=2880x1200\nhud_position=40\n", f);
         std::fclose(f);
     }
     BbSettings::Load();
     int width = 0, height = 0;
-    assert(BbSettings::CustomOutput(width, height) && width == 5120 && height == 2160);
+    assert(BbSettings::CustomOutput(width, height) && width == 2880 && height == 1200);
+    // A custom ultrawide size gets the HUD position like the listed ones; changing it restarts.
+    assert(BbSettings::UltrawideOutput() && s.hud_position == 40);
+    assert(!BbSettings::ResolutionNeedsRestart());
+    s.hud_position = 60;
+    assert(BbSettings::ResolutionNeedsRestart());
     s.show_fps = true;
     BbSettings::Save();
-    assert(Read(path).find("output_res=5120x2160\n") != std::string::npos);
-    // ...until a listed one is chosen.
+    assert(Read(path).find("output_res=2880x1200\n") != std::string::npos);
+    assert(Read(path).find("hud_position=60\n") != std::string::npos);
+    // ...until a listed one is chosen; leaving ultrawide needs a restart too.
     s.custom_output_width = 0;
     s.output_res = 2;
+    assert(!BbSettings::UltrawideOutput() && BbSettings::ResolutionNeedsRestart());
     BbSettings::Save();
     assert(Read(path).find("output_res=2560x1440\n") != std::string::npos);
     assert(!BbSettings::CustomOutput(width, height));
+    // The ultrawide sizes are listed: 3440x1440 is one of them, not a custom size.
+    {
+        FILE* f = std::fopen(path, "a");
+        std::fputs("output_res=3440x1440\n", f);
+        std::fclose(f);
+    }
+    BbSettings::Load();
+    assert(!BbSettings::CustomOutput(width, height) && BbSettings::Ultrawide(s.output_res) &&
+           BbSettings::OutputWidths[s.output_res] == 3440);
     unlink(path);
     std::puts("PASS: settings save keeps other keys, menu position, only a chosen menu language, "
-              "a custom output size");
+              "a custom output size, the HUD position");
 }

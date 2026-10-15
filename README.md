@@ -23,7 +23,7 @@ projects ([credits](docs/CREDITS.md)).
   [The Hunter's Dream](https://thehuntersdream.com) or a server of your own, and **Seamless
   Co-op** (experimental): co-op that lasts through deaths, lamps and areas, for up to 5 hunters.
 - **Frame rate unlocked** (up to 120 FPS) or capped at **30, 60 or 90**. Resolutions from
-  **720p to 4K**, and **ultrawide** (21:9, 32:9).
+  **720p to 4K**, and **ultrawide** (21:9, 32:9, [how](docs/TROUBLESHOOTING.md#the-picture-is-stretched-on-an-ultrawide-screen)).
 - **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
 - **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
   game**, and **keyboard and mouse**, with a direct 1:1 mouse camera and keys you can rebind.
