@@ -201,27 +201,40 @@ int main(void) {
     mouse_wheel_step(1140000,0,0);
     assert(mouse_key_down(MOUSE_WHEEL_DOWN) && wheel_pending[1]==0);
     /* Keyboard movement: opposite keys, the last pressed wins (or cancel out with
-     * stick_socd=neutral); a diagonal stays within a round gate (unless stick_circular=0). */
+     * stick_socd=neutral). */
     {
-        bool keys[SDL_SCANCODE_COUNT]={0};
-        const int a_key=bindings[IN_MOVE_LEFT].keys[0], d_key=bindings[IN_MOVE_RIGHT].keys[0];
-        const int w_key=bindings[IN_MOVE_UP].keys[0];
-        PadData m={0};
-        m.left_x=m.left_y=128;
-        keys[a_key]=1; apply_keyboard(&m,keys); assert(m.left_x==0);
-        keys[d_key]=1; apply_keyboard(&m,keys); assert(m.left_x==255); /* D pressed last */
-        keys[a_key]=0; apply_keyboard(&m,keys); assert(m.left_x==255);
-        keys[a_key]=1; apply_keyboard(&m,keys); assert(m.left_x==0);   /* now A is the last */
-        keys[a_key]=keys[d_key]=0;
+        assert(key_direction(0,1,0)==-1);
+        assert(key_direction(0,1,1)==1);  /* D pressed last */
+        assert(key_direction(0,0,1)==1);
+        assert(key_direction(0,1,1)==-1); /* now A is the last */
+        assert(key_direction(0,0,0)==0);
         stick_socd_last=0;
-        keys[a_key]=1; apply_keyboard(&m,keys);
-        keys[d_key]=1; apply_keyboard(&m,keys); assert(m.left_x==128);
-        stick_socd_last=1; keys[a_key]=keys[d_key]=0;
-        keys[w_key]=keys[a_key]=1; apply_keyboard(&m,keys);
-        assert(m.left_x==128-90 && m.left_y==128-90);
-        stick_circular=0; apply_keyboard(&m,keys);
-        assert(m.left_x==0 && m.left_y==0);
-        stick_circular=1; keys[w_key]=keys[a_key]=0;
+        assert(key_direction(0,1,1)==0);
+        stick_socd_last=1;
+    }
+    /* The movement keys as the stick (cassioKenji's measurements): the square gate, at most 30
+     * degrees a read toward the keys' direction, a half turn through forward, a release held
+     * 60 ms. */
+    {
+        int x, y; uint64_t t=10000000;
+        assert(key_move(0,-1,t,&x,&y) && x==0 && y==-127);              /* W */
+        t+=16000; key_move(-1,-1,t,&x,&y);                               /* W+A: one step of 14.4 */
+        assert(y==-127 && x<-25 && x>-40);
+        for (int i=0;i<10;++i) { t+=16000; key_move(-1,-1,t,&x,&y); }
+        assert(x==-127 && y==-127);                                      /* the square's corner */
+        t+=200000; key_move(-1,-1,t,&x,&y); t+=200000; key_move(-1,0,t,&x,&y);
+        assert(x==-127 && y>-127 && y<0);                                /* toward A: 30 degrees at most */
+        for (int i=0;i<10;++i) { t+=16000; key_move(-1,0,t,&x,&y); }
+        assert(x==-127 && y==0);
+        t+=16000; key_move(1,0,t,&x,&y);                                 /* A -> D: through forward */
+        assert(y<0);
+        t+=20000; assert(key_move(0,0,t,&x,&y) && y<0);                  /* released: held */
+        t+=100000; assert(!key_move(0,0,t,&x,&y));
+        stick_circular=1;
+        t+=16000; key_move(-1,-1,t,&x,&y);
+        assert(x==-90 && y==-90);                                        /* round gate */
+        stick_circular=0;
+        t+=200000; key_move(0,0,t,&x,&y);
     }
     /* Issue #7: a controller stick past the round gate comes back onto it, keeping its direction;
      * one axis all the way (0 or 255) stays as it is. */

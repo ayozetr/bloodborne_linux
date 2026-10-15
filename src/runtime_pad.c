@@ -445,9 +445,9 @@ static float mouse_sensitivity=1.0f;
  * at mouse_sensitivity (1: 900 counts per radian); default stick, the motion as the right stick. */
 static int mouse_camera_direct;
 /* Keyboard movement (bbport.ini): stick_socd=neutral makes opposite keys held together cancel out
- * (default: the one pressed last wins); stick_circular=0 leaves a diagonal of the movement keys at
- * the corner of the square (default: within a round gate, as a thumbstick). */
-static int stick_socd_last=1, stick_circular=1;
+ * (default: the one pressed last wins); stick_circular=1 puts a diagonal of the movement keys
+ * within a round gate, as a thumbstick (default: the square, see key_move). */
+static int stick_socd_last=1, stick_circular=0;
 /* pad_round_gate=0 (bbport.ini) passes a controller's sticks on as they come (default: within a
  * round gate, see round_gate). */
 static int pad_round_gate=1;
@@ -462,7 +462,7 @@ static int pad_camera_diagonal;
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=0;
-    stick_socd_last=1; stick_circular=1; pad_round_gate=1;
+    stick_socd_last=1; stick_circular=0; pad_round_gate=1;
     pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0;
     pad_camera_diagonal=0;
     const char *path=getenv("BB_CONFIG");
@@ -611,6 +611,49 @@ static uint8_t key_axis(uint8_t value, int held, int direction, int reach) {
     if (!held) return value;
     return (uint8_t)(direction<0 ? 128-reach : direction>0 ? 128+(reach>127 ? 127 : reach) : 128);
 }
+/* The movement keys as the left stick. Measured by cassioKenji (Supermedo/bloodborne_pc#74): the
+ * game picks walk or run by the larger stick axis, so a diagonal stays on the square (the larger
+ * axis all the way at every angle; on a round gate W+A was 90 of 127 each); and it ends a sprint
+ * when the stick turns 45 degrees or more between two reads, so the direction turns toward the
+ * keys' at 900 degrees a second, at most 30 degrees a read, a half turn (A <-> D, W <-> S) going
+ * through forward (or through the right when both ways are sideways). A released key keeps the
+ * last direction for 60 ms, so letting go of one key just before the next is no neutral read.
+ * After Supermedo's 4b930b1. Returns 0 when no movement key is held (nor just released). */
+#define KEY_TURN_RATE (900.0*3.14159265358979323846/180.0)
+#define KEY_MAX_STEP (30.0*3.14159265358979323846/180.0)
+#define KEY_HALF_TURN (170.0*3.14159265358979323846/180.0)
+#define KEY_RELEASE_HOLD_US 60000u
+static int key_move(int move_x, int move_y, uint64_t now, int *out_x, int *out_y) {
+    static double angle; static uint64_t at, released_at; static int active, last_x, last_y;
+    const double pi=3.14159265358979323846;
+    if (!move_x && !move_y) {
+        if (active && now-released_at<KEY_RELEASE_HOLD_US) { *out_x=last_x; *out_y=last_y; return 1; }
+        active=0;
+        return 0;
+    }
+    const double target=atan2((double)move_y,(double)move_x);
+    if (active) {
+        const double diff=fmod(target-angle+3.0*pi,2.0*pi)-pi; /* -pi..pi, shortest way round */
+        const double step=fmin(KEY_TURN_RATE*(double)(now-at)/1e6,KEY_MAX_STEP);
+        double dir=diff>0 ? 1.0 : -1.0;
+        if (fabs(diff)>KEY_HALF_TURN) {
+            /* Half way round counter-clockwise is angle+pi/2; forward is y < 0. */
+            const double hy=sin(angle+pi/2.0), hx=cos(angle+pi/2.0);
+            dir=hy<-1e-9 ? 1.0 : hy>1e-9 ? -1.0 : hx>0 ? 1.0 : -1.0;
+        }
+        if (fabs(diff)<=step) angle=target;
+        else angle=atan2(sin(angle+dir*step),cos(angle+dir*step));
+    } else {
+        angle=target;
+    }
+    active=1; at=now; released_at=now;
+    const double c=cos(angle), sn=sin(angle);
+    const double k=stick_circular ? 127.0 : 127.0/fmax(fabs(c),fabs(sn));
+    const long x=lround(c*k), y=lround(sn*k);
+    last_x=*out_x=(int)(x<-127 ? -127 : x>127 ? 127 : x);
+    last_y=*out_y=(int)(y<-127 ? -127 : y>127 ? 127 : y);
+    return 1;
+}
 static void apply_keyboard(PadData *d, const bool *k) {
     for (int i=IN_CROSS;i<=IN_RIGHT;++i)
         if (i!=IN_TOUCHPAD && i!=IN_TOUCHPAD_RIGHT && key_down(k,i)) d->buttons|=input_buttons[i];
@@ -621,11 +664,11 @@ static void apply_keyboard(PadData *d, const bool *k) {
     const int left=key_down(k,IN_MOVE_LEFT), right=key_down(k,IN_MOVE_RIGHT);
     const int up=key_down(k,IN_MOVE_UP), down=key_down(k,IN_MOVE_DOWN);
     const int move_x=key_direction(0,left,right), move_y=key_direction(1,up,down);
-    /* W+A gave the square's corner, ~1.41x a thumbstick's reach: a diagonal is full deflection
-     * within a round gate instead, as on a controller (127 / sqrt 2 on each axis). */
-    const int reach=stick_circular && move_x && move_y ? 90 : 128;
-    d->left_x=key_axis(d->left_x,left||right,move_x,reach);
-    d->left_y=key_axis(d->left_y,up||down,move_y,reach);
+    int stick_x, stick_y;
+    if (key_move(move_x,move_y,now_us(),&stick_x,&stick_y)) {
+        d->left_x=(uint8_t)(128+stick_x);
+        d->left_y=(uint8_t)(128+stick_y);
+    }
     const int look_left=key_down(k,IN_LOOK_LEFT), look_right=key_down(k,IN_LOOK_RIGHT);
     const int look_up=key_down(k,IN_LOOK_UP), look_down=key_down(k,IN_LOOK_DOWN);
     d->right_x=key_axis(d->right_x,look_left||look_right,key_direction(2,look_left,look_right),128);
