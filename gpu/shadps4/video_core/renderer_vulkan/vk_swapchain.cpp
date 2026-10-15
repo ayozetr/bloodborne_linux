@@ -285,6 +285,10 @@ void Swapchain::FindPresentMode() {
         present_mode = vk::PresentModeKHR::eFifo;
     } else if (requested_mode == "Immediate") {
         present_mode = vk::PresentModeKHR::eImmediate;
+    } else if (requested_mode == "FifoRelaxed") {
+        // bbport: the launcher offers it (FIFO that does not wait when a frame is late); a
+        // driver without it gets FIFO below.
+        present_mode = vk::PresentModeKHR::eFifoRelaxed;
     } else {
         LOG_ERROR(Render_Vulkan, "Unknown present mode {}, defaulting to Mailbox.",
                   EmulatorSettings.GetPresentMode());
