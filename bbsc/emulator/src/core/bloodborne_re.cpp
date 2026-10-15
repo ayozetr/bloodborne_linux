@@ -13802,6 +13802,14 @@ void PS4_SYSV_ABI TraceEntry(u64 tag, const GuestRegisterSnapshot* registers) {
         if (!capture_file) {
             return;
         }
+#if defined(BBSC_MOD) && !defined(_WIN32)
+        // bbport: one capture stops at 64 MB (a long session wrote ~30 MB an hour).
+        if (capture_file.tellp() > std::streampos{64 << 20}) {
+            capture_file.close();
+            LOG_INFO(Debug, "Bloodborne RE capture stopped at 64 MB");
+            return;
+        }
+#endif
         capture_file << "{\"type\":\"entry\",\"seq\":" << sequence << ",\"time_ms\":" << timestamp
                      << ",\"site\":\"" << site.name << "\",\"offset\":\"0x" << std::hex
                      << site.offset << std::dec << "\",\"hit\":" << hit << ",\"registers\":{";

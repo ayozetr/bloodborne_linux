@@ -79,6 +79,28 @@ std::filesystem::path data_dir; // <user dir>/bbsc: logs, captures
 FILE* log_file = nullptr;
 std::mutex log_mutex;
 
+// The newest `keep` files of a folder with this extension stay; older ones (earlier game starts)
+// go. Each start writes a log and a capture of its own.
+void KeepNewest(const std::filesystem::path& folder, const char* extension, size_t keep) {
+    std::error_code ignored;
+    std::vector<std::filesystem::directory_entry> files;
+    for (const auto& entry : std::filesystem::directory_iterator(folder, ignored)) {
+        if (entry.is_regular_file(ignored) && entry.path().extension() == extension) {
+            files.push_back(entry);
+        }
+    }
+    if (files.size() <= keep) {
+        return;
+    }
+    std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
+        std::error_code e;
+        return a.last_write_time(e) > b.last_write_time(e);
+    });
+    for (size_t i = keep; i < files.size(); ++i) {
+        std::filesystem::remove(files[i].path(), ignored);
+    }
+}
+
 void OpenLog() {
     Dl_info info{};
     if (dladdr(reinterpret_cast<void*>(&OpenLog), &info) != 0 && info.dli_fname != nullptr) {
@@ -88,6 +110,8 @@ void OpenLog() {
     data_dir = std::filesystem::path{user != nullptr && *user != '\0' ? user : "user"} / "bbsc";
     std::error_code ignored;
     std::filesystem::create_directories(data_dir / "logs", ignored);
+    KeepNewest(data_dir / "logs", ".log", 4); // with this one, 5
+    KeepNewest(data_dir / "captures" / "bloodborne-re", ".jsonl", 4);
     const std::time_t now = std::time(nullptr);
     std::tm local{};
     localtime_r(&now, &local);
