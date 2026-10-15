@@ -238,6 +238,8 @@ else
     bash build.sh
     probe=${BB_PROBE:-out/bb-probe}  # BB_PROBE: a wrapper (gdb) around it
 fi
+# BBSC is loaded only when seamless co-op is on (below): bb-probe loads whatever BB_BBSC_LIB names.
+[[ ${BB_BBSC:-0} == 1 && ${BB_ONLINE:-0} == 1 ]] || unset BB_BBSC_LIB
 # Online play (BB_ONLINE=1, launcher: Online; the online module gpu/bbnet): the game's own server
 # goes to the community server, summon signs to the shadNet WebAPI (scripts/online.py).
 if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
@@ -279,6 +281,17 @@ if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
     else
         SHADPS4_HTTP_HOST_OVERRIDES_JSON=$("$PYTHON" scripts/online.py overrides --user "${BB_USER_DIR:-$data/user}") || true
         export SHADPS4_HTTP_HOST_OVERRIDES_JSON
+    fi
+    # Seamless co-op (BB_BBSC=1, launcher: Online): BBSC (bbsc/) in the game's process; its
+    # options are BBSC_* / SHADPS4_BBSC_* variables (bbsc/emulator/mod/mod.json).
+    if [[ ${BB_BBSC:-0} == 1 ]]; then
+        bbsc_lib=${BB_BBSC_LIB:-${BB_BBSC_PACKAGED_LIB:-out/bbsc/libbbsc.so}}
+        if [[ -f $bbsc_lib ]]; then
+            BB_BBSC_LIB=$(cd -- "${bbsc_lib%/*}" && pwd)/${bbsc_lib##*/}; export BB_BBSC_LIB
+            echo "Co-op: seamless co-op (BBSC) on"
+        else
+            echo "Co-op: seamless co-op needs $bbsc_lib, not in this build: off" >&2
+        fi
     fi
 fi
 # Trophies (scripts/trophies.py): the dump's list and icons in the user directory, for the

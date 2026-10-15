@@ -39,6 +39,31 @@ If the game says you are not signed in to PlayStation Network, the shadNet login
 then has a shadNet login error (code 8 is a wrong name or password). If the server did not answer
 when the game started, the game keeps trying in the background.
 
+## Seamless co-op (BBSC)
+
+[BBSC](https://github.com/Classmg22/BBSC) (Bloodborne Seamless Co-op, by CLS_AMG) keeps a co-op
+session going through deaths, lamps, areas, bosses and the Hunter's Dream, for up to 5 hunters:
+the guest follows the host through lamps, sees the host's world (doors, bosses, lifts), keeps the
+items and echoes it gets, and enemies get stronger for every guest. It runs inside the game
+(`bbsc/`, loaded as `libbbsc.so`). It is new, and its own author marks much of it as untested.
+
+1. In the launcher's **Online** page, turn on **Seamless co-op (BBSC)**. **BBSC settings** has its
+   options (the same as in BBSC's Windows launcher); the defaults are BBSC's.
+2. Every player of the session needs BBSC, the same version: on Linux this port, on Windows
+   BBSC's package for the Windows port (its *BBport* release). A player without it plays the
+   normal game.
+3. The server decides how much of it works:
+   - **BBSC's game server** (your group's, [SERVER.md](SERVER.md#seamless-co-op-bbsc), or BBSC's
+     public one): everything, summons across areas and 5 hunters included. Set it as the
+     **Game server** of the Online page.
+   - **The Hunter's Dream**: the session stays together (deaths, lamps, bosses), but summons are
+     the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
+     Its messages go straight between the players.
+
+Its log is in `user/bbsc/logs/` (in the AppImage, `~/.local/share/bbport/user/bbsc/logs/`), and
+the game's log has its warnings (`BBSC:` lines). Not in the Linux build: BBSC's cinematic camera
+(L3 + R3 opens bbport's menu) and its own Discord status (bbport has one).
+
 ## Summoning in the game
 
 - The host rings the **Beckoning Bell** (one Insight each time); the helper rings the **Small

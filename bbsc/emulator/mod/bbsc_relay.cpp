@@ -145,11 +145,14 @@ bool FindServer(std::string& host, u16& port) {
         candidates.push_back(std::wstring(appdata) + L"\\shadPS4\\host_overrides.json");
     }
 #else
-    // bbport: the overrides the launcher writes in the user folder (scripts/online.py).
+    // bbport: the overrides file run.sh hands the online module (SHADPS4_HTTP_HOST_OVERRIDES_JSON,
+    // scripts/online.py), else the ones in the user folder.
     const char* user = std::getenv("BB_USER_DIR");
     const std::string dir = std::string{user != nullptr && *user != '\0' ? user : "user"} + "/";
-    const std::vector<std::string> candidates{dir + "host_overrides.custom.json",
-                                              dir + "host_overrides.json"};
+    std::vector<std::string> candidates{dir + "host_overrides.custom.json", dir + "host_overrides.json"};
+    if (const char* given = std::getenv("SHADPS4_HTTP_HOST_OVERRIDES_JSON"); given && *given) {
+        candidates.insert(candidates.begin(), given);
+    }
 #endif
     for (const auto& path : candidates) {
         host = HostFromOverrides(ReadFile(path));

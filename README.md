@@ -95,6 +95,12 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency from `shell
 2. **Test the connection**: every line should be green.
 3. Start the game and choose online at the title screen.
 
+**Seamless co-op (experimental)**: turn on **Seamless co-op (BBSC)** in the Online page and the
+session lives through deaths, lamps, areas, bosses and the Hunter's Dream, with up to 5 hunters.
+It is [BBSC](https://github.com/Classmg22/BBSC) by CLS_AMG, built for Linux here; every player of
+the session needs it (on Windows, BBSC's package for the Windows port). Summons across areas need
+BBSC's game server ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
+
 Everyone in a session needs game version 1.09 and the same pool. Turn cheats off when you play
 with others. shadPS4's public shadNet server no longer accepts bbport builds: it signs them out
 right after the login, and the launcher says so.
@@ -156,6 +162,9 @@ If this fork is useful to you and you would like to support it, you can on
   [The Hunter's Dream](https://thehuntersdream.com) by droogie and its team.
 - [bbbridge](https://github.com/MaskZeus/bbbridge) by MaskZeus (GPL-3.0-or-later): The Hunter's
   Dream's co-op pool for bbport, built for Linux here ([bbbridge/](bbbridge/)).
+- [BBSC](https://github.com/Classmg22/BBSC) by CLS_AMG (GPL-2.0-or-later): seamless co-op, with
+  Wozzardman's seamless summon; built for Linux here ([bbsc/](bbsc/)), with
+  [xbyak](https://github.com/herumi/xbyak) and [fmt](https://github.com/fmtlib/fmt).
 - [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR):
   the DLSS bridge, and the [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS).
 - [FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) by FireBurn and the AMD FidelityFX SDK.

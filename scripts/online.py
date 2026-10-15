@@ -29,6 +29,9 @@ import sys
 import urllib.error
 import urllib.request
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import bbsc  # noqa: E402
+
 COMMUNITY_SERVER = 'https://thehuntersdream.com'
 SHADNET_SERVER = 'srv.shadps4.net:31313'
 # Bloodborne's own game server, answered by the community server on the same port.
@@ -110,7 +113,7 @@ def environment(settings):
     """The game's online variables (run.sh and the online module) for the launcher's settings."""
     if server_kind(settings) == 'thd':
         # bbbridge on this PC (run.sh starts it): the online ID is the Discord sign-in's.
-        return {
+        return bbsc.environment(settings) | {
             'BB_ONLINE': '1',
             'BB_BRIDGE': '1',
             'BB_SHADNET_SERVER': BRIDGE_SERVER,
@@ -137,6 +140,8 @@ def environment(settings):
     # Summons through the server's WebAPI (http.cpp); the server needs BloodborneSeamlessCoop=true.
     if server_kind(settings) == 'own' and settings.get('online_seamless'):
         env['SHADPS4_BLOODBORNE_SEAMLESS_COOP'] = '1'
+    # Seamless co-op (BBSC), on any server.
+    env.update(bbsc.environment(settings))
     return env
 
 

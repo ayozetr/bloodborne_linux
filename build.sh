@@ -80,6 +80,14 @@ if pkg-config --exists libcurl openssl; then
         echo "bbbridge build failed (out/bbbridge-build.log): The Hunter's Dream is not offered" >&2
     fi
 fi
+# Seamless co-op (launcher: Online): BBSC (CLS_AMG, GPL-2.0-or-later, bbsc/) as libbbsc.so, which
+# bb-probe loads into the game when BB_BBSC_LIB names it. Everything it needs is in bbsc/.
+if cmake -S bbsc -B out/bbsc -G Ninja -DCMAKE_BUILD_TYPE=Release >out/bbsc-build.log 2>&1 &&
+    ninja -C out/bbsc >>out/bbsc-build.log 2>&1; then
+    echo "Seamless co-op (BBSC): out/bbsc/libbbsc.so"
+else
+    echo "BBSC build failed (out/bbsc-build.log): seamless co-op is not offered" >&2
+fi
 # Installing from PS4 packages (launcher: Install from PKG, scripts/pkg_install.py): pkgextract
 # (github.com/paulomanrique/ps4-pkg-extractor, Unlicense) at a reviewed revision, with its
 # Cargo.lock. Needs cargo; without it the launcher asks for a game folder only.

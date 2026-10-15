@@ -14,8 +14,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_path(XBYAK_INCLUDE xbyak/xbyak.h REQUIRED)
-find_path(FMT_INCLUDE fmt/format.h REQUIRED)
+# Header-only, kept in third_party/ (xbyak 7.37.3, BSD-3-Clause; fmt 12.2.0, MIT) so the build does
+# not depend on what the system has.
+set(XBYAK_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/xbyak)
+set(FMT_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include)
 
 add_library(bbsc SHARED
     emulator/src/core/bloodborne_re.cpp

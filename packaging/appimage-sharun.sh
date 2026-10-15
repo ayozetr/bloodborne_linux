@@ -67,6 +67,7 @@ export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet.so"
 [ -x "$APPDIR/bin/bbbridge-cli" ] && export BB_BRIDGE_CLI="$APPDIR/bin/bbbridge-cli"
 [ -x "$APPDIR/bin/pkgextract" ] && export BB_PKGEXTRACT="$APPDIR/bin/pkgextract"
+[ -f "$APPDIR/share/bbport/bbsc/libbbsc.so" ] && export BB_BBSC_PACKAGED_LIB="$APPDIR/share/bbport/bbsc/libbbsc.so"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 # deadinside28#172: Steam's Game Mode runs a non-Steam game in pressure-vessel, which points
@@ -136,6 +137,13 @@ if [[ -f $root/out/libbbport_dlss.so ]]; then
     mkdir -p "$appdir/share/bbport/dlss"
     cp "$root"/out/libbbport_dlss.so "$root"/out/libnvidia-ngx-dlss.so.* \
         "$root"/out/NVIDIA-DLSS-LICENSE.txt "$appdir/share/bbport/dlss/"
+fi
+# Seamless co-op (bbsc/, GPL-2.0-or-later): libbbsc.so needs only the C++ runtime the game has
+# loaded, so it goes in as it is, with the license, notice and supporters list it checks for.
+if [[ -f $root/out/bbsc/libbbsc.so ]]; then
+    mkdir -p "$appdir/share/bbport/bbsc"
+    cp "$root"/out/bbsc/libbbsc.so "$root"/out/bbsc/LICENSE.txt "$root"/out/bbsc/NOTICE.txt \
+        "$root"/out/bbsc/SUPPORTERS.txt "$root"/bbsc/emulator/mod/mod.json "$appdir/share/bbport/bbsc/"
 fi
 if [[ -n $net ]]; then
     module=$(find "$appdir/lib" -name libbbnet.so -print -quit)

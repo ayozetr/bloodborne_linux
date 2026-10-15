@@ -153,17 +153,29 @@ Summons go through the server's own summon service: the log of a game says
 
 Windows players set the same server, WebAPI and account in the Windows port's launcher.
 
-## Seamless co-op (not working yet)
+## Seamless co-op (BBSC)
 
-shadnet-p2p can pair a summon between players in different areas when the server has
-`BloodborneSeamlessCoop=true` (`-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` with Docker). In bbport,
-**Seamless co-op (experimental)** in the launcher's Online page only sends the game's summon
-requests to that server: the other half, moving the guest into the host's area (shadp2p's host
-placement), is not in bbport yet, and the option has not been tried in a real session. Leave it
-off unless you are testing it.
+For [BBSC](ONLINE.md#seamless-co-op-bbsc) with everything on (summons across areas, 5 hunters),
+the group also runs BBSC's game server next to shadNet. It is in this repository,
+`bbsc/server/gameserver/bbsc_gameserver.py` (Python 3, nothing to install), and it takes the
+place of The Hunter's Dream for messages, bloodstains and the server list:
 
-Co-op that survives deaths, lamps, areas and bosses is planned through
-[BBSC](https://github.com/Classmg22/BBSC) (Bloodborne Seamless Co-op).
+```sh
+python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z
+```
+
+| Port | Protocol | What |
+|---|---|---|
+| 20443 | TCP | The game server (messages, bloodstains, ghosts) |
+| 20444 | TCP | BBSC's relay (warps, world sync, scaling) |
+| 18671 | TCP | Its bbhost-compatible service (`--no-bbhost` turns it off) |
+| 3478 | UDP | That service's relay |
+
+shadNet itself needs `BloodborneSeamlessCoop=true` (`-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` with
+Docker). Each player then sets **Game server** to `http://100.x.y.z:20443` in the launcher's
+Online page, keeps the same shadNet server and account, and turns on **Seamless co-op (BBSC)**.
+BBSC finds its relay at the game server's address (or `BBSC_RELAY`, the relay address in BBSC's
+settings).
 
 ## Troubleshooting
 

@@ -33,7 +33,7 @@ import gi
 os.environ.setdefault("GSK_RENDERER", "cairo")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk  # noqa: E402
 
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
@@ -42,6 +42,7 @@ from mods import discover as discover_mods  # noqa: E402
 from prepare import sfo  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
+import bbsc  # noqa: E402
 import save_import  # noqa: E402
 from patches import external_patches  # noqa: E402
 import trophies  # noqa: E402
@@ -218,6 +219,9 @@ DEFAULTS = {
     "online_upnp": True,
     "online_p2p_port": 0,  # 0: a random port each time (SHADPS4_P2P_PORT)
     "online_seamless": False,
+    # Seamless co-op (BBSC): on or off, and the options the player changed ({mod.json id: value}).
+    "bbsc": False,
+    "bbsc_options": {},
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -385,6 +389,78 @@ SERVER_KINDS = [
 THD_KIND = ("The Hunter's Dream (с игроками bbhost)", "thd",
             "Вход через Discord; мост bbbridge запускается вместе с игрой")
 SERVER_GUIDE_URL = f"{bbport_update.REPOSITORY_URL}/blob/main/docs/SERVER.md"
+
+
+# Seamless co-op (BBSC, scripts/bbsc.py): the names and descriptions of its options, by mod.json id,
+# in the launcher's key language (bbport_i18n.py); mod.json has them in English only.
+BBSC_OPTION_TEXTS = {
+    "seamless": ("Бесшовный призыв",
+                "Призыв без обычных знаков и ожидания (Wozzardman)"),
+    "hooks": ("Перехваты кооператива",
+             "Переходы, синхронизация мира, Сон Охотника, сообщения… (нужно почти всему ниже)"),
+    "connect_first": ("Призыв между локациями",
+                     "Сначала подключение, затем одна загрузка в локацию хозяина"),
+    "warp_together": ("Путешествовать вместе",
+                     "Гость следует за хозяином при переходах через фонари"),
+    "world_sync": ("Синхронизация мира",
+                  "Гость видит мир хозяина (двери, боссы, лифты)"),
+    "dream": ("Сон Охотника вместе",
+             "Гость пользуется Куклой, мастерской и посыльными"),
+    "no_fog_walls": ("Без туманных стен",
+                    "Можно покидать локацию во время кооператива"),
+    "lamp": ("Фонари в кооперативе",
+            "Хозяин может пользоваться фонарями во время сессии"),
+    "host_dead": ("Остаться, если хозяин погиб",
+                 "Гость не теряет сессию, когда хозяин умирает"),
+    "spectate": ("Возрождение на месте",
+                "Погибший игрок возрождается или наблюдает, а не уходит"),
+    "full_echoes": ("Полные отголоски",
+                   "Гость получает столько же отголосков, сколько хозяин, а не половину"),
+    "no_hp_penalty": ("Без штрафа к здоровью гостя",
+                     "Убирает снижение максимального здоровья гостя на 30 %"),
+    "guest_items": ("Предметы гостя",
+                   "Гость подбирает и сохраняет предметы"),
+    "solid_npcs": ("Плотные NPC",
+                  "Гость видит NPC обычными, а не серыми призраками"),
+    "death_penalty": ("Пятно крови после смерти",
+                     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски"),
+    "free_bell": ("Бесплатный Зовущий колокол",
+                 "Колокол не тратит озарение"),
+    "five_hunters": ("Пять охотников",
+                    "Хозяин может призвать до 4 гостей"),
+    "messages": ("Тексты кооператива",
+                "Тексты под бесшовную игру (без «Возвращение в свой мир»)"),
+    "load_cover": ("Затемнение при подключении",
+                  "Загрузки гостя проходят за чёрным экраном"),
+    "floor_guard": ("Защита пола",
+                   "Без вылета, если пол под персонажем был выгружен"),
+    "scaling": ("Усиление врагов",
+               "Враги и боссы сильнее за каждого гостя (вместо усиления боссов в игре)"),
+    "scale_npc_hunters": ("Усиливать NPC-охотников",
+                         "Хенрик, Джура и другие враждебные охотники тоже усиливаются"),
+    "scale_enemy_hp": ("Здоровье врагов за гостя (%)",
+                      "Дополнительное здоровье обычных врагов за каждого гостя"),
+    "scale_boss_hp": ("Здоровье боссов за гостя (%)",
+                     "Дополнительное здоровье боссов за каждого гостя"),
+    "scale_damage": ("Урон врагов за гостя (%)",
+                    "Дополнительный урон врагов и боссов за каждого гостя"),
+    "scale_enemy_stagger": ("Устойчивость врагов за гостя (%)",
+                           "Обычных врагов сложнее оглушить, за каждого гостя"),
+    "scale_boss_stagger": ("Устойчивость боссов за гостя (%)",
+                          "Боссов сложнее оглушить, за каждого гостя"),
+    "shared_progress": ("Общий прогресс",
+                       "Когда гость уходит, пройденные хозяином боссы, срезки, двери и фонари добавляются в мир гостя (только добавляет; сохранения копируются заранее)"),
+    "p2p_channel": ("Канал P2P",
+                   "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)"),
+    "relay": ("Адрес ретранслятора",
+             "host:20444; пусто — адрес игрового сервера из настроек сети"),
+}
+
+
+def bbsc_library():
+    """libbbsc.so (bbsc/, built by build.sh), or the AppImage's copy; None when this build has none."""
+    path = Path(os.environ.get("BB_BBSC_PACKAGED_LIB") or PORT_DIR / "out/bbsc/libbbsc.so")
+    return path if path.is_file() else None
 
 
 def bridge_cli():
@@ -668,6 +744,7 @@ THANKS = (
                              "два экземпляра на одном ПК"),
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
         _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
+        _github("Classmg22", "BBSC (CLS_AMG): бесшовный кооператив"),
         _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
                               "страниц; меньше рывков при загрузке зон, смена стиков и инверсия "
                               "камеры, геймпад, которым играют, импорт сохранений, выбор версии"),
@@ -694,6 +771,8 @@ THANKS = (
          "https://github.com/pkgforge-dev/Anylinux-AppImages"),
         ("paulomanrique", "ps4-pkg-extractor: установка игры из файлов .pkg",
          "https://github.com/paulomanrique/ps4-pkg-extractor"),
+        ("fhody125-web", "NoDreamForHunter: основа игрового сервера BBSC",
+         "https://github.com/fhody125-web/NoDreamForHunter"),
     )),
 )
 
@@ -1839,20 +1918,50 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.server_row = Adw.EntryRow(title=tr("Адрес сервера (host:port)"), text=own)
         self.webapi_row = Adw.EntryRow(title=tr("Адрес WebAPI (пусто: порт 31315 сервера)"),
                                        text=s["online_webapi"])
-        self.seamless_row = Adw.SwitchRow(
-            title=tr("Бесшовный кооператив (экспериментально)"),
-            subtitle=tr("Не готово: только отправляет призывы на сервер с "
-                        "BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. "
-                        "Для проверки"),
-            active=s["online_seamless"])
         guide = Adw.ActionRow(title=tr("Как запустить свой сервер"), subtitle=SERVER_GUIDE_URL,
                               activatable=True)
         guide.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
         guide.connect("activated", lambda _row: self.open_uri(SERVER_GUIDE_URL))
-        for row in (self.server_row, self.webapi_row, self.seamless_row, guide):
+        for row in (self.server_row, self.webapi_row, guide):
             coop.add(row)
-        self.own_server_rows = (self.server_row, self.webapi_row, self.seamless_row)
+        self.own_server_rows = (self.server_row, self.webapi_row)
         page.add(coop)
+
+        # Seamless co-op: BBSC (bbsc/, CLS_AMG) in the game, on any server; its options are
+        # mod.json's (scripts/bbsc.py), kept only where the player changed them.
+        self.bbsc_row = None
+        self.bbsc_option_rows = {}
+        if bbsc_library() and bbsc.options():
+            seamless = Adw.PreferencesGroup(
+                title=tr("Бесшовный кооператив (BBSC)"),
+                description=tr("Сессия переживает смерти, фонари, смену локаций, боссов и Сон "
+                               "Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам "
+                               "сессии"))
+            self.bbsc_row = Adw.SwitchRow(title=tr("Включить BBSC"), active=bool(s.get("bbsc")))
+            seamless.add(self.bbsc_row)
+            options = Adw.ExpanderRow(title=tr("Настройки BBSC"),
+                                      subtitle=tr("Применяются при запуске игры"))
+            chosen = s.get("bbsc_options") or {}
+            for option in bbsc.options():
+                name, about = BBSC_OPTION_TEXTS.get(option["id"], (option.get("name", ""),
+                                                                    option.get("description", "")))
+                value = bbsc.value_of(option, chosen)
+                if option["type"] == "bool":
+                    row = Adw.SwitchRow(title=tr(name), subtitle=tr(about), active=value)
+                elif option["type"] == "int":
+                    row = Adw.SpinRow.new_with_range(option.get("min", 0), option.get("max", 1000), 5)
+                    row.set_title(tr(name))
+                    row.set_subtitle(tr(about))
+                    row.set_value(value)
+                else:
+                    row = Adw.EntryRow(title=tr(name), text=value)
+                    row.set_tooltip_text(tr(about))
+                options.add_row(row)
+                self.bbsc_option_rows[option["id"]] = (row, option)
+            seamless.add(options)
+            self.bbsc_row.bind_property("active", options, "sensitive",
+                                        GObject.BindingFlags.SYNC_CREATE)
+            page.add(seamless)
 
         # The Hunter's Dream: a Discord sign-in through bbbridge; its account is the online ID.
         self.thd_group = Adw.PreferencesGroup(
@@ -1944,9 +2053,26 @@ class LauncherWindow(Adw.ApplicationWindow):
             "online_password": self.password_row.get_text(),
             "online_upnp": self.upnp_row.get_active(),
             "online_p2p_port": int(self.p2p_port_row.get_value()),
-            "online_seamless": self.seamless_row.get_active(),
+            "online_seamless": self.settings.get("online_seamless", False),
             "online_accounts": self.kept_accounts(),
+            **self.bbsc_settings(),
         }
+
+    def bbsc_settings(self):
+        """The seamless co-op switch and the options changed from mod.json's defaults."""
+        if self.bbsc_row is None:
+            return {"bbsc": False, "bbsc_options": self.settings.get("bbsc_options", {})}
+        changed = {}
+        for key, (row, option) in self.bbsc_option_rows.items():
+            if option["type"] == "bool":
+                value = row.get_active()
+            elif option["type"] == "int":
+                value = int(row.get_value())
+            else:
+                value = row.get_text().strip()
+            if value != option.get("default"):
+                changed[key] = value
+        return {"bbsc": self.bbsc_row.get_active(), "bbsc_options": changed}
 
     def kept_accounts(self):
         self.keep_account()
