@@ -248,5 +248,21 @@ int main(void) {
         assert(m.right_x==128 && m.right_y==255);
         pad_invert_look_x=pad_invert_look_y=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options, pad in use");
+    /* Issue #7: a camera stick all the way out on a diagonal is pulled in under the game's fast
+     * turn (~96%); straight sideways, straight up/down and anything short of the rim stay. */
+    {
+        PadData m; memset(&m,0,sizeof m);
+        m.right_x=218; m.right_y=38; camera_diagonal(&m); assert(m.right_x==218 && m.right_y==38); /* off */
+        pad_camera_diagonal=1;
+        m.right_x=218; m.right_y=38; /* 45 degrees, all the way */
+        camera_diagonal(&m);
+        const float r=hypotf((float)m.right_x-128.0f,(float)m.right_y-128.0f)/127.0f;
+        assert(r>0.91f && r<0.94f && m.right_x-128==128-m.right_y);
+        m.right_x=255; m.right_y=128; camera_diagonal(&m); assert(m.right_x==255 && m.right_y==128);
+        m.right_x=250; m.right_y=100; camera_diagonal(&m); assert(m.right_x==250 && m.right_y==100); /* 13 degrees */
+        m.right_x=140; m.right_y=1; camera_diagonal(&m); assert(m.right_x==140 && m.right_y==1);   /* 85 degrees */
+        m.right_x=200; m.right_y=56; camera_diagonal(&m); assert(m.right_x==200 && m.right_y==56); /* 80% */
+        pad_camera_diagonal=0;
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options, camera diagonals, pad in use");
 }

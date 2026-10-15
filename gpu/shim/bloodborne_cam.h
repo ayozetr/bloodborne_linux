@@ -32,4 +32,9 @@ bool LockedOn();
 /// Window thread: applies relative mouse motion to the camera.
 void OnMouseMotion(float xrel, float yrel);
 
+/// Window thread, every event poll. BB_CAM_TRACE=<file> (diagnostics, not with the direct mouse
+/// camera): records the camera object and writes "ms yaw pitch" (radians) to the file whenever
+/// the camera turns, to measure how the game turns it for a given stick input.
+void TraceTick();
+
 } // namespace BbCamera

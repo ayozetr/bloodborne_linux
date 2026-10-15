@@ -242,6 +242,7 @@ INI_DEFAULTS = {
     "pad_swap_sticks": "0",
     "pad_invert_look_x": "0",
     "pad_invert_look_y": "0",
+    "pad_camera_diagonal": "0",
     **{key: "1" if default else "0" for key, _, default in EFFECTS},
     **{key: "0" for key, _, _ in CHEATS + TWEAKS},
     **{key: "1" if default else "0" for key, _, _, default in STREAMING},
@@ -1034,7 +1035,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.stick_rows = {}
         for key, title in (("pad_swap_sticks", tr("Поменять стики местами")),
                            ("pad_invert_look_x", tr("Инвертировать камеру геймпада по горизонтали")),
-                           ("pad_invert_look_y", tr("Инвертировать камеру геймпада по вертикали"))):
+                           ("pad_invert_look_y", tr("Инвертировать камеру геймпада по вертикали")),
+                           ("pad_camera_diagonal", tr("Ровная скорость камеры по диагонали"))):
             self.stick_rows[key] = Adw.SwitchRow(title=title, active=self.ini.get(key) == "1")
             controls.add(self.stick_rows[key])
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).

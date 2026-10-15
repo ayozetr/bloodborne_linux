@@ -215,11 +215,10 @@ static void touch_click(PadData *d, int right) {
     d->touches[0]=(PadTouch){.x=right ? 1440 : 480,.y=471,.id=touch_id};
 }
 
-/* Issue #7: on a DualShock 4 the camera turned two or three times faster at one point of a
- * diagonal, more so at a higher frame rate. Some sticks report a diagonal near the corner of the
- * square, up to ~1.41x the full deflection of one axis, which a stick with a round gate (as the
- * game expects) never does. A stick past the round gate is brought back onto it, keeping its
- * direction; the log says once how far past it each stick went (and again when further). */
+/* Some sticks report a diagonal near the corner of the square, up to ~1.41x the full deflection
+ * of one axis, which a stick with a round gate (as the game expects) never does. A stick past the
+ * round gate is brought back onto it, keeping its direction; the log says once how far past it
+ * each stick went (and again when further). (Not the cause of issue #7: see camera_diagonal.) */
 static void round_gate(int stick, uint8_t *x, uint8_t *y) {
     static float reported[2];
     const float dx=(float)*x-128.0f, dy=(float)*y-128.0f;
@@ -456,12 +455,16 @@ static int pad_round_gate=1;
  * pad_invert_look_x / pad_invert_look_y=1 invert the controller's camera stick. From Awaken's
  * BloodBorneButPc. */
 static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
+/* pad_camera_diagonal=1 (bbport.ini) evens out the camera stick's diagonals (see camera_diagonal;
+ * default: as the game turns them, as on a PS4). */
+static int pad_camera_diagonal;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=0;
     stick_socd_last=1; stick_circular=1; pad_round_gate=1;
     pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0;
+    pad_camera_diagonal=0;
     const char *path=getenv("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -480,6 +483,7 @@ static void load_bindings(void) {
             else if (!strncmp(line,"pad_swap_sticks=",16)) pad_swap_sticks=atoi(value)!=0;
             else if (!strncmp(line,"pad_invert_look_x=",18)) pad_invert_look_x=atoi(value)!=0;
             else if (!strncmp(line,"pad_invert_look_y=",18)) pad_invert_look_y=atoi(value)!=0;
+            else if (!strncmp(line,"pad_camera_diagonal=",20)) pad_camera_diagonal=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -662,6 +666,27 @@ static void apply_mouse_look(PadData *d, double dx, double dy, uint64_t now, int
     look_y=look_y<-127 ? -127 : look_y>127 ? 127 : look_y;
     d->right_x=look_axis(look_x,d->right_x,deadzone);
     d->right_y=look_axis(look_y,d->right_y,deadzone);
+}
+
+/* Issue #7: the camera turned two or three times faster on a diagonal, with any controller (and
+ * in shadPS4). Measured 2026-10-15 (camera yaw/pitch read while the stick was held at set
+ * positions): the camera turns in proportion to how far the stick is pushed, diagonals included,
+ * up to ~82 degrees a second; past ~96% of the stick's reach the game switches to its fast turn,
+ * 174 degrees a second sideways, and does so whenever the stick is not near vertical (still at 60
+ * degrees from horizontal, not at 80) - so a stick pushed all the way on a diagonal turned sideways
+ * at full speed. A camera stick that far out between 20 and 80 degrees from horizontal is pulled
+ * in to 93%: the diagonal turns at the proportional speed, the fast turn stays straight sideways.
+ * Off by default: it is how the game turns on a PS4 too, and without the fast turn on diagonals
+ * the camera feels heavier to players used to it. */
+static void camera_diagonal(PadData *d) {
+    if (!pad_camera_diagonal) return;
+    const float dx=(float)d->right_x-128.0f, dy=(float)d->right_y-128.0f;
+    const float reach=sqrtf(dx*dx+dy*dy)/127.0f;
+    const float ax=fabsf(dx), ay=fabsf(dy);
+    if (reach<0.94f || ay<=ax*0.364f || ay>=ax*5.67f) return; /* tan 20 and tan 80 degrees */
+    const float scale=0.93f/reach;
+    d->right_x=(uint8_t)lrintf(128.0f+dx*scale);
+    d->right_y=(uint8_t)lrintf(128.0f+dy*scale);
 }
 
 /* The controller's sticks swapped and the camera stick inverted, as bbport.ini asks; keyboard and
@@ -897,6 +922,7 @@ static void sample(PadData *d) {
     if (injected.buttons & BTN_R2) d->r2=255;
     uint8_t *axes[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
     for (int i=0;i<4;++i) if (injected.stick[i]>=0) *axes[i]=(uint8_t)injected.stick[i];
+    camera_diagonal(d);
     touch_ids(d);
 }
 

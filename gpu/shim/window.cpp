@@ -279,6 +279,7 @@ bool WindowSDL::PollEvents() {
         CaptureMouse(false);
     }
     UpdateMouseCamera();
+    BbCamera::TraceTick();
     UpdateCursor();
     return is_open;
 }

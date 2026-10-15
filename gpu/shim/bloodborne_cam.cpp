@@ -3,6 +3,8 @@
 #include "bloodborne_cam.h"
 
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <cstring>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -268,6 +270,79 @@ void OnMouseMotion(float xrel, float yrel) {
     Write<float>(cam + 0x26c, pitch);
     Write<float>(cam + 0x144, yaw);
     Write<float>(cam + 0x270, yaw);
+}
+
+
+namespace {
+/// CamMain jumps to the stub (which records the camera object), the game's camera code otherwise
+/// untouched. For BB_CAM_TRACE.
+bool InstallRecorder() {
+    if (!Mapped(ImageBase + CamMain, CamMainLen) ||
+        std::memcmp(At(CamMain), CamMainCode, CamMainLen) != 0 || !BuildStub()) {
+        return false;
+    }
+    u8 jump[CamMainLen];
+    std::memset(jump, 0x90, sizeof(jump));
+    jump[0] = 0xff;
+    jump[1] = 0x25;
+    std::memset(jump + 2, 0, 4);
+    const u64 target = reinterpret_cast<u64>(stub);
+    std::memcpy(jump + 6, &target, 8);
+    return WriteCode(CamMain, jump, CamMainLen);
+}
+} // namespace
+
+void TraceTick() {
+    static const char* path = std::getenv("BB_CAM_TRACE");
+    static std::FILE* file = nullptr;
+    static bool failed = false;
+    static float last_yaw = 0.0f, last_pitch = 0.0f;
+    if (path == nullptr || *path == '\0' || failed) {
+        return;
+    }
+    if (configured.load(std::memory_order_relaxed)) {
+        // The direct mouse camera owns the hook (bbport.ini is read after the window is up): the
+        // camera code goes back as it was for it, and the trace stops.
+        if (file != nullptr && !enabled.load(std::memory_order_acquire) &&
+            Mapped(ImageBase + CamMain, CamMainLen) && At(CamMain)[0] == 0xff) {
+            WriteCode(CamMain, CamMainCode, CamMainLen);
+        }
+        failed = file != nullptr;
+        if (failed) {
+            std::printf("Camera trace: off (mouse_camera=direct)\n");
+        }
+        return;
+    }
+    if (file == nullptr) {
+        if (!Mapped(ImageBase + CamMain, CamMainLen)) {
+            return; // the game is not loaded yet
+        }
+        if (!InstallRecorder() || (file = std::fopen(path, "w")) == nullptr) {
+            failed = true;
+            std::printf("Camera trace: could not start (%s)\n", path);
+            return;
+        }
+        std::printf("Camera trace: yaw and pitch to %s\n", path);
+    }
+    // The window comes up before the game's image is loaded: loading it writes the camera code
+    // over the jump, which then goes in again.
+    if (std::memcmp(At(CamMain), CamMainCode, CamMainLen) == 0 && InstallRecorder()) {
+        std::printf("Camera trace: camera code hooked\n");
+    }
+    const u64 cam = Object();
+    if (cam == 0 || !Mapped(cam + 0x140, 8)) {
+        return;
+    }
+    const float pitch = Read<float>(cam + 0x140), yaw = Read<float>(cam + 0x144);
+    if (yaw == last_yaw && pitch == last_pitch) {
+        return;
+    }
+    last_yaw = yaw;
+    last_pitch = pitch;
+    timespec now{};
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    std::fprintf(file, "%.3f %.6f %.6f\n", now.tv_sec * 1000.0 + now.tv_nsec / 1e6, yaw, pitch);
+    std::fflush(file);
 }
 
 } // namespace BbCamera
