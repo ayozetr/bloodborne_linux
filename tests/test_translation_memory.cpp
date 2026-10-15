@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
     const auto device = instance.GetDevice();
     Scheduler scheduler(instance);
     constexpr u32 Page = 65536, Pages = 3, Bytes = Page * Pages;
+    // Bloodborne's buffer copy shader (games/bloodborne.cpp): its stores also update the guest bytes.
+    constexpr u64 CopyShaderHash = 0xfefebf9f;
     struct Allocation { VkBuffer buffer{}; VmaAllocation memory{}; void* mapped{}; u64 bda{}; };
     std::array<Allocation, 6> allocations{};
     for (auto& a : allocations) {
@@ -68,7 +70,7 @@ int main(int argc, char** argv) {
 
     Info info{};
     info.hw_stage=HwStage::Compute; info.sw_stage=SwStage::Compute;
-    info.pgm_hash=BufferCopyShaderHash; info.uses_paged_buffers=true;
+    info.pgm_hash=CopyShaderHash; info.uses_paged_buffers=true;
     for (u32 i=0;i<3;++i) {
         BufferResource buffer{};
         buffer.buffer_type=i==2 ? BufferType::BdaPagetable : BufferType::Guest;
@@ -94,6 +96,7 @@ int main(int argc, char** argv) {
     runtime.hw.cs.workgroup_size={1,1,1};
     Profile profile{}; profile.supported_spirv=0x00010600; profile.support_int64=true;
     profile.paged_buffers=true; profile.sparse_page_shift=16;
+    profile.buffer_copy_shader_hash=CopyShaderHash;
     Backend::Bindings bindings{};
     const auto code=Backend::SPIRV::EmitSPIRV(profile,runtime,program,bindings);
     if (argc>1) {
