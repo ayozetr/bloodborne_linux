@@ -116,6 +116,12 @@ On a PC with a GeForce RTX, run `bash tools/build_dlss.sh` once after `build.sh`
 what it needs from the NVIDIA DLSS SDK and builds the bridge. Then choose **DLSS** as the
 upscaler.
 
+### Environment variables
+
+The launcher's **Settings → Developer → Extra variables** field (`NAME=value`, space-separated)
+passes environment variables to the game, the same ones `run.sh` takes from a terminal. Every one
+the port reads, what it does and which win over which: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+
 ### DLC
 
 The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. With the base game
