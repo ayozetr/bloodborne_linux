@@ -391,8 +391,9 @@ More in [docs/](docs); recent changes: [docs/CHANGES_0.4.md](docs/CHANGES_0.4.md
 and PSN libraries from shadp2p, a shadPS4 fork, with the shadNet client), built when protobuf,
 nlohmann_json, OpenSSL, zlib and miniupnpc are there (`shell.nix`) and included in the AppImage.
 The launcher's *Online* page turns it on (`BB_ONLINE=1`): messages, bloodstains and ghosts come
-from The Hunter's Dream, bells and summons go through a shadNet server (`srv.shadps4.net:31313` by
-default) with a shadNet account (Online ID and password). Offline the module is never loaded; a
+from The Hunter's Dream, bells and summons go through a shadNet server with a shadNet account (Online ID and password):
+The Hunter's Dream's pool through bbbridge, or a server of your own (`docs/SERVER.md`); shadPS4's
+public one (`srv.shadps4.net:31313`) no longer accepts bbport builds. Offline the module is never loaded; a
 build without it plays offline only.
 
 ## Repository layout

@@ -522,8 +522,8 @@ EN = {
         'How to host your own server',
     'Порт кооператива (UDP)':
         'Co-op port (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Summons between different areas. Only when the server has BloodborneSeamlessCoop=true, and every player turns it on too',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'Not ready: it only sends summons to a server with BloodborneSeamlessCoop=true; the guest is not moved to the host yet. For testing',
     'Публичный сервер shadPS4':
         "shadPS4's public server",
     'Свой сервер':
@@ -1238,8 +1238,8 @@ PT_BR = {
         'Como hospedar seu próprio servidor',
     'Порт кооператива (UDP)':
         'Porta do cooperativo (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Invocações entre áreas diferentes. Só se o servidor tiver BloodborneSeamlessCoop=true e todos os jogadores ativarem',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'Não está pronto: só envia as invocações a um servidor com BloodborneSeamlessCoop=true; o convidado ainda não é levado ao anfitrião. Para testes',
     'Публичный сервер shadPS4':
         'Servidor público do shadPS4',
     'Свой сервер':
@@ -1865,8 +1865,8 @@ ES = {
         'Cómo montar tu propio servidor',
     'Порт кооператива (UDP)':
         'Puerto del cooperativo (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Invocaciones entre zonas distintas. Solo si el servidor tiene BloodborneSeamlessCoop=true y todos los jugadores lo activan',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'No está listo: solo envía las invocaciones a un servidor con BloodborneSeamlessCoop=true; el invitado aún no se lleva junto al anfitrión. Para pruebas',
     'Публичный сервер shadPS4':
         'Servidor público de shadPS4',
     'Свой сервер':
@@ -2492,8 +2492,8 @@ IT = {
         'Come ospitare un tuo server',
     'Порт кооператива (UDP)':
         'Porta della cooperativa (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Evocazioni tra zone diverse. Solo se il server ha BloodborneSeamlessCoop=true e tutti i giocatori la attivano',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'Non è pronto: invia solo le evocazioni a un server con BloodborneSeamlessCoop=true; l’ospite non viene ancora portato dall’host. Per i test',
     'Публичный сервер shadPS4':
         'Server pubblico di shadPS4',
     'Свой сервер':
@@ -3119,8 +3119,8 @@ FR = {
         'Héberger votre propre serveur',
     'Порт кооператива (UDP)':
         'Port de coopération (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Invocations entre zones différentes. Seulement si le serveur a BloodborneSeamlessCoop=true et que tous les joueurs l’activent',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'Pas encore prêt : envoie seulement les invocations à un serveur avec BloodborneSeamlessCoop=true ; l’invité n’est pas encore amené chez l’hôte. Pour les tests',
     'Публичный сервер shadPS4':
         'Serveur public de shadPS4',
     'Свой сервер':
@@ -3746,8 +3746,8 @@ DE = {
         'Eigenen Server betreiben',
     'Порт кооператива (UDP)':
         'Koop-Port (UDP)',
-    'Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же':
-        'Beschwörungen zwischen verschiedenen Gebieten. Nur wenn der Server BloodborneSeamlessCoop=true hat und alle Spieler es einschalten',
+    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
+        'Noch nicht fertig: schickt nur die Beschwörungen an einen Server mit BloodborneSeamlessCoop=true; der Gast wird noch nicht zum Gastgeber gebracht. Zum Testen',
     'Публичный сервер shadPS4':
         'Öffentlicher Server von shadPS4',
     'Свой сервер':
@@ -4332,7 +4332,7 @@ ZH_CN = {
     "Получен {}": "获得于 {}",
     "Получено {} из {}": "已获得 {} / {}",
     "Порт кооператива (UDP)": "联机合作端口（UDP）",
-    "Призывы между разными локациями. Только если на сервере BloodborneSeamlessCoop=true, и у всех игроков так же": "可在不同区域之间召唤。仅当服务器设置了 BloodborneSeamlessCoop=true，且所有玩家都开启时有效",
+    "Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки": "尚未完成：只会把召唤发送到设置了 BloodborneSeamlessCoop=true 的服务器，访客还不会被移到房主那里。仅供测试",
     "Применяется при запуске игры": "在游戏启动时生效",
     "Проверить": "检测",
     "Проверить соединение": "检测连接",

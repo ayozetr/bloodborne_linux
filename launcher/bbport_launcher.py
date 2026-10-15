@@ -1841,8 +1841,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                                        text=s["online_webapi"])
         self.seamless_row = Adw.SwitchRow(
             title=tr("Бесшовный кооператив (экспериментально)"),
-            subtitle=tr("Призывы между разными локациями. Только если на сервере "
-                        "BloodborneSeamlessCoop=true, и у всех игроков так же"),
+            subtitle=tr("Не готово: только отправляет призывы на сервер с "
+                        "BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. "
+                        "Для проверки"),
             active=s["online_seamless"])
         guide = Adw.ActionRow(title=tr("Как запустить свой сервер"), subtitle=SERVER_GUIDE_URL,
                               activatable=True)

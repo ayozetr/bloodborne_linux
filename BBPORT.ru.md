@@ -362,7 +362,9 @@ VRAM считается не больше N МиБ: проверка повед�
 shadPS4 из shadp2p, форка shadPS4, с клиентом shadNet); собирается, когда есть protobuf, nlohmann_json,
 OpenSSL, zlib и miniupnpc (`shell.nix`), входит в AppImage. Включается на странице лаунчера *Онлайн*
 (`BB_ONLINE=1`): сообщения, пятна крови и призраки — с The Hunter's Dream, колокола и призывы — через
-сервер shadNet (по умолчанию `srv.shadps4.net:31313`) с учётной записью shadNet (Online ID и пароль).
+сервер shadNet с учётной записью shadNet (Online ID и пароль): пул The Hunter's Dream через bbbridge
+или свой сервер (`docs/SERVER.md`); публичный сервер shadPS4 (`srv.shadps4.net:31313`) больше не
+принимает сборки bbport.
 Офлайн модуль не загружается; сборка без него играет только офлайн.
 
 ## Устройство репозитория

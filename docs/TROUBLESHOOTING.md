@@ -54,8 +54,10 @@ other programs that use the GPU (browsers, video players, other games).
 ## Summons never connect
 
 Run **Test the connection** in the **Online** page. A red line for the shadNet server's UDP means
-the server never learns your address, and no summon can connect: shadPS4's public server does
-this. Use your own server: [SERVER.md](SERVER.md).
+the server never learns your address, and no summon can connect: check that the server is running
+and that its log lists the UDP listener, and that no firewall blocks UDP 31314 on its side
+([SERVER.md](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The
+Hunter's Dream or your own server.
 
 ## Other online problems
 

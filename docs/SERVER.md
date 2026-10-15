@@ -153,17 +153,17 @@ Summons go through the server's own summon service: the log of a game says
 
 Windows players set the same server, WebAPI and account in the Windows port's launcher.
 
-## Seamless co-op (experimental)
+## Seamless co-op (not working yet)
 
-shadnet-p2p can also summon between different areas: the guest is moved to the host's area. To
-use it, the server and every player must have it on:
+shadnet-p2p can pair a summon between players in different areas when the server has
+`BloodborneSeamlessCoop=true` (`-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` with Docker). In bbport,
+**Seamless co-op (experimental)** in the launcher's Online page only sends the game's summon
+requests to that server: the other half, moving the guest into the host's area (shadp2p's host
+placement), is not in bbport yet, and the option has not been tried in a real session. Leave it
+off unless you are testing it.
 
-- The server: add `-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` to `docker run`, or set
-  `BloodborneSeamlessCoop=true` in `shadnet.cfg`. Its log then says `seamless co-op enabled`.
-- Each player: **Seamless co-op (experimental)** in the launcher's Online page.
-
-Ring the host's Beckoning Bell first, then the guest's Small Resonant Bell. Travelling together
-by lantern once the session has started does not work yet.
+Co-op that survives deaths, lamps, areas and bosses is planned through
+[BBSC](https://github.com/Classmg22/BBSC) (Bloodborne Seamless Co-op).
 
 ## Troubleshooting
 
