@@ -66,17 +66,26 @@ class StunTests(unittest.TestCase):
     """The connection test's UDP ping against a stand-in for shadnet-p2p's StunServer, which
     answers the 21-byte ping behind the 0xffff signaling header with the sender's address."""
 
-    def serve(self, answer=True):
+    def serve(self, answer=True, public=False):
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server.bind(('127.0.0.1', 0))
         self.addCleanup(server.close)
         received = []
 
         def run():
-            data, sender = server.recvfrom(64)
-            received.append(data)
+            # A shadp2p server answers the 4-byte vport header; the shadPS4 team's, its own (it
+            # drops the other one).
+            header = online.SERVER_SIGNALING_HEADER if public else b'\xff\xff\xff\xff'
+            while True:
+                try:
+                    data, sender = server.recvfrom(64)
+                except OSError:  # closed by the test's cleanup
+                    return
+                received.append(data)
+                if data.startswith(header):
+                    break
             if answer:
-                server.sendto(b'\xff\xff\xff\xff' + socket.inet_aton(sender[0])
+                server.sendto(header + socket.inet_aton(sender[0])
                               + struct.pack('!H', sender[1]), sender)
         threading.Thread(target=run, daemon=True).start()
         return server.getsockname()[1], received
@@ -90,6 +99,13 @@ class StunTests(unittest.TestCase):
         self.assertEqual(len(ping), 4 + 21)
         self.assertEqual(ping[:5], b'\xff\xff\xff\xff\x01')
         self.assertEqual(ping[5:21].rstrip(b'\0'), online.STUN_TEST_ID)
+
+    def test_public_server_framing(self):
+        port, received = self.serve(public=True)
+        address, public_port = online.stun_ping('127.0.0.1', port, timeout=2)
+        self.assertEqual(address, '127.0.0.1')
+        self.assertGreater(public_port, 0)
+        self.assertEqual(received[-1][:7], online.SERVER_SIGNALING_HEADER + b'\x01')
 
     def test_no_answer(self):
         port, _received = self.serve(answer=False)

@@ -43,6 +43,8 @@ STUN_PORT = 31314
 # The online ID of the connection test's ping: the server keeps one address per online ID, and the
 # player's own would replace the address of a game running meanwhile.
 STUN_TEST_ID = b'bbport-udp-test'
+# The shadPS4 team's server frames UDP as a PS4 P2P datagram (p2p_sockets.cpp).
+SERVER_SIGNALING_HEADER = bytes([0xFF, 0x83, 0xFF, 0xFF, 0xFF, 0xFF])
 
 
 def community_address(value):
@@ -140,20 +142,26 @@ def environment(settings):
 
 def stun_ping(host, port=STUN_PORT, timeout=2.0, attempts=3):
     """The public (address, port) the shadNet server sees for this computer, from the ping the
-    game sends it (np_signaling_helpers.cpp: a 0xffff signaling header, command 1, the online ID
-    and the local address); OSError, TimeoutError when nothing answers."""
-    ping = b'\xff\xff\xff\xff' + b'\x01' + STUN_TEST_ID.ljust(16, b'\0') + bytes(4)
+    game sends it (np_signaling_helpers.cpp: command 1, the online ID and the local address);
+    OSError, TimeoutError when nothing answers. Sent in both framings, as the game does
+    (p2p_sockets.cpp): the 0xffff vport header for shadp2p servers (our own), and the PS4 P2P
+    datagram header the shadPS4 team's server (srv.shadps4.net) takes; each drops the other."""
+    body = b'\x01' + STUN_TEST_ID.ljust(16, b'\0') + bytes(4)
+    headers = (b'\xff\xff\xff\xff', SERVER_SIGNALING_HEADER)
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         sock.settimeout(timeout)
         address = socket.gethostbyname(host)
         for _ in range(attempts):
-            sock.sendto(ping, (address, port))
+            for header in headers:
+                sock.sendto(header + body, (address, port))
             try:
                 reply, sender = sock.recvfrom(64)
             except TimeoutError:
                 continue
-            if sender[0] == address and len(reply) == 10 and reply[:4] == b'\xff' * 4:
-                return socket.inet_ntoa(reply[4:8]), struct.unpack('!H', reply[8:10])[0]
+            for header in headers:
+                if sender[0] == address and len(reply) == len(header) + 6 and reply.startswith(header):
+                    found = reply[len(header):]
+                    return socket.inet_ntoa(found[:4]), struct.unpack('!H', found[4:6])[0]
         raise TimeoutError(f'no answer from {host}:{port} (UDP)')
 
 
