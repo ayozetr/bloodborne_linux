@@ -10,9 +10,8 @@ The PlayStation 4 version of *Bloodborne* running natively on Linux. The game's 
 directly on the CPU and its graphics are translated to Vulkan: it is not an emulator.
 
 This fork is built on [bbport](https://github.com/deadinside28/bloodborne_pc) by deadinside28. It
-adds improvements of its own, and others from the community: pull requests, the
-[Windows port](https://github.com/Supermedo/bloodborne_pc) and other projects
-([credits](docs/CREDITS.md)).
+adds improvements of its own, and others from the community, taken from pull requests and other
+projects ([credits](docs/CREDITS.md)).
 
 > **No game files are included.** You need your own decrypted dump of Bloodborne with update
 > 1.09, from a retail release ([which ones](docs/COMPATIBILITY.md)). This project is not
@@ -87,6 +86,11 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency by itself. 
 `bash tools/build_dlss.sh` once; the AppImage is `bash packaging/appimage-sharun.sh`. Environment
 variables for the launcher's **Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+## On Windows
+
+If you need a Windows version, I recommend
+[Supermedo's Windows port](https://github.com/Supermedo/bloodborne_pc).
 
 ## Support
 

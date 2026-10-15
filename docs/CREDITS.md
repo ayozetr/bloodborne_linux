@@ -1,7 +1,7 @@
 # Credits
 
-Everyone whose work is in this fork, and every project it took something from. The launcher's
-**About** page has the same list. Components and their licenses: [BBPORT.md](../BBPORT.md#credits-and-licenses).
+Everyone whose work is in this fork, and every project it took something from. Everyone listed
+under *People* and *Help and testing* also appears in the launcher's **About** page. Components and their licenses: [BBPORT.md](../BBPORT.md#credits-and-licenses).
 
 ## Projects
 
