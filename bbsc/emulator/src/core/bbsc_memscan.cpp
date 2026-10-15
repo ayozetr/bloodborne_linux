@@ -5,8 +5,15 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+// bbport: the Linux search.
+#include <cinttypes>
+#include <cstdio>
+#include <sys/uio.h>
+#include <unistd.h>
 #endif
 
+#include <algorithm>
 #include <cstring>
 
 namespace Core::Bbsc {
@@ -33,6 +40,45 @@ void SearchRegion(const std::uint8_t* start, std::size_t size, const std::uint8_
             ++at;
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {
+    }
+}
+#else
+// bbport: one region, copied in slices through process_vm_readv on this process: a page the GPU
+// side just protected, or a region unmapped meanwhile, only fails that read (as the SEH guard on
+// Windows) instead of faulting. Consecutive slices overlap by the needle's length.
+void SearchRegion(std::uint64_t start, std::uint64_t end, const std::uint8_t* needle,
+                  std::size_t length, std::vector<std::uint8_t>& buffer,
+                  std::vector<std::uint64_t>& hits, std::size_t max_hits) {
+    const pid_t self = getpid();
+    std::uint64_t at = start;
+    while (at < end && hits.size() < max_hits) {
+        const auto want =
+            static_cast<std::size_t>(std::min<std::uint64_t>(buffer.size(), end - at));
+        iovec local{buffer.data(), want};
+        iovec remote{reinterpret_cast<void*>(at), want};
+        const ssize_t got = process_vm_readv(self, &local, 1, &remote, 1, 0);
+        if (got <= 0) {
+            at = (at & ~std::uint64_t{0xFFF}) + 0x1000; // an unreadable page: the next one
+            continue;
+        }
+        const auto size = static_cast<std::size_t>(got);
+        const std::uint8_t* data = buffer.data();
+        const std::uint8_t* scan = data;
+        while (size >= length && hits.size() < max_hits) {
+            if (scan > data + size - length) {
+                break;
+            }
+            const auto left = static_cast<std::size_t>(data + size - length + 1 - scan);
+            scan = static_cast<const std::uint8_t*>(std::memchr(scan, needle[0], left));
+            if (scan == nullptr) {
+                break;
+            }
+            if (std::memcmp(scan, needle, length) == 0) {
+                hits.push_back(at + static_cast<std::uint64_t>(scan - data));
+            }
+            ++scan;
+        }
+        at += at + size >= end || size < length ? size : size - length + 1;
     }
 }
 #endif
@@ -66,6 +112,29 @@ std::vector<std::uint64_t> FindInMemory(std::span<const std::uint8_t> needle, st
         }
         at = end;
     }
+#else
+    if (needle.empty()) {
+        return hits;
+    }
+    // The readable mappings in [lo, hi), from /proc/self/maps.
+    FILE* maps = std::fopen("/proc/self/maps", "r");
+    if (maps == nullptr) {
+        return hits;
+    }
+    std::vector<std::uint8_t> buffer(std::size_t{1} << 20);
+    char line[512];
+    while (hits.size() < max_hits && std::fgets(line, sizeof(line), maps) != nullptr) {
+        std::uint64_t start = 0;
+        std::uint64_t end = 0;
+        char prot[5] = {};
+        if (std::sscanf(line, "%" SCNx64 "-%" SCNx64 " %4s", &start, &end, prot) != 3 ||
+            prot[0] != 'r' || end <= lo || start >= hi) {
+            continue;
+        }
+        SearchRegion(std::max(start, lo), std::min(end, hi), needle.data(), needle.size(), buffer,
+                     hits, max_hits);
+    }
+    std::fclose(maps);
 #endif
     return hits;
 }
