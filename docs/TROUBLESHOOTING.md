@@ -51,6 +51,14 @@ On a 6 GB card the texture cache can run out of video memory: the log then repea
 a lower output resolution, lower **Model detail** in the game's *Display* settings, and close
 other programs that use the GPU (browsers, video players, other games).
 
+## The camera turns much faster on diagonals
+
+With the right stick pushed all the way, the game switches to its fast turn (about twice the
+speed), and it does so on diagonals too, not only straight sideways. That is how the game turns on
+a PS4 as well, with any controller. **Controls → Even camera speed on diagonals** keeps diagonals at
+the normal speed; the fast turn stays when the stick is pushed straight sideways. With it on the
+camera can feel heavier: the game's own *Camera speed* setting makes up for it.
+
 ## Summons never connect
 
 Run **Test the connection** in the **Online** page. A red line for the shadNet server's UDP means

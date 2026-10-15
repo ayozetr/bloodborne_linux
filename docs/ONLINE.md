@@ -65,6 +65,18 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
    3478); `SHADPS4_P2P_RELAY=0` turns it off. Without BBSC, and on The Hunter's Dream (bbbridge
    relays by itself), the relay is off.
 
+BBSC gives every character its own items, which cost no Insight: the **Hunt Bell** (call other
+players), the **Kin Bell** (join another player), the **Bloodlust Bell** (invade), the **Duel Bell**
+(PvP on and off during co-op) and the **Parting Blank** (end co-op). It takes the game's Beckoning
+Bell, Small Resonant Bell and Silencing Blank out of the inventory, and they do not come back when
+BBSC is turned off. Before changing anything it backs the saves up to `user/bbsc/save-backups/`:
+copy a character's save from there to play it without BBSC with its old bells. Its texts follow the game's language (Spanish, French, German, Italian,
+Portuguese and Russian; English otherwise). **F8** puts you back on the ground if you get stuck
+inside another player.
+
+**Not yet tested with more than one player on Linux:** one player alone works (its items, deaths,
+lamps, the Hunter's Dream). Report what you find with the log.
+
 Its log is in `user/bbsc/logs/` (in the AppImage, `~/.local/share/bbport/user/bbsc/logs/`), and
 the game's log has its warnings (`BBSC:` lines). Not in the Linux build: BBSC's cinematic camera
 (L3 + R3 opens bbport's menu) and its own Discord status (bbport has one).
@@ -72,7 +84,7 @@ the game's log has its warnings (`BBSC:` lines). Not in the Linux build: BBSC's 
 ## Summoning in the game
 
 - The host rings the **Beckoning Bell** (one Insight each time); the helper rings the **Small
-  Resonant Bell**.
+  Resonant Bell**. With BBSC: the **Hunt Bell** and the **Kin Bell**, at no Insight cost.
 - Use the same **password** in the game's network settings, so you find each other whatever
   your levels.
 - Be in the same area, close to each other, with the area's boss still alive in the host's
