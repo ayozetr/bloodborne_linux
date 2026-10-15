@@ -6,64 +6,68 @@
 [![Platform: Linux | Steam Deck](https://img.shields.io/badge/platform-Linux%20%7C%20Steam%20Deck-blue.svg)](#features)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/ayozetr)
 
-The PlayStation 4 version of *Bloodborne* running natively on Linux. The game's own x86-64 code
-runs directly on the CPU and its graphics are translated to Vulkan. It is not an emulator.
+The PlayStation 4 version of *Bloodborne* running natively on Linux. The game's own code runs
+directly on the CPU and its graphics are translated to Vulkan: it is not an emulator.
 
-This fork builds on [bbport](https://github.com/deadinside28/bloodborne_pc), the native Linux port
-by deadinside28. It adds the features of [Supermedo's Windows port](https://github.com/Supermedo/bloodborne_pc)
-(online play, DLSS, cheats) brought to Linux, plus a few of its own.
+This fork is built on [bbport](https://github.com/deadinside28/bloodborne_pc) by deadinside28. It
+adds improvements of its own, and others from the community: pull requests, the
+[Windows port](https://github.com/Supermedo/bloodborne_pc) and other projects
+([credits](docs/CREDITS.md)).
 
 > **No game files are included.** You need your own decrypted dump of Bloodborne with update
-> 1.09, from a retail release: [which ones, and which have been checked](docs/COMPATIBILITY.md).
-> This project is not affiliated with Sony Interactive Entertainment or FromSoftware.
+> 1.09, from a retail release ([which ones](docs/COMPATIBILITY.md)). This project is not
+> affiliated with Sony Interactive Entertainment or FromSoftware.
 
 ## Features
 
-- **Online play (beta)** through [The Hunter's Dream](https://thehuntersdream.com): messages,
-  bloodstains, ghosts, bells and summons, with bbhost's players and Windows players of bbport, or
-  with your group on [a server of your own](docs/SERVER.md).
-- **Upscaling:** AMD FSR 3.1, FSR 4 and FSR 4.1.1, **NVIDIA DLSS** on GeForce RTX, and
-  native-resolution TAA.
-- **Unlocked frame rate**, capped at your display's refresh rate up to 120 FPS (above that the
-  game's own movement timing breaks), or 30/60/90 FPS. Output from 720p to 4K.
-- **Launcher** with every setting in one window, in English, Spanish, Italian, French, German,
-  Portuguese, Russian and Simplified Chinese, like the in-game menu (Insert or L3+R3).
-- **Settings in the game's own System menu** as well (Display and Effects pages), in the game's
-  language.
-- **Two memory models:** the new one, where the GPU works with the game's memory as in a PC game
-  (the default on AMD), and the one of 0.3 (the default elsewhere); the launcher switches them.
-- **Xbox, Switch and keyboard button prompts**, picked by the controller in use, and a gestures
-  menu without the motion-control icons.
-- **Cheats and gameplay tweaks:** never die, stealth, silent steps, enemy control, camera
-  distance, ragdoll physics and more.
-- **Trophies:** a notice in the game, in the style of the PS4's, and a Trophies page in the
-  launcher with every trophy, from your own dump. Their names and descriptions need the PS4's
-  trophy key (shadPS4's TrophyKey), which you enter in the launcher; without it, only the icons.
-- **Game effects** on and off, **mods** and community **patches**, loaded without changing the
-  game files ([how](docs/MODS.en.md)).
-- **Add to Steam** in one click (native or Flatpak Steam), and **Discord Rich Presence** with the
-  area you are in and your co-op partners.
-- **AppImage:** one file with everything inside, for any distribution and the Steam Deck. It
-  updates itself: the launcher's **About** page checks this repository's releases and installs
-  a new AppImage over the old one, or any earlier release from 0.5-linux.1 on, to go back to one
-  that worked better.
+- **Online play**: messages, bloodstains, ghosts, bells and summons, on
+  [The Hunter's Dream](https://thehuntersdream.com) or a server of your own, and **Seamless
+  Co-op** (experimental): co-op that lasts through deaths, lamps and areas, for up to 5 hunters.
+- **Frame rate unlocked** (up to 120 FPS) or capped at **30, 60 or 90**. Resolutions from
+  **720p to 4K**, and **ultrawide** (21:9, 32:9).
+- **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
+- **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
+  game**, and **keyboard and mouse**, with a direct 1:1 mouse camera and keys you can rebind.
+- **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
+- **Trophies and the platinum**, with a notice in the game like on the PS4.
+- **Add to Steam** in one click, and **Discord Rich Presence** with your area and co-op partners.
+- **Launcher and in-game menu** (L3 + R3 or Insert) in English, Spanish, French, German, Italian,
+  Portuguese, Russian and Simplified Chinese.
+- **AppImage** ready for any distribution and the Steam Deck, which **updates itself** from the
+  launcher (and can go back to an earlier release).
+- **Mods and community patches**, without touching the game files ([how](docs/MODS.en.md)).
 
 ## Requirements
 
-- Linux x86-64 and a GPU with Vulkan 1.3: AMD or Intel with Mesa, or NVIDIA with NVIDIA's driver
-  (open kernel modules included). Mesa's NVK has not been tested.
-- DLSS needs a GeForce RTX (20 series or newer) and NVIDIA's driver; it does not work with NVK.
-- About 6 GB of free memory, 10 GB for 1440p or 4K output.
+- Linux x86-64 and a GPU with Vulkan 1.3: AMD or Intel with Mesa, or NVIDIA with NVIDIA's driver.
+- About 6 GB of free memory, 10 GB for 1440p or 4K.
 
 ## Getting started
 
-### AppImage
+1. Download `Bloodborne-bbport-x86_64.AppImage` from the
+   [latest release](https://github.com/ayozetr/bloodborne_linux/releases/latest).
+2. Make it executable and run it.
+3. Choose your game folder (the one with `eboot.bin`) and press **Play**.
 
-Build it with `bash build.sh && bash packaging/appimage-sharun.sh`, then run
-`dist/Bloodborne-bbport-x86_64.AppImage`. Choose your game folder (the one with `eboot.bin`) and
-press **Play**. Saves and settings go to `~/.local/share/bbport`.
+Saves and settings go to `~/.local/share/bbport`. The Game of the Year edition already has The Old
+Hunters; with the base game, its DLC goes in **Game → DLC folder** ([how](docs/COMPATIBILITY.md)).
 
-### From source
+## Online play
+
+In the launcher's **Online** page, turn on **Play online**, choose a server and press **Test the
+connection** (every line should be green):
+
+- **The Hunter's Dream**: sign in with Discord, or create an account with just a name. You play
+  with bbhost's players. This connection is unofficial: report problems here, not to The Hunter's
+  Dream.
+- **Your own server**: for your group, with Docker and Tailscale ([docs/SERVER.md](docs/SERVER.md)).
+- **Seamless Co-op (BBSC)**, in the same page: every player needs it, and summons across areas need
+  its game server, which your own server can run ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
+
+Everyone in a session needs update 1.09. Turn cheats off when you play with others. Ports,
+firewalls and the rest: [docs/ONLINE.md](docs/ONLINE.md).
+
+## Building from source
 
 On Arch Linux (or CachyOS, Manjaro…):
 
@@ -76,118 +80,25 @@ paru -S magic_enum vulkan-memory-allocator xbyak   # from the AUR
 git clone --recursive https://github.com/ayozetr/bloodborne_linux
 cd bloodborne_linux
 bash build.sh
-python3 launcher/bbport_launcher.py   # or launcher/install-desktop.sh for a menu entry
+python3 launcher/bbport_launcher.py
 ```
 
-With [Nix](https://nixos.org), `bash build.sh` gets every dependency from `shell.nix` by itself.
-
-### Online play
-
-1. In the launcher, open **Online**, turn on **Play online** and choose the co-op server:
-   - **The Hunter's Dream (with bbhost players)**: sign in with Discord, or create an account
-     with just a name and keep the recovery code it shows (it brings the account back on
-     another PC). [bbbridge](bbbridge/README.md) by MaskZeus runs with the game and talks to
-     The Hunter's Dream the way bbhost does, so you play with bbhost's players and with Windows
-     players of bbport on the same pool.
-   - **Your own server**: your group's shadNet server and your account on it
-     ([docs/SERVER.md](docs/SERVER.md), Docker and Tailscale; tested with a Linux and a Windows
-     player).
-2. **Test the connection**: every line should be green.
-3. Start the game and choose online at the title screen.
-
-**Seamless co-op (experimental)**: turn on **Seamless co-op (BBSC)** in the Online page and the
-session lives through deaths, lamps, areas, bosses and the Hunter's Dream, with up to 5 hunters.
-It is [BBSC](https://github.com/Classmg22/BBSC) by CLS_AMG, built for Linux here; every player of
-the session needs it (on Windows, BBSC's package for the Windows port). Summons across areas need
-BBSC's game server ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
-
-Everyone in a session needs game version 1.09 and the same pool. Turn cheats off when you play
-with others. shadPS4's public shadNet server no longer accepts bbport builds: it signs them out
-right after the login, and the launcher says so.
-
-With your own server, co-op connects the players directly over UDP. UPnP opens the port on the router by itself; with
-ufw or firewalld on, the launcher's **Online** page says so and gives the commands: pin the
-**Co-op port** (for example 3658), open it (`sudo ufw allow 3658/udp`), and for UPnP let the
-router's answers in (`sudo ufw allow from <router> proto udp`). [More in docs/ONLINE.md](docs/ONLINE.md).
-
-### DLSS
-
-On a PC with a GeForce RTX, run `bash tools/build_dlss.sh` once after `build.sh`. It downloads
-what it needs from the NVIDIA DLSS SDK and builds the bridge. Then choose **DLSS** as the
-upscaler.
-
-### Environment variables
-
-The launcher's **Settings → Developer → Extra variables** field (`NAME=value`, space-separated)
-passes environment variables to the game, the same ones `run.sh` takes from a terminal. Every one
-the port reads, what it does and which win over which: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
-
-### DLC
-
-The Game of the Year edition (`CUSA03173`) already includes The Old Hunters. With the base game
-(such as the US `CUSA00900`), dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`,
-`SPDLCMESSENGER00`…) with only `sce_sys` inside, because their data ships with the 1.09 update.
-Put them in one folder and pick it in the launcher (**Game → DLC folder**), or set
-`BB_DLC_DIR=/path/to/dlc` for `run.sh`; the launcher shows how many it found. Each folder must
-keep the add-on's name (its entitlement label, such as `SPEXPANSIONDLC03`). Copying them to
-`user/addcont/<title id>/`, shadPS4's layout, works too.
-
-### Add to Steam
-
-**Game → Add to Steam** puts Bloodborne in your Steam library; it starts with the launcher's
-settings. Steam has to be closed while the game is added, and the launcher offers to do that.
-Flatpak Steam runs games inside its sandbox, which has neither the game nor your drivers, so
-the shortcut starts the game outside it with `flatpak-spawn --host`. That needs the
-`org.freedesktop.Flatpak` permission for Steam, which the launcher asks for once: it lets Steam
-start programs on your system.
-
-### Button prompts
-
-The game shows PlayStation buttons. In the launcher, **Controls → Button prompts** switches them to
-Xbox, Nintendo Switch or keyboard ones; *Automatic* follows the controller in use, and the
-keyboard's when none is connected. Keyboard prompts show the keys bound in **Controls →
-Keyboard**. **Gestures menu without motion-control icons** cleans up the gestures menu. The
-prompts are put into your own game's menu files at each start, and nothing in the game folder
-changes.
+With [Nix](https://nixos.org), `bash build.sh` gets every dependency by itself. DLSS needs
+`bash tools/build_dlss.sh` once; the AppImage is `bash packaging/appimage-sharun.sh`. Environment
+variables for the launcher's **Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Support
 
 If this fork is useful to you and you would like to support it, you can on
-[Ko-fi](https://ko-fi.com/ayozetr). The port itself is deadinside28's work (see below).
+[Ko-fi](https://ko-fi.com/ayozetr). The port itself is deadinside28's work.
 
 ## Credits
 
-- [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc): **bbport**, the
-  native Linux port this fork is built on, and almost all of the work behind it. Its README, with
-  the technical details, is in [BBPORT.md](BBPORT.md).
-- [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc): the Windows port, whose
-  online play, DLSS support, cheats page, Add to Steam and icon were brought to Linux here.
-- [shadPS4](https://github.com/shadps4-emu/shadPS4): the renderer and shader recompiler.
-- [shadp2p](https://github.com/Wozzardman/shadp2p) by Wozzardman: the network and PSN libraries
-  for online play. Servers by the [shadPS4](https://shadps4.net) team and
-  [The Hunter's Dream](https://thehuntersdream.com) by droogie and its team.
-- [bbbridge](https://github.com/MaskZeus/bbbridge) by MaskZeus (GPL-3.0-or-later): The Hunter's
-  Dream's co-op pool for bbport, built for Linux here ([bbbridge/](bbbridge/)).
-- [BBSC](https://github.com/Classmg22/BBSC) by CLS_AMG (GPL-2.0-or-later): seamless co-op, with
-  Wozzardman's seamless summon; built for Linux here ([bbsc/](bbsc/)), with
-  [xbyak](https://github.com/herumi/xbyak) and [fmt](https://github.com/fmtlib/fmt).
-- [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR):
-  the DLSS bridge, and the [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS).
-- [FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) by FireBurn and the AMD FidelityFX SDK.
-- **Dommo**: the Xbox and Switch button prompts (*DS3 Style - Modern Xbox prompts*, *DS3 Style -
-  Nintendo Switch prompts*) and the *Stripped down gesture menu*, from
-  [Nexus Mods (Bloodborne, mod 30)](https://www.nexusmods.com/bloodborne/mods/30), uploaded by
-  goomab. Only their drawn prompts are in this repository ([assets/menu_prompts](assets/menu_prompts)).
-- **Abken**: the [KBM Icons Generator](https://www.nexusmods.com/bloodborne/mods/537), which showed
-  which textures keyboard prompts need (after the idea of
-  [mod 460](https://www.nexusmods.com/bloodborne/mods/460)); bbport draws its own.
-- [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages) for the AppImage.
-- [ps4-pkg-extractor](https://github.com/paulomanrique/ps4-pkg-extractor) by paulomanrique
-  (Unlicense), on [orbis-pkg-util](https://crates.io/crates/orbis-pkg-util): the launcher's
-  *Install from PKG*.
-- Game patches by Kyo, Lance McDonald, auser1337, illusion, emoose and the Bloodborne community.
-
-Full list of components and licenses: [BBPORT.md](BBPORT.md#credits-and-licenses).
+Built on [bbport](https://github.com/deadinside28/bloodborne_pc) by deadinside28, with
+[shadPS4](https://github.com/shadps4-emu/shadPS4)'s renderer, and with work from many people and
+projects: everyone is in [docs/CREDITS.md](docs/CREDITS.md). Components and their licenses:
+[BBPORT.md](BBPORT.md#credits-and-licenses).
 
 ## License
 

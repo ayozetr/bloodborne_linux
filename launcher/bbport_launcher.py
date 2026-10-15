@@ -766,7 +766,7 @@ THANKS = (
         ("Abken", "Показал, какие текстуры нужны иконкам клавиатуры (Nexus Mods)",
          "https://www.nexusmods.com/bloodborne/mods/537"),
         ("Kyo, Lance McDonald, auser1337, illusion, emoose", "Патчи игры: высокий FPS, разрешение и другое",
-         "https://github.com/ayozetr/bloodborne_linux#credits"),
+         "https://github.com/ayozetr/bloodborne_linux/blob/main/docs/CREDITS.md"),
         ("shadPS4", "Рендерер и компилятор шейдеров", "https://github.com/shadps4-emu/shadPS4"),
         ("pkgforge-dev", "Инструмент для сборки AppImage",
          "https://github.com/pkgforge-dev/Anylinux-AppImages"),
