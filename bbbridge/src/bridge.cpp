@@ -218,6 +218,7 @@ std::pair<uint8_t, std::string> Session::handle(uint16_t command, uint64_t packe
             r = {sn::err::NoError, sn::proto_blob(pb::Writer().flag(1, true).str())};
             break;
         case sn::cmd::GetToken: r = on_get_token(); break;
+        case sn::cmd::SetClientVersion: r = {sn::err::NoError, ""}; break;   // any client is welcome
         case sn::cmd::SetAppearOffline:
         case sn::cmd::AddFriend:
         case sn::cmd::RemoveFriend:
@@ -1004,8 +1005,13 @@ void Bridge::stun_loop() {
             if (!running_) return;
             continue;
         }
-        if (n < 21 || buf[0] != 0x01) continue;
-        const std::string npid(buf + 1, strnlen(buf + 1, 16));
+        // bbport's P2P transport sends it in a signaling frame (virtual ports FF FF, FF FF first).
+        // That ping only tells the port's P2P socket: no echo, which would give the port 127.0.0.1
+        // as its external address, and bbport takes only framed datagrams anyway.
+        const bool framed = n >= 25 && std::memcmp(buf, "\xff\xff\xff\xff", 4) == 0 && buf[4] == 0x01;
+        const char* ping = framed ? buf + 4 : buf;
+        if (!framed && (n < 21 || buf[0] != 0x01)) continue;
+        const std::string npid(ping + 1, strnlen(ping + 1, 16));
         const Endpoint src = from_sockaddr(from);
         bool first;
         {
@@ -1015,6 +1021,7 @@ void Bridge::stun_loop() {
             registry_[npid] = src;
         }
         if (first) log(fmt("stun: %s pings from %s", repr(npid).c_str(), src.str().c_str()));
+        if (framed) continue;
         char reply[6];
         std::memcpy(reply, &from.sin_addr, 4);
         std::memcpy(reply + 4, &from.sin_port, 2);

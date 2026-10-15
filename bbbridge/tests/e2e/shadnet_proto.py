@@ -32,6 +32,7 @@ class Command:
     AddBlock = 10
     RemoveBlock = 11
     GetServerFeatures = 12
+    SetClientVersion = 13
     GetToken = 39
     SetAppearOffline = 40
     ContextStart = 100

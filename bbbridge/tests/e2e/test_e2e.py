@@ -274,6 +274,8 @@ def part_a():
         check("bbhost account created", "/auth/account/create" in fake.state["calls"])
         err, blob = c.request(sp.Command.GetServerFeatures)
         check("matching2 enabled", err == 0 and proto3.decode_message(sp.SERVER_FEATURES_REPLY, blob).get("matching2_enabled") is True)
+        err, _ = c.request(sp.Command.SetClientVersion)
+        check("client version accepted", err == 0, err)
         err, blob = c.request(sp.Command.GetToken)
         tok = proto3.decode_message(sp.GET_TOKEN_REPLY, blob)
         check("token relayed", err == 0 and tok.get("token") == "tok-123" and tok.get("npid") == NPID, tok)
@@ -282,6 +284,19 @@ def part_a():
         check("stun reply", ip == HOST and port == local, (ip, port, local))
         time.sleep(0.2)
         check("stun registry", br.debug()["registry"].get(NPID) == [HOST, local], br.debug()["registry"])
+        # bbport sends its ping inside a P2P signaling frame (FF FF FF FF first): registered, no echo.
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.5)
+        s.sendto(b"\xff\xff\xff\xff\x01" + b"framed".ljust(16, b"\0") + socket.inet_aton(HOST), (HOST, ports["udp"]))
+        framed_port = s.getsockname()[1]
+        try:
+            s.recvfrom(64)
+            echoed = True
+        except socket.timeout:
+            echoed = False
+        s.close()
+        check("framed stun ping registered without an echo",
+              br.debug()["registry"].get("framed") == [HOST, framed_port] and not echoed, br.debug()["registry"])
 
         err, _ = c.request(sp.Command.ContextStart, proto3.encode_message(sp.CONTEXT_START_REQUEST, {1: 7}))
         check("context_start", err == 0 and "/mp/matching2/context_start" in fake.state["calls"], err)
