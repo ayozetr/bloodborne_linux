@@ -298,6 +298,23 @@ static int mapped(Segment *segments, uint64_t count, uint64_t address, uint64_t 
 /* BBPATCH2 (patches.py): the patches' image base, then byte writes at image offsets, applied
  * after relocation. A write may replace a whole base-relative pointer slot (60/90 FPS++ swap
  * function pointers): the patch holds the address at the patches' base, rebased here. */
+#ifndef _WIN32
+/* BB_BBSC_LIB=<path to libbbsc.so>: BBSC (Bloodborne Seamless Co-op, bbsc/), loaded into the game's
+ * process once the game is linked and patched, before any of its code runs. bbsc_start() starts
+ * its worker, which checks every site it changes against the 1.09 bytes before writing any. */
+static void load_bbsc(void) {
+    const char *path=getenv("BB_BBSC_LIB");
+    if (!path || !*path) return;
+    void *library=dlopen(path,RTLD_NOW|RTLD_LOCAL);
+    void (*start)(void)=library ? (void (*)(void))dlsym(library,"bbsc_start") : NULL;
+    if (!start) {
+        printf("BBSC: not loaded (%s)\n",library ? "no bbsc_start" : dlerror());
+        return;
+    }
+    printf("BBSC: %s loaded\n",path);
+    start();
+}
+#endif
 static void apply_patches(const char *path, Segment *segments, uint64_t ns, const Reloc *relocs, uint64_t nr) {
     FILE *f=fopen(path,"rb");
     char magic[8];
@@ -595,6 +612,9 @@ int main(int argc, char **argv) {
             if (result) fail("module initializer failed");
         }
     }
+#ifndef _WIN32
+    load_bbsc();
+#endif
     printf("Entering original x86-64 code at guest offset 0x%" PRIx64 "\n", entry);
     entered_game=1;
     struct { uint64_t argc; const char *argv[2]; } params = {1, {"/app0/eboot.bin", NULL}};

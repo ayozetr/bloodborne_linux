@@ -15,9 +15,13 @@
 // Server address: BBSC_RELAY=host[:port], else the game server entry of host_overrides.json
 // (portable install: <emulator>\user\, else %APPDATA%\shadPS4\) - the address JOIN-HOST wrote.
 
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#else
+#include "linux/bbsc_win32.h" // bbport
+#endif
 
 #include <atomic>
 #include <cstring>
@@ -86,7 +90,11 @@ void Log(const std::string& text) {
     BbscMod::LogPlain(("Relay: " + text).c_str());
 }
 
+#ifdef _WIN32
 std::string ReadFile(const std::wstring& path) {
+#else
+std::string ReadFile(const std::string& path) {
+#endif
     std::ifstream in(path, std::ios::binary);
     std::stringstream text;
     text << in.rdbuf();
@@ -123,6 +131,7 @@ bool FindServer(std::string& host, u16& port) {
         host = value;
         return true;
     }
+#ifdef _WIN32
     wchar_t exe[MAX_PATH]{};
     GetModuleFileNameW(nullptr, exe, MAX_PATH);
     std::wstring dir{exe};
@@ -135,6 +144,13 @@ bool FindServer(std::string& host, u16& port) {
     if (const wchar_t* appdata = _wgetenv(L"APPDATA")) {
         candidates.push_back(std::wstring(appdata) + L"\\shadPS4\\host_overrides.json");
     }
+#else
+    // bbport: the overrides the launcher writes in the user folder (scripts/online.py).
+    const char* user = std::getenv("BB_USER_DIR");
+    const std::string dir = std::string{user != nullptr && *user != '\0' ? user : "user"} + "/";
+    const std::vector<std::string> candidates{dir + "host_overrides.custom.json",
+                                              dir + "host_overrides.json"};
+#endif
     for (const auto& path : candidates) {
         host = HostFromOverrides(ReadFile(path));
         if (!host.empty()) {
@@ -411,11 +427,16 @@ void RelaySendPlacement(const std::string& placement) {
 
 void StartRelay() {
     if (!started.exchange(true)) {
+#ifdef _WIN32
         LARGE_INTEGER counter{};
         QueryPerformanceCounter(&counter);
-        own_id = static_cast<u32>((static_cast<u64>(counter.QuadPart) ^ GetCurrentProcessId()) *
-                                  2654435761ull) |
-                 1u;
+        const u64 ticks = static_cast<u64>(counter.QuadPart);
+#else
+        timespec now{};
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        const u64 ticks = static_cast<u64>(now.tv_sec) * 1'000'000'000ull + static_cast<u64>(now.tv_nsec);
+#endif
+        own_id = static_cast<u32>((ticks ^ GetCurrentProcessId()) * 2654435761ull) | 1u;
         if (HANDLE thread = CreateThread(nullptr, 0, RelayThread, nullptr, 0, nullptr)) {
             CloseHandle(thread);
         }

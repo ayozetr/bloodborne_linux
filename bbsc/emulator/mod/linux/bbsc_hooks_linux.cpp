@@ -1,0 +1,223 @@
+// SPDX-FileCopyrightText: Copyright 2026 CLS_AMG
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+// bbport: the Linux counterpart of emulator/mod/bbsc_hooks.cpp - Core::InstallGuestCodeHook for
+// libbbsc.so. The trampoline is the mod's, unchanged: save every register and YMM into a
+// GuestRegisterSnapshot, call the C++ hook with it, restore the (possibly changed) snapshot, run the
+// copied instructions, jump back. The trampolines live in 1 MB of our own, mapped within a rel32
+// jump's reach below the game's image (bbport has no emulator trampoline area after it; the image
+// grows upwards, and bbport's own hooks take pages below it the same way).
+
+#include <sys/mman.h>
+#include <unistd.h>
+
+#include <array>
+#include <cstddef>
+#include <cstring>
+#include <mutex>
+
+#include <xbyak/xbyak.h>
+
+#include "core/cpu_patches.h"
+
+namespace BbscMod {
+void LogPlain(const char* text);
+u64 EbootAddress();
+}
+
+namespace Core {
+namespace {
+
+using namespace Xbyak::util;
+
+constexpr u64 OurSize = 1ULL << 20;
+
+std::mutex hook_mutex;
+Xbyak::CodeGenerator* generator = nullptr;
+bool area_checked = false;
+bool area_ok = false;
+
+// 1 MB below the image, within jump reach of all of it, never over anything already mapped.
+u64 MapOwnArea(u64 image) {
+    for (u64 k = 1; k <= 256; ++k) {
+        const u64 hint = image - k * (8ULL << 20);
+        void* got = mmap(reinterpret_cast<void*>(hint), OurSize, PROT_READ | PROT_WRITE | PROT_EXEC,
+                         MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE, -1, 0);
+        if (got != MAP_FAILED) {
+            return reinterpret_cast<u64>(got);
+        }
+    }
+    return 0;
+}
+
+bool CheckArea() {
+    if (area_checked) {
+        return area_ok;
+    }
+    area_checked = true;
+    const u64 image = BbscMod::EbootAddress();
+    if (image == 0) {
+        BbscMod::LogPlain("Hook area: the game image was not found - no hooks");
+        return false;
+    }
+    const u64 start = MapOwnArea(image);
+    if (start == 0) {
+        BbscMod::LogPlain("Hook area: no free memory within reach of the game image - no hooks");
+        return false;
+    }
+    generator = new Xbyak::CodeGenerator(OurSize, reinterpret_cast<void*>(start));
+    area_ok = true;
+    return true;
+}
+
+// The 5-byte jump (and NOPs to the end of the covered instructions): all but the first byte, then
+// the first, so a thread meeting the site decodes either the old instruction start or the jump.
+bool WriteJump(u8* site, const void* target, size_t length) {
+    const auto page = static_cast<u64>(sysconf(_SC_PAGESIZE));
+    void* first = reinterpret_cast<void*>(reinterpret_cast<u64>(site) & ~(page - 1));
+    const size_t span = reinterpret_cast<u64>(site) + length - reinterpret_cast<u64>(first);
+    if (mprotect(first, span, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+        return false;
+    }
+    std::array<u8, 32> bytes{};
+    const s64 rel = reinterpret_cast<s64>(target) - reinterpret_cast<s64>(site + 5);
+    bytes[0] = 0xE9;
+    const s32 rel32 = static_cast<s32>(rel);
+    std::memcpy(bytes.data() + 1, &rel32, 4);
+    for (size_t i = 5; i < length; ++i) {
+        bytes[i] = 0x90;
+    }
+    for (size_t i = 1; i < length; ++i) {
+        __atomic_store_n(site + i, bytes[i], __ATOMIC_SEQ_CST);
+    }
+    __atomic_store_n(site, bytes[0], __ATOMIC_SEQ_CST);
+    return true;
+}
+
+} // namespace
+
+bool InstallGuestCodeHook(void* address, std::span<const u8> expected_instructions, u64 tag,
+                          GuestCodeHook hook, const u8* skip_flag) {
+    constexpr size_t NearJumpBytes = 5;
+    constexpr size_t GuestRedZoneBytes = 128;
+    constexpr size_t SnapshotOffset = 0;
+    constexpr size_t ScratchR11Offset = sizeof(GuestRegisterSnapshot);
+    constexpr size_t ScratchRflagsOffset = ScratchR11Offset + sizeof(u64);
+    constexpr size_t FrameReserve =
+        ((ScratchRflagsOffset + sizeof(u64) + GuestRedZoneBytes) + 15) & ~size_t{15};
+
+    auto* code = static_cast<u8*>(address);
+    if (hook == nullptr || expected_instructions.size() < NearJumpBytes ||
+        expected_instructions.size() > 32) {
+        return false;
+    }
+    std::scoped_lock lock{hook_mutex};
+    if (!CheckArea()) {
+        return false;
+    }
+    if (std::memcmp(expected_instructions.data(), code, expected_instructions.size()) != 0) {
+        return false;
+    }
+
+    auto& trampoline = *generator;
+    const size_t trampoline_offset = trampoline.getSize();
+    const auto* trampoline_start = trampoline.getCurr();
+    const auto snapshot = [](size_t field_offset) {
+        return qword[rsp + SnapshotOffset + field_offset];
+    };
+
+    try {
+        trampoline.lea(rsp, ptr[rsp - FrameReserve]);
+        trampoline.mov(qword[rsp + ScratchR11Offset], r11);
+        trampoline.pushfq();
+        trampoline.pop(r11);
+        trampoline.mov(qword[rsp + ScratchRflagsOffset], r11);
+        trampoline.mov(r11, rsp);
+        trampoline.and_(rsp, -16);
+
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rax)), rax);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rbx)), rbx);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rcx)), rcx);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rdx)), rdx);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rsi)), rsi);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rdi)), rdi);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rbp)), rbp);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r8)), r8);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r9)), r9);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r10)), r10);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r12)), r12);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r13)), r13);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r14)), r14);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r15)), r15);
+        trampoline.mov(rax, qword[r11 + ScratchR11Offset]);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, r11)), rax);
+        trampoline.mov(rax, qword[r11 + ScratchRflagsOffset]);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rflags)), rax);
+        trampoline.lea(rax, ptr[r11 + FrameReserve]);
+        trampoline.mov(snapshot(offsetof(GuestRegisterSnapshot, rsp)), rax);
+        trampoline.stmxcsr(dword[rsp + SnapshotOffset + offsetof(GuestRegisterSnapshot, mxcsr)]);
+        for (size_t index = 0; index < 16; ++index) {
+            const size_t offset = SnapshotOffset + offsetof(GuestRegisterSnapshot, ymm) +
+                                  index * sizeof(std::array<u8, 32>);
+            trampoline.vmovdqu(yword[rsp + offset], Xbyak::Ymm(static_cast<int>(index)));
+        }
+
+        // The hook is Windows code: 32 bytes of shadow space and the MS x64 arguments are not
+        // what a PS4_SYSV_ABI function expects, so it is called the SysV way (rdi, rsi), exactly
+        // as the emulator does. A 32-byte gap below the snapshot keeps either convention safe.
+        trampoline.mov(r12, rsp);
+        trampoline.sub(rsp, 32);
+        trampoline.mov(rdi, tag);
+        trampoline.lea(rsi, ptr[r12 + SnapshotOffset]);
+        trampoline.mov(rax, reinterpret_cast<u64>(hook));
+        trampoline.call(rax);
+        trampoline.mov(rsp, r12);
+
+        for (size_t index = 0; index < 16; ++index) {
+            const size_t offset = SnapshotOffset + offsetof(GuestRegisterSnapshot, ymm) +
+                                  index * sizeof(std::array<u8, 32>);
+            trampoline.vmovdqu(Xbyak::Ymm(static_cast<int>(index)), yword[rsp + offset]);
+        }
+        trampoline.ldmxcsr(dword[rsp + SnapshotOffset + offsetof(GuestRegisterSnapshot, mxcsr)]);
+        trampoline.mov(rbx, snapshot(offsetof(GuestRegisterSnapshot, rbx)));
+        trampoline.mov(rcx, snapshot(offsetof(GuestRegisterSnapshot, rcx)));
+        trampoline.mov(rdx, snapshot(offsetof(GuestRegisterSnapshot, rdx)));
+        trampoline.mov(rsi, snapshot(offsetof(GuestRegisterSnapshot, rsi)));
+        trampoline.mov(rdi, snapshot(offsetof(GuestRegisterSnapshot, rdi)));
+        trampoline.mov(rbp, snapshot(offsetof(GuestRegisterSnapshot, rbp)));
+        trampoline.mov(r8, snapshot(offsetof(GuestRegisterSnapshot, r8)));
+        trampoline.mov(r9, snapshot(offsetof(GuestRegisterSnapshot, r9)));
+        trampoline.mov(r10, snapshot(offsetof(GuestRegisterSnapshot, r10)));
+        trampoline.mov(r11, snapshot(offsetof(GuestRegisterSnapshot, r11)));
+        trampoline.mov(r12, snapshot(offsetof(GuestRegisterSnapshot, r12)));
+        trampoline.mov(r13, snapshot(offsetof(GuestRegisterSnapshot, r13)));
+        trampoline.mov(r14, snapshot(offsetof(GuestRegisterSnapshot, r14)));
+        trampoline.mov(r15, snapshot(offsetof(GuestRegisterSnapshot, r15)));
+        trampoline.mov(rax, snapshot(offsetof(GuestRegisterSnapshot, rflags)));
+        trampoline.push(rax);
+        trampoline.popfq();
+        trampoline.mov(rax, snapshot(offsetof(GuestRegisterSnapshot, rax)));
+        trampoline.mov(rsp, snapshot(offsetof(GuestRegisterSnapshot, rsp)));
+        Xbyak::Label run_original;
+        if (skip_flag != nullptr) {
+            // Function entry only: a plain ret skips the whole function (see cpu_patches.h).
+            trampoline.push(rax);
+            trampoline.mov(rax, reinterpret_cast<u64>(skip_flag));
+            trampoline.cmp(byte[rax], 0);
+            trampoline.mov(byte[rax], 0);
+            trampoline.pop(rax);
+            trampoline.je(run_original, Xbyak::CodeGenerator::LabelType::T_NEAR);
+            trampoline.ret();
+        }
+        trampoline.L(run_original);
+        trampoline.db(expected_instructions.data(), expected_instructions.size());
+        trampoline.jmp(code + expected_instructions.size(), Xbyak::CodeGenerator::LabelType::T_NEAR);
+    } catch (const Xbyak::Error& error) {
+        trampoline.setSize(trampoline_offset);
+        BbscMod::LogPlain(error.what());
+        return false;
+    }
+    return WriteJump(code, trampoline_start, expected_instructions.size());
+}
+
+} // namespace Core

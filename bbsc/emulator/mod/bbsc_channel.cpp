@@ -26,7 +26,11 @@
 // Switch SHADPS4_BBSC_P2P_CHANNEL (Mods tab, on). Datagrams can be lost: every BBSC packet was
 // made for the emulator's UDP signaling first and is re-sent or repeated by its sender.
 
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "linux/bbsc_win32.h" // bbport
+#endif
 
 #include <atomic>
 #include <cstdlib>

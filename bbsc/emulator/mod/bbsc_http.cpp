@@ -30,8 +30,15 @@
 // Not done: the emulator's 3 s "fast sign" re-posts. They replaced the game's own reply; extra
 // posts from here would take the broker's claim themselves and the game would never join.
 
+#ifdef _WIN32
 #include <windows.h>
 #include <winhttp.h>
+#else
+#include "linux/bbsc_win32.h" // bbport
+#endif
+#ifndef _WIN32
+#include "core/memory.h" // bbport: SessionState
+#endif
 
 #include <array>
 #include <atomic>
@@ -112,6 +119,7 @@ s64 NowMs() {
 
 // ---- host_overrides.json ------------------------------------------------------------------------
 
+#ifdef _WIN32
 std::string ReadFile(const std::wstring& path) {
     std::ifstream in(path, std::ios::binary);
     std::stringstream text;
@@ -165,6 +173,13 @@ void LoadOverrides() {
     }
     LOG_INFO(Mod, "HTTP: no host_overrides.json - URLs unchanged");
 }
+#else
+// bbport: the online module applies the user folder's host_overrides itself, to every URL the game
+// sends; applying them here as well would rewrite them twice.
+void LoadOverrides() {
+    LOG_INFO(Mod, "HTTP: URL overrides left to bbport's online module");
+}
+#endif
 
 // 0.0.0.0 is a server's "listen on everything", never an address to connect to. A game server
 // started with it as its shadnet address (seen 2026-10-01 under Nucleus Co-op with
@@ -287,6 +302,7 @@ std::string JsonNumber(const std::string& body, const char* key) {
     return body.substr(at + needle.size(), end - at - needle.size());
 }
 
+#ifdef _WIN32
 // One plain POST with WinHTTP (the stale-record delete). Returns the status code, 0 on failure.
 DWORD Post(const std::string& url, const std::string& body) {
     std::wstring wide(url.begin(), url.end());
@@ -327,6 +343,62 @@ DWORD Post(const std::string& url, const std::string& body) {
     }
     return status;
 }
+#else
+// bbport: one plain HTTP POST over a socket (the stale-record delete goes to the summon broker,
+// shadNet's WebAPI, over http). Returns the status code, 0 on failure; https is not done here.
+DWORD Post(const std::string& url, const std::string& body) {
+    constexpr std::string_view Scheme = "http://";
+    if (url.rfind(Scheme, 0) != 0) {
+        return 0;
+    }
+    const std::string rest = url.substr(Scheme.size());
+    const size_t slash = rest.find('/');
+    const std::string authority = rest.substr(0, slash);
+    const std::string path = slash == std::string::npos ? "/" : rest.substr(slash);
+    std::string host = authority, port = "80";
+    if (const size_t colon = authority.rfind(':'); colon != std::string::npos) {
+        host = authority.substr(0, colon);
+        port = authority.substr(colon + 1);
+    }
+    addrinfo hints{};
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    addrinfo* found = nullptr;
+    if (getaddrinfo(host.c_str(), port.c_str(), &hints, &found) != 0 || found == nullptr) {
+        return 0;
+    }
+    const SOCKET s = socket(found->ai_family, found->ai_socktype, found->ai_protocol);
+    const timeval timeout{1, 500'000};
+    if (s != INVALID_SOCKET) {
+        setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+        setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    }
+    const bool connected =
+        s != INVALID_SOCKET && connect(s, found->ai_addr, found->ai_addrlen) == 0;
+    freeaddrinfo(found);
+    if (!connected) {
+        if (s != INVALID_SOCKET) {
+            closesocket(s);
+        }
+        return 0;
+    }
+    const std::string request = "POST " + path + " HTTP/1.0\r\nHost: " + authority +
+                                "\r\nContent-Type: application/json\r\n"
+                                "X-ShadPS4-Bloodborne-Seamless: 1\r\nContent-Length: " +
+                                std::to_string(body.size()) + "\r\nConnection: close\r\n\r\n" + body;
+    DWORD status = 0;
+    if (send(s, request.data(), request.size(), MSG_NOSIGNAL) == static_cast<ssize_t>(request.size())) {
+        char reply[64]{};
+        const ssize_t got = recv(s, reply, sizeof(reply) - 1, 0);
+        // "HTTP/1.x NNN ..."
+        if (got > 12 && std::strncmp(reply, "HTTP/", 5) == 0) {
+            status = static_cast<DWORD>(std::atoi(reply + 9));
+        }
+    }
+    closesocket(s);
+    return status;
+}
+#endif
 
 // The broker keeps Preparing/Claimed/Delivered records 15 minutes and Bloodborne reuses its
 // SessionId/UserId after a restart, so the first seamless sign of this run removes any old one.
@@ -362,6 +434,13 @@ void ClearStaleRecord(const std::string& url, const std::string& body) {
 //   - we were in a session (joining, guest or host) and are back to posting signs.
 s32 SessionState() {
     const u64 manager = *reinterpret_cast<const u64*>(BbscMod::EbootAddress() + 0x05540290);
+#ifndef _WIN32
+    // bbport: the game's memory map instead of VirtualQuery.
+    if (manager >= 0x10000 && Core::Memory::Instance()->IsValidMapping(manager + 0x124, 4)) {
+        return *reinterpret_cast<const s32*>(manager + 0x124);
+    }
+    return -1;
+#else
     MEMORY_BASIC_INFORMATION info{};
     constexpr DWORD Readable = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
                                PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
@@ -372,6 +451,7 @@ s32 SessionState() {
         return *reinterpret_cast<const s32*>(manager + 0x124);
     }
     return -1;
+#endif
 }
 
 void WatchSessionForStaleClaims() {
