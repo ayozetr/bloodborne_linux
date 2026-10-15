@@ -205,6 +205,14 @@ static bool ResolveEpollBinding(int id, int*& epoll_id_out, void**& user_arg_out
 static bool HeaderNameMatches(std::string_view a, std::string_view b);
 static std::string HttpStatusLabel(int sc);
 
+// bbport: a header's value as the log shows it. The account's session token (Authorization) and
+// cookies stay out of it: players attach their logs to public bug reports.
+static std::string_view LoggedHeaderValue(std::string_view name, std::string_view value) {
+    return HeaderNameMatches(name, "Authorization") || HeaderNameMatches(name, "Cookie")
+               ? std::string_view{"(hidden)"}
+               : value;
+}
+
 // JSON shape: flat object mapping endpoint -> replacement URL. Example:
 //   {
 //     "api.something.dev":                    "http://localhost:8080",
@@ -596,7 +604,7 @@ static void LogSendRequestSettings(const HttpRequest& req, int reqId, u64 body_s
             return;
         }
         for (const auto& [name, value] : h) {
-            LOG_INFO(Lib_Http, "  header[{}] {}: {}", origin, name, value);
+            LOG_INFO(Lib_Http, "  header[{}] {}: {}", origin, name, LoggedHeaderValue(name, value));
         }
     };
     if (tmpl) {
@@ -2856,7 +2864,7 @@ int PS4_SYSV_ABI sceHttpSetInflateGZIPEnabled(int id, int isEnable) {
 //***********************************
 int PS4_SYSV_ABI sceHttpAddRequestHeader(int id, const char* name, const char* value, s32 mode) {
     LOG_INFO(Lib_Http, "called id={}, name={}, value={}, mode={}", id, name ? name : "(null)",
-             value ? value : "(null)", mode);
+             value ? LoggedHeaderValue(name ? name : "", value) : "(null)", mode);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
         LOG_ERROR(Lib_Http, "Not initialized");
@@ -2884,7 +2892,7 @@ int PS4_SYSV_ABI sceHttpAddRequestHeader(int id, const char* name, const char* v
     }
     headers->emplace_back(name, value);
     LOG_INFO(Lib_Http, "added header at {} id={}: {}: {} (mode={}, total now {})", level, id, name,
-             value, mode, headers->size());
+             LoggedHeaderValue(name, value), mode, headers->size());
     return ORBIS_OK;
 }
 
