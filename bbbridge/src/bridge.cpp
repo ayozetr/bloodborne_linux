@@ -366,7 +366,11 @@ Session::Reply Session::on_context_start(const std::string& payload) {
     std::string blob;
     if (!sn::parse_proto_blob(payload, blob)) return {sn::err::Malformed, ""};
     ctx_id_ = pb::Message(blob).u(1);
-    if (!bridge_.registry_get(npid_))
+    // Without the gateway the address bbhost gets comes from the STUN ping. With it the gateway's
+    // own endpoints go there, and the port's socket falls back to the pinned port until its first
+    // ping comes (port_p2p_endpoint): bbport starts the context before that ping, so this warned on
+    // every session.
+    if (!bridge_.gateway && !bridge_.registry_get(npid_))
         log(fmt("warning: no STUN ping seen for %s yet; P2P endpoint unknown", repr(npid_).c_str()));
     const auto [local, mapped] = p2p_addresses();
     try {
