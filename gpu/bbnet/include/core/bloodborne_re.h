@@ -11,4 +11,9 @@ std::optional<std::string> GetSeamlessHostPlacementHeader();
 bool SetSeamlessHostPlacementHeader(std::string_view value);
 void ClearSeamlessHostPlacementHeader();
 void TraceMatching2LeaveRoom(std::uintptr_t return_address, std::uint64_t room_id);
+// bbsc: BBSC frames in signaling packets (host follow / world flags) are handled by BBSC itself
+// (bbsc/, libbbsc.so) through its relay and its own P2P channel; the online module only ignores them.
+inline void OnBbscHostFollowPacket(std::uint32_t, float, float, float, float, std::uint32_t,
+                                   std::int32_t) {}
+inline void OnBbscWorldFlagsPacket(const void*, std::uint32_t) {}
 } // namespace Core::Bloodborne
