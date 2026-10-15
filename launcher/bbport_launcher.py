@@ -1972,6 +1972,12 @@ class LauncherWindow(Adw.ApplicationWindow):
                            "bbhost) становится вашим Online ID. Пароль не хранится"))
         # Or, as in bbhost, an account held by this PC: a name, and a recovery code to get it
         # back on another PC.
+        # Their team has not approved bbbridge (Supermedo hid the pool for it, 9eeabba): problems go
+        # to us, not to their support.
+        notice = Adw.ActionRow(title=tr("Неофициальное подключение"),
+                               subtitle=tr("bbport подключается к The Hunter's Dream через свой мост (bbbridge), его команда это не одобряла. О проблемах сообщайте в bbport на GitHub, а не в поддержку The Hunter's Dream"))
+        notice.add_prefix(Gtk.Image.new_from_icon_name("dialog-warning-symbolic"))
+        self.thd_group.add(notice)
         self.thd_account_row = Adw.ActionRow(title=tr("Учётная запись"))
         self.thd_button = Gtk.Button(label=tr("Войти через Discord"), valign=Gtk.Align.CENTER)
         self.thd_button.connect("clicked", self.on_discord_sign_in)

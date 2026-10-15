@@ -24,6 +24,10 @@ router port is needed. The account is The Hunter's Dream's, kept in `user/bbbrid
 The game's play log (its own telemetry) stays blocked, so The Hunter's Dream's live map does not
 show you.
 
+**This connection is unofficial.** The Hunter's Dream's team has not approved bbbridge, and they
+do not support bbport: report problems here ([issues](https://github.com/ayozetr/bloodborne_linux/issues)),
+not to The Hunter's Dream's support.
+
 ## Your own server
 
 Its owner creates the account ([SERVER.md](SERVER.md)).
