@@ -3,6 +3,11 @@
 
 #include "core/bloodborne_re.h"
 
+#ifndef _WIN32
+#include <dlfcn.h> // bbport: F8 through SDL
+#include <unistd.h>
+#endif
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -10721,10 +10726,37 @@ extern "C" __declspec(dllimport) void* __stdcall GetForegroundWindow();
 extern "C" __declspec(dllimport) unsigned long __stdcall GetWindowThreadProcessId(void* window,
                                                                                   unsigned long* pid);
 extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
+#elif defined(BBSC_MOD)
+// bbport: on Linux, F8 through SDL, which the game's window uses (already in the process; the
+// runtime reads its keyboard state from the game's threads too). The foreground window is the
+// game's while SDL has a window with keyboard focus.
+void* BbscSdl(const char* name) {
+    return dlsym(RTLD_DEFAULT, name);
+}
+short GetAsyncKeyState(int key) {
+    using State = const bool* (*)(int* count);
+    static const auto state = reinterpret_cast<State>(BbscSdl("SDL_GetKeyboardState"));
+    constexpr int SdlScancodeF8 = 65;
+    int count = 0;
+    const bool* keys = state != nullptr && key == 0x77 ? state(&count) : nullptr;
+    return keys != nullptr && count > SdlScancodeF8 && keys[SdlScancodeF8] ? short(0x8000) : 0;
+}
+void* GetForegroundWindow() {
+    using Focus = void* (*)();
+    static const auto focus = reinterpret_cast<Focus>(BbscSdl("SDL_GetKeyboardFocus"));
+    return focus != nullptr ? focus() : nullptr;
+}
+unsigned long GetWindowThreadProcessId(void* window, unsigned long* pid) {
+    *pid = window != nullptr ? static_cast<unsigned long>(getpid()) : 0;
+    return 0;
+}
+unsigned long GetCurrentProcessId() {
+    return static_cast<unsigned long>(getpid());
+}
 #endif
 
 void TickBbscUnstuckKey() {
-#if defined(_WIN32) && defined(BBSC_MOD) // the DLL; the built-in build has no F8
+#if defined(BBSC_MOD) // the DLL, and bbport's libbbsc.so; the built-in build has no F8
     static bool was_down = false;
     const bool down = (GetAsyncKeyState(0x77 /* VK_F8 */) & 0x8000) != 0;
     const bool pressed = down && !was_down;

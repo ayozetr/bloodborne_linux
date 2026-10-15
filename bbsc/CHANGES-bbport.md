@@ -17,6 +17,7 @@ lines in BBSC's own files are marked `bbport:` in comments.
 - **Data folder.** BBSC's files go in the game's user folder, not the working directory.
 - **Memory search on Linux.** `emulator/src/core/bbsc_memscan.cpp` reads the readable mappings
   through `process_vm_readv`.
+- **F8 key.** The F8 unstuck key works on Linux through SDL (`emulator/src/core/bloodborne_re.cpp`).
 - **Saves.** `BBSC_SAVE_DIR` is set to bbport's save folder (`savedata/<user>/<title id>/SPRJ0005`).
 - **Translations.** BBSC's texts follow the game's language:
   - `emulator/src/core/bbsc_i18n.{h,cpp}` and `bbsc_translations.inc`, generated from
