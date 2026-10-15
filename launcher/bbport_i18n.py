@@ -1519,10 +1519,10 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
-    "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): cooperativo continuo",
+    "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): Seamless Co-op",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: la base del servidor de juego de BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
-    "Бесшовный призыв": "Invocación continua",
+    "Бесшовный призыв": "Invocación seamless",
     "Призыв без обычных знаков и ожидания (Wozzardman)": "Invocar sin las señales ni esperas normales (Wozzardman)",
     "Перехваты кооператива": "Ganchos del cooperativo",
     "Переходы, синхронизация мира, Сон Охотника, сообщения… (нужно почти всему ниже)": "Viajes, sincronía del mundo, Sueño del Cazador, mensajes… (casi todo lo de abajo lo necesita)",
@@ -1557,7 +1557,7 @@ ES = {
     "Пять охотников": "Cinco cazadores",
     "Хозяин может призвать до 4 гостей": "El anfitrión puede invocar hasta 4 invitados",
     "Тексты кооператива": "Textos del cooperativo",
-    "Тексты под бесшовную игру (без «Возвращение в свой мир»)": "Textos que encajan con el juego continuo (sin \"Volviendo a tu mundo\")",
+    "Тексты под бесшовную игру (без «Возвращение в свой мир»)": "Textos que encajan con el Seamless Co-op (sin \"Volviendo a tu mundo\")",
     "Затемнение при подключении": "Fundido a negro al unirse",
     "Загрузки гостя проходят за чёрным экраном": "Las cargas del invitado ocurren tras un fundido a negro",
     "Защита пола": "Protección del suelo",
@@ -1582,7 +1582,7 @@ ES = {
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "Los mensajes de BBSC van directos entre los jugadores cuando no hay relé de BBSC (hace falta en servidores públicos: The Hunter's Dream)",
     "Адрес ретранслятора": "Dirección del relé",
     "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; vacío: la dirección del servidor de juego de los ajustes online",
-    "Бесшовный кооператив (BBSC)": "Cooperativo continuo (BBSC)",
+    "Бесшовный кооператив (BBSC)": "Seamless Co-op (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "La sesión sobrevive a muertes, lámparas, zonas, jefes y el Sueño del Cazador; hasta 5 cazadores. BBSC, de CLS_AMG. Lo necesitan todos los jugadores de la sesión",
     "Включить BBSC": "Activar BBSC",
     "Настройки BBSC": "Ajustes de BBSC",
