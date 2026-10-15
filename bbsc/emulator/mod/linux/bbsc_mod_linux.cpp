@@ -106,9 +106,22 @@ void OpenLog() {
     if (dladdr(reinterpret_cast<void*>(&OpenLog), &info) != 0 && info.dli_fname != nullptr) {
         mod_dir = std::filesystem::path{info.dli_fname}.parent_path();
     }
+    // The game's user folder (run.sh exports it as BB_GPU_USER_DIR). Not the working directory's
+    // "user": in the AppImage that is inside its read-only mount, and BBSC installs none of its
+    // hooks without a capture folder (InstallReverseEngineeringTrace) - with its death patch
+    // still in, a death then never reloads. The temporary folder when the user folder is not
+    // writable either.
     const char* user = std::getenv("BB_USER_DIR");
+    if (user == nullptr || *user == '\0') {
+        user = std::getenv("BB_GPU_USER_DIR");
+    }
     data_dir = std::filesystem::path{user != nullptr && *user != '\0' ? user : "user"} / "bbsc";
     std::error_code ignored;
+    std::filesystem::create_directories(data_dir / "captures" / "bloodborne-re", ignored);
+    if (ignored) {
+        data_dir = std::filesystem::temp_directory_path(ignored) / "bbport-bbsc";
+        std::filesystem::create_directories(data_dir / "captures" / "bloodborne-re", ignored);
+    }
     std::filesystem::create_directories(data_dir / "logs", ignored);
     KeepNewest(data_dir / "logs", ".log", 4); // with this one, 5
     KeepNewest(data_dir / "captures" / "bloodborne-re", ".jsonl", 4);
