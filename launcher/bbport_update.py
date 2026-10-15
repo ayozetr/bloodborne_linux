@@ -22,6 +22,9 @@ LICENSE_URL = f"{REPOSITORY_URL}/blob/main/LICENSE"
 KOFI_URL = "https://ko-fi.com/ayozetr"
 RELEASES_URL = f"{REPOSITORY_URL}/releases"
 LATEST_API = f"https://api.github.com/repos/{REPOSITORY}/releases/latest"
+RELEASES_API = f"https://api.github.com/repos/{REPOSITORY}/releases?per_page=100"
+# The first release whose launcher updates itself: an older one (0.4-linux.1) could not come back.
+OLDEST_CHOICE = "0.5-linux.1"
 
 
 def version_key(tag):
@@ -38,16 +41,36 @@ def is_newer(tag, current=VERSION):
     return new is not None and old is not None and new > old
 
 
-def latest_release(url=LATEST_API, timeout=10):
-    """{"tag", "url", "appimage", "size"} of the latest release ("appimage" None without one)."""
+def fetch_json(url, timeout=10):
     request = urllib.request.Request(url, headers={
         "Accept": "application/vnd.github+json", "User-Agent": f"bbport-launcher/{VERSION}"})
     with urllib.request.urlopen(request, timeout=timeout) as reply:
-        data = json.load(reply)
+        return json.load(reply)
+
+
+def release_info(data):
+    """{"tag", "url", "appimage", "size", "date"} of one release ("appimage" None without one)."""
     asset = next((a for a in data.get("assets", []) if a.get("name", "").endswith(".AppImage")), None)
     return {"tag": data.get("tag_name", ""), "url": data.get("html_url", RELEASES_URL),
             "appimage": asset and asset.get("browser_download_url"),
-            "size": asset and asset.get("size")}
+            "size": asset and asset.get("size"), "date": (data.get("published_at") or "")[:10]}
+
+
+def latest_release(url=LATEST_API, timeout=10):
+    """The latest release (release_info)."""
+    return release_info(fetch_json(url, timeout))
+
+
+def releases(url=RELEASES_API, timeout=10):
+    """The versions the launcher can install, newest first: published releases tagged
+    <upstream>-linux.<n> with an AppImage, from OLDEST_CHOICE on (test builds, pre-releases and
+    drafts are left out)."""
+    oldest = version_key(OLDEST_CHOICE)
+    found = [release_info(data) for data in fetch_json(url, timeout)
+             if not data.get("prerelease") and not data.get("draft")]
+    found = [r for r in found
+             if r["appimage"] and version_key(r["tag"]) and version_key(r["tag"]) >= oldest]
+    return sorted(found, key=lambda r: version_key(r["tag"]), reverse=True)
 
 
 def running_appimage():

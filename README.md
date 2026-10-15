@@ -45,7 +45,8 @@ by deadinside28. It adds the features of [Supermedo's Windows port](https://gith
   area you are in and your co-op partners.
 - **AppImage:** one file with everything inside, for any distribution and the Steam Deck. It
   updates itself: the launcher's **About** page checks this repository's releases and installs
-  a new AppImage over the old one.
+  a new AppImage over the old one, or any earlier release from 0.5-linux.1 on, to go back to one
+  that worked better.
 
 ## Requirements
 

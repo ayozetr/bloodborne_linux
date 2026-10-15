@@ -663,7 +663,8 @@ THANKS = (
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
         _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
         _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
-                              "страниц; смена стиков и инверсия камеры, импорт сохранений"),
+                              "страниц; смена стиков и инверсия камеры, импорт сохранений, "
+                              "выбор версии"),
         _github("AwesomeObserver", "Большие группы команд записи и swapchain после изменений экрана"),
     )),
     ("Помощь и тесты", (
@@ -702,6 +703,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.stream = None
         self.fsr411_build = None  # tools/fsr4cap/build_assets.sh while it runs
         self.latest = None  # bbport_update.latest_release() once checked
+        self.releases = []  # bbport_update.releases(), the version selector's choices
+        self.installing = None  # the release being (or just) installed
         self.update_state = "idle"  # idle, checking, downloading, installed
         self.build()
         self.connect("close-request", self.on_close)
@@ -2151,6 +2154,17 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_button.connect("clicked", self.on_update_button)
         self.update_row.add_suffix(self.update_button)
         updates.add(self.update_row)
+        # Another released version, an older one too (back to one that worked better).
+        self.version_row = Adw.ComboRow(
+            title=tr("Другая версия"),
+            subtitle=tr("Например, предыдущая, если новая работает хуже. Настройки и сохранения не "
+                        "затрагиваются"),
+            model=Gtk.StringList.new([tr("Список появится после проверки обновлений")]))
+        self.version_button = Gtk.Button(label=tr("Установить"), valign=Gtk.Align.CENTER)
+        self.version_button.connect("clicked", self.on_install_version)
+        self.version_row.add_suffix(self.version_button)
+        self.version_row.connect("notify::selected", lambda *_: self.show_update_state())
+        updates.add(self.version_row)
         # What changed in the version installed: its release notes on GitHub.
         notes_url = f"{bbport_update.REPOSITORY_URL}/releases/tag/{bbport_update.VERSION}"
         notes = Adw.ActionRow(title=tr("Что нового в этой версии"),
@@ -2202,7 +2216,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             subtitle, button, sensitive = progress or tr("Загрузка…"), tr("Обновить"), False
         elif state == "installed":
             subtitle, button = tr("Версия {} установлена: перезапустите лаунчер").format(
-                latest["tag"]), tr("Перезапустить")
+                self.installing["tag"]), tr("Перезапустить")
         elif isinstance(latest, str):
             subtitle = tr("Не удалось проверить: {}").format(latest)
         elif latest is None:
@@ -2221,6 +2235,46 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_button.remove_css_class("suggested-action")
         if button in (tr("Обновить"), tr("Перезапустить")):
             self.update_button.add_css_class("suggested-action")
+        chosen = self.chosen_version()
+        self.version_row.set_sensitive(bool(self.releases))
+        self.version_button.set_sensitive(
+            chosen is not None and chosen["tag"] != bbport_update.VERSION and state == "idle")
+
+    def show_versions(self):
+        """The version selector's choices: every installable release, the running one marked."""
+        labels = [tr("{} (установлена)").format(r["tag"]) if r["tag"] == bbport_update.VERSION
+                  else f"{r['tag']} · {r['date']}" for r in self.releases]
+        self.version_row.set_model(Gtk.StringList.new(
+            labels or [tr("Список появится после проверки обновлений")]))
+        current = next((i for i, r in enumerate(self.releases)
+                        if r["tag"] == bbport_update.VERSION), 0)
+        self.version_row.set_selected(current)
+        self.show_update_state()
+
+    def chosen_version(self):
+        index = self.version_row.get_selected()
+        return self.releases[index] if self.releases and 0 <= index < len(self.releases) else None
+
+    def on_install_version(self, _button):
+        release = self.chosen_version()
+        if release is None or release["tag"] == bbport_update.VERSION:
+            return
+        if not bbport_update.running_appimage():
+            self.open_uri(release["url"])  # a git checkout: the release page
+            return
+        older = not bbport_update.is_newer(release["tag"])
+        dialog = Adw.AlertDialog(
+            heading=tr("Установить версию {}?").format(release["tag"]),
+            body=(tr("Это более старая версия, чем установленная ({}). Вернуться можно тем же "
+                     "списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются")
+                  if older else tr("Установлена версия {}. Настройки и сохранения не затрагиваются"))
+            .format(bbport_update.VERSION))
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("install", tr("Установить"))
+        dialog.set_response_appearance("install", Adw.ResponseAppearance.SUGGESTED)
+        dialog.connect("response", lambda _d, response:
+                       response == "install" and self.install_update(release))
+        dialog.present(self)
 
     def on_update_button(self, _button):
         latest = self.latest
@@ -2228,7 +2282,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.restart_launcher()
         elif isinstance(latest, dict) and bbport_update.is_newer(latest["tag"]):
             if bbport_update.running_appimage() and latest["appimage"]:
-                self.install_update()
+                self.install_update(latest)
             else:
                 self.open_uri(latest["url"])
         else:
@@ -2238,9 +2292,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_state = "checking"
         self.show_update_state()
 
-        def done(result):
+        def done(result, releases):
             self.latest, self.update_state = result, "idle"
-            self.show_update_state()
+            if releases is not None:
+                self.releases = releases
+            self.show_versions()
             if quiet and isinstance(result, dict) and bbport_update.is_newer(result["tag"]):
                 toast = Adw.Toast(title=tr("Доступна версия {}").format(result["tag"]),
                                   button_label=tr("Подробнее"), timeout=8)
@@ -2253,11 +2309,17 @@ class LauncherWindow(Adw.ApplicationWindow):
                 result = bbport_update.latest_release()
             except (OSError, ValueError) as error:
                 result = str(getattr(error, "reason", None) or error)
-            GLib.idle_add(done, result)
+            try:
+                releases = bbport_update.releases()
+            except (OSError, ValueError):
+                releases = None  # the selector keeps what it had
+            GLib.idle_add(done, result, releases)
         threading.Thread(target=work, daemon=True).start()
 
-    def install_update(self):
+    def install_update(self, release):
+        """Downloads release's AppImage over the running one (bbport_update.install)."""
         target = bbport_update.running_appimage()
+        self.installing = release
         self.update_state = "downloading"
         self.show_update_state()
 
@@ -2275,7 +2337,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def work():
             try:
-                bbport_update.install(self.latest["appimage"], target, progress)
+                bbport_update.install(release["appimage"], target, progress)
                 error = None
             except OSError as failure:
                 error = str(getattr(failure, "reason", None) or failure)

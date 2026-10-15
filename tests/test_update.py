@@ -40,7 +40,17 @@ class ReleaseTests(unittest.TestCase):
                             'browser_download_url': 'https://example.invalid/a', 'size': 9}]}))
             latest = bbport_update.latest_release(reply.as_uri())
         self.assertEqual(latest, {'tag': '0.5-linux.2', 'url': 'https://example.invalid/r',
-                                  'appimage': 'https://example.invalid/a', 'size': 9})
+                                  'appimage': 'https://example.invalid/a', 'size': 9, 'date': ''})
+
+    def test_releases_to_choose_from(self):
+        # This fork's /releases reply of 2026-10-15, trimmed to the fields the launcher reads.
+        found = bbport_update.releases((ROOT / 'tests/data/github_releases.json').as_uri())
+        self.assertEqual([r['tag'] for r in found],
+                         ['0.51-linux.6', '0.51-linux.5', '0.51-linux.4', '0.51-linux.3',
+                          '0.51-linux.2', '0.51-linux.1', '0.5-linux.1'])
+        self.assertEqual(found[0]['date'], '2026-10-14')
+        self.assertTrue(found[0]['appimage'].endswith('/0.51-linux.6/Bloodborne-bbport-x86_64.AppImage'))
+        self.assertEqual(found[0]['size'], 241642707)
 
     def test_install_replaces_the_file_executable(self):
         with tempfile.TemporaryDirectory() as tmp:

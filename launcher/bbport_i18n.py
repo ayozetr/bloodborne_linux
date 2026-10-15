@@ -455,6 +455,14 @@ EN = {
         "Downloading…",
     "Обновить":
         "Update",
+    "Другая версия": "Another version",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "An earlier one, for instance, if the new one runs worse. Settings and saves are not touched",
+    "Список появится после проверки обновлений": "The list appears once updates are checked",
+    "Установить": "Install",
+    "{} (установлена)": "{} (installed)",
+    "Установить версию {}?": "Install version {}?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "This is an older version than the installed one ({}). The same list or the Update button brings you back. Settings and saves are not touched",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "Version {} is installed. Settings and saves are not touched",
     "Версия {} установлена: перезапустите лаунчер":
         "Version {} installed: restart the launcher",
     "Перезапустить":
@@ -648,7 +656,7 @@ EN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Keyboard movement: a round diagonal and the last key pressed',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Crash debugging: the process waits for a debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: co-op on The Hunter's Dream's pool with bbhost players",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion, save import',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion, save import, the version selector',
     'Большие группы команд записи и swapchain после изменений экрана': 'Large recorded command groups and the swapchain after display changes',
 }
 
@@ -1112,6 +1120,14 @@ PT_BR = {
         "Baixando…",
     "Обновить":
         "Atualizar",
+    "Другая версия": "Outra versão",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "Por exemplo, a anterior, se a nova funcionar pior. Configurações e saves não são alterados",
+    "Список появится после проверки обновлений": "A lista aparece depois de verificar atualizações",
+    "Установить": "Instalar",
+    "{} (установлена)": "{} (instalada)",
+    "Установить версию {}?": "Instalar a versão {}?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "Esta versão é mais antiga que a instalada ({}). Para voltar, use esta mesma lista ou o botão Atualizar. Configurações e saves não são alterados",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "A versão {} está instalada. Configurações e saves não são alterados",
     "Версия {} установлена: перезапустите лаунчер":
         "Versão {} instalada: reinicie o launcher",
     "Перезапустить":
@@ -1352,7 +1368,7 @@ PT_BR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuração de travamentos: o processo espera um depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo no pool do The Hunter's Dream com jogadores do bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera, importação de saves',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera, importação de saves, seletor de versão',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandes grupos de comandos gravados e a swapchain após mudanças de tela',
 }
 
@@ -1727,6 +1743,14 @@ ES = {
         "Descargando…",
     "Обновить":
         "Actualizar",
+    "Другая версия": "Otra versión",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "Por ejemplo, la anterior si la nueva va peor. Los ajustes y las partidas no se tocan",
+    "Список появится после проверки обновлений": "La lista aparece tras buscar actualizaciones",
+    "Установить": "Instalar",
+    "{} (установлена)": "{} (instalada)",
+    "Установить версию {}?": "¿Instalar la versión {}?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "Es una versión más antigua que la instalada ({}). Para volver, usa esta misma lista o el botón Actualizar. Los ajustes y las partidas no se tocan",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "Está instalada la versión {}. Los ajustes y las partidas no se tocan",
     "Версия {} установлена: перезапустите лаунчер":
         "Versión {} instalada: reinicia el launcher",
     "Перезапустить":
@@ -1967,7 +1991,7 @@ ES = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuración de cierres: el proceso espera a un depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo en el pool de The Hunter's Dream con jugadores de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara, importación de partidas',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara, importación de partidas, selector de versión',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grupos grandes de comandos grabados y el swapchain tras cambios de pantalla',
 }
 
@@ -2342,6 +2366,14 @@ IT = {
         "Download…",
     "Обновить":
         "Aggiorna",
+    "Другая версия": "Un’altra versione",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "Per esempio la precedente, se la nuova funziona peggio. Impostazioni e salvataggi non vengono toccati",
+    "Список появится после проверки обновлений": "L’elenco compare dopo il controllo degli aggiornamenti",
+    "Установить": "Installa",
+    "{} (установлена)": "{} (installata)",
+    "Установить версию {}?": "Installare la versione {}?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "È una versione più vecchia di quella installata ({}). Per tornare indietro usa questo stesso elenco o il pulsante Aggiorna. Impostazioni e salvataggi non vengono toccati",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "È installata la versione {}. Impostazioni e salvataggi non vengono toccati",
     "Версия {} установлена: перезапустите лаунчер":
         "Versione {} installata: riavvia il launcher",
     "Перезапустить":
@@ -2582,7 +2614,7 @@ IT = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Debug dei crash: il processo attende un debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativa nel pool di The Hunter's Dream con i giocatori di bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera, importazione dei salvataggi',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera, importazione dei salvataggi, selettore di versione',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandi gruppi di comandi registrati e la swapchain dopo i cambi di schermo',
 }
 
@@ -2957,6 +2989,14 @@ FR = {
         "Téléchargement…",
     "Обновить":
         "Mettre à jour",
+    "Другая версия": "Une autre version",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "Par exemple la précédente, si la nouvelle fonctionne moins bien. Les réglages et les sauvegardes ne sont pas modifiés",
+    "Список появится после проверки обновлений": "La liste apparaît après la recherche de mises à jour",
+    "Установить": "Installer",
+    "{} (установлена)": "{} (installée)",
+    "Установить версию {}?": "Installer la version {} ?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "C’est une version plus ancienne que celle installée ({}). Pour revenir, utilisez cette même liste ou le bouton Mettre à jour. Les réglages et les sauvegardes ne sont pas modifiés",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "La version {} est installée. Les réglages et les sauvegardes ne sont pas modifiés",
     "Версия {} установлена: перезапустите лаунчер":
         "Version {} installée : redémarrez le launcher",
     "Перезапустить":
@@ -3197,7 +3237,7 @@ FR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Déplacement au clavier : diagonale ronde et dernière touche pressée',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Débogage des plantages : le processus attend un débogueur (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge : coopération sur le pool de The Hunter's Dream avec les joueurs de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée, import des sauvegardes',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée, import des sauvegardes, choix de version',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grands groupes de commandes enregistrées et la swapchain après un changement d’affichage',
 }
 
@@ -3572,6 +3612,14 @@ DE = {
         "Wird heruntergeladen…",
     "Обновить":
         "Aktualisieren",
+    "Другая версия": "Andere Version",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "Zum Beispiel die vorherige, wenn die neue schlechter läuft. Einstellungen und Spielstände bleiben unverändert",
+    "Список появится после проверки обновлений": "Die Liste erscheint nach der Suche nach Updates",
+    "Установить": "Installieren",
+    "{} (установлена)": "{} (installiert)",
+    "Установить версию {}?": "Version {} installieren?",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "Diese Version ist älter als die installierte ({}). Zurück geht es über dieselbe Liste oder die Schaltfläche Aktualisieren. Einstellungen und Spielstände bleiben unverändert",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "Version {} ist installiert. Einstellungen und Spielstände bleiben unverändert",
     "Версия {} установлена: перезапустите лаунчер":
         "Version {} installiert: Launcher neu starten",
     "Перезапустить":
@@ -3812,7 +3860,7 @@ DE = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Absturz-Debugging: Der Prozess wartet auf einen Debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: Koop im Pool von The Hunter's Dream mit bbhost-Spielern",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren, Spielstände importieren',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren, Spielstände importieren, Versionsauswahl',
     'Большие группы команд записи и swapchain после изменений экрана': 'Große aufgezeichnete Befehlsgruppen und die Swapchain nach Anzeigeänderungen',
 }
 
@@ -4134,6 +4182,14 @@ ZH_CN = {
         "正在下载…",
     "Обновить":
         "更新",
+    "Другая версия": "其他版本",
+    "Например, предыдущая, если новая работает хуже. Настройки и сохранения не затрагиваются": "例如新版本运行更差时可装回上一个版本。设置和存档不受影响",
+    "Список появится после проверки обновлений": "检查更新后会显示列表",
+    "Установить": "安装",
+    "{} (установлена)": "{}（已安装）",
+    "Установить версию {}?": "安装版本 {}？",
+    "Это более старая версия, чем установленная ({}). Вернуться можно тем же списком или кнопкой «Обновить». Настройки и сохранения не затрагиваются": "这是比已安装版本（{}）更旧的版本。可通过同一列表或“更新”按钮回到新版本。设置和存档不受影响",
+    "Установлена версия {}. Настройки и сохранения не затрагиваются": "已安装版本 {}。设置和存档不受影响",
     "Версия {} установлена: перезапустите лаунчер":
         "版本 {} 已安装：请重启启动器",
     "Перезапустить":
@@ -4370,7 +4426,7 @@ ZH_CN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': '键盘移动：圆形斜向与最后按下的键',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': '崩溃调试：进程等待调试器（BB_FAULT_WAIT）',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge：在 The Hunter's Dream 池中与 bbhost 玩家合作",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转、导入存档',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转、导入存档、版本选择',
     'Большие группы команд записи и swapchain после изменений экрана': '大型录制命令组以及显示变化后的交换链',
 }
 
