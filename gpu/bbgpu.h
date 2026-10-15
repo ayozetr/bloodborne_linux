@@ -40,6 +40,9 @@ void bbgpu_trophy_notice(int id, char grade, const char *name_utf8, const char *
 void bbgpu_mouse_take(double *dx, double *dy, int *wheel_up, int *wheel_down);
 int bbgpu_mouse_captured(void);
 void bbgpu_mouse_look_enable(int enabled);
+/* mouse_camera=direct in bbport.ini: the mouse turns the camera itself (gpu/shim/bloodborne_cam.h)
+ * at this sensitivity (1: 900 counts per radian) instead of moving the right stick. */
+void bbgpu_mouse_camera_configure(int direct, float sensitivity);
 /* Patches the loaded image before the game runs (image still writable): libGnm entry hooks. */
 void bbgpu_patch_image(unsigned char *image, uint64_t size);
 /* Number of symbols registered by the vendored libraries (diagnostics). */

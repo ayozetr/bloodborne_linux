@@ -253,6 +253,8 @@ EN = {
     "Щелчок в окне игры захватывает мышь, F1 — отпускает": "A click in the game window takes the mouse, F1 releases it",
     "Чувствительность мыши": "Mouse sensitivity",
     "Инвертировать мышь по вертикали": "Invert mouse Y axis",
+    "Прямая камера мышью (1:1)": "Direct mouse camera (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "The mouse turns the camera itself, without the stick's dead zone and acceleration, as in a PC game. While locked on, the mouse works as the stick again",
     "DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1":
         "DLSS not found: choose NVIDIA's library below (a build with the DLSS bridge is needed too). The game will use FSR 3.1",
     "Нет или повреждён файл {}": "Missing or damaged file {}",
@@ -653,7 +655,8 @@ EN = {
     'Язык внутриигрового меню при запуске без окна лаунчера': "The in-game menu's language when starting without the launcher window",
     'DLSS в AppImage на NVIDIA': 'DLSS in the AppImage on NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide monitors without a stretched picture',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Keyboard movement: a round diagonal and the last key pressed',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Keyboard movement: a round diagonal and the last key pressed; the direct mouse camera',
+    'Камера мышью bbmouse, основа прямой камеры': 'The bbmouse mouse camera, the basis of the direct camera',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Crash debugging: the process waits for a debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: co-op on The Hunter's Dream's pool with bbhost players",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion, save import, the version selector',
@@ -1185,6 +1188,8 @@ PT_BR = {
         'Desta build: {}',
     'Инвертировать мышь по вертикали':
         'Inverter o eixo Y do mouse',
+    "Прямая камера мышью (1:1)": "Câmera direta com o mouse (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "O mouse gira a câmera diretamente, sem a zona morta e a aceleração do analógico, como num jogo de PC. Com um alvo travado, o mouse volta a funcionar como o analógico",
     'Камера мышью':
         'Câmera com o mouse',
     'Клавиатура и мышь':
@@ -1365,7 +1370,8 @@ PT_BR = {
     'Язык внутриигрового меню при запуске без окна лаунчера': 'O idioma do menu do jogo ao iniciar sem a janela do launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS no AppImage em NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrawide sem imagem esticada',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada; câmera direta com o mouse',
+    'Камера мышью bbmouse, основа прямой камеры': 'A câmera com mouse bbmouse, base da câmera direta',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuração de travamentos: o processo espera um depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo no pool do The Hunter's Dream com jogadores do bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera, importação de saves, seletor de versão',
@@ -1808,6 +1814,8 @@ ES = {
         'De esta compilación: {}',
     'Инвертировать мышь по вертикали':
         'Invertir el eje Y del ratón',
+    "Прямая камера мышью (1:1)": "Cámara directa con el ratón (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "El ratón gira la cámara directamente, sin la zona muerta ni la aceleración del stick, como en un juego de PC. Con un objetivo fijado, el ratón vuelve a funcionar como el stick",
     'Камера мышью':
         'Cámara con el ratón',
     'Клавиатура и мышь':
@@ -1988,7 +1996,8 @@ ES = {
     'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS en la AppImage con NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Monitores ultrapanorámicos sin la imagen estirada',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada; cámara directa con el ratón',
+    'Камера мышью bbmouse, основа прямой камеры': 'La cámara con ratón bbmouse, base de la cámara directa',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuración de cierres: el proceso espera a un depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo en el pool de The Hunter's Dream con jugadores de bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara, importación de partidas, selector de versión',
@@ -2431,6 +2440,8 @@ IT = {
         'Da questa build: {}',
     'Инвертировать мышь по вертикали':
         "Inverti l'asse Y del mouse",
+    "Прямая камера мышью (1:1)": "Telecamera diretta col mouse (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "Il mouse ruota direttamente la telecamera, senza la zona morta e l’accelerazione dello stick, come in un gioco per PC. Con un bersaglio agganciato, il mouse torna a funzionare come lo stick",
     'Камера мышью':
         'Visuale con il mouse',
     'Клавиатура и мышь':
@@ -2611,7 +2622,8 @@ IT = {
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La lingua del menu di gioco avviando senza la finestra del launcher',
     'DLSS в AppImage на NVIDIA': "DLSS nell'AppImage su NVIDIA",
     'Сверхширокие мониторы без растянутой картинки': 'Monitor ultrawide senza immagine stirata',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto; telecamera diretta col mouse',
+    'Камера мышью bbmouse, основа прямой камеры': 'La telecamera col mouse bbmouse, base della telecamera diretta',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Debug dei crash: il processo attende un debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativa nel pool di The Hunter's Dream con i giocatori di bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera, importazione dei salvataggi, selettore di versione',
@@ -3054,6 +3066,8 @@ FR = {
         'De cette version : {}',
     'Инвертировать мышь по вертикали':
         "Inverser l'axe Y de la souris",
+    "Прямая камера мышью (1:1)": "Caméra directe à la souris (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "La souris tourne directement la caméra, sans la zone morte ni l’accélération du stick, comme dans un jeu PC. Avec une cible verrouillée, la souris fonctionne de nouveau comme le stick",
     'Камера мышью':
         'Caméra à la souris',
     'Клавиатура и мышь':
@@ -3234,7 +3248,8 @@ FR = {
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La langue du menu en jeu au lancement sans la fenêtre du launcher',
     'DLSS в AppImage на NVIDIA': 'DLSS dans l’AppImage sur NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Les écrans ultra-larges sans image étirée',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Déplacement au clavier : diagonale ronde et dernière touche pressée',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Déplacement au clavier : diagonale ronde et dernière touche pressée ; caméra directe à la souris',
+    'Камера мышью bbmouse, основа прямой камеры': 'La caméra à la souris bbmouse, base de la caméra directe',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Débogage des plantages : le processus attend un débogueur (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge : coopération sur le pool de The Hunter's Dream avec les joueurs de bbhost",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée, import des sauvegardes, choix de version',
@@ -3677,6 +3692,8 @@ DE = {
         'Aus diesem Build: {}',
     'Инвертировать мышь по вертикали':
         'Maus-Y-Achse umkehren',
+    "Прямая камера мышью (1:1)": "Direkte Mauskamera (1:1)",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "Die Maus dreht die Kamera direkt, ohne Totzone und Beschleunigung des Sticks, wie in einem PC-Spiel. Bei anvisiertem Ziel arbeitet die Maus wieder wie der Stick",
     'Камера мышью':
         'Kamera mit der Maus',
     'Клавиатура и мышь':
@@ -3857,7 +3874,8 @@ DE = {
     'Язык внутриигрового меню при запуске без окна лаунчера': 'Die Sprache des Spielmenüs beim Start ohne Launcher-Fenster',
     'DLSS в AppImage на NVIDIA': 'DLSS im AppImage auf NVIDIA',
     'Сверхширокие мониторы без растянутой картинки': 'Ultrawide-Monitore ohne gestrecktes Bild',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste; direkte Mauskamera',
+    'Камера мышью bbmouse, основа прямой камеры': 'Die Mauskamera bbmouse, Grundlage der direkten Kamera',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Absturz-Debugging: Der Prozess wartet auf einen Debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: Koop im Pool von The Hunter's Dream mit bbhost-Spielern",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren, Spielstände importieren, Versionsauswahl',
@@ -4070,6 +4088,8 @@ ZH_CN = {
     "Щелчок в окне игры захватывает мышь, F1 — отпускает": "在游戏窗口中单击以捕获鼠标，按 F1 释放",
     "Чувствительность мыши": "鼠标灵敏度",
     "Инвертировать мышь по вертикали": "反转鼠标纵轴",
+    "Прямая камера мышью (1:1)": "鼠标直接控制视角（1:1）",
+    "Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в игре для ПК. При захвате цели мышь снова работает как стик": "鼠标直接转动视角，没有摇杆的死区和加速，就像 PC 游戏一样。锁定目标时，鼠标重新像摇杆一样工作",
     "DLSS не найден: выберите библиотеку NVIDIA ниже (и нужна сборка с мостом DLSS). Игра включит FSR 3.1":
         "未找到 DLSS：请在下方选择 NVIDIA 的库（还需要带 DLSS 桥接的版本）。游戏将改用 FSR 3.1",
     "Нет или повреждён файл {}": "文件 {} 缺失或已损坏",
@@ -4423,7 +4443,8 @@ ZH_CN = {
     'Язык внутриигрового меню при запуске без окна лаунчера': '不经启动器窗口启动时游戏内菜单的语言',
     'DLSS в AppImage на NVIDIA': 'NVIDIA 上 AppImage 中的 DLSS',
     'Сверхширокие мониторы без растянутой картинки': '超宽屏显示器画面不再被拉伸',
-    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': '键盘移动：圆形斜向与最后按下的键',
+    'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; прямая камера мышью': '键盘移动：圆形斜向与最后按下的键；鼠标直接控制视角',
+    'Камера мышью bbmouse, основа прямой камеры': 'bbmouse 鼠标视角，鼠标直接控制视角的基础',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': '崩溃调试：进程等待调试器（BB_FAULT_WAIT）',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge：在 The Hunter's Dream 池中与 bbhost 玩家合作",
     'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, импорт сохранений, выбор версии': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转、导入存档、版本选择',

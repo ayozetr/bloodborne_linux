@@ -53,6 +53,9 @@ private:
     u64 last_mouse_motion_ms{}; ///< SDL_GetTicks of the last mouse motion (UpdateCursor)
     bool cursor_hidden{};
     void CaptureMouse(bool capture);
+    /// Installs or removes the direct mouse camera's hook (bloodborne_cam.h) as the capture goes.
+    void UpdateMouseCamera();
+    bool camera_hook_failed{false}; ///< the camera code is not the 1.09 one: the stick stays
     std::mutex mouse_mutex;
     double mouse_dx{}, mouse_dy{};
     int wheel_up{}, wheel_down{};

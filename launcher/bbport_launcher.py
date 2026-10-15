@@ -234,6 +234,7 @@ INI_DEFAULTS = {
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
+    "mouse_camera": "stick",
     "pad_swap_sticks": "0",
     "pad_invert_look_x": "0",
     "pad_invert_look_y": "0",
@@ -659,7 +660,9 @@ THANKS = (
         _github("AyrtonSanabio", "Язык внутриигрового меню при запуске без окна лаунчера"),
         _github("Aryxa", "DLSS в AppImage на NVIDIA"),
         _github("pmwork-personal", "Сверхширокие мониторы без растянутой картинки"),
-        _github("Jhony-Jhansen", "Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша"),
+        _github("Jhony-Jhansen", "Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша; "
+                                 "прямая камера мышью"),
+        _github("mcrib884", "Камера мышью bbmouse, основа прямой камеры"),
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
         _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
         _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
@@ -985,8 +988,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mouse_invert_row = Adw.SwitchRow(title=tr("Инвертировать мышь по вертикали"),
                                               active=self.ini.get("mouse_invert_y") == "1")
         controls.add(self.mouse_invert_row)
+        # mouse_camera=direct (gpu/shim/bloodborne_cam.cpp): the mouse turns the camera itself.
+        self.mouse_camera_row = Adw.SwitchRow(
+            title=tr("Прямая камера мышью (1:1)"),
+            subtitle=tr("Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в "
+                        "игре для ПК. При захвате цели мышь снова работает как стик"),
+            active=self.ini.get("mouse_camera") == "direct")
+        controls.add(self.mouse_camera_row)
         def mouse_rows_sensitive(*_):
-            for row in (self.mouse_sensitivity_row, self.mouse_invert_row):
+            for row in (self.mouse_sensitivity_row, self.mouse_invert_row, self.mouse_camera_row):
                 row.set_sensitive(self.mouse_look_row.get_active())
         self.mouse_look_row.connect("notify::active", mouse_rows_sensitive)
         mouse_rows_sensitive()
@@ -1578,6 +1588,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",
+            "mouse_camera": "direct" if self.mouse_camera_row.get_active() else "stick",
             **{key: "1" if row.get_active() else "0" for key, row in self.stick_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
