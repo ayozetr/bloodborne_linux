@@ -233,6 +233,9 @@ INI_DEFAULTS = {
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
+    "pad_swap_sticks": "0",
+    "pad_invert_look_x": "0",
+    "pad_invert_look_y": "0",
     **{key: "1" if default else "0" for key, _, default in EFFECTS},
     **{key: "0" for key, _, _ in CHEATS + TWEAKS},
     **{key: "1" if default else "0" for key, _, _, default in STREAMING},
@@ -658,7 +661,8 @@ THANKS = (
         _github("Jhony-Jhansen", "Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша"),
         _github("AndiMajore", "Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)"),
         _github("MaskZeus", "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost"),
-        _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц"),
+        _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
+                              "страниц; смена стиков и инверсия камеры"),
         _github("AwesomeObserver", "Большие группы команд записи и swapchain после изменений экрана"),
     )),
     ("Помощь и тесты", (
@@ -935,6 +939,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.gestures_row = Adw.SwitchRow(title=tr("Меню жестов без значков управления движением"),
                                           active=self.settings["gestures_no_motion"])
         controls.add(self.gestures_row)
+        # Controller sticks (runtime_pad.c): swapped, camera stick inverted.
+        self.stick_rows = {}
+        for key, title in (("pad_swap_sticks", tr("Поменять стики местами")),
+                           ("pad_invert_look_x", tr("Инвертировать камеру геймпада по горизонтали")),
+                           ("pad_invert_look_y", tr("Инвертировать камеру геймпада по вертикали"))):
+            self.stick_rows[key] = Adw.SwitchRow(title=title, active=self.ini.get(key) == "1")
+            controls.add(self.stick_rows[key])
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
@@ -1514,6 +1525,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",
+            **{key: "1" if row.get_active() else "0" for key, row in self.stick_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.streaming_rows.items()},

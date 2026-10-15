@@ -405,6 +405,9 @@ EN = {
     "Автоматически (по контроллеру)": "Automatic (by controller)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Gestures menu without motion-control icons",
+    "Поменять стики местами": "Swap the sticks",
+    "Инвертировать камеру геймпада по горизонтали": "Invert the controller camera horizontally",
+    "Инвертировать камеру геймпада по вертикали": "Invert the controller camera vertically",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Flatpak Steam runs games inside its sandbox, which has neither the game folder nor the drivers: the shortcut has to start the game outside it (flatpak-spawn --host). For that, Steam needs the org.freedesktop.Flatpak permission, which lets it start programs on your system. Grant it?',
@@ -635,7 +638,7 @@ EN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Keyboard movement: a round diagonal and the last key pressed',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Crash debugging: the process waits for a debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: co-op on The Hunter's Dream's pool with bbhost players",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Video memory on 4 GB cards and crashes: flips, the swapchain, descriptors and page faults; swapped sticks and camera inversion',
     'Большие группы команд записи и swapchain после изменений экрана': 'Large recorded command groups and the swapchain after display changes',
 }
 
@@ -933,6 +936,9 @@ PT_BR = {
     "Автоматически (по контроллеру)": "Automático (pelo controle)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menu de gestos sem ícones de controle por movimento",
+    "Поменять стики местами": "Trocar os analógicos",
+    "Инвертировать камеру геймпада по горизонтали": "Inverter a câmera do controle na horizontal",
+    "Инвертировать камеру геймпада по вертикали": "Inverter a câmera do controle na vertical",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'O Steam do Flatpak roda os jogos dentro da sua sandbox, que não tem a pasta do jogo nem os drivers: o atalho precisa iniciar o jogo fora dela (flatpak-spawn --host). Para isso, o Steam precisa da permissão org.freedesktop.Flatpak, que permite iniciar programas no seu sistema. Conceder?',
@@ -1326,7 +1332,7 @@ PT_BR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento pelo teclado: diagonal redonda e a última tecla pressionada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuração de travamentos: o processo espera um depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo no pool do The Hunter's Dream com jogadores do bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memória de vídeo em placas de 4 GB e travamentos: flips, swapchain, descritores e falhas de página; troca dos analógicos e inversão da câmera',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandes grupos de comandos gravados e a swapchain após mudanças de tela',
 }
 
@@ -1615,6 +1621,9 @@ ES = {
     "Автоматически (по контроллеру)": "Automático (según el mando)",
     "PlayStation (оригинал)": "PlayStation (original)",
     "Меню жестов без значков управления движением": "Menú de gestos sin iconos de control por movimiento",
+    "Поменять стики местами": "Intercambiar los sticks",
+    "Инвертировать камеру геймпада по горизонтали": "Invertir la cámara del mando en horizontal",
+    "Инвертировать камеру геймпада по вертикали": "Invertir la cámara del mando en vertical",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'El Steam de Flatpak ejecuta los juegos dentro de su sandbox, donde no están ni la carpeta del juego ni los drivers: el atajo tiene que arrancar el juego fuera de ella (flatpak-spawn --host). Para eso Steam necesita el permiso org.freedesktop.Flatpak, que le permite ejecutar programas en tu sistema. ¿Concederlo?',
@@ -1928,7 +1937,7 @@ ES = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimiento con teclado: diagonal redonda y la última tecla pulsada',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Depuración de cierres: el proceso espera a un depurador (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativo en el pool de The Hunter's Dream con jugadores de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memoria de vídeo en tarjetas de 4 GB y cierres: flips, swapchain, descriptores y fallos de página; intercambio de sticks e inversión de la cámara',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grupos grandes de comandos grabados y el swapchain tras cambios de pantalla',
 }
 
@@ -2217,6 +2226,9 @@ IT = {
     "Автоматически (по контроллеру)": "Automatico (in base al controller)",
     "PlayStation (оригинал)": "PlayStation (originale)",
     "Меню жестов без значков управления движением": "Menu dei gesti senza icone del controllo di movimento",
+    "Поменять стики местами": "Scambiare gli stick",
+    "Инвертировать камеру геймпада по горизонтали": "Invertire la telecamera del controller in orizzontale",
+    "Инвертировать камеру геймпада по вертикали": "Invertire la telecamera del controller in verticale",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Steam da Flatpak avvia i giochi nella sua sandbox, dove non ci sono né la cartella del gioco né i driver: il collegamento deve avviare il gioco fuori da essa (flatpak-spawn --host). Per questo Steam ha bisogno del permesso org.freedesktop.Flatpak, che gli consente di avviare programmi sul tuo sistema. Concederlo?',
@@ -2530,7 +2542,7 @@ IT = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Movimento da tastiera: diagonale rotonda e l’ultimo tasto premuto',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Debug dei crash: il processo attende un debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: cooperativa nel pool di The Hunter's Dream con i giocatori di bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Memoria video su schede da 4 GB e crash: flip, swapchain, descrittori ed errori di pagina; scambio degli stick e inversione della telecamera',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grandi gruppi di comandi registrati e la swapchain dopo i cambi di schermo',
 }
 
@@ -2819,6 +2831,9 @@ FR = {
     "Автоматически (по контроллеру)": "Automatique (selon la manette)",
     'PlayStation (оригинал)': "PlayStation (d'origine)",
     "Меню жестов без значков управления движением": "Menu des gestes sans icônes de détection de mouvement",
+    "Поменять стики местами": "Inverser les sticks",
+    "Инвертировать камеру геймпада по горизонтали": "Inverser la caméra de la manette horizontalement",
+    "Инвертировать камеру геймпада по вертикали": "Inverser la caméra de la manette verticalement",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         "Steam en Flatpak lance les jeux dans son bac à sable, qui n'a ni le dossier du jeu ni les pilotes : le raccourci doit lancer le jeu en dehors (flatpak-spawn --host). Pour cela, Steam a besoin de l'autorisation org.freedesktop.Flatpak, qui lui permet de lancer des programmes sur votre système. L'accorder ?",
@@ -3132,7 +3147,7 @@ FR = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Déplacement au clavier : diagonale ronde et dernière touche pressée',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Débogage des plantages : le processus attend un débogueur (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge : coopération sur le pool de The Hunter's Dream avec les joueurs de bbhost",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Mémoire vidéo sur les cartes de 4 Go et plantages : flips, swapchain, descripteurs et défauts de page ; sticks inversés et caméra inversée',
     'Большие группы команд записи и swapchain после изменений экрана': 'Grands groupes de commandes enregistrées et la swapchain après un changement d’affichage',
 }
 
@@ -3421,6 +3436,9 @@ DE = {
     "Автоматически (по контроллеру)": "Automatisch (nach Controller)",
     "PlayStation (оригинал)": "PlayStation (Original)",
     "Меню жестов без значков управления движением": "Gestenmenü ohne Symbole der Bewegungssteuerung",
+    "Поменять стики местами": "Sticks tauschen",
+    "Инвертировать камеру геймпада по горизонтали": "Controller-Kamera horizontal invertieren",
+    "Инвертировать камеру геймпада по вертикали": "Controller-Kamera vertikal invertieren",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
         'Steam aus Flatpak startet Spiele in seiner Sandbox, in der weder der Spielordner noch die Treiber sind: Die Verknüpfung muss das Spiel außerhalb davon starten (flatpak-spawn --host). Dafür braucht Steam die Berechtigung org.freedesktop.Flatpak, mit der es Programme auf deinem System starten kann. Erteilen?',
@@ -3734,7 +3752,7 @@ DE = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': 'Bewegung per Tastatur: runde Diagonale und die zuletzt gedrückte Taste',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': 'Absturz-Debugging: Der Prozess wartet auf einen Debugger (BB_FAULT_WAIT)',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge: Koop im Pool von The Hunter's Dream mit bbhost-Spielern",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': 'Videospeicher auf 4-GB-Karten und Abstürze: Flips, Swapchain, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren',
     'Большие группы команд записи и swapchain после изменений экрана': 'Große aufgezeichnete Befehlsgruppen und die Swapchain nach Anzeigeänderungen',
 }
 
@@ -4139,6 +4157,9 @@ ZH_CN = {
         'PS4 的奖杯密钥（shadPS4 中的 TrophyKey），32 位十六进制数：填写后奖杯名称和说明使用游戏语言。仅保存在本机。未填写时为英文',
     "Копировать": "复制",
     "Меню жестов без значков управления движением": "手势菜单不显示体感操作图标",
+    "Поменять стики местами": "交换左右摇杆",
+    "Инвертировать камеру геймпада по горизонтали": "手柄视角水平反转",
+    "Инвертировать камеру геймпада по вертикали": "手柄视角垂直反转",
     "Монитор": "显示器",
     "Найдено DLC: {}": "找到的 DLC：{}",
     "Не использовать DLC": "不使用 DLC",
@@ -4279,7 +4300,7 @@ ZH_CN = {
     'Движение с клавиатуры: круглая диагональ и последняя нажатая клавиша': '键盘移动：圆形斜向与最后按下的键',
     'Отладка вылетов: процесс ждёт отладчик (BB_FAULT_WAIT)': '崩溃调试：进程等待调试器（BB_FAULT_WAIT）',
     "bbbridge: кооператив на пуле The Hunter's Dream с игроками bbhost": "bbbridge：在 The Hunter's Dream 池中与 bbhost 玩家合作",
-    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误',
+    'Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки страниц; смена стиков и инверсия камеры': '4 GB 显卡的显存与崩溃：翻转、交换链、描述符和页错误；交换摇杆与视角反转',
     'Большие группы команд записи и swapchain после изменений экрана': '大型录制命令组以及显示变化后的交换链',
 }
 

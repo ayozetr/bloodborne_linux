@@ -203,5 +203,20 @@ int main(void) {
         x=255; y=200; round_gate(0,&x,&y);
         assert(x>=237 && x<=239 && y>=190 && y<=192); /* (127,72) scaled to reach 127 */
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves");
+    /* Stick options: swapped sticks, then the camera stick (now the left one) inverted; the
+     * centre stays the centre. */
+    {
+        PadData m; memset(&m,0,sizeof m);
+        m.left_x=10; m.left_y=20; m.right_x=128; m.right_y=0;
+        apply_stick_options(&m);
+        assert(m.left_x==10 && m.left_y==20 && m.right_x==128 && m.right_y==0);
+        pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=1;
+        apply_stick_options(&m);
+        assert(m.left_x==128 && m.left_y==0 && m.right_x==246 && m.right_y==236);
+        m.right_x=128; m.right_y=0; pad_swap_sticks=0;
+        apply_stick_options(&m);
+        assert(m.right_x==128 && m.right_y==255);
+        pad_invert_look_x=pad_invert_look_y=0;
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options");
 }

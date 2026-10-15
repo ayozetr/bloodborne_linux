@@ -396,11 +396,16 @@ static int stick_socd_last=1, stick_circular=1;
 /* pad_round_gate=0 (bbport.ini) passes a controller's sticks on as they come (default: within a
  * round gate, see round_gate). */
 static int pad_round_gate=1;
+/* pad_swap_sticks=1 (bbport.ini) moves with the right stick and looks with the left;
+ * pad_invert_look_x / pad_invert_look_y=1 invert the controller's camera stick. From Awaken's
+ * BloodBorneButPc. */
+static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f;
     stick_socd_last=1; stick_circular=1; pad_round_gate=1;
+    pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0;
     const char *path=getenv("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -415,6 +420,9 @@ static void load_bindings(void) {
             else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
             else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
             else if (!strncmp(line,"pad_round_gate=",15)) pad_round_gate=atoi(value)!=0;
+            else if (!strncmp(line,"pad_swap_sticks=",16)) pad_swap_sticks=atoi(value)!=0;
+            else if (!strncmp(line,"pad_invert_look_x=",18)) pad_invert_look_x=atoi(value)!=0;
+            else if (!strncmp(line,"pad_invert_look_y=",18)) pad_invert_look_y=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -599,6 +607,17 @@ static void apply_mouse_look(PadData *d, double dx, double dy, uint64_t now, int
     d->right_y=look_axis(look_y,d->right_y,deadzone);
 }
 
+/* The controller's sticks swapped and the camera stick inverted, as bbport.ini asks; keyboard and
+ * mouse are applied later and keep their own directions (mouse_invert_y). */
+static void apply_stick_options(PadData *d) {
+    if (pad_swap_sticks) {
+        uint8_t t=d->left_x; d->left_x=d->right_x; d->right_x=t;
+        t=d->left_y; d->left_y=d->right_y; d->right_y=t;
+    }
+    if (pad_invert_look_x) d->right_x=(uint8_t)(256-d->right_x>255 ? 255 : 256-d->right_x);
+    if (pad_invert_look_y) d->right_y=(uint8_t)(256-d->right_y>255 ? 255 : 256-d->right_y);
+}
+
 static void sample_host(PadData *d) {
     report_guest_heap();
     memset(d,0,sizeof(*d));
@@ -642,6 +661,7 @@ static void sample_host(PadData *d) {
             round_gate(0,&d->left_x,&d->left_y);
             round_gate(1,&d->right_x,&d->right_y);
         }
+        apply_stick_options(d);
         if (SDL_GetNumGamepadTouchpads(g)>0) {
             const int fingers=SDL_GetNumGamepadTouchpadFingers(g,0);
             for (int finger=0;finger<fingers && d->touch_count<2;++finger) {
