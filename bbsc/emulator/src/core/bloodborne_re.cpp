@@ -12282,9 +12282,13 @@ void StartBbscDuelBell() {
     if (started.exchange(true)) {
         return;
     }
+    // bbport: the item tables are only there once a character is loaded, and the search gave up
+    // after 3 minutes - a player who stayed longer on the title screen (a first start compiling
+    // shaders) never got the kit, while the vanilla bells already said to use it. It keeps looking:
+    // every 5 s for those 3 minutes, then every 15 s.
     std::thread{[] {
-        for (int attempt = 0; attempt < 36 && !bbsc_duel_bell_ready; ++attempt) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+        for (int attempt = 0; !bbsc_duel_bell_ready; ++attempt) {
+            std::this_thread::sleep_for(std::chrono::seconds(attempt < 36 ? 5 : 15));
             PrepareBbscDuelBell();
         }
     }}.detach();
