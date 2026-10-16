@@ -13,7 +13,8 @@ DIR/trophies/<NP communication id>/: icons/ (the PNGs, and TROPxxx.rgba for the 
 width and height as little-endian u32, then 128x128 RGBA, made with Pillow), and trophies.tsv for
 the runtime (id, grade P/G/S/B or -, hidden 1/0, name, detail, platinum 1/0: whether it counts
 toward the platinum, which add-on trophies do not); prints that directory. The runtime appends what the game unlocks
-to earned.tsv there (id, Unix time) and shows it in the overlay (src/runtime_services.c).
+to earned.tsv there (id, Unix time) and shows it in the overlay (src/runtime_services.c). The
+launcher's Trophies page can mark trophies earned on a PS4 (a third column, "manual").
 """
 import argparse
 import os
@@ -21,6 +22,7 @@ from pathlib import Path
 import re
 import struct
 import sys
+import time
 import xml.etree.ElementTree as ET
 
 TRP_MAGIC = 0xDCA24D00
@@ -286,6 +288,64 @@ def read_earned(directory):
         if len(fields) >= 2 and fields[0].isdigit() and fields[1].isdigit():
             earned.setdefault(int(fields[0]), int(fields[1]))
     return earned
+
+
+def read_marked(directory):
+    """The ids marked as earned in the launcher (earned.tsv lines ending in "manual")."""
+    try:
+        lines = (Path(directory) / 'earned.tsv').read_text(encoding='utf-8').splitlines()
+    except OSError:
+        return set()
+    return {int(f[0]) for f in (line.split('\t') for line in lines)
+            if len(f) >= 3 and f[0].isdigit() and f[2] == 'manual'}
+
+
+def platinum_due(listed, earned):
+    """The platinum's id once every trophy that counts toward it is earned, else None, as the
+    runtime awards it (src/runtime_services.c)."""
+    platinum = next((i for i, t in listed.items() if t['grade'] == 'P'), None)
+    if platinum is None or platinum in earned:
+        return None
+    column = any(t['platinum'] for t in listed.values())  # a list without it counts every trophy
+    rest = [i for i, t in listed.items() if t['grade'] != 'P' and (t['platinum'] or not column)]
+    return platinum if all(i in earned for i in rest) else None
+
+
+def mark_earned(directory, ids, now=None):
+    """Marks trophies as earned (on a PS4, for a save carried over), and the platinum when they
+    complete it; returns the ids added. Only with the game closed: it reads earned.tsv at start."""
+    listed, earned = read_list(directory), read_earned(directory)
+    now = int(time.time() if now is None else now)
+    added = [i for i in sorted(set(ids)) if i in listed and i not in earned]
+    earned.update(dict.fromkeys(added, now))
+    platinum = platinum_due(listed, earned)
+    if added and platinum is not None:
+        added.append(platinum)
+    if added:
+        with open(Path(directory) / 'earned.tsv', 'a', encoding='utf-8') as f:
+            f.writelines(f'{i}\t{now}\tmanual\n' for i in added)
+    return added
+
+
+def unmark_earned(directory, trophy):
+    """Takes back a trophy marked in the launcher, and a platinum marked there that needs it;
+    the ones the game unlocked stay. Returns the ids removed."""
+    marked = read_marked(directory)
+    if trophy not in marked:
+        return []
+    listed = read_list(directory)
+    platinum = next((i for i, t in listed.items() if t['grade'] == 'P'), None)
+    column = any(t['platinum'] for t in listed.values())
+    counts = trophy in listed and (listed[trophy]['platinum'] or not column)
+    removed = {trophy} | ({platinum} if platinum in marked and counts else set())
+    path = Path(directory) / 'earned.tsv'
+    kept = [line for line in path.read_text(encoding='utf-8').splitlines()
+            if not ((f := line.split('\t'))[0].isdigit() and int(f[0]) in removed
+                    and f[2:3] == ['manual'])]
+    temp = Path(str(path) + '.tmp')
+    temp.write_text(''.join(line + '\n' for line in kept), encoding='utf-8')
+    os.replace(temp, path)
+    return sorted(removed)
 
 
 def read_list(directory):

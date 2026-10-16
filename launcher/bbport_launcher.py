@@ -2576,8 +2576,33 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(key)
         self.trophy_group = Adw.PreferencesGroup(title=tr("Трофеи"), description=tr(
             "Записываются, когда игра их открывает, и показываются в игре"))
+        # The ⋮ menu marks trophies earned on a PS4 (a save carried over): a check per trophy,
+        # written on Save.
+        action = Gio.SimpleAction.new("trophy-edit", None)
+        action.connect("activate", lambda *_: self.edit_trophies(True))
+        self.add_action(action)
+        menu = Gio.Menu()
+        menu.append(tr("Отметить трофеи"), "win.trophy-edit")
+        self.trophy_menu = Gtk.MenuButton(icon_name="view-more-symbolic", menu_model=menu,
+                                          halign=Gtk.Align.END, valign=Gtk.Align.CENTER, css_classes=["flat"],
+                                          sensitive=False)
+        cancel = Gtk.Button(label=tr("Отмена"))
+        cancel.connect("clicked", lambda _b: self.edit_trophies(False))
+        save = Gtk.Button(label=tr("Сохранить"), css_classes=["suggested-action"])
+        save.connect("clicked", self.on_trophies_save)
+        editing = Gtk.Box(spacing=6, valign=Gtk.Align.CENTER)
+        editing.append(cancel)
+        editing.append(save)
+        self.trophy_header = Gtk.Stack(hhomogeneous=False, vhomogeneous=False, halign=Gtk.Align.END,
+                                       valign=Gtk.Align.CENTER)
+        self.trophy_header.add_named(self.trophy_menu, "menu")
+        self.trophy_header.add_named(editing, "editing")
+        self.trophy_group.set_header_suffix(self.trophy_header)
         page.add(self.trophy_group)
         self.trophy_rows = []
+        self.trophy_checks = {}
+        self.trophy_editing = False
+        self.trophy_shown = (None, None)
         return page
 
     def refresh_trophies(self):
@@ -2587,42 +2612,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         language = int(self.settings.get("language") or system_game_language())
 
         def show(directory, problem):
-            for row in self.trophy_rows:
-                self.trophy_group.remove(row)
-            self.trophy_rows = []
-            rows = []
-            if directory is None:
-                rows.append(Adw.ActionRow(title=problem or tr("В дампе игры нет трофеев (sce_sys/trophy)")))
-            else:
-                listed, earned = trophies.read_list(directory), trophies.read_earned(directory)
-                counted = [i for i, t in listed.items() if t["grade"] != "P"] or list(listed)
-                done = sum(1 for i in counted if i in earned)
-                self.trophy_group.set_description(tr("Получено {} из {}").format(done, len(counted)))
-                if problem:
-                    rows.append(Adw.ActionRow(title=problem))
-                for i, t in sorted(listed.items(), key=lambda item: (item[0] not in earned, item[0])):
-                    got = i in earned
-                    name = t["name"] or f"#{i}"
-                    detail = t["detail"]
-                    if t["hidden"] and not got:
-                        name, detail = tr("Скрытый трофей"), ""
-                    when = time.strftime("%Y-%m-%d %H:%M", time.localtime(earned[i])) if got else None
-                    subtitle = "\n".join(x for x in (detail, tr("Получен {}").format(when) if when else None) if x)
-                    row = Adw.ActionRow(title=GLib.markup_escape_text(name),
-                                        subtitle=GLib.markup_escape_text(subtitle))
-                    icon = Path(directory) / "icons" / f"TROP{i:03d}.PNG"
-                    image = Gtk.Image(file=str(icon), pixel_size=48) if icon.is_file() else \
-                        Gtk.Image(icon_name="starred-symbolic", pixel_size=48)
-                    row.add_prefix(image)
-                    grade = TROPHY_GRADES.get(t["grade"])
-                    if grade:
-                        row.add_suffix(Gtk.Label(label=tr(grade), css_classes=["dim-label"]))
-                    if not got:
-                        image.set_opacity(0.35)
-                    rows.append(row)
-            for row in rows:
-                self.trophy_group.add(row)
-                self.trophy_rows.append(row)
+            self.trophy_shown = (directory, problem)
+            self.trophy_editing = False
+            self.show_trophies()
             return False
 
         def work():
@@ -2637,6 +2629,84 @@ class LauncherWindow(Adw.ApplicationWindow):
                     directory = None
             GLib.idle_add(show, directory, problem)
         threading.Thread(target=work, daemon=True).start()
+
+    def show_trophies(self):
+        directory, problem = self.trophy_shown
+        editing = self.trophy_editing and directory is not None
+        for row in self.trophy_rows:
+            self.trophy_group.remove(row)
+        self.trophy_rows = []
+        self.trophy_checks = {}
+        self.trophy_header.set_visible_child_name("editing" if editing else "menu")
+        self.trophy_menu.set_sensitive(directory is not None)
+        rows = []
+        if directory is None:
+            rows.append(Adw.ActionRow(title=problem or tr("В дампе игры нет трофеев (sce_sys/trophy)")))
+        else:
+            listed, earned = trophies.read_list(directory), trophies.read_earned(directory)
+            marked = trophies.read_marked(directory)
+            counted = [i for i, t in listed.items() if t["grade"] != "P"] or list(listed)
+            done = sum(1 for i in counted if i in earned)
+            self.trophy_group.set_description(
+                tr("Отметьте трофеи, уже полученные на PS4 или в другой версии порта.")
+                if editing else tr("Получено {} из {}").format(done, len(counted)))
+            if problem:
+                rows.append(Adw.ActionRow(title=problem))
+            order = sorted(listed.items(), key=lambda item: item[0] if editing else (item[0] not in earned, item[0]))
+            for i, t in order:
+                got = i in earned
+                name = t["name"] or f"#{i}"
+                detail = t["detail"]
+                if t["hidden"] and not got and not editing:
+                    name, detail = tr("Скрытый трофей"), ""
+                when = time.strftime("%Y-%m-%d %H:%M", time.localtime(earned[i])) if got else None
+                note = (tr("Отмечен вручную {}") if i in marked else tr("Получен {}")).format(when) \
+                    if when else None
+                subtitle = "\n".join(x for x in (detail, note) if x)
+                row = Adw.ActionRow(title=GLib.markup_escape_text(name),
+                                    subtitle=GLib.markup_escape_text(subtitle))
+                icon = Path(directory) / "icons" / f"TROP{i:03d}.PNG"
+                image = Gtk.Image(file=str(icon), pixel_size=48) if icon.is_file() else \
+                    Gtk.Image(icon_name="starred-symbolic", pixel_size=48)
+                row.add_prefix(image)
+                grade = TROPHY_GRADES.get(t["grade"])
+                if grade:
+                    row.add_suffix(Gtk.Label(label=tr(grade), css_classes=["dim-label"]))
+                if not got:
+                    image.set_opacity(0.35)
+                if editing:
+                    # The game's own unlocks stay, and the platinum follows the others.
+                    check = Gtk.CheckButton(active=got, valign=Gtk.Align.CENTER,
+                                            sensitive=t["grade"] != "P" and (not got or i in marked))
+                    row.add_suffix(check)
+                    row.set_activatable_widget(check)
+                    self.trophy_checks[i] = check
+                rows.append(row)
+        for row in rows:
+            self.trophy_group.add(row)
+            self.trophy_rows.append(row)
+
+    def edit_trophies(self, editing):
+        if editing and (self.process is not None or save_import.game_running()):
+            self.alert(tr("Трофеи"), tr("Сначала закройте игру"))
+            return
+        self.trophy_editing = editing
+        self.show_trophies()
+
+    def on_trophies_save(self, _button):
+        """Writes the checks: the trophies earned on a PS4, and the marks taken back."""
+        if self.process is not None or save_import.game_running():
+            self.alert(tr("Трофеи"), tr("Сначала закройте игру"))
+            return
+        directory = self.trophy_shown[0]
+        earned, marked = trophies.read_earned(directory), trophies.read_marked(directory)
+        for i, check in self.trophy_checks.items():
+            if not check.get_active() and i in marked:
+                trophies.unmark_earned(directory, i)
+        trophies.mark_earned(directory, [i for i, check in self.trophy_checks.items()
+                                         if check.get_active() and i not in earned])
+        self.trophy_editing = False
+        self.show_trophies()
 
     # --- cheats page ---------------------------------------------------------------------
 

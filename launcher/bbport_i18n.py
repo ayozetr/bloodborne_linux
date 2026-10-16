@@ -622,6 +622,14 @@ EN = {
         'Wrong trophy key: the names are unavailable',
     'Получен {}':
         'Earned {}',
+    'Отметить трофеи':
+        'Mark trophies',
+    'Сохранить':
+        'Save',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Check the trophies you already earned on a PS4 or in another version of the port.',
+    'Отмечен вручную {}':
+        'Marked by hand {}',
     'Получено {} из {}':
         '{} of {} earned',
     'Скрытый трофей':
@@ -1418,6 +1426,14 @@ PT_BR = {
         'Chave de troféus incorreta: os nomes não estão disponíveis',
     'Получен {}':
         'Conquistado em {}',
+    'Отметить трофеи':
+        'Marcar troféus',
+    'Сохранить':
+        'Salvar',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Marque os troféus que você já conquistou num PS4 ou em outra versão do port.',
+    'Отмечен вручную {}':
+        'Marcado manualmente em {}',
     'Получено {} из {}':
         '{} de {} conquistados',
     'Скрытый трофей':
@@ -2125,6 +2141,14 @@ ES = {
         'Clave de trofeos incorrecta: los nombres no están disponibles',
     'Получен {}':
         'Conseguido el {}',
+    'Отметить трофеи':
+        'Marcar trofeos',
+    'Сохранить':
+        'Guardar',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Marca los trofeos ya conseguidos en una PS4 o en otra versión del port.',
+    'Отмечен вручную {}':
+        'Marcado a mano el {}',
     'Получено {} из {}':
         '{} de {} conseguidos',
     'Скрытый трофей':
@@ -2832,6 +2856,14 @@ IT = {
         'Chiave dei trofei errata: i nomi non sono disponibili',
     'Получен {}':
         'Ottenuto il {}',
+    'Отметить трофеи':
+        'Segna i trofei',
+    'Сохранить':
+        'Salva',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Spunta i trofei già ottenuti su una PS4 o in un’altra versione del port.',
+    'Отмечен вручную {}':
+        'Segnato a mano il {}',
     'Получено {} из {}':
         '{} di {} ottenuti',
     'Скрытый трофей':
@@ -3539,6 +3571,14 @@ FR = {
         'Clé des trophées incorrecte : les noms ne sont pas disponibles',
     'Получен {}':
         'Obtenu le {}',
+    'Отметить трофеи':
+        'Marquer des trophées',
+    'Сохранить':
+        'Enregistrer',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Cochez les trophées déjà obtenus sur une PS4 ou dans une autre version du port.',
+    'Отмечен вручную {}':
+        'Marqué à la main le {}',
     'Получено {} из {}':
         '{} sur {} obtenus',
     'Скрытый трофей':
@@ -4246,6 +4286,14 @@ DE = {
         'Falscher Trophäen-Schlüssel: die Namen sind nicht verfügbar',
     'Получен {}':
         'Erhalten am {}',
+    'Отметить трофеи':
+        'Trophäen markieren',
+    'Сохранить':
+        'Speichern',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.':
+        'Hake die Trophäen an, die du schon auf einer PS4 oder in einer anderen Version des Ports erhalten hast.',
+    'Отмечен вручную {}':
+        'Von Hand markiert am {}',
     'Получено {} из {}':
         '{} von {} erhalten',
     'Скрытый трофей':
@@ -4882,6 +4930,10 @@ ZH_CN = {
     "Поддержать проект": "支持本项目",
     "Пока игра добавляется, Steam нужно закрыть; потом он запустится снова. Закрыть Steam?": "添加游戏时需要关闭 Steam，完成后会重新启动。要关闭 Steam 吗？",
     "Получен {}": "获得于 {}",
+    'Отметить трофеи': '标记奖杯',
+    'Сохранить': '保存',
+    'Отметьте трофеи, уже полученные на PS4 или в другой версии порта.': '勾选已在 PS4 或此移植的其他版本中获得的奖杯。',
+    'Отмечен вручную {}': '手动标记于 {}',
     "Получено {} из {}": "已获得 {} / {}",
     "Порт кооператива (UDP)": "联机合作端口（UDP）",
     "Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки": "尚未完成：只会把召唤发送到设置了 BloodborneSeamlessCoop=true 的服务器，访客还不会被移到房主那里。仅供测试",

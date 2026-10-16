@@ -142,5 +142,29 @@ class TrophyFileTests(unittest.TestCase):
             self.assertIsNone(trophies.prepare(Path(tmp) / 'nothing', user))
 
 
+    def test_marked_by_hand(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = trophies.prepare(self.game(tmp), Path(tmp) / 'user', KEY, 3)
+            earned = directory / 'earned.tsv'
+            earned.write_text('2\t1700000000\n')  # unlocked by the game: an add-on's
+            self.assertEqual(trophies.mark_earned(directory, [2, 7]), [])
+            # The last one that counts brings the platinum (0) with it.
+            self.assertEqual(trophies.mark_earned(directory, [1], now=1800000000), [1, 0])
+            self.assertEqual(trophies.read_earned(directory), {2: 1700000000, 1: 1800000000,
+                                                               0: 1800000000})
+            self.assertEqual(trophies.read_marked(directory), {0, 1})
+            self.assertEqual(trophies.unmark_earned(directory, 2), [])
+            self.assertEqual(trophies.unmark_earned(directory, 1), [0, 1])
+            self.assertEqual(earned.read_text(), '2\t1700000000\n')
+
+    def test_platinum_due(self):
+        listed = {0: {'grade': 'P', 'platinum': False}, 1: {'grade': 'B', 'platinum': True},
+                  2: {'grade': 'G', 'platinum': False}}
+        self.assertEqual(trophies.platinum_due(listed, {1: 1}), 0)
+        self.assertIsNone(trophies.platinum_due(listed, {1: 1, 0: 1}))
+        old = {i: dict(t, platinum=False) for i, t in listed.items()}  # without the column
+        self.assertIsNone(trophies.platinum_due(old, {1: 1}))
+        self.assertEqual(trophies.platinum_due(old, {1: 1, 2: 1}), 0)
+
 if __name__ == '__main__':
     unittest.main()
