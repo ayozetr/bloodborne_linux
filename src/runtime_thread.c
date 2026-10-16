@@ -217,8 +217,24 @@ static void set_host_name(const char *name) {
     memcpy(host,name,strnlen(name,sizeof(host)-1));
     pthread_setname_np(pthread_self(),host);
 }
+/* The PS4 runs its threads with flush-to-zero and denormals-are-zero set in MXCSR, and the x87
+ * control word Linux also uses; a Linux thread starts with both flags clear (MXCSR 0x1f80). Game
+ * code gets different results with them clear (very small values stay as denormals instead of
+ * becoming 0, and a physics step can drift or blow up from there) and runs slower on denormals.
+ * The values are the ones dumped from real hardware, as in shadPS4 (shadPS4#3568, StevenMiller123,
+ * found by red-prig): set on the game's main thread before its first code, and on each thread it
+ * creates. */
+void runtime_orbis_fpu(void) {
+#if defined(__x86_64__)
+    const uint32_t mxcsr=0x9fc0;
+    const uint16_t fpucw=0x037f;
+    __asm__ volatile("ldmxcsr %0" : : "m"(mxcsr));
+    __asm__ volatile("fldcw %0" : : "m"(fpucw));
+#endif
+}
 static void *host_start(void *p) {
     GuestThread *t=p;
+    runtime_orbis_fpu();
     attach(t);
     set_host_name(t->name);
     if (!setjmp(t->exit_jump)) t->result=t->entry(t->argument);

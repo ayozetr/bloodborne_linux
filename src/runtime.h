@@ -9,6 +9,8 @@
 extern __thread sigjmp_buf *runtime_fault_recover;
 /* Restarts the game (in-game settings menu, render resolution change). */
 void runtime_restart(void);
+/* The floating-point state a PS4 gives its threads (runtime_thread.c). */
+void runtime_orbis_fpu(void);
 /* Quit to Desktop (runtime_services.c, scripts/quit_menu.py): a file the game opens, the end of a
  * save, and the save data mounted now. */
 void runtime_quit_on_open(const char *guest);
