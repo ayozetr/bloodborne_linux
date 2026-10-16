@@ -542,6 +542,7 @@ EN = {
         "Restart",
     "Не удалось проверить: {}":
         "Could not check: {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "no connection to GitHub, check your internet connection",
     "Установлена версия {}":
         "Version {} installed",
     "Установлена последняя версия ({})":
@@ -1288,6 +1289,7 @@ PT_BR = {
         "Reiniciar",
     "Не удалось проверить: {}":
         "Não foi possível verificar: {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "sem conexão com o GitHub, verifique sua conexão com a internet",
     "Установлена версия {}":
         "Versão {} instalada",
     "Установлена последняя версия ({})":
@@ -1994,6 +1996,7 @@ ES = {
         "Reiniciar",
     "Не удалось проверить: {}":
         "No se pudo comprobar: {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "sin conexión con GitHub, comprueba tu conexión a internet",
     "Установлена версия {}":
         "Versión {} instalada",
     "Установлена последняя версия ({})":
@@ -2700,6 +2703,7 @@ IT = {
         "Riavvia",
     "Не удалось проверить: {}":
         "Impossibile controllare: {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "nessuna connessione a GitHub, controlla la connessione a internet",
     "Установлена версия {}":
         "Versione {} installata",
     "Установлена последняя версия ({})":
@@ -3406,6 +3410,7 @@ FR = {
         "Redémarrer",
     "Не удалось проверить: {}":
         "Vérification impossible : {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "pas de connexion à GitHub, vérifiez votre connexion internet",
     "Установлена версия {}":
         "Version {} installée",
     "Установлена последняя версия ({})":
@@ -4112,6 +4117,7 @@ DE = {
         "Neu starten",
     "Не удалось проверить: {}":
         "Prüfung fehlgeschlagen: {}",
+    "нет связи с GitHub, проверьте подключение к интернету": "keine Verbindung zu GitHub, prüfe die Internetverbindung",
     "Установлена версия {}":
         "Version {} installiert",
     "Установлена последняя версия ({})":
@@ -4766,6 +4772,7 @@ ZH_CN = {
         "重启",
     "Не удалось проверить: {}":
         "无法检查：{}",
+    "нет связи с GitHub, проверьте подключение к интернету": "无法连接 GitHub，请检查网络连接",
     "Установлена версия {}":
         "已安装版本 {}",
     "Установлена последняя версия ({})":

@@ -506,7 +506,8 @@ void Menu() {
     ImGui::EndDisabled(); // upscaler off
 
     ImGui::SeparatorText(BbSettings::MenuText("Output resolution", "Разрешение вывода"));
-    static const char* outputs[] = {"1280 x 720", "1920 x 1080", "2560 x 1440", "3840 x 2160",
+    static const char* outputs[] = {"1280 x 720 (16:9)", "1920 x 1080 (16:9)", "2560 x 1440 (16:9)",
+                                    "3840 x 2160 (16:9)",
                                     "2560 x 1080 (21:9)", "3440 x 1440 (21:9)",
                                     "3840 x 1600 (21:9)", "5120 x 2160 (21:9)",
                                     "3840 x 1080 (32:9)", "5120 x 1440 (32:9)"};

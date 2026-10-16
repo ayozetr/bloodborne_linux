@@ -14,6 +14,7 @@ import shutil
 import os
 import re
 import signal
+import socket
 import subprocess
 import sys
 import threading
@@ -98,7 +99,8 @@ UPSCALERS = [("FSR 4", "fsr4"), ("FSR 4.1.1", "fsr411"), ("FSR 3", "fsr3"),
              ("TAA (нативное сглаживание)", "taa"), ("Выключен", "off")]
 PRESETS = [("Native AA", 0), ("Quality (x1.5)", 1), ("Balanced (x1.7)", 2),
            ("Performance (x2)", 3), ("Ultra Performance (x3)", 4)]
-OUTPUT_RES = [("1280×720 (Steam Deck)", "1280x720"), ("1920×1080", "1920x1080"), ("2560×1440", "2560x1440"), ("3840×2160", "3840x2160"),
+OUTPUT_RES = [("1280×720 (16:9)", "1280x720"), ("1920×1080 (16:9)", "1920x1080"),
+              ("2560×1440 (16:9)", "2560x1440"), ("3840×2160 (16:9)", "3840x2160"),
               ("2560×1080 (21:9)", "2560x1080"), ("3440×1440 (21:9)", "3440x1440"),
               ("3840×1600 (21:9)", "3840x1600"), ("5120×2160 (21:9)", "5120x2160"),
               ("3840×1080 (32:9)", "3840x1080"), ("5120×1440 (32:9)", "5120x1440")]
@@ -2333,9 +2335,11 @@ class LauncherWindow(Adw.ApplicationWindow):
             subtitle=tr("Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего "
                         "согласия"),
             active=self.settings.get("check_updates", True))
+        self.check_updates_row.add_prefix(Gtk.Image(icon_name="emblem-synchronizing-symbolic"))
         self.check_updates_row.connect("notify::active", lambda *_: self.store())
         updates.add(self.check_updates_row)
         self.update_row = Adw.ActionRow(title=tr("Последняя версия"))
+        self.update_row.add_prefix(Gtk.Image(icon_name="software-update-available-symbolic"))
         self.update_button = Gtk.Button(valign=Gtk.Align.CENTER)
         self.update_button.connect("clicked", self.on_update_button)
         self.update_row.add_suffix(self.update_button)
@@ -2346,6 +2350,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             subtitle=tr("Например, предыдущая, если новая работает хуже. Настройки и сохранения не "
                         "затрагиваются"),
             model=Gtk.StringList.new([tr("Список появится после проверки обновлений")]))
+        self.version_row.add_prefix(Gtk.Image(icon_name="document-open-recent-symbolic"))
         self.version_button = Gtk.Button(label=tr("Установить"), valign=Gtk.Align.CENTER)
         self.version_button.connect("clicked", self.on_install_version)
         self.version_row.add_suffix(self.version_button)
@@ -2491,10 +2496,22 @@ class LauncherWindow(Adw.ApplicationWindow):
             return False
 
         def work():
-            try:
-                result = bbport_update.latest_release()
-            except (OSError, ValueError) as error:
-                result = str(getattr(error, "reason", None) or error)
+            # A connection that is not up yet when the launcher opens (the name does not resolve,
+            # no route) gets a second try a few seconds later, and a plain message.
+            for attempt in (1, 2):
+                try:
+                    result = bbport_update.latest_release()
+                    break
+                except (OSError, ValueError) as error:
+                    reason = getattr(error, "reason", None) or error
+                    if isinstance(reason, (socket.gaierror, ConnectionError, TimeoutError)):
+                        result = tr("нет связи с GitHub, проверьте подключение к интернету")
+                        if attempt == 1:
+                            time.sleep(5)
+                            continue
+                    else:
+                        result = str(reason)
+                    break
             try:
                 releases = bbport_update.releases()
             except (OSError, ValueError):
