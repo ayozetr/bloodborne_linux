@@ -252,11 +252,16 @@ behaviour when the variable is unset. In the tables:
 | `__GL_SHADER_DISK_CACHE_SIZE` | bytes (run.sh default 10737418240) | NVIDIA's shader cache size (10 GiB by default here). | `run.sh:30` |
 | `__GL_SHADER_DISK_CACHE_SKIP_CLEANUP` | run.sh default 1 | NVIDIA's shader cache without its size cleanup (as Steam sets it). | `run.sh:29` |
 
+| `BB_WINDOW_RECT` | x,y,w,h as fractions of the game's display, e.g. `0,0,1,0.5` (default off) | Local co-op: the window's place and size on the game's display (BB_DISPLAY), without borders, instead of fullscreen. Needs X11 (`SDL_VIDEO_DRIVER=x11`): Wayland lets no window place itself. | `gpu/shim/window.cpp` |
+
 ## Controls & input
 
 | Variable | Values (default) | What it does | Where |
 |---|---|---|---|
-| `BB_GAMEPAD` | SDL GUID or part of the name (default: first controller) | **Launcher:** Settings → "Controller". Preferred controller, so wheels and other always-connected devices do not take over. | `src/runtime_pad.c:240-244`, `launcher/bbport_launcher.py:513` |
+| `BB_GAMEPAD` | SDL GUID, part of the name, or the device path (`/dev/hidrawN`, `/dev/input/eventN`; the log's `gamepad connected` line shows it) (default: first controller) | **Launcher:** Settings → "Controller". Preferred controller, so wheels and other always-connected devices do not take over. The path tells two pads of the same model apart (local co-op). | `src/runtime_pad.c` (preferred_gamepad), `launcher/bbport_launcher.py:513` |
+| `BB_GAMEPAD_STRICT` | 1 (default off) | Local co-op: only the BB_GAMEPAD controller, never the first one or the one in use instead; with no BB_GAMEPAD, no controller at all. | `src/runtime_pad.c` (gamepad_strict) |
+| `BB_KEYBOARD` | 0 (default on) | Local co-op: this game ignores the keyboard and the mouse, and never takes the mouse. | `src/runtime_pad.c` (keyboard_enabled) |
+| `BB_PAD_BACKGROUND` | 1 (default off) | Local co-op: the controller keeps driving the game while another window has the focus. | `gpu/shim/window.cpp` |
 | `BB_MOUSE_DEADZONE` | 0–100 of 127 (default 16) | Minimum right-stick deflection used for mouse look, so slow mouse movement still turns the camera past the game's dead zone. | `src/runtime_pad.c:630-656` |
 | `BB_PAD_CENTER` | lx,ly,rx,ry (default: measured) | Overrides the measured neutral position of each stick axis. | `src/runtime_pad.c:27`, `src/runtime_pad.c:113-118` |
 | `BB_PAD_CENTER_CAL` | 0 = off (default on) | Disables measuring each axis' neutral and travel (for third-party pads whose axes are biased). | `src/runtime_pad.c:28`, `src/runtime_pad.c:106` |

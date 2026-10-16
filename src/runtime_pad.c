@@ -236,18 +236,36 @@ static void round_gate(int stick, uint8_t *x, uint8_t *y) {
     *y=(uint8_t)lrintf(128.0f+dy*scale);
 }
 
-/* BB_GAMEPAD (the launcher's controller choice): its SDL GUID, or part of its name. Issue #15:
- * wheels and other controllers connected for good came first. */
+/* BB_GAMEPAD (the launcher's controller choice): its SDL GUID, part of its name, or its device
+ * path (/dev/input/eventN, or the hidraw path; the only way to tell two pads of the same model
+ * apart, as local co-op needs). Issue #15: wheels and other controllers connected for good came
+ * first. */
 static const char *preferred_gamepad(void) {
     static const char *want; static int read;
     if (!read) { want=getenv("BB_GAMEPAD"); if (want && !*want) want=NULL; read=1; }
     return want;
 }
+/* BB_GAMEPAD_STRICT=1 (local co-op, one game per player): only the chosen gamepad, never the
+ * first one or the one in use instead - that one is another player's. Without a chosen one, no
+ * gamepad at all. */
+static int gamepad_strict(void) {
+    static int strict=-1;
+    if (strict<0) { const char *v=getenv("BB_GAMEPAD_STRICT"); strict=v && v[0]=='1'; }
+    return strict;
+}
+/* BB_KEYBOARD=0 (local co-op): this game ignores the keyboard and the mouse, which reach whichever
+ * game window has the focus; its player has a gamepad. */
+static int keyboard_enabled(void) {
+    static int enabled=-1;
+    if (enabled<0) { const char *v=getenv("BB_KEYBOARD"); enabled=!(v && v[0]=='0'); }
+    return enabled;
+}
 static int is_preferred(SDL_JoystickID id, const char *want) {
     char guid[33];
     SDL_GUIDToString(SDL_GetGamepadGUIDForID(id),guid,sizeof guid);
     const char *name=SDL_GetGamepadNameForID(id);
-    return !strcasecmp(guid,want) || (name && strcasestr(name,want));
+    const char *path=SDL_GetGamepadPathForID(id);
+    return !strcasecmp(guid,want) || (path && !strcmp(path,want)) || (name && strcasestr(name,want));
 }
 /* Several gamepads at once (also one pad behind a 2.4 GHz receiver that shows as two) and none
  * chosen: the one being used takes over, checked five times a second. Used means a button held
@@ -315,7 +333,7 @@ static SDL_Gamepad *current_gamepad(void) {
         int count=0, pick=-1;
         SDL_JoystickID *ids=SDL_GetGamepads(&count);
         for (int i=0; want && ids && i<count && pick<0; ++i) if (is_preferred(ids[i],want)) pick=i;
-        if (pick<0 && !gamepad && ids && count>0) pick=0;
+        if (pick<0 && !gamepad && ids && count>0 && !gamepad_strict()) pick=0;
         if (pick>=0 && (!gamepad || SDL_GetGamepadID(gamepad)!=ids[pick])) {
             if (gamepad) SDL_CloseGamepad(gamepad);
             gamepad=SDL_OpenGamepad(ids[pick]);
@@ -323,13 +341,15 @@ static SDL_Gamepad *current_gamepad(void) {
             on_preferred=want && gamepad && is_preferred(ids[pick],want);
             if (gamepad) {
                 ++connected_count;
-                printf("Runtime: gamepad connected: %s%s\n",SDL_GetGamepadName(gamepad),
-                       !want ? "" : on_preferred ? " (the chosen one)" : " (the chosen one is not connected)");
+                const char *path=SDL_GetGamepadPath(gamepad);
+                printf("Runtime: gamepad connected: %s%s (%s)\n",SDL_GetGamepadName(gamepad),
+                       !want ? "" : on_preferred ? " (the chosen one)" : " (the chosen one is not connected)",
+                       path ? path : "no path");
             }
         }
         SDL_free(ids);
     }
-    if (!want) follow_active_pad(now);
+    if (!want && !gamepad_strict()) follow_active_pad(now);
     return gamepad;
 }
 /* bbport (frame stats): the game's libc heap, read every 5 s from a game thread (it reads the pad)
@@ -753,8 +773,10 @@ static void sample_host(PadData *d) {
     SDL_Gamepad *g=current_gamepad();
     if (!bindings_ready) {
         load_bindings(); bindings_ready=1;
-        bbgpu_mouse_look_enable(mouse_look);
-        bbgpu_mouse_camera_configure(mouse_camera_direct,mouse_sensitivity);
+        /* A game without the keyboard and the mouse (BB_KEYBOARD=0) never takes the mouse either:
+         * holding it would keep the other players' windows from getting clicks, and the focus. */
+        bbgpu_mouse_look_enable(mouse_look && keyboard_enabled());
+        bbgpu_mouse_camera_configure(mouse_camera_direct && keyboard_enabled(),mouse_sensitivity);
     }
     /* The mouse's motion and wheel since the last sample (always taken: none of it piles up while
      * the menu is open); it counts while the window holds the mouse. */
@@ -763,8 +785,9 @@ static void sample_host(PadData *d) {
     bbgpu_mouse_take(&mouse_dx,&mouse_dy,&wheel_up,&wheel_down);
     const int captured=bbgpu_mouse_captured();
     if (bbgpu_overlay_captures_input()) { apply_mouse_look(d,0,0,d->timestamp,0); return; } /* menu open: neutral input */
-    const bool *k=SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetKeyboardState(NULL) : NULL;
-    mouse_buttons=captured && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
+    if (!keyboard_enabled()) { mouse_dx=mouse_dy=0; wheel_up=wheel_down=0; }
+    const bool *k=keyboard_enabled() && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetKeyboardState(NULL) : NULL;
+    mouse_buttons=keyboard_enabled() && captured && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
     mouse_wheel_step(d->timestamp,captured ? wheel_up : 0,captured ? wheel_down : 0);
     if (g) {
         int touch_right=0;

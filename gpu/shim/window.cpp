@@ -1,4 +1,5 @@
 // bbport: SDL3 window for the Vulkan swapchain (X11 or Wayland).
+#include <charconv>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -56,6 +57,11 @@ SDL_DisplayID ChooseDisplay() {
 } // namespace
 
 WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}, height{height_} {
+    // Local co-op (BB_PAD_BACKGROUND=1): each player's gamepad keeps driving their game while
+    // another player's window has the focus.
+    if (const char* background = std::getenv("BB_PAD_BACKGROUND"); background && background[0] == '1') {
+        SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+    }
     // Gamepads are sampled by runtime_pad.c; their events are pumped here with the window's.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         UNREACHABLE_MSG("Failed to initialize SDL video: {}", SDL_GetError());
@@ -63,14 +69,53 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
     SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title);
     const SDL_DisplayID display = ChooseDisplay();
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED_DISPLAY(display));
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    // Local co-op (BB_WINDOW_RECT=x,y,w,h, fractions of the game's display: 0,0,1,0.5 is its top
+    // half): each player's game in its own part of the screen, without borders. Fractions, as the
+    // desktop's coordinates and scale differ from screen to screen. Wayland lets no window place
+    // itself: the launcher runs these games through X11 (Xwayland), where the position is kept.
+    int rect_x = 0, rect_y = 0;
+    float fx = 0, fy = 0, fw = 0, fh = 0;
+    SDL_Rect bounds{};
+    const char* rect = std::getenv("BB_WINDOW_RECT");
+    // std::from_chars: a '.' whatever the locale (sscanf's %f wants a ',' in Spanish).
+    const auto read_fractions = [](const char* text, float* out) {
+        const char* end = text + std::strlen(text);
+        for (int i = 0; i < 4; ++i) {
+            const auto [next, error] = std::from_chars(text, end, out[i]);
+            if (error != std::errc{} || (i < 3 && (next == end || *next != ','))) {
+                return false;
+            }
+            text = next + 1;
+        }
+        return true;
+    };
+    float fractions[4] = {};
+    const bool placed = rect && read_fractions(rect, fractions) && fractions[2] > 0 &&
+                        fractions[3] > 0 && SDL_GetDisplayBounds(display, &bounds);
+    fx = fractions[0];
+    fy = fractions[1];
+    fw = fractions[2];
+    fh = fractions[3];
+    if (placed) {
+        rect_x = bounds.x + static_cast<int>(fx * bounds.w + 0.5f);
+        rect_y = bounds.y + static_cast<int>(fy * bounds.h + 0.5f);
+        width_ = static_cast<s32>(fw * bounds.w + 0.5f);
+        height_ = static_cast<s32>(fh * bounds.h + 0.5f);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
+        std::printf("Display: this game's part of it: %dx%d at %d,%d (BB_WINDOW_RECT)\n", width_,
+                    height_, rect_x, rect_y);
+    }
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER,
+                          placed ? rect_x : SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER,
+                          placed ? rect_y : SDL_WINDOWPOS_CENTERED_DISPLAY(display));
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width_);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height_);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, true);
     const char* fullscreen = std::getenv("BB_FULLSCREEN");
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, fullscreen && fullscreen[0] == '1');
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN,
+                           !placed && fullscreen && fullscreen[0] == '1');
     base_title = title;
     window = SDL_CreateWindowWithProperties(props);
     SDL_DestroyProperties(props);
