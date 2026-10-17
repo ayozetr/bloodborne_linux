@@ -185,7 +185,7 @@ class LoginTests(unittest.TestCase):
                 received.append((kind, command, body))
                 if notify_first:
                     send(sock, 2, 7, b'\0\0')
-                send(sock, 1, 0, bytes([error]))
+                send(sock, 1, command, bytes([error]))
         threading.Thread(target=run, daemon=True).start()
         return server.getsockname()[1], received
 
@@ -211,6 +211,19 @@ class LoginTests(unittest.TestCase):
         self.assertEqual(online.shadnet_login('127.0.0.1', port, 'hunter', 'secret'),
                          (False, 'protocol v2'))
 
+
+    def test_register(self):
+        port, received = self.serve(error=0)
+        self.assertEqual(online.shadnet_register('127.0.0.1', port, 'hunter', 'secret'), (True, ''))
+        kind, command, body = received[0]
+        self.assertEqual((kind, command), (0, 2))
+        # No email given: one made from the name, as Seamless Hunt's account tool does.
+        self.assertEqual(body[4:], b'\x0a\x06hunter\x12\x06secret\x22\x11hunter@bbsc.local')
+        port, received = self.serve(error=11)
+        self.assertEqual(online.shadnet_register('127.0.0.1', port, 'hunter', 'secret',
+                                                 'me@example.org', 'k'),
+                         (False, 'the name is taken'))
+        self.assertTrue(received[0][2].endswith(b'\x22\x0eme@example.org\x2a\x01k'))
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,6 +7,14 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    "Создать учётную запись": "Create an account",
+    "На этом сервере, с именем и паролем выше": "On this server, with the name and password above",
+    "Введите имя и пароль выше": "Type a name and password above",
+    "это имя уже занято": "that name is taken",
+    "серверу нужен ключ регистрации: спросите его владельца": "the server needs its registration key: ask its owner",
+    "недопустимое имя или пароль": "invalid name or password",
+    "Учётная запись {} создана на {}": "Account {} created on {}",
+    "Не удалось создать учётную запись: {}": "Couldn't create the account: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): seamless co-op",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: the base of BBSC's game server",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -756,6 +764,14 @@ EN = {
 }
 
 PT_BR = {
+    "Создать учётную запись": "Criar uma conta",
+    "На этом сервере, с именем и паролем выше": "Neste servidor, com o nome e a senha acima",
+    "Введите имя и пароль выше": "Digite um nome e uma senha acima",
+    "это имя уже занято": "esse nome já está em uso",
+    "серверу нужен ключ регистрации: спросите его владельца": "o servidor precisa da chave de registro: peça ao dono",
+    "недопустимое имя или пароль": "nome ou senha inválidos",
+    "Учётная запись {} создана на {}": "Conta {} criada em {}",
+    "Не удалось создать учётную запись: {}": "Não foi possível criar a conta: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): cooperativo contínuo",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: a base do servidor de jogo do BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -1565,6 +1581,14 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    "Создать учётную запись": "Crear una cuenta",
+    "На этом сервере, с именем и паролем выше": "En este servidor, con el nombre y la contraseña de arriba",
+    "Введите имя и пароль выше": "Escribe un nombre y una contraseña arriba",
+    "это имя уже занято": "ese nombre ya está en uso",
+    "серверу нужен ключ регистрации: спросите его владельца": "el servidor necesita su clave de registro: pídesela a su dueño",
+    "недопустимое имя или пароль": "nombre o contraseña no válidos",
+    "Учётная запись {} создана на {}": "Cuenta {} creada en {}",
+    "Не удалось создать учётную запись: {}": "No se pudo crear la cuenta: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): Seamless Co-op",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: la base del servidor de juego de BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -2283,6 +2307,14 @@ ES = {
 
 # Italian.
 IT = {
+    "Создать учётную запись": "Crea un account",
+    "На этом сервере, с именем и паролем выше": "Su questo server, con il nome e la password qui sopra",
+    "Введите имя и пароль выше": "Scrivi un nome e una password qui sopra",
+    "это имя уже занято": "quel nome è già in uso",
+    "серверу нужен ключ регистрации: спросите его владельца": "il server richiede la sua chiave di registrazione: chiedila al proprietario",
+    "недопустимое имя или пароль": "nome o password non validi",
+    "Учётная запись {} создана на {}": "Account {} creato su {}",
+    "Не удалось создать учётную запись: {}": "Impossibile creare l'account: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): cooperativo continuo",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: la base del server di gioco di BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -3001,6 +3033,14 @@ IT = {
 
 # French.
 FR = {
+    "Создать учётную запись": "Créer un compte",
+    "На этом сервере, с именем и паролем выше": "Sur ce serveur, avec le nom et le mot de passe ci-dessus",
+    "Введите имя и пароль выше": "Saisissez un nom et un mot de passe ci-dessus",
+    "это имя уже занято": "ce nom est déjà pris",
+    "серверу нужен ключ регистрации: спросите его владельца": "le serveur demande sa clé d'inscription : demandez-la à son propriétaire",
+    "недопустимое имя или пароль": "nom ou mot de passe non valide",
+    "Учётная запись {} создана на {}": "Compte {} créé sur {}",
+    "Не удалось создать учётную запись: {}": "Impossible de créer le compte : {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG) : coop continue",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter : la base du serveur de jeu de BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -3719,6 +3759,14 @@ FR = {
 
 # German.
 DE = {
+    "Создать учётную запись": "Konto erstellen",
+    "На этом сервере, с именем и паролем выше": "Auf diesem Server, mit dem Namen und Passwort oben",
+    "Введите имя и пароль выше": "Gib oben einen Namen und ein Passwort ein",
+    "это имя уже занято": "dieser Name ist vergeben",
+    "серверу нужен ключ регистрации: спросите его владельца": "der Server braucht seinen Registrierungsschlüssel: frag den Betreiber",
+    "недопустимое имя или пароль": "ungültiger Name oder ungültiges Passwort",
+    "Учётная запись {} создана на {}": "Konto {} auf {} erstellt",
+    "Не удалось создать учётную запись: {}": "Konto konnte nicht erstellt werden: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): nahtloser Koop",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: die Grundlage des Spielservers von BBSC",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.
@@ -4437,6 +4485,14 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    "Создать учётную запись": "创建账户",
+    "На этом сервере, с именем и паролем выше": "在此服务器上，使用上方的名称和密码",
+    "Введите имя и пароль выше": "请先在上方输入名称和密码",
+    "это имя уже занято": "该名称已被占用",
+    "серверу нужен ключ регистрации: спросите его владельца": "服务器需要注册密钥：请向服务器所有者索取",
+    "недопустимое имя или пароль": "名称或密码无效",
+    "Учётная запись {} создана на {}": "已在 {1} 上创建账户 {0}",
+    "Не удалось создать учётную запись: {}": "无法创建账户：{}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC（CLS_AMG）：无缝合作",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter：BBSC 游戏服务器的基础",
     # Seamless co-op (BBSC): the launcher's group and the options of bbsc/emulator/mod/mod.json.

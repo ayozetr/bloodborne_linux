@@ -369,9 +369,10 @@ def proto_string(field, text):
             return bytes([field << 3 | 2]) + bytes(varint) + data
 
 
-def shadnet_login(host, port, npid, password, timeout=6.0):
-    """Signs in to a shadNet server as the game does and leaves at once: (ok, detail), detail an
-    entry of LOGIN_ERRORS, 'protocol vN' or the socket error."""
+def shadnet_request(host, port, command, request, timeout=6.0):
+    """Sends one request to a shadNet server as the game does and leaves at once: its error byte
+    (0: done), or None when the server speaks another protocol version (then ConnectionError
+    for one that is no shadNet server, OSError for the socket)."""
     def receive(sock, size):
         data = b''
         while len(data) < size:
@@ -393,16 +394,43 @@ def shadnet_login(host, port, npid, password, timeout=6.0):
             raise ConnectionError('not a shadNet server')
         version = struct.unpack_from('<I', payload)[0] if len(payload) >= 4 else SHADNET_PROTOCOL
         if version != SHADNET_PROTOCOL:
-            return False, f'protocol v{version}'
-        request = (proto_string(1, npid) + proto_string(2, password) +
-                   proto_string(4, 'CUSA00900') + proto_string(5, 'Bloodborne'))
+            raise ConnectionError(f'protocol v{version}')
         body = struct.pack('<I', len(request)) + request
-        sock.sendall(SHADNET_HEADER.pack(0, 0, SHADNET_HEADER.size + len(body), 1) + body)
+        sock.sendall(SHADNET_HEADER.pack(0, command, SHADNET_HEADER.size + len(body), 1) + body)
         while True:  # notifications may come first
-            kind, command, payload = packet(sock)
-            if kind == 1 and command == 0:
-                error = payload[0] if payload else 1
-                return error == 0, LOGIN_ERRORS.get(error, f'code {error}') if error else ''
+            kind, reply, payload = packet(sock)
+            if kind == 1 and reply == command:
+                return payload[0] if payload else 1
+
+
+def shadnet_login(host, port, npid, password, timeout=6.0):
+    """Signs in to a shadNet server as the game does and leaves at once: (ok, detail), detail an
+    entry of LOGIN_ERRORS, 'protocol vN' or the socket error."""
+    request = (proto_string(1, npid) + proto_string(2, password) +
+               proto_string(4, 'CUSA00900') + proto_string(5, 'Bloodborne'))
+    try:
+        error = shadnet_request(host, port, 0, request, timeout)
+    except ConnectionError as failure:
+        if str(failure).startswith('protocol v'):
+            return False, str(failure)
+        raise
+    return error == 0, LOGIN_ERRORS.get(error, f'code {error}') if error else ''
+
+
+# The server's answers to RegistrationRequest (client.h, ErrorType).
+REGISTER_ERRORS = {3: 'invalid name, password or email', 10: 'error',
+                   11: 'the name is taken', 12: 'email provider not allowed',
+                   13: 'the email is taken', 23: 'the server needs its registration key'}
+
+
+def shadnet_register(host, port, npid, password, email='', key='', timeout=6.0):
+    """Makes an account on a shadNet server (shadnet-sample's register): (ok, detail), detail an
+    entry of REGISTER_ERRORS. Servers want one email per account; none given, one is made from
+    the name, as Seamless Hunt's account tool does (the address is not checked)."""
+    request = (proto_string(1, npid) + proto_string(2, password) +
+               proto_string(4, email or f'{npid}@bbsc.local') + (proto_string(5, key) if key else b''))
+    error = shadnet_request(host, port, 2, request, timeout)
+    return error == 0, REGISTER_ERRORS.get(error, f'code {error}') if error else ''
 
 
 def check(server, webapi, community, account=None):

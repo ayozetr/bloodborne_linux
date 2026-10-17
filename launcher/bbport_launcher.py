@@ -2056,6 +2056,14 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=password)
         account.add(self.npid_row)
         account.add(self.password_row)
+        # A private server's account made from here, as Seamless Hunt's account tool does on Windows.
+        self.register_row = Adw.ActionRow(title=tr("Создать учётную запись"),
+                                          subtitle=tr("На этом сервере, с именем и паролем выше"))
+        self.register_button = Gtk.Button(label=tr("Создать"), valign=Gtk.Align.CENTER)
+        self.register_button.connect("clicked", self.on_register)
+        self.register_row.add_suffix(self.register_button)
+        account.add(self.register_row)
+        self.own_server_rows = (*self.own_server_rows, self.register_row)
         self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
         self.account_group = account
         page.add(account)
@@ -2300,6 +2308,36 @@ class LauncherWindow(Adw.ApplicationWindow):
                        if combo_value(self.server_kind_row) == "thd"
                        else online.check(server, webapi, community, account))
             GLib.idle_add(show, results)
+        threading.Thread(target=work, daemon=True).start()
+
+    def on_register(self, _button):
+        server = online.addresses(self.online_settings())[0]
+        npid, password = self.npid_row.get_text().strip(), self.password_row.get_text()
+        if not npid or not password:
+            self.toasts.add_toast(Adw.Toast(title=tr("Введите имя и пароль выше")))
+            return
+        host, _sep, port = server.rpartition(":")
+        errors = {"the name is taken": tr("это имя уже занято"),
+                  "the server needs its registration key": tr("серверу нужен ключ регистрации: "
+                                                              "спросите его владельца"),
+                  "invalid name, password or email": tr("недопустимое имя или пароль")}
+        self.register_button.set_sensitive(False)
+
+        def done(ok, detail):
+            self.register_button.set_sensitive(True)
+            message = (tr("Учётная запись {} создана на {}").format(npid, host) if ok else
+                       tr("Не удалось создать учётную запись: {}").format(errors.get(detail, detail)))
+            self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(message), timeout=6))
+            if ok:
+                self.store()
+            return False
+
+        def work():
+            try:
+                result = online.shadnet_register(host, int(port), npid, password)
+            except (OSError, ValueError) as error:
+                result = (False, str(error))
+            GLib.idle_add(done, *result)
         threading.Thread(target=work, daemon=True).start()
 
     # --- about page ----------------------------------------------------------------------
