@@ -2,7 +2,9 @@
 
 USER_DEFINED_PARAM_1 is Bloodborne's region: 2 the Americas (msg/na: Latin American Spanish), 13
 Europe (msg/eu: Spanish from Spain). --region eu|na sets it for this launch (BB_REGION, the
-launcher's Region), whatever the dump's param.sfo says."""
+launcher's Region), whatever the dump's param.sfo says. A dump without one (0)
+gets Europe: with no region the game has no address for its server, and Log In fails with "Unable
+to obtain Bloodborne server information" (issue #9)."""
 import argparse
 import json
 import struct
@@ -19,6 +21,8 @@ def prepare(game, out, sku='full', region=''):
         raise ValueError('invalid user-defined parameter')
     if region:
         params[0]=REGIONS[region]
+    elif params[0]==0:
+        params[0]=REGIONS['eu']
     profile=dict(title_id=values.get('TITLE_ID'),sku=sku,sku_source='explicit probe setting',
                  user_params=params, mounted_addons=[],boot_attr=0)
     out.mkdir(parents=True,exist_ok=True)

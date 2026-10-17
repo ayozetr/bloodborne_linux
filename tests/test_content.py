@@ -25,6 +25,15 @@ class ProfileTests(unittest.TestCase):
                     content_profile.prepare(p,p,region=region)
                 self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes())[2],value)
 
+    def test_dump_without_a_region_gets_europe(self):
+        # Without one the game has no address for its server (issue #9).
+        for region,value in (('',13),('na',2)):
+            with self.subTest(region=region), tempfile.TemporaryDirectory() as tmp:
+                p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')
+                with patch.object(content_profile,'sfo',return_value={}):
+                    content_profile.prepare(p,p,region=region)
+                self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes())[2],value)
+
     def test_invalid_sfo_parameter_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')
