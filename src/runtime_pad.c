@@ -1036,4 +1036,17 @@ static const RuntimeExport exports[]={
     {"scePadSetMotionSensorState",pad_ok_handle_flag},
 };
 uintptr_t runtime_pad_resolve(const char *name) { return RUNTIME_LOOKUP(exports,name); }
+/* The gamepad button bound to a PS4 input ("cross", "circle"), for the port's on-screen keyboard
+ * and menu (gpu/shim/bbport_overlay.cpp), which then follow A and B swapped: an SDL_GAMEPAD_BUTTON_*,
+ * or -1 when the input has none or the bindings are not read yet. */
+int runtime_pad_button(const char *input) {
+    if (!bindings_ready || !input) return -1;
+    for (int i=0;i<IN_COUNT;++i) {
+        if (strcmp(input_names[i],input)) continue;
+        for (int j=0;j<bindings[i].pad_count;++j)
+            if (bindings[i].pad[j]<SDL_GAMEPAD_BUTTON_COUNT) return bindings[i].pad[j];
+        return -1;
+    }
+    return -1;
+}
 void runtime_pad_report(void) { printf("Runtime: pad reads=%zu, gamepad=%s\n",reads,gamepad ? SDL_GetGamepadName(gamepad) : "none"); }

@@ -41,6 +41,16 @@ extern "C" const unsigned char bb_font_ttf[];
 extern "C" const unsigned char bb_font_ttf_end[];
 
 extern "C" void runtime_restart(void); // bb-probe (probe.c)
+extern "C" int runtime_pad_button(const char* input); // bb-probe (runtime_pad.c)
+
+namespace {
+/// The SDL button the game's cross or circle is on (bbport.ini pad.cross / pad.circle: A and B
+/// swapped on Nintendo-style controllers), the PS4's place without a binding.
+u8 PadButton(const char* input, SDL_GamepadButton fallback) {
+    const int button = runtime_pad_button(input);
+    return static_cast<u8>(button >= 0 ? button : fallback);
+}
+} // namespace
 
 namespace BbOverlay {
 
@@ -168,6 +178,13 @@ ImGuiKey KeyFromSdl(SDL_Keycode key) {
 }
 
 ImGuiKey KeyFromGamepad(u8 button) {
+    // The menu's accept and back follow the game's cross and circle.
+    if (button == PadButton("cross", SDL_GAMEPAD_BUTTON_SOUTH)) {
+        return ImGuiKey_GamepadFaceDown;
+    }
+    if (button == PadButton("circle", SDL_GAMEPAD_BUTTON_EAST)) {
+        return ImGuiKey_GamepadFaceRight;
+    }
     switch (button) {
     case SDL_GAMEPAD_BUTTON_SOUTH: return ImGuiKey_GamepadFaceDown;
     case SDL_GAMEPAD_BUTTON_EAST: return ImGuiKey_GamepadFaceRight;
@@ -941,6 +958,15 @@ void OskMove(int d_row, int d_col) {
 /// Window thread, the text dialog open and the menu closed: a controller types on the keyboard.
 bool OskEvent(const SDL_Event& event) {
     if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
+        // Types and cancels on the game's cross and circle, wherever bbport.ini puts them.
+        if (event.gbutton.button == PadButton("cross", SDL_GAMEPAD_BUTTON_SOUTH)) {
+            OskPress(osk.row, osk.col);
+            return true;
+        }
+        if (event.gbutton.button == PadButton("circle", SDL_GAMEPAD_BUTTON_EAST)) {
+            OskEdit(TextEdit::Cancel);
+            return true;
+        }
         switch (event.gbutton.button) {
         case SDL_GAMEPAD_BUTTON_DPAD_UP: OskMove(-1, 0); return true;
         case SDL_GAMEPAD_BUTTON_DPAD_DOWN: OskMove(1, 0); return true;
