@@ -1,8 +1,11 @@
 from paths import ROOT  # noqa: F401
+import json
 import socket
 import struct
+import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 
 import online
 
@@ -67,6 +70,20 @@ class ServerChoiceTests(unittest.TestCase):
         finally:
             thread.join(5)
             listener.close()
+
+    def test_seamless_hunt_bloodstains_off_unless_kept(self):
+        # They crash the game with "Transaction failed" there (issue #10).
+        keys = {f'http://{host}:20443/tomb_messenger/message_area'
+                for host in online.SEAMLESSHUNT_HOSTS}
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(online, 'summon_service', return_value=False):
+            def written(community, tombs=False):
+                path = online.write_overrides(tmp, community, 'http://x:31315', tombs)
+                return json.loads(path.read_text())
+            off = written('http://play.seamlesshunt.com:20443')
+            self.assertEqual({k: off[k] for k in keys}, dict.fromkeys(keys, online.NOWHERE))
+            self.assertFalse(keys & written('http://play.seamlesshunt.com', tombs=True).keys())
+            self.assertFalse(keys & written('').keys())  # The Hunter's Dream
 
     def test_environment(self):
         env = online.environment({

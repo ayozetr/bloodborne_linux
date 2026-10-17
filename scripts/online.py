@@ -39,6 +39,13 @@ SHADNET_SERVER = 'srv.shadps4.net:31313'
 GAME_SERVER = 'https://ss4.scej-network.jp:20443'
 # The server's ss.info sends the game to this port for its API (summons among them).
 COMMUNITY_API_PORT = 18671
+# Seamless Hunt's game server (its ss.info sends the game to the address). Its bloodstains and
+# death visions (tomb_messenger/message_area) crash the game with "Transaction failed" on Windows and
+# Linux alike (issue #10): its own BBSC package sends those two requests nowhere by default, so they
+# fail and the game goes on without them. BB_SEAMLESSHUNT_TOMBS=1 (the launcher) keeps them.
+SEAMLESSHUNT_HOSTS = ('play.seamlesshunt.com', '199.195.193.131')
+SEAMLESSHUNT_TOMBS = '/tomb_messenger/message_area'
+NOWHERE = 'http://127.0.0.1:9'
 
 
 # The shadNet server's UDP port (shadnet.cfg MatchingUdpPort): the game pings it to learn its public
@@ -153,6 +160,7 @@ def environment(settings):
         'BB_SHADNET_PASSWORD': settings.get('online_password') or '',
         'BB_UPNP': '1' if settings.get('online_upnp', True) else '0',
         'BB_COMMUNITY_SERVER': community,
+        'BB_SEAMLESSHUNT_TOMBS': '1' if settings.get('online_seamlesshunt_tombs') else '0',
     }
     port = int(settings.get('online_p2p_port') or 0)
     if 0 < port < 65536:
@@ -208,8 +216,9 @@ def summon_service(webapi):
         return False
 
 
-def write_overrides(user_dir, community, webapi):
-    """The host overrides file for this launch; returns its path."""
+def write_overrides(user_dir, community, webapi, tombs=False):
+    """The host overrides file for this launch; returns its path. tombs: Seamless Hunt's
+    bloodstains and death visions too (SEAMLESSHUNT_TOMBS)."""
     user_dir = Path(user_dir)
     user_dir.mkdir(parents=True, exist_ok=True)
     custom = user_dir / 'host_overrides.custom.json'
@@ -225,6 +234,11 @@ def write_overrides(user_dir, community, webapi):
         print(f'Co-op: summon signs through {webapi}', file=sys.stderr)
     else:
         print(f'Co-op: {webapi} has no summon service; summon signs through {community}',
+              file=sys.stderr)
+    if host in SEAMLESSHUNT_HOSTS and not tombs:
+        overrides.update({f'http://{name}:20443{SEAMLESSHUNT_TOMBS}': NOWHERE
+                          for name in SEAMLESSHUNT_HOSTS})
+        print('Co-op: Seamless Hunt\'s bloodstains and death visions are off (they crash the game)',
               file=sys.stderr)
     path = user_dir / 'host_overrides.json'
     path.write_text(json.dumps(overrides, indent=2) + '\n', encoding='utf-8')
@@ -448,7 +462,8 @@ def main():
         print(config)
         print(overrides)
     elif a.command == 'overrides':
-        print(write_overrides(a.user, community, webapi))
+        print(write_overrides(a.user, community, webapi,
+                              os.environ.get('BB_SEAMLESSHUNT_TOMBS') == '1'))
     else:
         for name, address, ok, detail in check(server, webapi, community):
             print(f'{name}: {address}: {"reachable" if ok else "not reachable"} {detail}'.rstrip())

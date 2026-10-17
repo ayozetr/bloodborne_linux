@@ -445,6 +445,9 @@ EN = {
     "Играть онлайн": "Play online",
     "Выключено: игра остаётся офлайн, как раньше": "Off: the game stays offline, as before",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Game server (messages, bloodstains, ghosts)",
+    "Пятна крови на Seamless Hunt": "Bloodstains on Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "This server's bloodstains and death visions crash the game with \"Transaction failed\": without them it doesn't crash",
     "Игровой сервер": "Game server",
     "Сервер кооператива (колокола и призывы)": "Co-op server (bells and summons)",
     "Учётная запись": "Account",
@@ -1083,6 +1086,9 @@ PT_BR = {
     "Играть онлайн": "Jogar online",
     "Выключено: игра остаётся офлайн, как раньше": "Desligado: o jogo continua offline, como antes",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor do jogo (mensagens, manchas de sangue, fantasmas)",
+    "Пятна крови на Seamless Hunt": "Manchas de sangue no Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "As manchas de sangue e visões de morte deste servidor fecham o jogo com \"Transaction failed\": sem elas o jogo não fecha",
     "Игровой сервер": "Servidor do jogo",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (sinos e invocações)",
     "Учётная запись": "Conta",
@@ -1879,6 +1885,9 @@ ES = {
     "Играть онлайн": "Jugar online",
     "Выключено: игра остаётся офлайн, как раньше": "Desactivado: el juego sigue sin conexión, como antes",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor del juego (mensajes, manchas de sangre, fantasmas)",
+    "Пятна крови на Seamless Hunt": "Manchas de sangre en Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "Las manchas de sangre y visiones de muerte de este servidor cierran el juego con «Transaction failed»: sin ellas no se cierra",
     "Игровой сервер": "Servidor del juego",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (campanas e invocaciones)",
     "Учётная запись": "Cuenta",
@@ -2594,6 +2603,9 @@ IT = {
     "Играть онлайн": "Gioca online",
     "Выключено: игра остаётся офлайн, как раньше": "Disattivato: il gioco resta offline, come prima",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Server di gioco (messaggi, macchie di sangue, fantasmi)",
+    "Пятна крови на Seamless Hunt": "Macchie di sangue su Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "Le macchie di sangue e le visioni di morte di questo server fanno chiudere il gioco con \"Transaction failed\": senza di esse non si chiude",
     "Игровой сервер": "Server di gioco",
     "Сервер кооператива (колокола и призывы)": "Server cooperativo (campane ed evocazioni)",
     "Учётная запись": "Account",
@@ -3309,6 +3321,9 @@ FR = {
     "Играть онлайн": "Jouer en ligne",
     "Выключено: игра остаётся офлайн, как раньше": "Désactivé : le jeu reste hors ligne, comme avant",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Serveur de jeu (messages, taches de sang, fantômes)",
+    "Пятна крови на Seamless Hunt": "Taches de sang sur Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "Les taches de sang et visions de mort de ce serveur font planter le jeu avec « Transaction failed » : sans elles, il ne plante pas",
     "Игровой сервер": "Serveur de jeu",
     "Сервер кооператива (колокола и призывы)": "Serveur coopératif (cloches et invocations)",
     "Учётная запись": "Compte",
@@ -4024,6 +4039,9 @@ DE = {
     "Играть онлайн": "Online spielen",
     "Выключено: игра остаётся офлайн, как раньше": "Aus: Das Spiel bleibt offline wie bisher",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Spielserver (Nachrichten, Blutflecken, Geister)",
+    "Пятна крови на Seamless Hunt": "Blutflecken auf Seamless Hunt",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "Die Blutflecken und Todesvisionen dieses Servers bringen das Spiel mit „Transaction failed“ zum Absturz: ohne sie stürzt es nicht ab",
     "Игровой сервер": "Spielserver",
     "Сервер кооператива (колокола и призывы)": "Koop-Server (Glocken und Beschwörungen)",
     "Учётная запись": "Konto",
@@ -4887,6 +4905,9 @@ ZH_CN = {
     "Играть офлайн": "离线游玩",
     "Игровой сервер": "游戏服务器",
     "Игровой сервер (сообщения, пятна крови, призраки)": "游戏服务器（留言、血迹、幻影）",
+    "Пятна крови на Seamless Hunt": "Seamless Hunt 上的血迹",
+    "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
+        "该服务器的血迹和死亡幻影会使游戏以“Transaction failed”崩溃：关闭后不会崩溃",
     "Изменения игрового процесса": "玩法调整",
     "Иконки кнопок": "按键图标",
     "Поменять местами A и B": "交换 A 和 B",

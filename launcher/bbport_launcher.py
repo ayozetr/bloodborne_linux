@@ -227,6 +227,9 @@ DEFAULTS = {
     # Online page swaps them when the server changes; online_npid/password are the chosen one's.
     "online_accounts": {},
     "online_upnp": True,
+    # Seamless Hunt's bloodstains and death visions, off by default: they crash the game there
+    # (scripts/online.py, SEAMLESSHUNT_TOMBS).
+    "online_seamlesshunt_tombs": False,
     "online_p2p_port": 0,  # 0: a random port each time (SHADPS4_P2P_PORT)
     "online_seamless": False,
     # Seamless co-op (BBSC): on or off, and the options the player changed ({mod.json id: value}).
@@ -1947,6 +1950,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
         self.community_row = Adw.EntryRow(title=tr("Игровой сервер"), text=s["online_community"])
         game.add(self.community_row)
+        self.tombs_row = Adw.SwitchRow(
+            title=tr("Пятна крови на Seamless Hunt"),
+            subtitle=tr("Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: "
+                        "без них игра не вылетает"),
+            active=s["online_seamlesshunt_tombs"])
+        game.add(self.tombs_row)
         page.add(game)
 
         coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
@@ -2099,6 +2108,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "online_npid": self.npid_row.get_text().strip(),
             "online_password": self.password_row.get_text(),
             "online_upnp": self.upnp_row.get_active(),
+            "online_seamlesshunt_tombs": self.tombs_row.get_active(),
             "online_p2p_port": int(self.p2p_port_row.get_value()),
             "online_seamless": self.settings.get("online_seamless", False),
             "online_accounts": self.kept_accounts(),
