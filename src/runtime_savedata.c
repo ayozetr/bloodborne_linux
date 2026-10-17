@@ -99,8 +99,11 @@ static void bloodborne_sound_hack(void) {
     }
     closedir(dir);
 }
+/* BB_SAVEDATA_TITLE: the saves' title id, for BBSC (bbsc/emulator/mod/linux), loaded later, to
+ * know the save folder before the game has written one. */
 void runtime_savedata_configure(const char *title) {
     if (title && *title) snprintf(title_id,sizeof(title_id),"%s",title);
+    setenv("BB_SAVEDATA_TITLE",title_id,1);
     bloodborne_sound_hack();
 }
 

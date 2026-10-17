@@ -24,6 +24,8 @@ lines in BBSC's own files are marked `bbport:` in comments.
 - **The co-op kit, late.** The search for the item tables, which only appear once a character is
   loaded, no longer gives up after 3 minutes (`emulator/src/core/bloodborne_re.cpp`, StartBbscDuelBell).
 - **Saves.** `BBSC_SAVE_DIR` is set to bbport's save folder (`savedata/<user>/<title id>/SPRJ0005`).
+  On a first start, with no saves yet, it is the folder the game will write (`BB_SAVEDATA_TITLE`,
+  from bbport's runtime), so the kit still comes.
 - **Translations.** BBSC's texts follow the game's language:
   - `emulator/src/core/bbsc_i18n.{h,cpp}` and `bbsc_translations.inc`, generated from
     `translations/*.json` by `translations/gen_translations.py`;

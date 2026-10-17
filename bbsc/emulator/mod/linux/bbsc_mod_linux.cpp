@@ -142,6 +142,12 @@ void OpenLog() {
         } catch (const std::exception&) {
         }
         ignored.clear();
+        // bbport: a first start has no saves yet, and the kit was then never given: the folder
+        // the game will write (user 1, src/runtime_services.c; BB_SAVEDATA_TITLE from the runtime).
+        const char* title = std::getenv("BB_SAVEDATA_TITLE");
+        if (newest.empty() && title != nullptr && *title != '\0' && std::strcmp(title, "UNKNOWN") != 0) {
+            newest = user_dir / "savedata" / "1" / title / "SPRJ0005";
+        }
         if (!newest.empty()) {
             setenv("BBSC_SAVE_DIR", newest.c_str(), 1);
         }

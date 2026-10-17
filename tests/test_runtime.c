@@ -459,6 +459,13 @@ static void orbis_fpu(void) {
     assert(tiny*1.0f==0.0f);
     __asm__ volatile("ldmxcsr %0" : : "m"(before));
 }
+/* BBSC reads the saves' title id to find the save folder before the game has written one. */
+static void savedata_title(void) {
+    setenv("BB_SOUND_HACK","0",1);  /* no save touched */
+    runtime_savedata_configure("CUSA00900");
+    assert(getenv("BB_SAVEDATA_TITLE") && !strcmp(getenv("BB_SAVEDATA_TITLE"),"CUSA00900"));
+}
+
 int main(int argc,char **argv) {
     runtime_start(0); assert(runtime_resolve("bzQExy189ZI#q#q",0)==0);
     runtime_start(1);
@@ -487,7 +494,7 @@ int main(int argc,char **argv) {
     if (argc>1 && !strcmp(argv[1],"--trophy-platinum")) { assert(trophy_platinum(0)==0); return 0; }
     if (argc>1 && !strcmp(argv[1],"--trophy-platinum-legacy")) { assert(trophy_platinum(1)==-1); return 0; }
     libc_support(); posix_mutexes(); wall_time(); exit_handlers(); guards(); mutexes(); direct_memory(); write_traps(); memory_primitives();
-    rw_lifecycle(); rw_concurrency(); rw_timeouts(); quit_to_desktop(); orbis_fpu();
-    puts("PASS: callback lifecycle, guard ABI, mutex errors, shared direct memory, memory primitives, resolver scope, Quit to Desktop, the PS4's floating-point state");
+    rw_lifecycle(); rw_concurrency(); rw_timeouts(); quit_to_desktop(); orbis_fpu(); savedata_title();
+    puts("PASS: callback lifecycle, guard ABI, mutex errors, shared direct memory, memory primitives, resolver scope, Quit to Desktop, the PS4's floating-point state, the saves' title id");
     return 0;
 }
