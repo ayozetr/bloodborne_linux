@@ -7,7 +7,7 @@ everyone needs the game at version 1.09 and the same pool.
 
 > **shadPS4's public shadNet server no longer accepts bbport builds**: it signs the game out
 > right after the login ("This shadNet server doesn't accept your shadPS4 build" in the log), and
-> the launcher says so. The two pools for bbport are The Hunter's Dream's and a server of your own.
+> the launcher says so. The pools for bbport are The Hunter's Dream's, Seamless Hunt and a server of your own.
 
 ## The Hunter's Dream (with bbhost's players)
 
@@ -28,9 +28,25 @@ show you.
 do not support bbport: report problems here ([issues](https://github.com/ayozetr/bloodborne_linux/issues)),
 not to The Hunter's Dream's support.
 
+## Seamless Hunt
+
+[Seamless Hunt](https://install.seamlesshunt.com) is a community server for Seamless Co-op (BBSC),
+where Windows players join with BBSC's package for the Windows port.
+
+1. In the launcher's **Online** page, turn on **Play online** and choose **Seamless Hunt**: its
+   shadNet server, WebAPI and game server come with it.
+2. Type a name and a password under **Account** and press **Create** (once). The server wants an
+   email for each account; the launcher makes one from the name, as Seamless Hunt's own tool does.
+3. Turn on **Seamless co-op (BBSC)** and **Test the connection**.
+
+Its bloodstains and death visions crash the game with "Transaction failed", on Windows too: they
+are off by default, as in Seamless Hunt's package (**Bloodstains on Seamless Hunt** brings them
+back). Messages, ghosts and summon signs are not affected.
+
 ## Your own server
 
-Its owner creates the account ([SERVER.md](SERVER.md)).
+Its owner creates the account ([SERVER.md](SERVER.md)), or you make it with **Create** under
+**Account** when the server lets anyone register.
 
 1. In the launcher's **Online** page, turn on **Play online**, choose **Your own server** with
    its address, and enter the **account name** (not the email) and the password. The password is

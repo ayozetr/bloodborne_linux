@@ -85,6 +85,17 @@ class ServerChoiceTests(unittest.TestCase):
             self.assertFalse(keys & written('http://play.seamlesshunt.com', tombs=True).keys())
             self.assertFalse(keys & written('').keys())  # The Hunter's Dream
 
+    def test_seamless_hunt_choice_sets_its_servers(self):
+        settings = {'online_server_kind': 'seamlesshunt', 'online_server': '100.64.0.7',
+                    'online_community': 'thehuntersdream.com', 'online_npid': 'me'}
+        self.assertEqual(online.addresses(settings),
+                         ('play.seamlesshunt.com:31313', 'http://play.seamlesshunt.com:31315',
+                          'http://play.seamlesshunt.com'))
+        env = online.environment(settings)
+        self.assertEqual((env['BB_SHADNET_SERVER'], env['BB_COMMUNITY_SERVER']),
+                         ('play.seamlesshunt.com:31313', 'http://play.seamlesshunt.com'))
+        self.assertEqual(env['BB_SEAMLESSHUNT_TOMBS'], '0')
+
     def test_environment(self):
         env = online.environment({
             'online_server_kind': 'own', 'online_server': '100.64.0.7', 'online_npid': ' Hunter ',

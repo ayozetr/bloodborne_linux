@@ -44,6 +44,11 @@ COMMUNITY_API_PORT = 18671
 # Linux alike (issue #10): its own BBSC package sends those two requests nowhere by default, so they
 # fail and the game goes on without them. BB_SEAMLESSHUNT_TOMBS=1 (the launcher) keeps them.
 SEAMLESSHUNT_HOSTS = ('play.seamlesshunt.com', '199.195.193.131')
+# Its servers, for the launcher's "Seamless Hunt" choice (online_server_kind "seamlesshunt"), as its
+# guide sets them up (install.seamlesshunt.com/bbport.html): shadNet, the WebAPI, the game server.
+SEAMLESSHUNT_SERVER = 'play.seamlesshunt.com:31313'
+SEAMLESSHUNT_WEBAPI = 'http://play.seamlesshunt.com:31315'
+SEAMLESSHUNT_GAME = 'http://play.seamlesshunt.com'
 SEAMLESSHUNT_TOMBS = '/tomb_messenger/message_area'
 NOWHERE = 'http://127.0.0.1:9'
 
@@ -102,10 +107,10 @@ def webapi_setting(webapi, server, community):
 
 
 def server_kind(settings):
-    """'public' (shadPS4's server) or 'own'; settings from before the choice existed are 'own'
-    when they name another server."""
+    """'public' (shadPS4's server), 'own', 'seamlesshunt' or 'thd'; settings from before the choice
+    existed are 'own' when they name another server."""
     kind = settings.get('online_server_kind')
-    if kind in ('public', 'own', 'thd'):
+    if kind in ('public', 'own', 'seamlesshunt', 'thd'):
         return kind
     server = str(settings.get('online_server') or '').strip()
     return 'own' if server and server != SHADNET_SERVER else 'public'
@@ -126,6 +131,8 @@ def account(settings, kind):
 def addresses(settings):
     """(shadNet server, WebAPI, game server) for the launcher's settings. A server without a port
     gets shadNet's 31313; shadPS4's public server ignores the WebAPI field."""
+    if server_kind(settings) == 'seamlesshunt':
+        return SEAMLESSHUNT_SERVER, SEAMLESSHUNT_WEBAPI, SEAMLESSHUNT_GAME
     community = community_address(settings.get('online_community'), probe=True)
     server = str(settings.get('online_server') or '').strip()
     if server_kind(settings) == 'public' or not server:

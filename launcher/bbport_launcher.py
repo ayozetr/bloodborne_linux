@@ -399,6 +399,8 @@ TROPHY_GRADES = {"P": "Платиновый", "G": "Золотой", "S": "Се�
 SERVER_KINDS = [
     ("Публичный сервер shadPS4", "public", "srv.shadps4.net:31313"),
     ("Свой сервер", "own", "shadnet-p2p: на вашем ПК или VPS"),
+    # Seamless Hunt's servers, as its guide sets them up (online.SEAMLESSHUNT_*).
+    ("Seamless Hunt", "seamlesshunt", "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows"),
 ]
 # The Hunter's Dream, with bbhost's players: bbbridge on this PC (scripts/online.py, run.sh).
 THD_KIND = ("The Hunter's Dream (с игроками bbhost)", "thd",
@@ -2050,7 +2052,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                            "хранится на этом компьютере вместе с настройками лаунчера"))
         self.account_kind = combo_value(self.server_kind_row)
         self.online_accounts = {kind: dict(zip(("npid", "password"), online.account(s, kind)))
-                                for kind in ("public", "own", "thd")}
+                                for kind in ("public", "own", "seamlesshunt", "thd")}
         npid, password = online.account(s, self.account_kind)
         self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=npid)
         self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=password)
@@ -2063,7 +2065,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.register_button.connect("clicked", self.on_register)
         self.register_row.add_suffix(self.register_button)
         account.add(self.register_row)
-        self.own_server_rows = (*self.own_server_rows, self.register_row)
         self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
         self.account_group = account
         page.add(account)
@@ -2163,6 +2164,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         kind = combo_value(self.server_kind_row)
         for row in self.own_server_rows:
             row.set_visible(kind == "own")
+        # Seamless Hunt: its game server comes with the choice, and accounts are made from here.
+        self.community_row.set_visible(kind != "seamlesshunt")
+        self.register_row.set_visible(kind in ("own", "seamlesshunt"))
         # The Hunter's Dream: the bridge reaches the internet, the game only the bridge on this PC.
         thd = kind == "thd"
         self.thd_group.set_visible(thd)

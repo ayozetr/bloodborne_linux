@@ -60,6 +60,8 @@ connection** (every line should be green):
 - **The Hunter's Dream**: sign in with Discord, or create an account with just a name. You play
   with bbhost's players. This connection is unofficial: report problems here, not to The Hunter's
   Dream.
+- **Seamless Hunt**: the community server of Seamless Co-op (BBSC), with players on the Windows
+  port. Make an account from the launcher with **Create** ([docs/ONLINE.md](docs/ONLINE.md#seamless-hunt)).
 - **Your own server**: for your group, with Docker and Tailscale ([docs/SERVER.md](docs/SERVER.md)).
 - **Seamless Co-op (BBSC)**, in the same page: every player needs it, and summons across areas need
   its game server, which your own server can run ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
