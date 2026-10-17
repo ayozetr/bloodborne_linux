@@ -44,6 +44,30 @@ class ServerChoiceTests(unittest.TestCase):
         self.assertEqual(online.addresses({'online_server_kind': 'own', 'online_server': ''})[0],
                          online.SHADNET_SERVER)
 
+    def test_game_server_typed_without_scheme(self):
+        self.assertEqual(online.community_address('http://example.org:20443'),
+                         'http://example.org')
+        self.assertEqual(online.community_address('example.org:20443'), 'https://example.org')
+        # A server whose port 20443 speaks plain http, as seamlesshunt's (issue #9).
+        try:
+            listener = socket.create_server(('127.0.0.1', 20443))
+        except OSError:
+            self.skipTest('port 20443 is busy')
+
+        def answer():
+            peer, _ = listener.accept()
+            peer.recv(1024)
+            peer.sendall(b'HTTP/1.0 400 Bad Request\r\n\r\n')
+            peer.close()
+        thread = threading.Thread(target=answer)
+        thread.start()
+        try:
+            self.assertEqual(online.community_address('127.0.0.1:20443', probe=True),
+                             'http://127.0.0.1')
+        finally:
+            thread.join(5)
+            listener.close()
+
     def test_environment(self):
         env = online.environment({
             'online_server_kind': 'own', 'online_server': '100.64.0.7', 'online_npid': ' Hunter ',

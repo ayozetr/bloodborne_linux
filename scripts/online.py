@@ -23,6 +23,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import ssl
 import struct
 import subprocess
 import sys
@@ -50,12 +51,30 @@ STUN_TEST_ID = b'bbport-udp-test'
 SERVER_SIGNALING_HEADER = bytes([0xFF, 0x83, 0xFF, 0xFF, 0xFF, 0xFF])
 
 
-def community_address(value):
-    """The game server as https://host (the game picks the ports), The Hunter's Dream by default."""
+def community_address(value, probe=False):
+    """The game server as https://host (the game picks the ports), The Hunter's Dream by default.
+    A host typed without http:// or https:// is https, or with probe whatever its port 20443
+    speaks: some servers answer the game in plain http (issue #9)."""
     value = str(value or '').strip() or COMMUNITY_SERVER
     scheme, _sep, rest = value.rpartition('://')
     host = rest.split('/')[0].split(':')[0]
+    if not scheme and probe:
+        scheme = community_scheme(host)
     return f'{scheme or "https"}://{host}'
+
+
+def community_scheme(host):
+    """'http' when the host's port 20443 refuses a TLS handshake, else 'https' (unreachable too)."""
+    try:
+        with socket.create_connection((host, 20443), timeout=4) as sock:
+            ssl.create_default_context().wrap_socket(sock, server_hostname=host).close()
+    except ssl.SSLCertVerificationError:
+        return 'https'
+    except ssl.SSLError:
+        return 'http'
+    except OSError:
+        pass
+    return 'https'
 
 
 def webapi_address(server):
@@ -100,7 +119,7 @@ def account(settings, kind):
 def addresses(settings):
     """(shadNet server, WebAPI, game server) for the launcher's settings. A server without a port
     gets shadNet's 31313; shadPS4's public server ignores the WebAPI field."""
-    community = community_address(settings.get('online_community'))
+    community = community_address(settings.get('online_community'), probe=True)
     server = str(settings.get('online_server') or '').strip()
     if server_kind(settings) == 'public' or not server:
         return SHADNET_SERVER, webapi_address(SHADNET_SERVER), community
