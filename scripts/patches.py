@@ -70,13 +70,19 @@ def intel_cpu(cpuinfo='/proc/cpuinfo'):
         return False
 
 
-# The title's PLAY ONLINE / PLAY OFFLINE dialog: the port has no PSN, the game goes straight to the
-# main menu offline. On by default (the launcher's switch); BB_SKIP_NETWORK_CHOICE=0 shows it.
+# The title's PLAY ONLINE / PLAY OFFLINE dialog: the game goes straight to the main menu, offline,
+# or online with online play on (BB_ONLINE=1), as PLAY ONLINE on a PS4: offline, its online session
+# only started with Log In, and the co-op bells stayed grey until then (issue #9). On by default
+# (the launcher's switch); BB_SKIP_NETWORK_CHOICE=0 shows it.
 SKIP_NETWORK_CHOICE='Skip Online/Offline Choice'
+SKIP_NETWORK_CHOICE_ONLINE='Skip Online/Offline Choice: Online'
 
 
 def skip_network_choice(env=os.environ):
-    return env.get('BB_SKIP_NETWORK_CHOICE','1')!='0'
+    """The patch that answers the dialog, or None to show it."""
+    if env.get('BB_SKIP_NETWORK_CHOICE','1')=='0':
+        return None
+    return SKIP_NETWORK_CHOICE_ONLINE if env.get('BB_ONLINE')=='1' else SKIP_NETWORK_CHOICE
 
 
 # The game's two per-frame GX command heaps are 256 KiB; a frame that fills one writes through a
@@ -485,8 +491,9 @@ def main():
     names+=[n for n in effect_patches(read_settings(a.settings)) if n not in names]
     if intel_tonemap_fix() and INTEL_TONEMAP not in names:
         names.append(INTEL_TONEMAP)
-    if skip_network_choice() and SKIP_NETWORK_CHOICE not in names:
-        names.append(SKIP_NETWORK_CHOICE)
+    skip=skip_network_choice()
+    if skip and not {SKIP_NETWORK_CHOICE,SKIP_NETWORK_CHOICE_ONLINE}&set(names):
+        names.append(skip)
     if gx_command_heap() and GX_COMMAND_HEAP not in names:
         names.append(GX_COMMAND_HEAP)
     names=validate_patch_requirements(names,a.game_dir)

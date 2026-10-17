@@ -157,8 +157,8 @@ EN = {
     "{} (не подключён)": "{} (not connected)",
     "Монитор": "Monitor",
     "Пропускать выбор «по сети / вне сети»": "Skip the \u201cplay online / offline\u201d choice",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "The game opens the main menu offline at once (a game patch)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "The game opens the main menu at once: online when online play is on, offline otherwise (a game patch)",
     "Основной": "Primary",
     ", основной": ", primary",
     "Нужно обновление 1.09: скопируйте файлы дампа обновления 1.09 в папку игры с заменой (найдена версия {})":
@@ -1225,8 +1225,8 @@ PT_BR = {
         "Monitor",
     "Пропускать выбор «по сети / вне сети»":
         "Pular a escolha “jogar online / offline”",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "O jogo abre o menu principal offline direto (um patch do jogo)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "O jogo abre o menu principal direto: online se o jogo online estiver ativado, senão offline (um patch do jogo)",
     "Основной":
         "Principal",
     ", основной":
@@ -1984,8 +1984,8 @@ ES = {
         "Monitor",
     "Пропускать выбор «по сети / вне сети»":
         "Saltar la elección «jugar en línea / sin conexión»",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "El juego abre el menú principal sin conexión directamente (un parche del juego)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "El juego abre el menú principal directamente: en línea si el juego en línea está activado y, si no, sin conexión (un parche del juego)",
     "Основной":
         "Principal",
     ", основной":
@@ -2711,8 +2711,8 @@ IT = {
         "Monitor",
     "Пропускать выбор «по сети / вне сети»":
         "Salta la scelta «gioca online / offline»",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "Il gioco apre subito il menu principale offline (una patch del gioco)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "Il gioco apre subito il menu principale: online se il gioco online è attivo, altrimenti offline (una patch del gioco)",
     "Основной":
         "Principale",
     ", основной":
@@ -3438,8 +3438,8 @@ FR = {
         "Écran",
     "Пропускать выбор «по сети / вне сети»":
         "Passer le choix « jouer en ligne / hors ligne »",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "Le jeu ouvre directement le menu principal hors ligne (un patch du jeu)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "Le jeu ouvre directement le menu principal : en ligne si le jeu en ligne est activé, sinon hors ligne (un patch du jeu)",
     "Основной":
         "Principal",
     ", основной":
@@ -4165,8 +4165,8 @@ DE = {
         "Monitor",
     "Пропускать выбор «по сети / вне сети»":
         "Die Auswahl „online / offline spielen“ überspringen",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)":
-        "Das Spiel öffnet das Hauptmenü sofort offline (ein Spiel-Patch)",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
+        "Das Spiel öffnet das Hauptmenü sofort: online, wenn Online-Spiel an ist, sonst offline (ein Spiel-Patch)",
     "Основной":
         "Hauptmonitor",
     ", основной":
@@ -4963,7 +4963,7 @@ ZH_CN = {
     "Закрыть Steam": "关闭 Steam",
     "Записываются, когда игра их открывает, и показываются в игре": "游戏解锁奖杯时记录，并在游戏中显示",
     "Игра в библиотеке Steam запускается сразу, с настройками этого лаунчера": "从 Steam 库启动时会直接进入游戏，并使用本启动器的设置",
-    "Игра сразу открывает главное меню в режиме вне сети (патч игры)": "游戏直接以离线模式进入主菜单（游戏补丁）",
+    "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)": "游戏直接进入主菜单：开启在线游玩时为在线模式，否则为离线模式（游戏补丁）",
     "Играть онлайн": "在线游玩",
     "Играть офлайн": "离线游玩",
     "Игровой сервер": "游戏服务器",

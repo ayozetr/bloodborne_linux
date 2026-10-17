@@ -115,6 +115,24 @@ class GxCommandHeapTests(unittest.TestCase):
                 self.assertEqual(data[offset + 0x4000 - 1:offset + 0x4000 + 4], b'\xba\x00\x00\x04\x00')
 
 
+class NetworkChoiceTests(unittest.TestCase):
+    def test_online_play_answers_play_online(self):
+        self.assertEqual(patches.skip_network_choice({}), patches.SKIP_NETWORK_CHOICE)
+        self.assertEqual(patches.skip_network_choice({'BB_ONLINE': '1'}),
+                         patches.SKIP_NETWORK_CHOICE_ONLINE)
+        self.assertIsNone(patches.skip_network_choice({'BB_SKIP_NETWORK_CHOICE': '0',
+                                                       'BB_ONLINE': '1'}))
+        (at, offline), = compile_patches(XML, [patches.SKIP_NETWORK_CHOICE], '01.09', SEGMENTS)
+        (at2, online), = compile_patches(XML, [patches.SKIP_NETWORK_CHOICE_ONLINE], '01.09',
+                                         SEGMENTS)
+        self.assertEqual(at, at2)
+        # The same builder: the PLAY ONLINE item's vtable (0x533be80) and operator() (0x1b49eb0).
+        lea = lambda code: at + 0x13 + struct.unpack_from('<i', code, 0xf)[0]
+        call = lambda code: at + 0x24 + struct.unpack_from('<i', code, 0x20)[0]
+        self.assertEqual((lea(offline), call(offline)), (0x533be30, 0x1b49cd0))
+        self.assertEqual((lea(online), call(online)), (0x533be80, 0x1b49eb0))
+
+
 class DebugPatchTests(unittest.TestCase):
     def test_camera_patch_is_optional_and_compatible_with_fps_and_debug_menu(self):
         self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0',

@@ -66,8 +66,9 @@ connection** (every line should be green):
 - **Seamless Co-op (BBSC)**, in the same page: every player needs it, and summons across areas need
   its game server, which your own server can run ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
 
-You may need to choose **Log In** on the game's title screen for online play to load; until then
-the co-op bells are greyed out.
+With online play on, the game starts online by itself, as PLAY ONLINE on a PS4. If you turned off
+*Skip the “play online / offline” choice* and pick offline, choose **Log In** on the title screen later
+for online play; until then the co-op bells are greyed out.
 
 Everyone in a session needs update 1.09. Turn cheats off when you play with others. Ports,
 firewalls and the rest: [docs/ONLINE.md](docs/ONLINE.md).

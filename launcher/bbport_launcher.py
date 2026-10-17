@@ -1188,10 +1188,11 @@ class LauncherWindow(Adw.ApplicationWindow):
                                     "игры», и потом закрывается"))
             self.effect_rows[key] = row
             effects.add(row)
-        # The title's "play online / play offline": the port has no PSN.
+        # The title's "play online / play offline": answered as the Online page's switch.
         self.skip_network_row = Adw.SwitchRow(
             title=tr("Пропускать выбор «по сети / вне сети»"),
-            subtitle=tr("Игра сразу открывает главное меню в режиме вне сети (патч игры)"),
+            subtitle=tr("Игра сразу открывает главное меню: в сети, если включена игра по сети, "
+                        "иначе вне сети (патч игры)"),
             active=self.settings.get("skip_network_choice", True))
         effects.add(self.skip_network_row)
         page.add(effects)
