@@ -13810,7 +13810,9 @@ void PS4_SYSV_ABI TraceEntry(u64 tag, const GuestRegisterSnapshot* registers) {
     if (site.kind == TraceKind::ResponderBellAvailability) {
         if (site.offset == 0x0157F686) {
             responder_goods = static_cast<s32>(registers->r12);
-            if (responder_goods != 205 && responder_goods != 225) {
+            // bbport: and the kit's Kin and Bloodlust Bells (4121, 11201), which replace them.
+            if (responder_goods != 205 && responder_goods != 225 && responder_goods != 4121 &&
+                responder_goods != 11201) {
                 return;
             }
             responder_availability_frame = registers->rbp;

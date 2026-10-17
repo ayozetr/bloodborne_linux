@@ -19,6 +19,8 @@ lines in BBSC's own files are marked `bbport:` in comments.
   through `process_vm_readv`, and through `/proc/self/mem` where that fails: on AMD the game's
   memory is a GPU dma-buf, and the item tables were never found there (no co-op kit).
 - **F8 key.** The F8 unstuck key works on Linux through SDL (`emulator/src/core/bloodborne_re.cpp`).
+- **Bell trace.** The responder bell trace also records the kit's Kin and Bloodlust Bells (4121,
+  11201), not only the vanilla bells they replace (`emulator/src/core/bloodborne_re.cpp`).
 - **The co-op kit, late.** The search for the item tables, which only appear once a character is
   loaded, no longer gives up after 3 minutes (`emulator/src/core/bloodborne_re.cpp`, StartBbscDuelBell).
 - **Saves.** `BBSC_SAVE_DIR` is set to bbport's save folder (`savedata/<user>/<title id>/SPRJ0005`).
