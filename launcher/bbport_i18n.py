@@ -512,8 +512,8 @@ EN = {
         'Could not grant Steam the permission: {}',
     "Регион игры":
         "Game region",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "The regional text of languages that have one: Spanish from Spain (Europe) or Latin American Spanish (the Americas)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "The regional text of languages that have one: Spanish from Spain (Europe) or Latin American Spanish (the Americas). It also picks the address of the game's server",
     "Как в дампе игры":
         "As in the game dump",
     "Европа":
@@ -1279,8 +1279,8 @@ PT_BR = {
         "Na pasta logs do diretório de dados: para investigar engasgos e travamentos",
     "Регион игры":
         "Região do jogo",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "A variante de texto dos idiomas que têm uma: espanhol da Espanha (Europa) ou da América Latina (Américas)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "A variante de texto dos idiomas que têm uma: espanhol da Espanha (Europa) ou da América Latina (Américas). Também escolhe o endereço do servidor do jogo",
     "Как в дампе игры":
         "Como no dump do jogo",
     "Европа":
@@ -2006,8 +2006,8 @@ ES = {
         "Antiguo (como en la 0.3)",
     "Регион игры":
         "Región del juego",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "La variante de texto de los idiomas que la tienen: español de España (Europa) o de Latinoamérica (América)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "La variante de texto de los idiomas que la tienen: español de España (Europa) o de Latinoamérica (América). También elige la dirección del servidor del juego",
     "Как в дампе игры":
         "Como en el volcado del juego",
     "Европа":
@@ -2733,8 +2733,8 @@ IT = {
         "Vecchio (come nella 0.3)",
     "Регион игры":
         "Regione del gioco",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "La variante del testo delle lingue che ne hanno una: spagnolo di Spagna (Europa) o dell'America Latina (America)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "La variante del testo delle lingue che ne hanno una: spagnolo di Spagna (Europa) o dell'America Latina (America). Sceglie anche l'indirizzo del server di gioco",
     "Как в дампе игры":
         "Come nel dump del gioco",
     "Европа":
@@ -3460,8 +3460,8 @@ FR = {
         "Ancien (comme dans la 0.3)",
     "Регион игры":
         "Région du jeu",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "La variante du texte des langues qui en ont une : espagnol d'Espagne (Europe) ou d'Amérique latine (Amériques)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "La variante du texte des langues qui en ont une : espagnol d'Espagne (Europe) ou d'Amérique latine (Amériques). Elle choisit aussi l'adresse du serveur du jeu",
     "Как в дампе игры":
         "Comme dans le dump du jeu",
     "Европа":
@@ -4187,8 +4187,8 @@ DE = {
         "Alt (wie in 0.3)",
     "Регион игры":
         "Spielregion",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "Die regionale Textvariante von Sprachen, die eine haben: Spanisch aus Spanien (Europa) oder Lateinamerika (Amerika)",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "Die regionale Textvariante von Sprachen, die eine haben: Spanisch aus Spanien (Europa) oder Lateinamerika (Amerika). Sie bestimmt auch die Adresse des Spielservers",
     "Как в дампе игры":
         "Wie im Dump des Spiels",
     "Европа":
@@ -4859,8 +4859,8 @@ ZH_CN = {
         '无法为 Steam 授予权限：{}',
     "Регион игры":
         "游戏地区",
-    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка)":
-        "有地区版本的语言所用的文本：西班牙的西班牙语（欧洲）或拉丁美洲西班牙语（美洲）",
+    "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
+        "有地区版本的语言所用的文本：西班牙的西班牙语（欧洲）或拉丁美洲西班牙语（美洲）。也决定游戏服务器的地址",
     "Как в дампе игры":
         "与游戏转储相同",
     "Европа":

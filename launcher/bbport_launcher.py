@@ -942,7 +942,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.region_row = combo_row(
             tr("Регион игры"),
             tr("Вариант текста у языков с региональными версиями: испанский Испании (Европа) или "
-               "Латинской Америки (Америка)"),
+               "Латинской Америки (Америка). Также выбирает адрес игрового сервера"),
             REGIONS, self.settings.get("region", ""))
         game.add(self.region_row)
         steam = Adw.ActionRow(title=tr("Добавить в Steam"),
