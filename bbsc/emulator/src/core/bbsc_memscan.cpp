@@ -9,6 +9,7 @@
 // bbport: the Linux search.
 #include <cinttypes>
 #include <cstdio>
+#include <fcntl.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #endif
@@ -46,8 +47,12 @@ void SearchRegion(const std::uint8_t* start, std::size_t size, const std::uint8_
 // bbport: one region, copied in slices through process_vm_readv on this process: a page the GPU
 // side just protected, or a region unmapped meanwhile, only fails that read (as the SEH guard on
 // Windows) instead of faulting. Consecutive slices overlap by the needle's length.
+// process_vm_readv cannot read a driver's mapping (VM_IO / VM_PFNMAP): on AMD the game's memory is a
+// GPU dma-buf (gpu/shim/bbport_guest_memory.cpp), and the item tables were never found there
+// (issue #9). /proc/self/mem reads those through the driver's own access, so a failed slice is
+// read again that way.
 void SearchRegion(std::uint64_t start, std::uint64_t end, const std::uint8_t* needle,
-                  std::size_t length, std::vector<std::uint8_t>& buffer,
+                  std::size_t length, std::vector<std::uint8_t>& buffer, int mem,
                   std::vector<std::uint64_t>& hits, std::size_t max_hits) {
     const pid_t self = getpid();
     std::uint64_t at = start;
@@ -56,7 +61,10 @@ void SearchRegion(std::uint64_t start, std::uint64_t end, const std::uint8_t* ne
             static_cast<std::size_t>(std::min<std::uint64_t>(buffer.size(), end - at));
         iovec local{buffer.data(), want};
         iovec remote{reinterpret_cast<void*>(at), want};
-        const ssize_t got = process_vm_readv(self, &local, 1, &remote, 1, 0);
+        ssize_t got = process_vm_readv(self, &local, 1, &remote, 1, 0);
+        if (got <= 0 && mem >= 0) {
+            got = pread(mem, buffer.data(), want, static_cast<off_t>(at));
+        }
         if (got <= 0) {
             at = (at & ~std::uint64_t{0xFFF}) + 0x1000; // an unreadable page: the next one
             continue;
@@ -122,6 +130,7 @@ std::vector<std::uint64_t> FindInMemory(std::span<const std::uint8_t> needle, st
         return hits;
     }
     std::vector<std::uint8_t> buffer(std::size_t{1} << 20);
+    const int mem = open("/proc/self/mem", O_RDONLY | O_CLOEXEC);
     char line[512];
     while (hits.size() < max_hits && std::fgets(line, sizeof(line), maps) != nullptr) {
         std::uint64_t start = 0;
@@ -132,7 +141,10 @@ std::vector<std::uint64_t> FindInMemory(std::span<const std::uint8_t> needle, st
             continue;
         }
         SearchRegion(std::max(start, lo), std::min(end, hi), needle.data(), needle.size(), buffer,
-                     hits, max_hits);
+                     mem, hits, max_hits);
+    }
+    if (mem >= 0) {
+        close(mem);
     }
     std::fclose(maps);
 #endif

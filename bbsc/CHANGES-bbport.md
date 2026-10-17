@@ -16,7 +16,8 @@ lines in BBSC's own files are marked `bbport:` in comments.
 - **Logs and captures.** BBSC keeps 5 of each, and stops a capture at 64 MB.
 - **Data folder.** BBSC's files go in the game's user folder, not the working directory.
 - **Memory search on Linux.** `emulator/src/core/bbsc_memscan.cpp` reads the readable mappings
-  through `process_vm_readv`.
+  through `process_vm_readv`, and through `/proc/self/mem` where that fails: on AMD the game's
+  memory is a GPU dma-buf, and the item tables were never found there (no co-op kit).
 - **F8 key.** The F8 unstuck key works on Linux through SDL (`emulator/src/core/bloodborne_re.cpp`).
 - **The co-op kit, late.** The search for the item tables, which only appear once a character is
   loaded, no longer gives up after 3 minutes (`emulator/src/core/bloodborne_re.cpp`, StartBbscDuelBell).
