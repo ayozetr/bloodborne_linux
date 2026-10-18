@@ -182,6 +182,59 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     }
 }
 
+/// bbport: a GPU-written tiled image back into the game's memory, tiled as the game laid it out,
+/// synchronously (the collector frees it next). DownloadImageMemory copies linear images only.
+void TextureCache::WriteBackTiledImage(ImageId image_id) {
+    Image& image = slot_images[image_id];
+    const u64 size = image.info.guest_size;
+    // TileImage moves the copies' offsets: a fresh set for each call.
+    const auto make_copies = [&] {
+        boost::container::small_vector<vk::BufferImageCopy, 14> copies;
+        for (u32 mip = 0; mip < image.info.resources.levels; mip++) {
+            const auto& mip_info = image.info.mips_layout[mip];
+            copies.push_back(vk::BufferImageCopy{
+                .bufferOffset = mip_info.offset,
+                .bufferRowLength = mip_info.pitch,
+                .bufferImageHeight = mip_info.height,
+                .imageSubresource{
+                    .aspectMask = image.aspect_mask & ~vk::ImageAspectFlagBits::eStencil,
+                    .mipLevel = mip,
+                    .baseArrayLayer = 0,
+                    .layerCount = image.info.resources.layers,
+                },
+                .imageOffset = {0, 0, 0},
+                .imageExtent = {std::max(image.info.size.width >> mip, 1u),
+                                std::max(image.info.size.height >> mip, 1u),
+                                std::max(image.info.size.depth >> mip, 1u)},
+            });
+        }
+        return copies;
+    };
+    scheduler.EndRendering();
+    // As DownloadImageMemory: where the game's memory has a VRAM copy, into that copy too.
+    if (GuestInPlace() && image.info.guest_address != 0) {
+        const auto [arena, offset] = buffer_cache.ObtainBuffer(image.info.guest_address, size, true);
+        auto copies = make_copies();
+        tile_manager.TileImage(image, copies, arena, offset);
+        if (buffer_cache.IsInPlace(image.info.guest_address, size)) {
+            return;
+        }
+    }
+    const auto download = runtime.GetStagingPool().Request(size, MemoryType::HostCached,
+                                                           instance.StorageMinAlignment());
+    auto copies = make_copies();
+    tile_manager.TileImage(image, copies, download.buffer, download.offset);
+    scheduler.Finish();
+    download.Invalidate();
+    BbFreeCheck::Check(image.info.guest_address, size, download.mapped,
+                       BbFreeCheck::ImageDownload);
+    Core::Memory::Instance()->TryWriteBacking(std::bit_cast<u8*>(image.info.guest_address),
+                                              download.mapped, size);
+    if (!WriteTracking()) {
+        buffer_cache.InvalidateMemory(image.info.guest_address, size);
+    }
+}
+
 /// bbport: the guest memory a MaybeCpuDirty check compares, the same at marking and at
 /// refresh (they hashed different ranges, the whole image and its first 8x8 pixels, so the
 /// first check never matched). Such an image lies within the faulting page: cheap to hash
@@ -1349,20 +1402,31 @@ void TextureCache::GarbageCollectImages() {
         const bool download = image.SafeToDownload();
         const bool tiled = image.info.IsTiled();
         // bbport: images that cannot go now (GPU-written: their contents exist only here, and
-        // tiled ones cannot be written back at all) neither use up the deletions nor stay first
-        // in line. The oldest ten being such render targets stopped the collector for good, and
-        // VRAM grew with every area visited up to the pressure mark (~10 GB on 16 GB).
-        // Past the critical mark, one unused for a minute goes all the same, unwritten (render
-        // targets of an area left behind): out of VRAM the game would stop instead.
-        const bool drop = tiled && download && aggresive && image.lru_touched_tick < minute_tick;
-        if (!drop && ((tiled && download) || (download && !pressured))) {
+        // tiled ones are written back only past the critical mark) neither use up the deletions
+        // nor stay first in line. The oldest ten being such render targets stopped the collector
+        // for good, and VRAM grew with every area visited up to the pressure mark (~10 GB on
+        // 16 GB). Past the critical mark, one unused for a minute goes all the same (render
+        // targets of an area left behind): out of VRAM the game would stop instead. It is tiled
+        // back into the game's memory first, where the game finds it again: dropped unwritten,
+        // what the game made once and kept, the Hunter's Dream's, came back black (issues #13,
+        // #14). Multisampled ones cannot be tiled back and are still dropped.
+        static const bool tile_back = [] {
+            const char* env = std::getenv("BB_GC_TILE_BACK");
+            return !env || env[0] != '0';
+        }();
+        const bool old_tiled =
+            tiled && download && aggresive && image.lru_touched_tick < minute_tick;
+        if (!old_tiled && ((tiled && download) || (download && !pressured))) {
             lru_cache.Touch(image.lru_id, gc_tick);
             BbStats::gc_kept_images.fetch_add(1, std::memory_order_relaxed);
             return false;
         }
         --num_deletions;
-        if (drop) {
+        if (old_tiled && (!tile_back || image.info.num_samples > 1)) {
             ++gc_dropped;
+        } else if (old_tiled) {
+            WriteBackTiledImage(image_id);
+            ++gc_downloads;
         } else if (download) {
             // bbport: synchronously, while the image still protects its pages. A deferred
             // write-back landed after FreeImage had unprotected them, over whatever the game
