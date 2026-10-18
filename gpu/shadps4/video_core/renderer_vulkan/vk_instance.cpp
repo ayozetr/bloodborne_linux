@@ -790,6 +790,34 @@ bool Instance::CreateDevice() {
     device = std::move(dev);
 
     VULKAN_HPP_DEFAULT_DISPATCHER.init(*device);
+    // bbport: an extension the driver lists and enables but whose commands it does not resolve
+    // counts as missing: calling them jumped to address 0 (RIP=0; NVIDIA 595, deadinside28#161;
+    // Intel ANV, #177, #181). From upstream bbport 0.6-pre1.
+    {
+        const auto& dispatch = VULKAN_HPP_DEFAULT_DISPATCHER;
+        const auto require = [](bool& flag, const void* command, const char* name) {
+            if (flag && !command) {
+                LOG_WARNING(Render_Vulkan, "{} is enabled but its commands are not resolved: off",
+                            name);
+                std::printf("GPU: %s is enabled but its commands are not resolved: off\n", name);
+                flag = false;
+            }
+        };
+        require(buffer_marker, reinterpret_cast<const void*>(dispatch.vkCmdWriteBufferMarkerAMD),
+                VK_AMD_BUFFER_MARKER_EXTENSION_NAME);
+        require(vertex_input_dynamic_state,
+                reinterpret_cast<const void*>(dispatch.vkCmdSetVertexInputEXT),
+                VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME);
+        require(dynamic_state_3, reinterpret_cast<const void*>(dispatch.vkCmdSetColorWriteMaskEXT),
+                VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME);
+        require(guest_memory_export, reinterpret_cast<const void*>(dispatch.vkGetMemoryFdKHR),
+                VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+        require(host_memory_import,
+                reinterpret_cast<const void*>(dispatch.vkGetMemoryHostPointerPropertiesEXT),
+                VK_EXT_EXTERNAL_MEMORY_HOST_EXTENSION_NAME);
+        ASSERT_MSG(dispatch.vkCmdPushDescriptorSetKHR,
+                   "The driver does not resolve vkCmdPushDescriptorSetKHR (VK_KHR_push_descriptor)");
+    }
     if (Dlss* dlss = Dlss::Get()) {
         dlss->Initialize(*instance, physical_device, *device);
     }
