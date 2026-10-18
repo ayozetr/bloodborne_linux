@@ -236,6 +236,21 @@ int main(void) {
         stick_circular=0;
         t+=200000; key_move(0,0,t,&x,&y);
     }
+    /* Walk (Left Alt, held): the move keys stay under the run threshold, 48 of 127. */
+    {
+        bool k[SDL_SCANCODE_COUNT]={0};
+        PadData walk_data;
+        memset(&walk_data,0,sizeof walk_data);
+        walk_data.left_x=walk_data.left_y=128;
+        k[SDL_SCANCODE_W]=true; k[SDL_SCANCODE_LALT]=true;
+        apply_keyboard(&walk_data,k);
+        assert(walk_data.left_x==128 && walk_data.left_y==128-48);
+        k[SDL_SCANCODE_LALT]=false;
+        apply_keyboard(&walk_data,k);
+        assert(walk_data.left_x==128 && walk_data.left_y==128-127);
+        k[SDL_SCANCODE_W]=false;
+        uint64_t later=now_us()+200000; int x, y; key_move(0,0,later,&x,&y);
+    }
     /* Issue #7: a controller stick past the round gate comes back onto it, keeping its direction;
      * one axis all the way (0 or 255) stays as it is. */
     {
@@ -277,5 +292,5 @@ int main(void) {
         m.right_x=200; m.right_y=56; camera_diagonal(&m); assert(m.right_x==200 && m.right_y==56); /* 80% */
         pad_camera_diagonal=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, round gate, Back + d-pad touchpad halves, stick options, camera diagonals, pad in use");
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, walk key, round gate, Back + d-pad touchpad halves, stick options, camera diagonals, pad in use");
 }

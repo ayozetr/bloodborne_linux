@@ -653,6 +653,7 @@ CONTROLS = [
     ("look_down", "Камера вниз", "Down", None),
     ("look_left", "Камера влево", "Left", None),
     ("look_right", "Камера вправо", "Right", None),
+    ("walk", "Шаг (удерживать с движением)", "Left Alt", None),
 ]
 
 

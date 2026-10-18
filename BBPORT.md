@@ -183,7 +183,7 @@ through SDL3 (the launcher's *Controls → Controller* picks one when several ar
 `BB_GAMEPAD=<GUID or part of the name>`; with none picked, the one you press a button on or move
 takes over). The keyboard works too,
 also next to a connected gamepad (the Steam Deck always has one); both are remapped in the
-launcher (*Controls*). The character name is typed on the keyboard in a box over the game.
+launcher (*Controls*); holding Left Alt with the move keys walks instead of running (`key.walk`). The character name is typed on the keyboard in a box over the game.
 The touchpad: its left half (Tab, Back/Select) opens the gestures, the right half (Backspace)
 the key items. On a controller without a touchpad (Xbox), Back + d-pad left / right clicks the
 left / right half. *Controls* in the launcher also swaps the sticks and inverts the controller's
