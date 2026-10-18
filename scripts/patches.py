@@ -462,6 +462,24 @@ def compile_external(selected, segments):
     return writes
 
 
+def external_writes(selected, segments, fps_writes):
+    """(writes of the selected external patches, the key of the one replacing the built-in frame
+    rate preset whose writes are fps_writes, or None). A frame rate patch of its own (shadPS4's
+    "120 FPS++", "60FPS++ (no deltatime)") writes at the preset's addresses with other values:
+    applied over it, the two mixed, so it replaces the preset whole. Only a patch named FPS
+    does: "Smaller Hunter" writes there too, and would otherwise leave the game at 30 FPS."""
+    ranges=[(offset,offset+len(data)) for offset,data in fps_writes]
+    writes,replacing=[],None
+    for item in selected:
+        ours=compile_external([item],segments)
+        if (replacing is None and 'fps' in item[0].rsplit('/',1)[-1].lower()
+                and any(start<offset+len(data) and offset<end
+                        for offset,data in ours for start,end in ranges)):
+            replacing=item[0]
+        writes+=ours
+    return writes,replacing
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--patches-dir',type=Path,help='third-party patch XML files (shadPS4 format)')
@@ -508,6 +526,8 @@ def main():
     names=validate_patch_requirements(names,a.game_dir)
     segments=eboot_segments((a.out/'eboot.elf').read_bytes())
     writes=compile_patches(a.xml,names,a.app_version,segments)
+    fps_names=[n for n in FPS_PRESETS[a.fps] if n in names]
+    fps_count=len(compile_patches(a.xml,fps_names,a.app_version,segments))  # the first writes
     settings=read_settings(a.settings)
     size=render_size(settings,a.render_res) if a.render_res else None
     # The UI keeps the game's 1920x1080 coordinates even for a larger output: the port draws
@@ -528,8 +548,12 @@ def main():
         print(f'Patches: scene {size[0]}x{size[1]}; UI {ui[0]}x{ui[1]}')
     external=[]
     if a.patches_dir:
-        external=compile_external(external_selection(external_patches(a.patches_dir,a.app_version,a.xml),
-                                                     a.patches_config),segments)
+        selected=external_selection(external_patches(a.patches_dir,a.app_version,a.xml),a.patches_config)
+        external,replacing=external_writes(selected,segments,writes[:fps_count])
+        if replacing:
+            print(f'Patches: external {replacing} replaces the built-in {", ".join(fps_names)}')
+            writes=writes[fps_count:]
+            names=[n for n in names if n not in fps_names]
     if a.quit_to_desktop=='1' and settings.get('quit_to_desktop','1')!='0':
         quit=quit_to_desktop_writes((a.out/'eboot.elf').read_bytes(),writes+external)
         if quit:

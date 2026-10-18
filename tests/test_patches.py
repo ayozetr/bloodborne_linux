@@ -260,6 +260,26 @@ class ExternalPatchTests(unittest.TestCase):
             self.assertEqual([key for key, _, _ in external_selection(found, config)],
                              ['Bloodborne.xml/On'])
 
+    def test_an_external_fps_patch_replaces_the_preset(self):
+        # shadPS4's "120 FPS++" writes at the preset's addresses: it replaces the preset rather
+        # than mixing with it. "Smaller Hunter" writes there too, without replacing it.
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / 'Bloodborne.xml').write_text(
+                EXTERNAL.replace('Name="Off"', 'Name="120 FPS++"').replace('Name="On"', 'Name="Smaller Hunter"'))
+            found = external_patches(folder)
+            preset = [(0x2000, bytes(4))]
+            hunter = [item for item in found if item[0] == 'Bloodborne.xml/Smaller Hunter']
+            writes, replacing = patches.external_writes(hunter, SEGMENTS, [(0x1000, bytes(2))])
+            self.assertEqual((writes, replacing), ([(0x1000, bytes.fromhex('9090'))], None))
+            fps = [item for item in found if item[0] == 'Bloodborne.xml/120 FPS++']
+            writes, replacing = patches.external_writes(hunter + fps, SEGMENTS, preset)
+            self.assertEqual(replacing, 'Bloodborne.xml/120 FPS++')
+            self.assertEqual(len(writes), 2)
+            # Not touching the preset: nothing replaced.
+            self.assertIsNone(patches.external_writes(fps, SEGMENTS, [(0x3000, bytes(4))])[1])
+            self.assertIsNone(patches.external_writes(fps, SEGMENTS, [])[1])
+
     def test_built_in_file_is_not_external(self):
         self.assertEqual(external_patches(XML.parent), [])
 
