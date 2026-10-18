@@ -1421,10 +1421,13 @@ bool LayerTrapHandler(void* context, void* fault_address) {
         if (!layer_trap_armed.erase(block)) {
             return false;
         }
+        // The write runs again, now through. Under the lock: unprotected after it, a trap armed
+        // again meanwhile (LayerArmTraps) lost its protection and the block's VRAM copy went stale
+        // ("exploding" vertices). From upstream bbport 0.6-pre1.
+        LayerUnprotect(block);
         const auto* g = static_cast<const ucontext_t*>(context)->uc_mcontext.gregs;
         layer_trap_hits.emplace_back(block, u64(g[REG_RIP]));
     }
-    LayerUnprotect(block); // the write runs again, now through
     layer_trap_faults.fetch_add(1, std::memory_order_relaxed);
     layer_trap_pending.store(true, std::memory_order_release);
     return true;
