@@ -166,10 +166,24 @@ static ABI __attribute__((noreturn)) void hard_exit(int status) {
     fflush(stdout);
     _exit(status);
 }
+/* The game stopping itself. _exit, not exit: exit ran the static destructors under live threads
+ * (the online module's), which ended in "terminate called ..." instead of this report. Where it
+ * was called from, and the game's return addresses up the stack, say which check failed. From
+ * upstream bbport 0.6-pre1. */
 static ABI __attribute__((noreturn)) void raise_exception(uint32_t code,uint64_t argument) {
     fprintf(stderr,"STOP: guest raised debug exception code=0x%x argument=0x%llx\n",code,(unsigned long long)argument);
+    const uint64_t text_lo=0x800000000ull, text_hi=0x800000000ull+0x50d96dcull;
+    const uint64_t caller=(uint64_t)__builtin_return_address(0);
+    fprintf(stderr,"STOP: called from %s0x%llx; game code up the stack:",
+            caller>=text_lo && caller<text_hi ? "+" : "host ",
+            (unsigned long long)(caller>=text_lo && caller<text_hi ? caller-text_lo : caller));
+    const uint64_t *stack=(const uint64_t *)__builtin_frame_address(0);
+    for (int i=0,found=0;i<256 && found<12;++i)
+        if (stack[i]>=text_lo && stack[i]<text_hi) { fprintf(stderr," +0x%llx",(unsigned long long)(stack[i]-text_lo)); ++found; }
+    fprintf(stderr,"\n");
     runtime_report();
-    exit(23);
+    fflush(NULL);
+    _exit(23);
 }
 static ABI int32_t print_backtrace(void) {
     fputs("Runtime: guest requested a backtrace (not available)\n",stderr);
