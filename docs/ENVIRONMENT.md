@@ -263,6 +263,7 @@ behaviour when the variable is unset. In the tables:
 | `BB_PAD_DEADZONE` | 0–126 (default 5) | Inner stick dead zone, as shadPS4's analog_deadzone. | `src/runtime_pad.c:26`, `src/runtime_pad.c:109` |
 | `BB_PAD_DEADZONE_OUTER` | 1–127 (default 127) | Outer stick dead zone: travel up to this value maps to full deflection (helps pads that never reach full). | `src/runtime_pad.c:26`, `src/runtime_pad.c:111` |
 | `BB_PROMPTS` | playstation \| xbox \| switch \| keyboard (default playstation) | **Launcher:** Settings → "Button prompts" (Automatic follows the controller). Button prompts of the game's menus, made from the game's files at start. | `run.sh:67-70`, `scripts/menu_prompts.py:57`, `launcher/bbport_launcher.py:502` |
+| `BB_STEAM_INPUT_X11` | 0 = keep Wayland (default on) | Launched from Steam with Steam Input on a Wayland desktop, the game window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`): Steam sends its virtual controller's input only to a focused window it can see, and it sees only X11 windows (issue #12). Not when `SDL_VIDEO_DRIVER` is set. | `run.sh` |
 
 ## Audio
 

@@ -241,6 +241,16 @@ if [[ ${MANGOHUD:-0} == 1 ]]; then
         export VK_LOADER_LAYERS_DISABLE=${VK_LOADER_LAYERS_DISABLE:+$VK_LOADER_LAYERS_DISABLE,}VK_LAYER_MANGOHUD_overlay_64_x86_64
     fi
 fi
+# Steam Input (issue #12): Steam sends its virtual controller's input only while it sees the
+# game's window focused, and on a Wayland desktop it only sees X11 windows. A native Wayland window
+# got nothing from the controller; through Xwayland it works. Only when Steam made a virtual
+# controller for the game and SDL_VIDEO_DRIVER is not set (BB_STEAM_INPUT_X11=0: keep Wayland).
+if [[ -z ${SDL_VIDEO_DRIVER:-} && -n ${WAYLAND_DISPLAY:-} && -n ${DISPLAY:-} \
+        && ${BB_STEAM_INPUT_X11:-1} != 0 && ${SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD:-0} == 1 ]] \
+        && grep -qs '^\[slot' "${SteamVirtualGamepadInfo:-}"; then
+    echo "Window: X11 (Xwayland), so Steam Input reaches the game (BB_STEAM_INPUT_X11=0: Wayland)"
+    export SDL_VIDEO_DRIVER=x11
+fi
 # Write tracking with userfaultfd write-protection instead of mprotect (no address-space write lock:
 # a streaming burst re-protected thousands of pages, ~10-20 ms); falls back to mprotect when the
 # kernel lacks it. Off by default for now: the Steam Deck crashed 4 times in 9 minutes with it

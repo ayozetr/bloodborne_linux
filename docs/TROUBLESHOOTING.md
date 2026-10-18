@@ -82,6 +82,15 @@ code 0, as when the window is closed.
 - A mod that replaces `msg/<language>/menu.msgbnd.dcx` (a translation) is laid over Quit to
   Desktop's texts: the entries keep that mod's names (*Opinion Box*, *Language*).
 
+## The controller does nothing when the game is started from Steam
+
+With Steam Input on, Steam hides the controller and the game gets Steam's virtual one, whose input
+Steam sends only to the window it sees focused. On a Wayland desktop Steam sees only X11 windows,
+so the game now opens its window through Xwayland when Steam made a virtual controller for it (the
+log says `Window: X11 (Xwayland), so Steam Input reaches the game`). On older releases, put
+`SDL_VIDEO_DRIVER=x11 %command% --play` in the shortcut's launch options (keep `--play` after
+`%command%`), or turn Steam Input off for the shortcut: the game reads the controller itself.
+
 ## The camera turns much faster on diagonals
 
 With the right stick pushed all the way, the game switches to its fast turn (about twice the
