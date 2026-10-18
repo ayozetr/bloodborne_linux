@@ -29,7 +29,8 @@ bool Enabled();
 /// True while the game reports a lock-on target (motion is not applied then).
 bool LockedOn();
 
-/// Window thread: applies relative mouse motion to the camera.
+/// Window thread: gathers relative mouse motion; the game's camera update applies it (once per
+/// update, so every frame turns by the motion since the one before).
 void OnMouseMotion(float xrel, float yrel);
 
 /// Window thread, every event poll. BB_CAM_TRACE=<file> (diagnostics, not with the direct mouse

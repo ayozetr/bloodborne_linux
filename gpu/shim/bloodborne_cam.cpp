@@ -9,6 +9,50 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+// The direct mouse camera's hook: the game's camera update jumps here with the camera in r13,
+// just before it loads the camera's pitch. The stub stamps the camera live, applies the mouse
+// motion gathered since the last update (bbcam_apply) and runs the two loads it replaced.
+// Turning the camera here, once per update, gives every frame exactly the motion since the one
+// before; written from the window thread at any moment, a steady pan was split unevenly between
+// frames and juddered by a pixel now and then. The game's registers are kept: its red zone is
+// skipped, and what the System V ABI lets bbcam_apply change (rax, rcx, rdx, rsi, rdi, r8-r11,
+// ymm0-15 whole, as the game's code is AVX, and the flags) is saved. Guest threads keep the
+// port's fs (their TLS is gs), so port code runs there as in the other guest hooks. From
+// Supermedo/bloodborne_pc d3a7584 (Ethan Murphy), written for Linux.
+// `used`: only the asm below reads them, which link-time optimization does not see.
+extern "C" {
+__attribute__((used, visibility("hidden"))) std::uint64_t bbcam_apply_return = 0;
+__attribute__((used, visibility("hidden"))) void bbcam_apply(std::uint64_t camera);
+extern char bbcam_apply_stub[];
+}
+__asm__(".text\n"
+        ".globl bbcam_apply_stub\n.hidden bbcam_apply_stub\nbbcam_apply_stub:\n"
+        "  test %r13, %r13\n  jz 1f\n"
+        "  movl $0x3F333333, 0x130(%r13)\n" // 0.7f: the camera is live
+        "  lea -128(%rsp), %rsp\n  pushfq\n"
+        "  push %rax\n  push %rcx\n  push %rdx\n  push %rsi\n  push %rdi\n"
+        "  push %r8\n  push %r9\n  push %r10\n  push %r11\n  push %rbx\n"
+        "  mov %rsp, %rbx\n  and $-32, %rsp\n  sub $512, %rsp\n"
+        "  vmovdqu %ymm0, 0(%rsp)\n  vmovdqu %ymm1, 32(%rsp)\n  vmovdqu %ymm2, 64(%rsp)\n"
+        "  vmovdqu %ymm3, 96(%rsp)\n  vmovdqu %ymm4, 128(%rsp)\n  vmovdqu %ymm5, 160(%rsp)\n"
+        "  vmovdqu %ymm6, 192(%rsp)\n  vmovdqu %ymm7, 224(%rsp)\n  vmovdqu %ymm8, 256(%rsp)\n"
+        "  vmovdqu %ymm9, 288(%rsp)\n  vmovdqu %ymm10, 320(%rsp)\n  vmovdqu %ymm11, 352(%rsp)\n"
+        "  vmovdqu %ymm12, 384(%rsp)\n  vmovdqu %ymm13, 416(%rsp)\n  vmovdqu %ymm14, 448(%rsp)\n"
+        "  vmovdqu %ymm15, 480(%rsp)\n"
+        "  mov %r13, %rdi\n  call bbcam_apply\n"
+        "  vmovdqu 0(%rsp), %ymm0\n  vmovdqu 32(%rsp), %ymm1\n  vmovdqu 64(%rsp), %ymm2\n"
+        "  vmovdqu 96(%rsp), %ymm3\n  vmovdqu 128(%rsp), %ymm4\n  vmovdqu 160(%rsp), %ymm5\n"
+        "  vmovdqu 192(%rsp), %ymm6\n  vmovdqu 224(%rsp), %ymm7\n  vmovdqu 256(%rsp), %ymm8\n"
+        "  vmovdqu 288(%rsp), %ymm9\n  vmovdqu 320(%rsp), %ymm10\n  vmovdqu 352(%rsp), %ymm11\n"
+        "  vmovdqu 384(%rsp), %ymm12\n  vmovdqu 416(%rsp), %ymm13\n  vmovdqu 448(%rsp), %ymm14\n"
+        "  vmovdqu 480(%rsp), %ymm15\n"
+        "  mov %rbx, %rsp\n"
+        "  pop %rbx\n  pop %r11\n  pop %r10\n  pop %r9\n  pop %r8\n"
+        "  pop %rdi\n  pop %rsi\n  pop %rdx\n  pop %rcx\n  pop %rax\n"
+        "  popfq\n  lea 128(%rsp), %rsp\n"
+        "  vmovss 0x140(%r13), %xmm0\n  vmovss 0x150(%r13), %xmm1\n" // the replaced loads
+        "1:\n  jmp *bbcam_apply_return(%rip)\n");
+
 namespace BbCamera {
 namespace {
 using u8 = std::uint8_t;
@@ -16,7 +60,8 @@ using u64 = std::uint64_t;
 constexpr u64 ImageBase = 0x800000000ull; // as bbport_guest_hooks.cpp
 
 /// The camera update: `vmovss xmm0, [r13 + 0x140]; vmovss xmm1, [r13 + 0x150]` (pitch, smoothed
-/// pitch), with r13 the camera object. Jumped over to a stub that records r13.
+/// pitch), with r13 the camera object. Jumped over to bbcam_apply_stub (the direct camera), or for
+/// BB_CAM_TRACE to a stub that records r13.
 constexpr u64 CamMain = 0x143ceaa;
 constexpr std::size_t CamMainLen = 18;
 constexpr u8 CamMainCode[CamMainLen] = {0xc4, 0xc1, 0x7a, 0x10, 0x85, 0x40, 0x01, 0x00, 0x00,
@@ -44,6 +89,9 @@ constexpr float Pi = 3.14159265f, TwoPi = 6.28318531f;
 
 std::atomic<bool> configured{false}, enabled{false}, locked_on{false};
 std::atomic<float> scale{1.0f};
+/// Mouse motion gathered by the window thread since the camera's last update, and when that was.
+std::atomic<float> pending_x{0.0f}, pending_y{0.0f};
+std::atomic<std::int64_t> last_apply_ms{0};
 u8 nop_saved[4][NopLen] = {};
 u8* stub = nullptr;
 bool reported_missing = false;
@@ -85,7 +133,7 @@ bool WriteCode(u64 offset, const u8* bytes, std::size_t size) {
     return true;
 }
 
-/// The stub CamMain jumps to: it records the camera object (r13) at +0x38, stamps the object
+/// BB_CAM_TRACE's stub: it records the camera object (r13) at +0x38, stamps the object
 /// (+0x130 = 0.7f: the camera is live; the game's own write there is one of the NOPs), runs the
 /// two instructions the jump covers and jumps back. Built once, never freed (a thread may be in it).
 bool BuildStub() {
@@ -129,6 +177,16 @@ T Read(u64 address) {
 template <typename T>
 void Write(u64 address, T value) {
     *reinterpret_cast<volatile T*>(address) = value;
+}
+std::int64_t NowMs() {
+    timespec now{};
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return std::int64_t(now.tv_sec) * 1000 + now.tv_nsec / 1000000;
+}
+void AddFloat(std::atomic<float>& value, float add) {
+    float old = value.load(std::memory_order_relaxed);
+    while (!value.compare_exchange_weak(old, old + add, std::memory_order_relaxed)) {
+    }
 }
 float WrapYaw(float yaw) {
     while (yaw > Pi) {
@@ -192,10 +250,6 @@ bool SetEnabled(bool on) {
         }
         return false;
     }
-    if (!BuildStub()) {
-        std::printf("Mouse camera: no memory for the hook; the mouse stays on the stick\n");
-        return false;
-    }
     for (int i = 0; i < 4; ++i) {
         std::memcpy(nop_saved[i], At(NopSites[i].offset), NopLen);
     }
@@ -205,7 +259,10 @@ bool SetEnabled(bool on) {
     jump[0] = 0xff;
     jump[1] = 0x25;
     std::memset(jump + 2, 0, 4);
-    const u64 target = reinterpret_cast<u64>(stub);
+    bbcam_apply_return = ImageBase + CamMain + CamMainLen;
+    pending_x.store(0.0f, std::memory_order_relaxed);
+    pending_y.store(0.0f, std::memory_order_relaxed);
+    const u64 target = reinterpret_cast<u64>(bbcam_apply_stub);
     std::memcpy(jump + 6, &target, 8);
     if (!WriteCode(CamMain, jump, CamMainLen)) {
         std::printf("Mouse camera: the game's code is not writable; the mouse stays on the stick\n");
@@ -221,18 +278,31 @@ bool SetEnabled(bool on) {
 }
 
 void OnMouseMotion(float xrel, float yrel) {
+    // Locked on, window.cpp sends the motion to the stick instead.
+    if (!enabled.load(std::memory_order_acquire) || locked_on.load(std::memory_order_relaxed)) {
+        return;
+    }
+    // While the camera is not updated (a loading screen), motion is not saved up for later.
+    if (NowMs() - last_apply_ms.load(std::memory_order_relaxed) > 100) {
+        pending_x.store(xrel, std::memory_order_relaxed);
+        pending_y.store(yrel, std::memory_order_relaxed);
+        return;
+    }
+    AddFloat(pending_x, xrel);
+    AddFloat(pending_y, yrel);
+}
+
+namespace {
+/// The game thread, in its camera update (bbcam_apply_stub): turns the camera `cam` by the motion
+/// gathered since the last update. `cam` is the object the game is about to read.
+void Apply(u64 cam) {
+    last_apply_ms.store(NowMs(), std::memory_order_relaxed);
     if (!enabled.load(std::memory_order_acquire)) {
         return;
     }
-    const u64 cam = Object();
-    if (!Mapped(cam + 0x130, 0x144)) { // every field touched below
-        return;
-    }
-    const float stamp = Read<float>(cam + 0x130);
-    if (!(stamp > 0.699f && stamp < 0.701f)) {
-        return;
-    }
-    // Locked on: the game drives the camera; window.cpp sends the motion to the stick instead.
+    const float xrel = pending_x.exchange(0.0f, std::memory_order_relaxed);
+    const float yrel = pending_y.exchange(0.0f, std::memory_order_relaxed);
+    // Locked on: the game drives the camera (checked every update).
     const bool locked = Read<float>(cam + 0x154) == 1.0f;
     locked_on.store(locked, std::memory_order_relaxed);
     if (locked || (xrel == 0.0f && yrel == 0.0f)) {
@@ -270,6 +340,11 @@ void OnMouseMotion(float xrel, float yrel) {
     Write<float>(cam + 0x26c, pitch);
     Write<float>(cam + 0x144, yaw);
     Write<float>(cam + 0x270, yaw);
+}
+} // namespace
+
+extern "C" __attribute__((used)) void bbcam_apply(std::uint64_t camera) {
+    Apply(camera);
 }
 
 
