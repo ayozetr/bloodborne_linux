@@ -160,6 +160,10 @@ public:
         return maintenance_8;
     }
 
+    /// bbport: prints the driver's report of where the GPU faulted, after a device loss
+    /// (VK_EXT_device_fault), once. Breadcrumbs::ReportDeviceLost calls it.
+    void ReportDeviceFault() const;
+
     /// bbport: VK_AMD_buffer_marker (GPU breadcrumbs).
     bool IsBufferMarkerSupported() const {
         return buffer_marker;
@@ -606,6 +610,7 @@ private:
     bool shader_atomic_float2{};
     bool workgroup_memory_explicit_layout{};
     bool maintenance_5{};
+    bool device_fault{};
     bool maintenance_8{};
     bool buffer_marker{};
     bool attachment_feedback_loop{};

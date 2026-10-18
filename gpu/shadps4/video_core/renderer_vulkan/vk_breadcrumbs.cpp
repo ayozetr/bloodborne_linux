@@ -42,6 +42,8 @@ std::array<Stream, MaxStreams> streams;
 std::atomic<u32> num_streams{0};
 bool enabled = false;
 std::once_flag init_once;
+/// For the driver's fault report on device lost (any scheduler's instance: there is one).
+std::atomic<const Instance*> fault_instance{nullptr};
 vk::Buffer marker_buffer{};
 VmaAllocation marker_allocation{};
 volatile u32* markers = nullptr;
@@ -226,6 +228,7 @@ void DumpPrograms(const Stream& stream, u64 id) {
 } // Anonymous namespace
 
 u32 NewStream(const Instance& instance, const char* name) {
+    fault_instance.store(&instance, std::memory_order_release);
     std::call_once(init_once, [&] { Init(instance); });
     const u32 index = num_streams.fetch_add(1, std::memory_order_relaxed);
     if (index >= MaxStreams) {
@@ -281,7 +284,16 @@ void Report(const char* title, const char* where);
 
 void ReportDeviceLost(const char* where) {
     static std::atomic_flag reported = ATOMIC_FLAG_INIT;
-    if (enabled && !reported.test_and_set()) {
+    if (reported.test_and_set()) {
+        return;
+    }
+    // bbport: the driver's own report first (also with the breadcrumbs off). From
+    // Supermedo/bloodborne_pc 4f3dd91.
+    if (const Instance* instance = fault_instance.load(std::memory_order_acquire)) {
+        std::printf("GPU: device lost (%s)\n", where);
+        instance->ReportDeviceFault();
+    }
+    if (enabled) {
         Report("at device lost", where);
     }
 }
