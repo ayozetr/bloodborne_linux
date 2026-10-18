@@ -60,6 +60,20 @@ TextureCache::TextureCache(const Vulkan::Instance& instance_, Vulkan::Scheduler&
     critical_gc_memory = static_cast<u64>(
         std::max<u64>(std::min(device_local_memory - min_vacancy_critical, min_spacing_critical),
                       DEFAULT_CRITICAL_GC_MEMORY));
+    // bbport: below 8 GB the pressure mark was 40% of the budget (2.4 GB on a 6 GB card), about
+    // what the game holds outside textures (its memory's copies, upscaler, swapchain): such cards
+    // were under pressure all session, evicting textures unused for 5 s and uploading them again.
+    // 60% (BB_GC_PRESSURE_PERCENT) leaves an area's textures room first; the critical mark stays.
+    // Integrated GPUs set their own marks (GarbageCollectImages). From Supermedo's port (a02c38f).
+    if (device_local_memory < TARGET_GC_THRESHOLD) {
+        static const s64 percent = [] {
+            const char* env = std::getenv("BB_GC_PRESSURE_PERCENT");
+            return std::clamp<s64>(env ? std::strtoll(env, nullptr, 10) : 60, 10, 75);
+        }();
+        pressure_gc_memory = std::min(
+            std::max<u64>(pressure_gc_memory, static_cast<u64>(device_local_memory / 100 * percent)),
+            critical_gc_memory);
+    }
     trigger_gc_memory = static_cast<u64>((device_local_memory - mem_threshold) / 2);
 }
 
