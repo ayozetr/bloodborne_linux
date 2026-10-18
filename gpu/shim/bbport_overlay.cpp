@@ -668,6 +668,7 @@ void Menu() {
         "шейдеров, а не проблема. В каждом месте только один раз."));
     Checkbox(BbSettings::MenuText("Sound when a trophy is earned", "Звук при получении трофея"),
              s.trophy_sound);
+    Checkbox(BbSettings::MenuText("Mute in the background", "Без звука в фоне"), s.mute_unfocused);
 
     ImGui::Spacing();
     if (ImGui::Button(BbSettings::MenuText("Close", "Закрыть"))) {

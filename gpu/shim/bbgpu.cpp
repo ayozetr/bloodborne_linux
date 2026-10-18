@@ -444,6 +444,10 @@ extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
 }
 
+extern "C" int bbgpu_audio_muted(void) {
+    return g_window && BbSettings::Get().mute_unfocused && !g_window->IsFocused() ? 1 : 0;
+}
+
 extern "C" void bbgpu_trophy_notice(int id, char grade, const char* name_utf8, const char* icon_path) {
     std::vector<u8> icon;
     int size = 0;

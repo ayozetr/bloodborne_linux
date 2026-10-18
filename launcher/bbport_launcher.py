@@ -250,6 +250,7 @@ INI_DEFAULTS = {
     "live_resolution": "0",
     "hud_position": "100",
     "fov": "43",
+    "mute_unfocused": "0",
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
@@ -1051,6 +1052,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fullscreen_row = Adw.SwitchRow(title=tr("Полноэкранный режим"),
                                             active=self.settings["fullscreen"])
         screen.add(self.fullscreen_row)
+        self.mute_row = Adw.SwitchRow(title=tr("Без звука в фоне"),
+                                      subtitle=tr("Пока окно игры не в фокусе"),
+                                      active=self.ini.get("mute_unfocused", "0") == "1")
+        screen.add(self.mute_row)
         # Issue #69: the window (and fullscreen) went to the monitor SDL calls primary.
         self.display_row = Adw.ComboRow(title=tr("Монитор"))
         self.display_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
@@ -1735,6 +1740,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "live_resolution": combo_value(self.live_row),
             "hud_position": combo_value(self.hud_row),
             "fov": str(int(self.fov_row.get_value())),
+            "mute_unfocused": "1" if self.mute_row.get_active() else "0",
             "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",

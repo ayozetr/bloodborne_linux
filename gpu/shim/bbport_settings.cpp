@@ -70,6 +70,8 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         v.shader_notice = i != 0;
     } else if (key == "trophy_sound") {
         v.trophy_sound = i != 0;
+    } else if (key == "mute_unfocused") {
+        v.mute_unfocused = i != 0;
     } else if (key == "menu_pos") {
         float x = -1.0f, y = -1.0f;
         if (std::sscanf(value.c_str(), "%f,%f", &x, &y) == 2 && x >= 0.0f && x <= 1.0f && y >= 0.0f &&
@@ -314,6 +316,7 @@ void Save() {
     put("show_fps", flag(v.show_fps));
     put("shader_notice", flag(v.shader_notice));
     put("trophy_sound", flag(v.trophy_sound));
+    put("mute_unfocused", flag(v.mute_unfocused));
     put("fsr4_auto_exposure", flag(v.fsr4_auto_exposure));
     put("fsr4_invert_jitter", flag(v.fsr4_invert_jitter));
     // Read by patches.py at start.

@@ -98,6 +98,8 @@ struct Values {
     std::atomic<bool> shader_notice{true};
     /// A short chime of our own when a trophy notice shows.
     std::atomic<bool> trophy_sound{true};
+    /// Silent while the window does not have focus (bbgpu_audio_muted).
+    std::atomic<bool> mute_unfocused{false};
     /// The settings menu's position (fraction of the screen), -1 until it is moved.
     std::atomic<float> menu_x{-1.0f}, menu_y{-1.0f};
     // FSR 4 checks (menu): the provider's auto exposure, the jitter sign it is given.

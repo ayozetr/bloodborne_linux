@@ -7,6 +7,8 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    "Без звука в фоне": "Mute in the background",
+    "Пока окно игры не в фокусе": "While the game window is not in focus",
     "Поле зрения": "Field of view",
     "Градусы по вертикали; в игре 43": "Vertical degrees; the game has 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: BBSC's community server, with players on Windows",
@@ -774,6 +776,8 @@ EN = {
 }
 
 PT_BR = {
+    "Без звука в фоне": "Silenciar em segundo plano",
+    "Пока окно игры не в фокусе": "Enquanto a janela do jogo não estiver em foco",
     "Поле зрения": "Campo de visão",
     "Градусы по вертикали; в игре 43": "Graus na vertical; o jogo usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: servidor da comunidade do BBSC, com jogadores no Windows",
@@ -1601,6 +1605,8 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    "Без звука в фоне": "Silenciar en segundo plano",
+    "Пока окно игры не в фокусе": "Mientras la ventana del juego no tenga el foco",
     "Поле зрения": "Campo de visión",
     "Градусы по вертикали; в игре 43": "Grados en vertical; el juego usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: servidor de la comunidad de BBSC, con jugadores en Windows",
@@ -2337,6 +2343,8 @@ ES = {
 
 # Italian.
 IT = {
+    "Без звука в фоне": "Silenzia in background",
+    "Пока окно игры не в фокусе": "Finché la finestra del gioco non è in primo piano",
     "Поле зрения": "Campo visivo",
     "Градусы по вертикали; в игре 43": "Gradi in verticale; il gioco usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: server della comunità di BBSC, con giocatori su Windows",
@@ -3073,6 +3081,8 @@ IT = {
 
 # French.
 FR = {
+    "Без звука в фоне": "Couper le son en arrière-plan",
+    "Пока окно игры не в фокусе": "Tant que la fenêtre du jeu n'a pas le focus",
     "Поле зрения": "Champ de vision",
     "Градусы по вертикали; в игре 43": "Degrés à la verticale ; le jeu utilise 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com : serveur communautaire de BBSC, avec des joueurs sous Windows",
@@ -3809,6 +3819,8 @@ FR = {
 
 # German.
 DE = {
+    "Без звука в фоне": "Im Hintergrund stummschalten",
+    "Пока окно игры не в фокусе": "Solange das Spielfenster nicht im Fokus ist",
     "Поле зрения": "Sichtfeld",
     "Градусы по вертикали; в игре 43": "Vertikale Grad; das Spiel hat 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: Community-Server von BBSC, mit Spielern unter Windows",
@@ -4545,6 +4557,8 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    "Без звука в фоне": "后台时静音",
+    "Пока окно игры не в фокусе": "游戏窗口未获得焦点时",
     "Поле зрения": "视野",
     "Градусы по вертикали; в игре 43": "垂直角度；游戏默认为 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com：BBSC 社区服务器，可与 Windows 玩家联机",

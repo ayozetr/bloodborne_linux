@@ -254,7 +254,11 @@ bool WindowSDL::PollEvents() {
             (notches > 0 ? wheel_up : wheel_down) += notches != 0 ? 1 : 0;
         }
         if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
+            focused.store(false, std::memory_order_relaxed);
             CaptureMouse(false);
+        }
+        if (event.type == SDL_EVENT_WINDOW_FOCUS_GAINED) {
+            focused.store(true, std::memory_order_relaxed);
         }
         switch (event.type) {
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
