@@ -226,9 +226,9 @@ class ExternalPatchTests(unittest.TestCase):
     def test_short_version_and_copies_of_the_built_in_file(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
-            # "1.09" is "01.09"; a copy of Bloodborne.xml (any case) is the built-in one.
+            # "1.09" is "01.09"; a copy of Bloodborne.xml (any case) adds nothing.
             (folder / 'short.xml').write_text(EXTERNAL.replace('AppVer="01.09"', 'AppVer="1.09"'))
-            (folder / 'BLOODBORNE.xml').write_text(EXTERNAL)
+            (folder / 'BLOODBORNE.xml').write_text(XML.read_text())
             found = external_patches(folder)
             self.assertEqual([key for key, _, _ in found],
                              ['short.xml/On', 'short.xml/Off', 'short.xml/Mask'])
@@ -243,6 +243,22 @@ class ExternalPatchTests(unittest.TestCase):
             (folder / 'japan.xml').write_text(EXTERNAL.replace('<ID>CUSA03173</ID><ID>CUSA00207</ID>',
                                                                '<ID>CUSA00299</ID>'))
             self.assertEqual(len(external_patches(folder)), 3)
+
+    def test_shadps4_patch_file_named_bloodborne_xml(self):
+        # Issue #16: its own patches are listed, off until chosen; those named as built-in ones
+        # (frame rate and the rest) stay the port's.
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / 'Bloodborne.xml').write_text(EXTERNAL.replace('Name="Off"',
+                                                                    'Name="Uncap FPS++"'))
+            found = external_patches(folder)
+            self.assertEqual([key for key, _, _ in found],
+                             ['Bloodborne.xml/On', 'Bloodborne.xml/Mask'])
+            self.assertEqual(external_selection(found, None), [])
+            config = folder / 'patches.json'
+            config.write_text('{"enabled": ["Bloodborne.xml/On", "Bloodborne.xml/Uncap FPS++"]}')
+            self.assertEqual([key for key, _, _ in external_selection(found, config)],
+                             ['Bloodborne.xml/On'])
 
     def test_built_in_file_is_not_external(self):
         self.assertEqual(external_patches(XML.parent), [])

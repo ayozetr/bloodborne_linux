@@ -101,6 +101,9 @@ the launcher.
   executable is skipped whole, and the log says so.
 - They apply after bbport's own patches (`patches/Bloodborne.xml`), so where both change the
   same bytes, the third-party patch wins.
+- shadPS4's patch file can stay named `Bloodborne.xml`. In a file of that name, the patches
+  named as one of bbport's own are left out (bbport's apply), and the rest start off until you
+  turn them on, whatever the file says. An older package's copy of bbport's file adds nothing.
 - Patches that replace pointers in tables, such as *60 FPS++*, are moved to where the game is
   loaded.
 

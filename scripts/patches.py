@@ -405,19 +405,28 @@ def external_patches(directory, app_version='01.09', exclude=Path(__file__).reso
     key is "<file name>/<patch name>" (the launcher's selection, patches.json)."""
     found=[]
     directory=Path(directory)
+    built_in=None
     for path in sorted(directory.glob('*.xml')) if directory.is_dir() else []:
-        # The built-in file, and copies of it in another patches folder (an older package's): those
-        # applied its frame-rate patches over the port's own (from Awaken's BloodBorneButPc).
-        if path.resolve()==Path(exclude).resolve() or path.name.lower()==Path(exclude).name.lower(): continue
+        if path.resolve()==Path(exclude).resolve(): continue
+        # Another file named Bloodborne.xml: shadPS4's patch file, or a copy of the built-in one
+        # (an older package's), whose frame-rate patches applied over the port's own (from Awaken's
+        # BloodBorneButPc). Its patches named as built-in ones (any case) are left out, and the rest start
+        # off whatever the file says.
+        same_name=path.name.lower()==Path(exclude).name.lower()
         try:
             root=ET.parse(path).getroot()
-        except ET.ParseError as error:
+            if same_name and built_in is None:
+                built_in={(meta.get('Name') or '').lower() for meta in ET.parse(exclude).getroot().iter('Metadata')}
+        except (ET.ParseError,OSError) as error:
             print(f'Patches: {path.name}: {error}',file=sys.stderr)
             continue
         ids={e.text.strip() for e in root.iter('ID') if e.text}
         if ids and not ids&BLOODBORNE_IDS: continue
         for meta in root.iter('Metadata'):
             if same_app_version(meta.get('AppVer'),app_version) and meta.get('AppElf','eboot.bin')=='eboot.bin':
+                if same_name:
+                    if (meta.get('Name') or '').lower() in built_in: continue
+                    meta.set('isEnabled','false')
                 found.append((f'{path.name}/{meta.get("Name")}',path,meta))
     return found
 
