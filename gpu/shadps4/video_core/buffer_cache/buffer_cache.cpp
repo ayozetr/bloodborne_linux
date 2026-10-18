@@ -2547,6 +2547,35 @@ void BufferCache::ProcessPendingAssets() {
             continue;
         }
         asset_bytes.Add({addr, addr + size});
+        // bbport: a block the GPU once wrote in place (dynamic for good) that the loaders have now
+        // written whole holds the CPU's data only: it may have a VRAM copy again. Kept, such
+        // blocks piled up as areas were loaded over memory the last one's GPU buffers had used
+        // (164 -> 1117 MiB of dynamic blocks after a few teleports), and one of them in a range
+        // kept the whole range in place: the same spot went from 76.6 to 55.3 FPS. The GPU's
+        // writes there stay in place from now on (layer_cpu_blocks), so the CPU's view (the
+        // translator reads shader code and descriptors there) is never left behind a VRAM copy.
+        // Blocks the CPU writes often (layer_cpu_hot) stay dynamic. BB_LAYER_RELOAD_RESET=0: as
+        // before. From upstream bbport 0.6-pre1.
+        static const bool reload_reset = [] {
+            const char* env = std::getenv("BB_LAYER_RELOAD_RESET");
+            return !(env && env[0] == '0');
+        }();
+        if (LayerMode() && reload_reset) {
+            for (u64 block = first; block < end; ++block) {
+                if (!dynamic_blocks.Contains(block) || layer_cpu_hot.Contains(block, block + 1)) {
+                    continue;
+                }
+                bool whole = true;
+                asset_bytes.ForEachGap(block << block_shift, (block + 1) << block_shift,
+                                       [&](u64, u64) { whole = false; });
+                if (!whole) {
+                    continue;
+                }
+                layer_cpu_blocks.Add({block, block + 1});
+                dynamic_blocks.Subtract(block, block + 1);
+                layer_write_bounces.Subtract(block, block + 1);
+            }
+        }
         for (u64 block = first; block < end; ++block) {
             const bool in_place =
                 LayerMode() ? !BbLayer::GpuMemory::Get().AnyValid(block, block + 1)
@@ -3235,6 +3264,41 @@ void BufferCache::ProcessPendingUnmaps() {
         }
         asset_bytes.Subtract(first << block_shift, end << block_shift);
         gpu_written_bytes.Subtract(first << block_shift, end << block_shift);
+        // bbport: blocks wholly unmapped hold nobody's data: whatever kept them in place (the
+        // CPU wrote them, the GPU wrote them in place, their watch failed) is over. Memory mapped
+        // there again starts as new. BB_LAYER_UNMAP_RESET=0: as before. From upstream bbport
+        // 0.6-pre1.
+        static const bool unmap_reset = [] {
+            const char* env = std::getenv("BB_LAYER_UNMAP_RESET");
+            return !(env && env[0] == '0');
+        }();
+        static std::atomic<u64> unmap_reset_bytes{0};
+        if (const u64 whole_first = (addr + block_size - 1) >> block_shift,
+            whole_end = (addr + size) >> block_shift;
+            unmap_reset && whole_first < whole_end) {
+            const u64 bytes = (whole_end - whole_first) << block_shift;
+            const u64 total = unmap_reset_bytes.fetch_add(bytes) + bytes;
+            if ((total >> 26) != ((total - bytes) >> 26)) {
+                std::printf("Guest memory: %llu MiB of unmapped blocks started over\n",
+                            (unsigned long long)(total >> 20));
+            }
+            dynamic_blocks.Subtract(whole_first, whole_end);
+            if (LayerMode()) {
+                layer_cpu_blocks.Subtract(whole_first, whole_end);
+                layer_cpu_hot.Subtract(whole_first, whole_end);
+                layer_watch_failed.Subtract(whole_first, whole_end);
+                layer_write_bounces.Subtract(whole_first, whole_end);
+                layer_watched.Subtract(whole_first, whole_end);
+                layer_volatile.Subtract(whole_first, whole_end);
+                for (u64 block = whole_first; block < whole_end; ++block) {
+                    layer_watch_strikes.erase(block);
+                }
+            }
+            std::scoped_lock dynamic_lock{dynamic_mutex};
+            for (u64 block = whole_first; block < whole_end; ++block) {
+                cpu_write_frames.erase(block);
+            }
+        }
         copy_back_blocks.Subtract(first, end);
         promote_candidates.Subtract(first, end);
         idle_demoted.Subtract(first, end);
