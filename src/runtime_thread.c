@@ -77,8 +77,34 @@ static void attach(GuestThread *t) {
     set_gs(tcb);
     current=t;
 }
+/* A thread's record is its ScePthread handle, and the game packs handles into 40-bit fields: the
+ * owner of Bloodborne's hybrid lock (guest 0x20368c0) is masked to 0xffffffffff and then compared
+ * with the whole handle, so a handle above 40 bits never matches its own lock and the thread sleeps
+ * on its semaphore forever (lamp travel hung at a loading screen; calloc in a worker thread's malloc
+ * arena can return such an address). Records come from low memory (below 40 bits, zeroed), carved
+ * out of 256 KiB pieces; they are never freed. Found by msisovic (deadinside28/bloodborne_pc PR
+ * #193); as upstream bbport 0.6 takes it. */
+static GuestThread *low_record(void) {
+    static pthread_mutex_t pool_lock=PTHREAD_MUTEX_INITIALIZER;
+    static unsigned char *pool;
+    static size_t left;
+    const size_t size=(sizeof(GuestThread)+63)&~(size_t)63, piece=256*1024;
+    void *record=NULL;
+    pthread_mutex_lock(&pool_lock);
+    if (left<size) {
+        pool=runtime_low_map(piece,PROT_READ|PROT_WRITE);
+        left=pool ? piece : 0;
+    }
+    if (left>=size) { record=pool; pool+=size; left-=size; }
+    pthread_mutex_unlock(&pool_lock);
+    return record;
+}
 static GuestThread *new_thread(void) {
-    GuestThread *t=calloc(1,sizeof(*t));
+    GuestThread *t=low_record();
+    if (!t) {
+        fputs("Runtime: no low memory for a thread record; its handle may not fit 40 bits\n",stderr);
+        t=calloc(1,sizeof(*t));
+    }
     if (!t) return NULL;
     t->attr=(ThreadAttr){.magic=ATTR_MAGIC,.policy=1,.prio=DEFAULT_PRIO,.stack=DEFAULT_STACK,.affinity=0x7f};
     return t;
