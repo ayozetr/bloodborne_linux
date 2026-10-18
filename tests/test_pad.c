@@ -89,9 +89,15 @@ int main(void) {
     assert(SDL_SetJoystickVirtualTouchpad(joystick,0,1,false,0,0,0));
     SDL_UpdateJoysticks();
     SDL_UpdateGamepads();
-    /* Buttons still held when a menu closes stay hidden until all are released (hold_after_capture). */
+    /* Buttons still held when a menu closes stay hidden until released (hold_after_capture);
+     * one pressed after it closed shows at once. */
     assert(pad_read_state(1,&data)==0 && data.touch_count==1 && data.touches[0].x==480 &&
            data.buttons==0);
+    assert(SDL_SetJoystickVirtualButton(joystick,SDL_GAMEPAD_BUTTON_NORTH,true));
+    SDL_UpdateJoysticks();
+    SDL_UpdateGamepads();
+    assert(pad_read_state(1,&data)==0 && data.buttons==BTN_TRIANGLE);
+    assert(SDL_SetJoystickVirtualButton(joystick,SDL_GAMEPAD_BUTTON_NORTH,false));
     assert(SDL_SetJoystickVirtualButton(joystick,SDL_GAMEPAD_BUTTON_TOUCHPAD,false));
     assert(SDL_SetJoystickVirtualTouchpad(joystick,0,0,false,0,0,0));
     SDL_UpdateJoysticks();
