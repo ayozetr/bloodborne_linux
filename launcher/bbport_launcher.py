@@ -17,6 +17,7 @@ import signal
 import socket
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from pathlib import Path
@@ -52,6 +53,7 @@ PACKAGED = bool(os.environ.get("BB_PREBUILT"))
 DATA_DIR = Path(os.environ.get("BB_DATA_DIR", PORT_DIR))
 CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "bbport-launcher"
 CONFIG_FILE = CONFIG_DIR / "settings.json"
+# The Journal shows the last MAX_LOG_LINES lines; Copy and Export take the whole session.
 MAX_LOG_LINES = 5000
 # The memory model (run.sh: BB_PC_MODEL): "auto" leaves it to the GPU (the new one on AMD, the
 # 0.3 one elsewhere), or either by hand. The new one goes through the layer's memory module on
@@ -837,6 +839,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.ini, self.ini_lines = load_ini()
         self.process = None
         self.stream = None
+        self.log_spool = None  # every line of the Journal since it was last cleared; False: failed
         self.fsr411_build = None  # tools/fsr4cap/build_assets.sh while it runs
         self.latest = None  # bbport_update.latest_release() once checked
         self.releases = []  # bbport_update.releases(), the version selector's choices
@@ -2862,12 +2865,30 @@ class LauncherWindow(Adw.ApplicationWindow):
         buffer = self.log_view.get_buffer()
         return buffer.get_text(*buffer.get_bounds(), False)
 
+    def full_log_text(self):
+        """The whole session: the Journal keeps only its last MAX_LOG_LINES lines (issue #17)."""
+        if not self.log_spool:
+            return self.log_text()
+        try:
+            self.log_spool.seek(0)
+            text = self.log_spool.read()
+            self.log_spool.seek(0, os.SEEK_END)
+            return text
+        except (OSError, ValueError):
+            return self.log_text()
+
+    def clear_log(self):
+        self.log_view.get_buffer().set_text("")
+        if self.log_spool:
+            self.log_spool.close()
+        self.log_spool = None
+
     def on_copy_log(self, _button):
-        self.get_clipboard().set(self.log_text())
+        self.get_clipboard().set(self.full_log_text())
         self.toasts.add_toast(Adw.Toast(title=tr("Журнал скопирован")))
 
     def on_export_log(self, _button):
-        text = self.log_text()
+        text = self.full_log_text()
         dialog = Gtk.FileDialog(title=tr("Экспорт журнала"))
         dialog.set_initial_name(f"bbport-{time.strftime('%Y%m%d_%H%M%S')}.log")
 
@@ -2888,6 +2909,17 @@ class LauncherWindow(Adw.ApplicationWindow):
         dialog.save(self, None, finish)
 
     def append_log(self, text):
+        if self.log_spool is not False:
+            try:
+                if self.log_spool is None:
+                    self.log_spool = tempfile.TemporaryFile("w+", encoding="utf-8",
+                                                            errors="replace")
+                self.log_spool.write(text)
+            except OSError:
+                # A spool with a gap would be worse: Copy and Export take what the Journal shows.
+                if self.log_spool:
+                    self.log_spool.close()
+                self.log_spool = False
         buffer = self.log_view.get_buffer()
         buffer.insert(buffer.get_end_iter(), text)
         extra = buffer.get_line_count() - MAX_LOG_LINES
@@ -2927,7 +2959,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.stack.set_visible_child_name("online")
             return
         self.store()
-        self.log_view.get_buffer().set_text("")
+        self.clear_log()
         launcher = Gio.SubprocessLauncher.new(
             Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
         launcher.set_environ([f"{k}={v}" for k, v in self.environment().items()])
