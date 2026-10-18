@@ -86,3 +86,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 - **[Kaka556Kevin](https://github.com/Kaka556Kevin)**: testing the video memory fix.
 - **[segasonicye](https://github.com/segasonicye)**: why the game did not start in the Steam Deck's Game Mode.
 - **[Monochrome0907](https://github.com/Monochrome0907)**: which effects freeze loading screens on NVIDIA.
+- **[bruxis](https://github.com/bruxis)**: the log that showed why Steam Input did not reach the game.
+- **[shauryasagar](https://github.com/shauryasagar)** and **[ZeroSTF](https://github.com/ZeroSTF)**: the Hunter's Dream going black after long sessions.
+- **[popcar2](https://github.com/popcar2)**: Quit to Desktop with online play on, and ideas for the launcher.
+- **[shaneo88](https://github.com/shaneo88)**: shadPS4's patch file in the patches folder.
+- **[n3vrs0ft](https://github.com/n3vrs0ft)** and **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.

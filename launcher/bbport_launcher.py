@@ -787,6 +787,13 @@ THANKS = (
                           "ускорение камеры по диагонали и вылет при выходе из игры"),
         _github("segasonicye", "Нашёл, почему игра не запускалась в игровом режиме Steam Deck"),
         _github("Monochrome0907", "Нашёл, при каких эффектах зависают загрузки на NVIDIA"),
+        _github("bruxis", "Журнал, показавший, почему Steam Input не доходил до игры"),
+        _github("shauryasagar", "Чёрный Сон Охотника после долгой игры"),
+        _github("ZeroSTF", "Чёрный Сон Охотника после долгой игры"),
+        _github("popcar2", "«Выход на рабочий стол» при игре по сети и идеи для лаунчера"),
+        _github("shaneo88", "Файл патчей shadPS4 в папке патчей"),
+        _github("n3vrs0ft", "Вылет «Transaction failed» на Seamless Hunt"),
+        _github("cappp", "Вылет «Transaction failed» на Seamless Hunt"),
     )),
     ("Другие благодарности", (
         ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",
