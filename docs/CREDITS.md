@@ -47,6 +47,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 - **[Jhony-Jhansen](https://github.com/Jhony-Jhansen)**: keyboard movement and the direct mouse camera.
 - **[mcrib884](https://github.com/mcrib884)**: the bbmouse mouse camera, the basis of the direct camera.
 - **[HatsyRei](https://github.com/HatsyRei)**: the keyboard walk key (in Mrsuss60's port).
+- **[msisovic](https://github.com/msisovic)**: why loading hung after a lamp travel (guest thread handles above 40 bits).
 - **[pmwork-personal](https://github.com/pmwork-personal)**: ultrawide monitors without a stretched picture.
 - **[emurphy04](https://github.com/emurphy04)**: ultrawide output and the HUD position, Quit to
   Desktop in the game's menus, and a video player crash when it stops.
