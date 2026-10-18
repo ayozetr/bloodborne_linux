@@ -11,7 +11,8 @@ Desktop, and change what they do:
   it always does. It tells the port first ("bb:p"); Exit Game's confirmation then asks the port
   ("bb:d") and shows the Quit to Desktop question. The port closes the game when the intro logos
   start loading, once the save is done (src/runtime_services.c), or at the latest when the
-  title screen is built ("bb:t", the Play Online / Play Offline choice or the title menu).
+  title screen is built ("bb:t", the Play Online / Play Offline choice or the title menu; with
+  the choice skipped online, the patch that skips it says so: patches/Bloodborne.xml).
 
 The messages go through the game's sceSystemServiceLaunchWebBrowser import, which the port
 answers itself (src/runtime_services.c). The new code lives where the Language entry's old

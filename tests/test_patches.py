@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import patches
+import quit_menu
 
 from patches import (EBOOT_BASE, OUTPUT_SIZE, RESOLUTION_TEMPLATE, SCENE_HEIGHT,
                      SCENE_WIDTH, UI_HEIGHT, UI_WIDTH, compile_patches,
@@ -127,10 +128,19 @@ class NetworkChoiceTests(unittest.TestCase):
                                          SEGMENTS)
         self.assertEqual(at, at2)
         # The same builder: the PLAY ONLINE item's vtable (0x533be80) and operator() (0x1b49eb0).
-        lea = lambda code: at + 0x13 + struct.unpack_from('<i', code, 0xf)[0]
-        call = lambda code: at + 0x24 + struct.unpack_from('<i', code, 0x20)[0]
-        self.assertEqual((lea(offline), call(offline)), (0x533be30, 0x1b49cd0))
-        self.assertEqual((lea(online), call(online)), (0x533be80, 0x1b49eb0))
+        rel = lambda code, end: at + end + struct.unpack_from('<i', code, end - 4)[0]
+        self.assertEqual((rel(offline, 0x13), rel(offline, 0x24)), (0x533be30, 0x1b49cd0))
+        self.assertEqual((rel(online, 0x29), rel(online, 0x3a)), (0x533be80, 0x1b49eb0))
+
+    def test_online_choice_tells_quit_to_desktop_the_title_is_back(self):
+        # Without the Play Online label it hooks, a Quit to Desktop from the System menu would
+        # wait for the sign-in and the server's messages (issue #15).
+        (at, online), = compile_patches(XML, [patches.SKIP_NETWORK_CHOICE_ONLINE], '01.09',
+                                         SEGMENTS)
+        rel = lambda end: at + end + struct.unpack_from('<i', online, end - 4)[0]
+        self.assertEqual(rel(0x1f), quit_menu.BROWSER)
+        self.assertEqual(online[rel(0x18) - at:], b'bb:t\0')
+        self.assertLessEqual(at + len(online), quit_menu.ONLINE_LABEL)
 
 
 class DebugPatchTests(unittest.TestCase):

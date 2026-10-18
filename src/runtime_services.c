@@ -96,7 +96,7 @@ static ABI int32_t hide_splash(void) { note("SystemService: splash screen hidden
  * the Quit to Desktop question and arms the quit. The game then saves and leaves the world, and
  * closes as soon as it starts the intro logos (a menu/logo_ file opens) with no save data mounted,
  * or after the last save unmounts, or when the title screen is built ("bb:t", with the intro
- * skipped). An unanswered dialog disarms it after two minutes. Closing is the window's own close
+ * skipped; also from Skip Online/Offline Choice: Online, before the game signs in). An unanswered dialog disarms it after two minutes. Closing is the window's own close
  * (SDL_EVENT_QUIT: the window thread ends the process with exit code 0). */
 #define QUIT_ARMED_SECONDS 120
 static int quit_pending, quit_waiting;

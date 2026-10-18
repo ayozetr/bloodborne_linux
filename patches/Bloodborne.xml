@@ -3451,9 +3451,9 @@
             <Line Type="bytes" Address="0x01f39030" Value="554889e5534883ec184889fb488d05ed2d80034889042448897424084889e6e87c0c01004889d84883c4185b5dc3"/>
         </PatchList>
     </Metadata>
-    <Metadata Title="Bloodborne" Name="Skip Online/Offline Choice: Online" Author="bbport" Note="As Skip Online/Offline Choice, with PLAY ONLINE: the dialog builder returns what its PLAY ONLINE item returns (operator() at 0x1b49eb0, item functor vtable 0x533be80), which differs from PLAY OFFLINE's only in the online flag it passes on (1, not 0). The game then starts its online session at the title as on a PS4, without Log In. Used when online play is on." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+    <Metadata Title="Bloodborne" Name="Skip Online/Offline Choice: Online" Author="bbport" Note="As Skip Online/Offline Choice, with PLAY ONLINE: the dialog builder returns what its PLAY ONLINE item returns (operator() at 0x1b49eb0, item functor vtable 0x533be80), which differs from PLAY OFFLINE's only in the online flag it passes on (1, not 0). The game then starts its online session at the title as on a PS4, without Log In. It first tells the port that the title screen is back (the web browser import with bb:t, as Quit to Desktop's Play Online label does), so a Quit to Desktop from the System menu closes the game there, not after the server's sign-in and its messages. Used when online play is on." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
         <PatchList>
-            <Line Type="bytes" Address="0x01f39030" Value="554889e5534883ec184889fb488d053d2e80034889042448897424084889e6e85c0e01004889d84883c4185b5dc3"/>
+            <Line Type="bytes" Address="0x01f39030" Value="554889e55341544883ec104889fb4989f4488d3d2e00000031f6e8597908014889df488d05272e8003488904244c896424084889e6e8460e01004889d84883c410415c5b5dc362623a7400"/>
         </PatchList>
     </Metadata>
     <!-- From droogie/bbhost (patches/*.toml), where each site is checked against its original
