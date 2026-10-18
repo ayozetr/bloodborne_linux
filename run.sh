@@ -47,9 +47,12 @@ if [[ ${BB_SAVE_LOG:-} == 1 ]]; then
     export BB_FRAME_STATS=1 BB_FRAME_LOG=${BB_FRAME_LOG:-$logs/$stamp.frames.csv}
     export BB_READBACK_LOG=${BB_READBACK_LOG:-$logs/$stamp.readbacks.csv}
     echo "Log: $logs/$stamp.log"
-    exec 3>"$logs/$stamp.log"
+    # A free descriptor, not 3: the AppImage runtime keeps its mount open on an inherited fd 3, and
+    # closing it unmounted the image under the game ("Software caused connection abort", --play).
+    # From upstream bbport 0.6.
+    exec {log_fd}>"$logs/$stamp.log"
     # Bash builtins only (the AppImage's PATH has no tee).
-    exec > >(while IFS= read -r line || [[ -n $line ]]; do printf '%s\n' "$line"; printf '%s\n' "$line" >&3; done) 2>&1
+    exec > >(while IFS= read -r line || [[ -n $line ]]; do printf '%s\n' "$line"; printf '%s\n' "$line" >&$log_fd; done) 2>&1
 fi
 if [[ -z ${PYTHON:-} ]]; then
     PYTHON=$(command -v python3 || true)
