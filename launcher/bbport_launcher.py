@@ -39,7 +39,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk  # noqa: E402
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
 from menu_prompts import prompts_for  # noqa: E402
-from mods import discover as discover_mods  # noqa: E402
+from mods import discover as discover_mods, unrecognized as unrecognized_mods  # noqa: E402
 from prepare import sfo  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
@@ -693,6 +693,16 @@ def connected_displays():
     return [(name if names.count(name) == 1 else str(number),
              f"{number}: {name} ({size})" + (tr(", основной") if primary == "1" else ""))
             for number, (name, size, primary) in enumerate(rows, 1)]
+
+
+# mods.py problem(): why a folder in the mods folder is not loaded.
+MOD_PROBLEMS = {
+    "empty": "папка пуста",
+    "archive": "это ещё архив: распакуйте его сюда",
+    "several": "несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, "
+               "parts, map)",
+    "no-game-files": "нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map",
+}
 
 
 class FolderList:
@@ -1878,6 +1888,15 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.mod_list.add(name, row)
         if not order:
             self.mods_folder_row.set_subtitle(f"{self.mods_dir()} — {tr('Модов нет')}")
+        # Folders that are not mods are named, with why, instead of left out without a word.
+        for row in getattr(self, "mod_problem_rows", []):
+            self.mod_list.group.remove(row)
+        self.mod_problem_rows = []
+        for name, problem in unrecognized_mods(self.mods_dir()):
+            row = Adw.ActionRow(title=name, subtitle=f"{tr('Не загружен')}: {tr(MOD_PROBLEMS[problem])}")
+            row.add_css_class("dim-label")
+            self.mod_list.group.add(row)
+            self.mod_problem_rows.append(row)
 
     def move_mod(self, name, direction):
         rows = self.mod_list.rows

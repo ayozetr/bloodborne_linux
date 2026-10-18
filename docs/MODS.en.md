@@ -25,11 +25,16 @@ These layouts work as well:
 
 - `Mod name/app0/dvdroot_ps4/...`, and `Mod name/<title ID>/dvdroot_ps4/...` with whichever
   release the mod was made for (`CUSA03173`, `CUSA00900`, ...).
-- One extra wrapper folder, as extracting an archive into a folder of its name leaves it:
-  `Mod name/Mod name v1.2/dvdroot_ps4/...` (readme files and pictures may sit next to it).
+- Up to three extra wrapper folders, as extracting an archive into a folder of its name leaves it:
+  `Mod name/Mod name v1.2/dvdroot_ps4/...` (notes, pictures and links may sit next to them:
+  `README`, `.txt`, `.pdf`, `.png`, `.webp`, `.url`, ...).
 - The game's folders without `dvdroot_ps4`: `Mod name/chr/...`, `Mod name/parts/...` (`chr`,
   `parts`, `map`, `menu`, `msg`, `param`, `sfx`, `sound`, `font` and the other folders of
-  `dvdroot_ps4`).
+  `dvdroot_ps4`), also next to other folders such as `Screenshots` or `Optional`, which stay out
+  of the game.
+
+A folder in the mods folder that is not a mod is listed in the launcher under the mods with the
+reason: still an archive, several mods in one folder, no game files, or empty.
 
 Upper or lower case does not matter: a mod made on Windows with
 `DVDROOT_PS4/Chr/C0000.chrbnd.dcx` replaces the game's `dvdroot_ps4/chr/c0000.chrbnd.dcx`.

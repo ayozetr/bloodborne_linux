@@ -7,6 +7,11 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Не загружен': 'Not loaded',
+    'папка пуста': 'the folder is empty',
+    'это ещё архив: распакуйте его сюда': 'still an archive: extract it here',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'several folders: put each mod in its own folder (with dvdroot_ps4, or folders like chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'no game files: expected dvdroot_ps4, or folders like chr, parts, map',
     "Без звука в фоне": "Mute in the background",
     "Пока окно игры не в фокусе": "While the game window is not in focus",
     "Поле зрения": "Field of view",
@@ -776,6 +781,11 @@ EN = {
 }
 
 PT_BR = {
+    'Не загружен': 'Não carregado',
+    'папка пуста': 'a pasta está vazia',
+    'это ещё архив: распакуйте его сюда': 'ainda é um arquivo compactado: extraia-o aqui',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'várias pastas: coloque cada mod na sua própria pasta (com dvdroot_ps4 ou pastas como chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'sem arquivos do jogo: esperava-se dvdroot_ps4 ou pastas como chr, parts, map',
     "Без звука в фоне": "Silenciar em segundo plano",
     "Пока окно игры не в фокусе": "Enquanto a janela do jogo não estiver em foco",
     "Поле зрения": "Campo de visão",
@@ -1605,6 +1615,11 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Не загружен': 'No se carga',
+    'папка пуста': 'la carpeta está vacía',
+    'это ещё архив: распакуйте его сюда': 'todavía es un archivo comprimido: extráelo aquí',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'varias carpetas: pon cada mod en su propia carpeta (con dvdroot_ps4 o carpetas como chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'no hay archivos del juego: se esperaba dvdroot_ps4 o carpetas como chr, parts, map',
     "Без звука в фоне": "Silenciar en segundo plano",
     "Пока окно игры не в фокусе": "Mientras la ventana del juego no tenga el foco",
     "Поле зрения": "Campo de visión",
@@ -2343,6 +2358,11 @@ ES = {
 
 # Italian.
 IT = {
+    'Не загружен': 'Non caricato',
+    'папка пуста': 'la cartella è vuota',
+    'это ещё архив: распакуйте его сюда': 'è ancora un archivio: estrailo qui',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'più cartelle: metti ogni mod nella sua cartella (con dvdroot_ps4 o cartelle come chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'nessun file del gioco: serve dvdroot_ps4 o cartelle come chr, parts, map',
     "Без звука в фоне": "Silenzia in background",
     "Пока окно игры не в фокусе": "Finché la finestra del gioco non è in primo piano",
     "Поле зрения": "Campo visivo",
@@ -3081,6 +3101,11 @@ IT = {
 
 # French.
 FR = {
+    'Не загружен': 'Non chargé',
+    'папка пуста': 'le dossier est vide',
+    'это ещё архив: распакуйте его сюда': 'c’est encore une archive : extrayez-la ici',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'plusieurs dossiers : mettez chaque mod dans son propre dossier (avec dvdroot_ps4 ou des dossiers comme chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'aucun fichier du jeu : dvdroot_ps4 attendu, ou des dossiers comme chr, parts, map',
     "Без звука в фоне": "Couper le son en arrière-plan",
     "Пока окно игры не в фокусе": "Tant que la fenêtre du jeu n'a pas le focus",
     "Поле зрения": "Champ de vision",
@@ -3819,6 +3844,11 @@ FR = {
 
 # German.
 DE = {
+    'Не загружен': 'Nicht geladen',
+    'папка пуста': 'der Ordner ist leer',
+    'это ещё архив: распакуйте его сюда': 'noch ein Archiv: hier entpacken',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': 'mehrere Ordner: jede Mod in einen eigenen Ordner (mit dvdroot_ps4 oder Ordnern wie chr, parts, map)',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': 'keine Spieldateien: erwartet wird dvdroot_ps4 oder Ordner wie chr, parts, map',
     "Без звука в фоне": "Im Hintergrund stummschalten",
     "Пока окно игры не в фокусе": "Solange das Spielfenster nicht im Fokus ist",
     "Поле зрения": "Sichtfeld",
@@ -4557,6 +4587,11 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Не загружен': '未加载',
+    'папка пуста': '文件夹为空',
+    'это ещё архив: распакуйте его сюда': '仍是压缩包：请解压到此处',
+    'несколько папок: каждый мод — в своей папке (с dvdroot_ps4 или папками вроде chr, parts, map)': '多个文件夹：每个模组放在各自的文件夹中（含 dvdroot_ps4，或 chr、parts、map 等文件夹）',
+    'нет файлов игры: нужна dvdroot_ps4 или папки вроде chr, parts, map': '没有游戏文件：需要 dvdroot_ps4，或 chr、parts、map 等文件夹',
     "Без звука в фоне": "后台时静音",
     "Пока окно игры не в фокусе": "游戏窗口未获得焦点时",
     "Поле зрения": "视野",
