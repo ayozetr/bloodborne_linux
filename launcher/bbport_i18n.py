@@ -7,6 +7,8 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    "Поле зрения": "Field of view",
+    "Градусы по вертикали; в игре 43": "Vertical degrees; the game has 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: BBSC's community server, with players on Windows",
     "Создать учётную запись": "Create an account",
     "На этом сервере, с именем и паролем выше": "On this server, with the name and password above",
@@ -772,6 +774,8 @@ EN = {
 }
 
 PT_BR = {
+    "Поле зрения": "Campo de visão",
+    "Градусы по вертикали; в игре 43": "Graus na vertical; o jogo usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: servidor da comunidade do BBSC, com jogadores no Windows",
     "Создать учётную запись": "Criar uma conta",
     "На этом сервере, с именем и паролем выше": "Neste servidor, com o nome e a senha acima",
@@ -1597,6 +1601,8 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    "Поле зрения": "Campo de visión",
+    "Градусы по вертикали; в игре 43": "Grados en vertical; el juego usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: servidor de la comunidad de BBSC, con jugadores en Windows",
     "Создать учётную запись": "Crear una cuenta",
     "На этом сервере, с именем и паролем выше": "En este servidor, con el nombre y la contraseña de arriba",
@@ -2331,6 +2337,8 @@ ES = {
 
 # Italian.
 IT = {
+    "Поле зрения": "Campo visivo",
+    "Градусы по вертикали; в игре 43": "Gradi in verticale; il gioco usa 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: server della comunità di BBSC, con giocatori su Windows",
     "Создать учётную запись": "Crea un account",
     "На этом сервере, с именем и паролем выше": "Su questo server, con il nome e la password qui sopra",
@@ -3065,6 +3073,8 @@ IT = {
 
 # French.
 FR = {
+    "Поле зрения": "Champ de vision",
+    "Градусы по вертикали; в игре 43": "Degrés à la verticale ; le jeu utilise 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com : serveur communautaire de BBSC, avec des joueurs sous Windows",
     "Создать учётную запись": "Créer un compte",
     "На этом сервере, с именем и паролем выше": "Sur ce serveur, avec le nom et le mot de passe ci-dessus",
@@ -3799,6 +3809,8 @@ FR = {
 
 # German.
 DE = {
+    "Поле зрения": "Sichtfeld",
+    "Градусы по вертикали; в игре 43": "Vertikale Grad; das Spiel hat 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com: Community-Server von BBSC, mit Spielern unter Windows",
     "Создать учётную запись": "Konto erstellen",
     "На этом сервере, с именем и паролем выше": "Auf diesem Server, mit dem Namen und Passwort oben",
@@ -4533,6 +4545,8 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    "Поле зрения": "视野",
+    "Градусы по вертикали; в игре 43": "垂直角度；游戏默认为 43",
     "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows": "play.seamlesshunt.com：BBSC 社区服务器，可与 Windows 玩家联机",
     "Создать учётную запись": "创建账户",
     "На этом сервере, с именем и паролем выше": "在此服务器上，使用上方的名称和密码",

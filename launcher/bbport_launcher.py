@@ -249,6 +249,7 @@ INI_DEFAULTS = {
     "model_lod": "0",
     "live_resolution": "0",
     "hud_position": "100",
+    "fov": "43",
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
@@ -1037,6 +1038,16 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.output_row.connect("notify::selected", lambda *_: self.hud_row.set_sensitive(
             ultrawide(combo_value(self.output_row))))
         self.hud_row.set_sensitive(ultrawide(combo_value(self.output_row)))
+        # bbport.ini fov (scripts/fov.py): every camera of the game's table scaled; 43 is the game's.
+        self.fov_row = Adw.SpinRow.new_with_range(30, 90, 1)
+        self.fov_row.set_title(tr("Поле зрения"))
+        self.fov_row.set_subtitle(tr("Градусы по вертикали; в игре 43"))
+        try:
+            fov = min(max(float(self.ini.get("fov", "43")), 30.0), 90.0)
+        except ValueError:
+            fov = 43.0
+        self.fov_row.set_value(fov)
+        screen.add(self.fov_row)
         self.fullscreen_row = Adw.SwitchRow(title=tr("Полноэкранный режим"),
                                             active=self.settings["fullscreen"])
         screen.add(self.fullscreen_row)
@@ -1723,6 +1734,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "model_lod": combo_value(self.lod_row),
             "live_resolution": combo_value(self.live_row),
             "hud_position": combo_value(self.hud_row),
+            "fov": str(int(self.fov_row.get_value())),
             "mouse_look": "1" if self.mouse_look_row.get_active() else "0",
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",

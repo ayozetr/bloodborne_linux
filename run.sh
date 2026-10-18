@@ -147,6 +147,11 @@ if [[ -n ${BB_UI_RES:-} ]]; then
         --canvas-width "${BB_UI_RES%x*}" --config "$BB_CONFIG" --source "$ui_mods") || hud_layer=
     if [[ -n $hud_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$hud_layer; fi
 fi
+# Field of view (bbport.ini fov, degrees; unset or 43 the game's): the camera table with every
+# camera's field of view scaled, a layer under the mods (a mod's own camera table wins). Optional:
+# without it the game keeps its own (scripts/fov.py).
+fov_layer=$("$PYTHON" scripts/fov.py "$game" --out "$out/fov" --config "$BB_CONFIG") || fov_layer=
+if [[ -n $fov_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$fov_layer; fi
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
     --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods")

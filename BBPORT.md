@@ -190,7 +190,9 @@ left / right half. *Controls* in the launcher also swaps the sticks and inverts 
 camera (`pad_swap_sticks`, `pad_invert_look_x`, `pad_invert_look_y` in bbport.ini). With *Direct
 mouse camera* (`mouse_camera=direct`) the mouse turns the camera itself, 1:1, with no stick dead
 zone or turn curve (the game's 1.09 code is hooked while the window holds the mouse; locked on, the
-mouse moves the stick again so a flick switches targets). There is no PSN: the *Play online / offline* screen is skipped and the game opens
+mouse moves the stick again so a flick switches targets). *Screen → Field of view* (`fov`, 30-90 degrees, the game's
+43) scales every camera of the game's camera table, as a layer under the mods (`scripts/fov.py`; a mod's own
+`gameparam.parambnd.dcx` wins). There is no PSN: the *Play online / offline* screen is skipped and the game opens
 its main menu offline (a game patch; the launcher's *Game effects → Skip the “play online / offline” choice*,
 `BB_SKIP_NETWORK_CHOICE=0` shows it). With several monitors, *Screen → Monitor* in the launcher
 (`BB_DISPLAY=<number or part of the name>`) picks the one for the game.
