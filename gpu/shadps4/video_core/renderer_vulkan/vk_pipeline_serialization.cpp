@@ -123,7 +123,11 @@ bool LoadShaderMeta(Serialization::Archive& ar, Shader::Info& info,
         return false;
     }
 
-    fetch_shader_data = spec.fetch_shader_data;
+    // bbport: only a stage with a fetch shader sets it: a geometry stage, loaded after the vertex
+    // stage, left the pipeline without one. From upstream bbport 0.6-pre1.
+    if (spec.fetch_shader_data) {
+        fetch_shader_data = spec.fetch_shader_data;
+    }
     return true;
 }
 
@@ -204,6 +208,9 @@ void GraphicsPipeline::SerializationSupport::Serialize(Serialization::Archive& a
     sdata.Write(multisampling);
     sdata.Write(tcs);
     sdata.Write(tes);
+    // bbport: clip distance emulation's discard shader (NVIDIA), which a pipeline without a
+    // pixel shader loaded from the disk cache had to rebuild from a stale fragment stage.
+    sdata.Write(fragment);
 }
 
 bool GraphicsPipeline::SerializationSupport::Deserialize(Serialization::Archive& ar) {
@@ -215,6 +222,9 @@ bool GraphicsPipeline::SerializationSupport::Deserialize(Serialization::Archive&
     sdata.Read(multisampling);
     sdata.Read(tcs);
     sdata.Read(tes);
+    if (!ar.IsEoS()) { // entries written before it have none
+        sdata.Read(fragment);
+    }
     return true;
 }
 
@@ -224,6 +234,10 @@ bool PipelineCache::LoadGraphicsPipeline(Serialization::Archive& ar) {
     GraphicsPipeline::SerializationSupport sdata{};
     sdata.Deserialize(ar);
 
+    // bbport: a pipeline that failed to load (return false below) leaves no stage behind.
+    sel.infos.fill(nullptr);
+    sel.modules.fill(nullptr);
+    sel.fetch_shader.reset();
     for (int stage_idx = 0; stage_idx < MaxShaderStages; ++stage_idx) {
         const auto& hash = sel.graphics_key.stage_hashes[stage_idx];
         if (!hash) {
