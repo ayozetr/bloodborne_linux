@@ -487,7 +487,11 @@ static void load_bindings(void) {
             else if (!strncmp(line,"pad_invert_look_y=",18)) pad_invert_look_y=atoi(value)!=0;
             else if (!strncmp(line,"pad_camera_diagonal=",20)) pad_camera_diagonal=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
-                const float v=strtof(value,NULL);
+                /* A decimal comma (earlier AppImages, in the user's language: issue #18). */
+                char number[32]; snprintf(number,sizeof(number),"%s",value);
+                char *comma=strchr(number,',');
+                if (comma && !strchr(number,'.') && !strchr(comma+1,',')) *comma='.';
+                const float v=strtof(number,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
             }
             continue;

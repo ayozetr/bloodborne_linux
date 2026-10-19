@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <assert.h>
+#include <locale.h>
 #include <unistd.h>
 #include "../src/runtime_pad.c"
 
@@ -113,6 +114,28 @@ int main(void) {
     assert(bindings[IN_CROSS].key_count==2 && bindings[IN_CROSS].keys[0]==SDL_SCANCODE_X &&
            bindings[IN_CROSS].keys[1]==SDL_SCANCODE_SPACE);
     assert(camera_direct==1 && camera_sensitivity==1.5f); /* mouse_camera=direct */
+    /* Issue #18: an earlier AppImage wrote numbers in the user's language ("1,5"); they read as
+       written with a point. In such a language strtof stops at the point: bb-probe sets
+       LC_NUMERIC to C at start, as here. */
+    FILE *comma=fopen(config,"w");
+    assert(comma);
+    fputs("mouse_sensitivity=1,5\n",comma);
+    fclose(comma);
+    load_bindings();
+    assert(mouse_sensitivity==1.5f);
+    if (setlocale(LC_ALL,"es_ES.UTF-8")) {
+        assert(strtof("1.5",NULL)==1.0f); /* what a Spanish locale did to "1.5" */
+        setlocale(LC_NUMERIC,"C");
+        assert(strtof("1.5",NULL)==1.5f);
+        load_bindings();
+        assert(mouse_sensitivity==1.5f);
+        setlocale(LC_ALL,"C");
+    }
+    comma=fopen(config,"w");
+    assert(comma);
+    fputs(controls,comma);
+    fclose(comma);
+    load_bindings();
     mouse_sensitivity=1.0f; /* the mouse look checks below are at 1 */
     SDL_CloseJoystick(joystick);
     if (gamepad) SDL_CloseGamepad(gamepad);

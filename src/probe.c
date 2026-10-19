@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <locale.h>
 #include <cpuid.h>
 #include "runtime.h"
 #include "gpu/bbgpu.h"
@@ -369,6 +370,11 @@ void runtime_restart(void) {
 
 int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
+    /* Numbers are read and written with a decimal point whatever the user's language: the
+       AppImage's preloaded anylinux.so checks the host locale with setlocale(LC_ALL, "") and
+       leaves it set, so in Spanish, German, ... bbport.ini got "sharpness=0,30" (the launcher
+       then stayed blank, issue #18) and "0.30" read back as 0. */
+    setlocale(LC_NUMERIC, "C");
 #ifndef _WIN32
     /* Keep host heap objects handed to the guest (thread handles, TLS) in the
        non-PIE brk heap, i.e. below 1 TiB: the guest packs pointers into 40 bits. */

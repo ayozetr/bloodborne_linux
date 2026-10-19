@@ -27,7 +27,14 @@ float Clamp(float v, float lo, float hi) {
 }
 
 void Set(Values& v, const std::string& key, const std::string& value) {
-    const float f = float(std::atof(value.c_str()));
+    // A single number written with a decimal comma (earlier AppImages, in the user's language:
+    // issue #18) is read as written with a point.
+    std::string number = value;
+    if (number.find(',') != std::string::npos && number.find('.') == std::string::npos &&
+        std::count(number.begin(), number.end(), ',') == 1) {
+        std::replace(number.begin(), number.end(), ',', '.');
+    }
+    const float f = float(std::atof(number.c_str()));
     const int i = std::atoi(value.c_str());
     if (key == "menu_language") {
         const auto it = std::find(std::begin(MenuLanguageCodes), std::end(MenuLanguageCodes), value);
