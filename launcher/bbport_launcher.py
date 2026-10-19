@@ -279,7 +279,10 @@ def load_settings():
 
 def number(value, default, kind=float, where="bbport.ini", key=""):
     """A saved setting as a number; one that is not (written by hand, or by another version) keeps
-    the default instead of stopping the launcher (issue #18: a blank window)."""
+    the default instead of stopping the launcher (issue #18: a blank window). A decimal comma
+    (bbport.ini as earlier AppImages wrote it in the user's language) reads as a point."""
+    if kind is float and isinstance(value, str) and value.count(",") == 1 and "." not in value:
+        value = value.replace(",", ".")
     try:
         return kind(value)
     except (TypeError, ValueError):
