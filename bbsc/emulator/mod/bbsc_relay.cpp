@@ -39,6 +39,7 @@
 namespace BbscMod {
 void LogPlain(const char* text);
 void OnHostPlacement(const std::string& placement, u32 sender);
+void OnDirectedPlacement(s64 target_user, const std::string& placement, u32 sender); // bbport
 bool IsPublicServerAddress(const std::string& url_or_host); // bbsc_http.cpp
 u32 P2PChannelSend(const void* data, u32 size);             // bbsc_channel.cpp
 u32 P2PChannelPeerCount();
@@ -49,6 +50,9 @@ namespace {
 constexpr u16 DefaultRelayPort = 20444;
 constexpr u8 FollowType = 0x20;
 constexpr u8 PlacementType = 0x30; // "SHAD" 0x30 + a host's placement text (bbsc_http.cpp)
+// bbport: "SHAD" 0x31 + "<target UserId>|<placement>": a host's placement for the one sign it
+// rings (BBSC's bbsc.dll of 2026-10-17; 0x30 broadcasts are ignored since, issue #17).
+constexpr u8 PlacementToType = 0x31;
 constexpr u8 LifeType = 0x23;   // "SHAD" 0x23 + u32 player, u8 dead, u32 sequence
 constexpr u8 ScaleType = 0x24;  // "SHAD" 0x24 + 5 x u16 the host's scaling percentages
 constexpr u8 PvpType = 0x25;    // "SHAD" 0x25 + u8 kind (0 host state, 1 guest asks) + u8 on + u32
@@ -300,6 +304,14 @@ void Dispatch(const std::vector<u8>& wrapped) {
     } else if (frame[4] == PlacementType) {
         // A host looking for signs: for players not in a session yet, any host on the server.
         BbscMod::OnHostPlacement(std::string(frame.begin() + 5, frame.end()), sender);
+    } else if (frame[4] == PlacementToType) {
+        // bbport: the placement of the host that rang one sign: "<target UserId>|<placement>".
+        const std::string text(frame.begin() + 5, frame.end());
+        const size_t bar = text.find('|');
+        if (bar != std::string::npos && bar != 0) {
+            const s64 target = std::strtoll(text.substr(0, bar).c_str(), nullptr, 10);
+            BbscMod::OnDirectedPlacement(target, text.substr(bar + 1), sender);
+        }
     } else if (frame[4] == Libraries::Np::NpSignaling::kSignalingBbscWorldFlagsType) {
         if (from_our_host()) {
             Core::Bloodborne::OnBbscWorldFlagsPacket(frame.data(), static_cast<u32>(frame.size()));
@@ -424,6 +436,16 @@ void RelayDispatch(const std::vector<u8>& wrapped) {
 void RelaySendPlacement(const std::string& placement) {
     std::string frame = "SHAD";
     frame.push_back(static_cast<char>(PlacementType));
+    frame += placement;
+    SendFrame(frame.data(), static_cast<u32>(frame.size()));
+}
+
+// bbport: a host's placement for the sign it rings only (the sign's owner, by its UserId).
+void RelaySendPlacementTo(s64 target_user, const std::string& placement) {
+    std::string frame = "SHAD";
+    frame.push_back(static_cast<char>(PlacementToType));
+    frame += std::to_string(target_user);
+    frame.push_back('|');
     frame += placement;
     SendFrame(frame.data(), static_cast<u32>(frame.size()));
 }

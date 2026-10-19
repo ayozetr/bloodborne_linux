@@ -60,6 +60,7 @@
 
 namespace BbscMod {
 void RelaySendPlacement(const std::string& placement);
+void RelaySendPlacementTo(s64 target_user, const std::string& placement); // bbport
 u64 EbootAddress(); // bbsc_mod.cpp: where the game image is (0 until found)
 void GuardSlot(u64 slot_offset, u64 wrapper, void** original, const char* name); // bbsc_mod.cpp
 }
@@ -78,6 +79,9 @@ constexpr u64 SlotReadData = 0x053E5668;
 // works; one that has not after this long is a dead claim.
 constexpr s64 ClaimJoinWaitMs = 20'000;
 constexpr s64 PlacementStaleMs = 20'000;
+// bbport: a placement sent to our own sign by the host that rang it stays longer (BBSC's bbsc.dll
+// of 2026-10-17: 90 s), as that host keeps the claim open while the game joins.
+constexpr s64 DirectedPlacementStaleMs = 90'000;
 
 using CreateConnectionFn = int PS4_SYSV_ABI (*)(int, const char*, bool);
 using CreateRequestFn = int PS4_SYSV_ABI (*)(int, s32, const char*, u64);
@@ -104,12 +108,16 @@ std::atomic<s64> placement_received_ms{0};
 // guest sent its own placement as "a host looking for signs". The other waiting guests switched
 // their sign's map between the real host (Dream) and a guest in Central Yharnam, and the broker
 // hid every sign outside the searcher's map (Preparing) - nobody past the 3rd was summoned.
-// Only a player without a sign of its own (or a host, state 3) sends the placement now, and a
-// waiting guest follows one host until that host goes quiet.
-std::atomic<s64> own_sign_created_ms{0};
-std::atomic<s64> own_sign_deleted_ms{0};
-constexpr s64 OwnSignMs = 60'000; // the game posts its sign again about every 30 s
+// bbport (issue #17): a host now sends its placement only to the sign it rings (below), so a
+// waiting guest's own polling sends nothing.
 std::atomic<u32> placement_sender{0};
+// bbport (issue #17): which sign is ours, and whether the placement we hold was sent to it.
+// Following the first host on the server that looked for signs tied a guest to a stranger on a
+// busy server (12 hosts on Seamless Hunt in one session): its sign went to that host's map and
+// the friend never found it. As in BBSC's bbsc.dll of 2026-10-17, a host now sends its placement
+// to the one sign it rings, and a guest takes only a placement sent to its own sign.
+std::atomic<s64> own_sign_user{0};
+std::atomic<bool> placement_directed{false};
 std::atomic<s64> claim_delivered_ms{0}; // our sign's reply carried a host's claim (0 = none open)
 std::atomic<bool> was_in_session{false};
 
@@ -225,9 +233,6 @@ bool IsSummon(const std::string& url) {
 }
 bool IsSummonCreate(const std::string& url) {
     return Contains(url, "/summon_messenger/create");
-}
-bool IsSummonDelete(const std::string& url) {
-    return Contains(url, "/summon_messenger/delete");
 }
 
 bool IsSummonSearch(const std::string& url) {
@@ -536,41 +541,59 @@ int PS4_SYSV_ABI SendRequest(int request, const void* data, u64 size) {
         return original_send(request, data, size); // (review 2026-10-08) the slots never filled
     }
     original_add_header(request, "X-ShadPS4-Bloodborne-Seamless", "1", 0);
-    if (IsSummonDelete(url)) {
-        own_sign_deleted_ms = NowMs();
-    }
     if (IsSummonSearch(url)) {
-        const s64 created = own_sign_created_ms.load();
-        const bool own_sign_out = SessionState() != 3 && created != 0 &&
-                                  created > own_sign_deleted_ms.load() &&
-                                  NowMs() - created < OwnSignMs;
-        if (own_sign_out) {
-            static std::atomic<s64> last_logged{0};
-            if (NowMs() - last_logged.load() > 60'000) {
-                last_logged = NowMs();
-                LOG_INFO(Mod, "HTTP: sign search while our own sign is out - no host placement "
-                              "sent (we are waiting, not hosting)");
+        // bbport (issue #17): a host ringing a sign sends its placement to that sign's owner only
+        // (its TargetUserId), with the header for the broker; nothing goes to the whole server.
+        const std::string body = data != nullptr && size != 0
+                                     ? std::string(static_cast<const char*>(data), static_cast<size_t>(size))
+                                     : std::string{};
+        std::string target_text = JsonNumber(body, "TargetUserId");
+        if (target_text.empty()) {
+            target_text = JsonString(body, "TargetUserId");
+        }
+        if (!target_text.empty()) {
+            const s64 target = std::strtoll(target_text.c_str(), nullptr, 10);
+            const auto placement = Core::Bloodborne::GetSeamlessHostPlacementHeader();
+            if (placement && target > 0) {
+                original_add_header(request, "X-ShadPS4-Bloodborne-Host-Placement",
+                                    placement->c_str(), 0);
+                BbscMod::RelaySendPlacementTo(target, *placement);
+                LOG_INFO(Mod, "HTTP: ringing the sign of user {} - our placement {} sent to it",
+                         target, *placement);
+            } else {
+                LOG_INFO(Mod, "HTTP: ringing a sign - no placement sent (target user {}, "
+                              "placement {})",
+                         target_text, placement ? "known" : "none");
             }
-        } else if (const auto placement = Core::Bloodborne::GetSeamlessHostPlacementHeader()) {
-            original_add_header(request, "X-ShadPS4-Bloodborne-Host-Placement", placement->c_str(),
-                                0);
-            BbscMod::RelaySendPlacement(*placement);
         }
         return original_send(request, data, size);
-    }
-    if (IsSummonCreate(url)) {
-        own_sign_created_ms = NowMs();
     }
     if (IsSummonCreate(url) && data != nullptr && size != 0) {
         std::string body(static_cast<const char*>(data), static_cast<size_t>(size));
         ClearStaleRecord(url, body);
+        // bbport (issue #17): the UserId our sign is posted under; a host ringing it sends its
+        // placement to that id.
+        std::string user = JsonNumber(body, "UserId");
+        if (user.empty()) {
+            user = JsonString(body, "UserId");
+        }
+        if (!user.empty()) {
+            const s64 id = std::strtoll(user.c_str(), nullptr, 10);
+            if (id > 0 && own_sign_user.exchange(id) != id) {
+                LOG_INFO(Mod, "HTTP: our sign's user id is {}", id);
+            }
+        }
         // A host's placement that has not been refreshed for a while is a host that stopped
         // looking: forget it, as the emulator did when a create reply carried none.
         const s64 received = placement_received_ms.load();
-        if (received != 0 && NowMs() - received > PlacementStaleMs) {
+        const s64 stale = placement_directed.load() ? DirectedPlacementStaleMs : PlacementStaleMs;
+        if (received != 0 && NowMs() - received > stale) {
             placement_received_ms = 0;
             placement_sender = 0;
+            placement_directed = false;
             Core::Bloodborne::ClearSeamlessHostPlacementHeader();
+            LOG_INFO(Mod, "HTTP: no word from that host for a while - the sign goes back to our "
+                          "own map");
         }
         if (RewriteAreaId(body)) {
             original_set_content_length(request, body.size());
@@ -684,40 +707,35 @@ bool IsPublicServerAddress(const std::string& url_or_host) {
 }
 
 // A host's placement from the relay: what the broker's reply header carried in the emulator
-// build. Used only by a player who is not in a session yet (a guest waiting to be summoned).
+// build. bbport (issue #17): a placement sent to the whole server is ignored, as BBSC's bbsc.dll of
+// 2026-10-17 does ("an old host - it must update BBSC"): following any host on a busy server sent
+// a guest's sign to a stranger's map.
 void OnHostPlacement(const std::string& placement, u32 sender) {
+    static std::atomic<bool> logged{false};
+    if (!logged.exchange(true)) {
+        LOG_INFO(Mod, "HTTP: placement broadcast from {:08x} ignored (an old host - it must "
+                      "update BBSC): {}",
+                 sender, placement);
+    }
+}
+
+// bbport (issue #17): the placement of the host that rang our sign, sent to its UserId. Used only
+// by a player who is not in a session yet (a guest waiting to be summoned).
+void OnDirectedPlacement(s64 target_user, const std::string& placement, u32 sender) {
+    const s64 own = own_sign_user.load();
+    if (own == 0 || target_user != own) {
+        return; // another player's sign
+    }
     const s32 state = SessionState();
     if (state == 3 || state == 4 || state == 6) {
         return; // hosting, joining or already a guest
     }
-    // One host at a time: another sender's placement is taken only once ours has gone quiet.
-    const u32 current = placement_sender.load();
-    const s64 received = placement_received_ms.load();
-    if (current != 0 && current != sender && received != 0 &&
-        NowMs() - received <= PlacementStaleMs) {
-        static std::atomic<s64> last_logged{0};
-        if (NowMs() - last_logged.load() > 30'000) {
-            last_logged = NowMs();
-            LOG_INFO(Mod, "HTTP: placement from another player {:08x} ignored - following host "
-                          "{:08x}",
-                     sender, current);
-        }
-        return;
-    }
     if (Core::Bloodborne::SetSeamlessHostPlacementHeader(placement)) {
-        if (placement_sender.exchange(sender) != sender) {
-            LOG_INFO(Mod, "HTTP: following host {:08x} for the sign's map", sender);
-        }
-        // "1,<map>,x,y,z,heading,area": the map is logged whenever it changes (2026-10-07: the
-        // third player's sign stayed on a map the host had left; only the first one was logged).
-        static std::string last_map;
-        const size_t a = placement.find(',');
-        const size_t b = a == std::string::npos ? a : placement.find(',', a + 1);
-        const std::string map = b == std::string::npos ? std::string{} : placement.substr(a + 1, b - a - 1);
-        if (placement_received_ms.exchange(NowMs()) == 0 || map != last_map) {
-            LOG_INFO(Mod, "HTTP: a host is looking for signs - placement {}", placement);
-        }
-        last_map = map;
+        placement_directed = true;
+        placement_sender = sender;
+        placement_received_ms = NowMs();
+        LOG_INFO(Mod, "HTTP: host {:08x} rang our sign (user {}) - placement {}", sender,
+                 target_user, placement);
     }
 }
 
