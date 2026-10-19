@@ -73,6 +73,16 @@ for online play; until then the co-op bells are greyed out.
 Everyone in a session needs update 1.09. Turn cheats off when you play with others. Ports,
 firewalls and the rest: [docs/ONLINE.md](docs/ONLINE.md).
 
+## Local co-op (experimental)
+
+Several games on one PC, one per player, each in its part of the screen with its own controller
+(the launcher's **Local co-op** page): choose the players (2 to 4), the layout and each player's
+controller, then press **Play together**. Player 1 plays with the launcher's settings and saves;
+players 2 to 4 get their own saves and settings in `~/.local/share/bbport/coop/player<N>` (copied
+from player 1's the first time, about 400 MB each), without online play or Discord. One player can
+use the keyboard and mouse. Only player 1 has sound unless you turn that off. The windows are
+placed through X11, which works in a Wayland session too (XWayland).
+
 ## Building from source
 
 On Arch Linux (or CachyOS, Manjaro…):

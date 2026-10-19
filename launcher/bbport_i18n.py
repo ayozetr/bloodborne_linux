@@ -7,6 +7,24 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': "\n— player {}'s game exited (code {}) —\n",
+    'Выберите контроллер для каждого игрока': 'Choose a controller for every player',
+    'Звук только у игрока 1': 'Sound only for player 1',
+    'Играть вместе': 'Play together',
+    'Игрок {}': 'Player {}',
+    'Игроки': 'Players',
+    'Иначе звучат все игры сразу': 'Otherwise every game plays its sound at once',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Only one player can use the keyboard and mouse',
+    'Контроллеры': 'Controllers',
+    'Локальный кооп': 'Local co-op',
+    'Не выбран': 'None',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': "Several games on this PC, one per player, each in its own part of the screen with its own controller. Player 1 plays with the launcher's settings; the others get their own saves and bbport.ini (a copy of player 1's settings), without online play or Discord. The windows are placed through X11 (XWayland on Wayland)",
+    'Один контроллер выбран у двух игроков': 'Two players have the same controller',
+    'Один над другим': 'One above the other',
+    'Расположение': 'Layout',
+    'Рядом': 'Side by side',
+    'С тремя и четырьмя игроками — четверти экрана': 'Three and four players get a quarter of the screen each',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'The launcher could not open a page: starting the game is off and settings are not saved',
     'Эта страница не открылась из-за ошибки': 'This page did not open because of an error',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Starting the game is off and settings are not saved, so nothing gets damaged. Copy the error into a bug report',
@@ -786,6 +804,24 @@ EN = {
 }
 
 PT_BR = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': '\n— o jogo do jogador {} foi encerrado (código {}) —\n',
+    'Выберите контроллер для каждого игрока': 'Escolha um controle para cada jogador',
+    'Звук только у игрока 1': 'Som só para o jogador 1',
+    'Играть вместе': 'Jogar juntos',
+    'Игрок {}': 'Jogador {}',
+    'Игроки': 'Jogadores',
+    'Иначе звучат все игры сразу': 'Senão, todos os jogos tocam som ao mesmo tempo',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Só um jogador pode usar o teclado e o mouse',
+    'Контроллеры': 'Controles',
+    'Локальный кооп': 'Coop local',
+    'Не выбран': 'Nenhum',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Vários jogos neste PC, um por jogador, cada um na sua parte da tela e com seu controle. O jogador 1 joga com as configurações do launcher; os outros têm seus próprios saves e bbport.ini (uma cópia das configurações do jogador 1), sem jogo online nem Discord. As janelas são posicionadas pelo X11 (XWayland no Wayland)',
+    'Один контроллер выбран у двух игроков': 'Dois jogadores estão com o mesmo controle',
+    'Один над другим': 'Um em cima do outro',
+    'Расположение': 'Disposição',
+    'Рядом': 'Lado a lado',
+    'С тремя и четырьмя игроками — четверти экрана': 'Com três e quatro jogadores, um quarto da tela para cada',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'O launcher não conseguiu abrir uma página: iniciar o jogo está desativado e as configurações não são salvas',
     'Эта страница не открылась из-за ошибки': 'Esta página não abriu por causa de um erro',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Iniciar o jogo está desativado e as configurações não são salvas, para não estragar nada. Copie o erro para um relatório de bug',
@@ -1625,6 +1661,24 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': '\n— el juego del jugador {} se cerró (código {}) —\n',
+    'Выберите контроллер для каждого игрока': 'Elige un mando para cada jugador',
+    'Звук только у игрока 1': 'Sonido solo para el jugador 1',
+    'Играть вместе': 'Jugar juntos',
+    'Игрок {}': 'Jugador {}',
+    'Игроки': 'Jugadores',
+    'Иначе звучат все игры сразу': 'Si no, suenan todos los juegos a la vez',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Solo un jugador puede usar el teclado y el ratón',
+    'Контроллеры': 'Mandos',
+    'Локальный кооп': 'Coop local',
+    'Не выбран': 'Ninguno',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Varios juegos en este PC, uno por jugador, cada uno en su parte de la pantalla y con su mando. El jugador 1 juega con los ajustes del lanzador; los demás tienen sus propias partidas y su bbport.ini (una copia de los ajustes del jugador 1), sin juego en línea ni Discord. Las ventanas se colocan mediante X11 (XWayland en Wayland)',
+    'Один контроллер выбран у двух игроков': 'Dos jugadores tienen el mismo mando',
+    'Один над другим': 'Uno encima del otro',
+    'Расположение': 'Disposición',
+    'Рядом': 'Uno al lado del otro',
+    'С тремя и четырьмя игроками — четверти экрана': 'Con tres y cuatro jugadores, un cuarto de pantalla cada uno',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'El launcher no pudo abrir una página: iniciar el juego está desactivado y los ajustes no se guardan',
     'Эта страница не открылась из-за ошибки': 'Esta página no se abrió por un error',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Iniciar el juego está desactivado y los ajustes no se guardan, para no estropear nada. Copia el error en un informe de fallo',
@@ -2373,6 +2427,24 @@ ES = {
 
 # Italian.
 IT = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': '\n— il gioco del giocatore {} è terminato (codice {}) —\n',
+    'Выберите контроллер для каждого игрока': 'Scegli un controller per ogni giocatore',
+    'Звук только у игрока 1': 'Audio solo per il giocatore 1',
+    'Играть вместе': 'Gioca insieme',
+    'Игрок {}': 'Giocatore {}',
+    'Игроки': 'Giocatori',
+    'Иначе звучат все игры сразу': 'Altrimenti tutti i giochi suonano insieme',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Solo un giocatore può usare tastiera e mouse',
+    'Контроллеры': 'Controller',
+    'Локальный кооп': 'Coop locale',
+    'Не выбран': 'Nessuno',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Più giochi su questo PC, uno per giocatore, ognuno nella sua parte dello schermo e con il suo controller. Il giocatore 1 gioca con le impostazioni del launcher; gli altri hanno i propri salvataggi e il proprio bbport.ini (una copia delle impostazioni del giocatore 1), senza gioco online né Discord. Le finestre vengono posizionate tramite X11 (XWayland su Wayland)',
+    'Один контроллер выбран у двух игроков': 'Due giocatori hanno lo stesso controller',
+    'Один над другим': "Uno sopra l'altro",
+    'Расположение': 'Disposizione',
+    'Рядом': 'Affiancati',
+    'С тремя и четырьмя игроками — четверти экрана': 'Con tre e quattro giocatori, un quarto di schermo ciascuno',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': "Il launcher non è riuscito ad aprire una pagina: l'avvio del gioco è disattivato e le impostazioni non vengono salvate",
     'Эта страница не открылась из-за ошибки': 'Questa pagina non si è aperta a causa di un errore',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': "L'avvio del gioco è disattivato e le impostazioni non vengono salvate, per non rovinare nulla. Copia l'errore in una segnalazione",
@@ -3121,6 +3193,24 @@ IT = {
 
 # French.
 FR = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': "\n— le jeu du joueur {} s'est fermé (code {}) —\n",
+    'Выберите контроллер для каждого игрока': 'Choisissez une manette pour chaque joueur',
+    'Звук только у игрока 1': 'Son uniquement pour le joueur 1',
+    'Играть вместе': 'Jouer ensemble',
+    'Игрок {}': 'Joueur {}',
+    'Игроки': 'Joueurs',
+    'Иначе звучат все игры сразу': 'Sinon, tous les jeux jouent leur son en même temps',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Un seul joueur peut utiliser le clavier et la souris',
+    'Контроллеры': 'Manettes',
+    'Локальный кооп': 'Coop locale',
+    'Не выбран': 'Aucune',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': "Plusieurs jeux sur ce PC, un par joueur, chacun dans sa partie de l'écran avec sa manette. Le joueur 1 joue avec les réglages du lanceur ; les autres ont leurs propres sauvegardes et leur bbport.ini (une copie des réglages du joueur 1), sans jeu en ligne ni Discord. Les fenêtres sont placées via X11 (XWayland sous Wayland)",
+    'Один контроллер выбран у двух игроков': 'Deux joueurs ont la même manette',
+    'Один над другим': "L'un au-dessus de l'autre",
+    'Расположение': 'Disposition',
+    'Рядом': 'Côte à côte',
+    'С тремя и четырьмя игроками — четверти экрана': "À trois et quatre joueurs, un quart de l'écran chacun",
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': "Le lanceur n'a pas pu ouvrir une page : le lancement du jeu est désactivé et les réglages ne sont pas enregistrés",
     'Эта страница не открылась из-за ошибки': "Cette page ne s'est pas ouverte à cause d'une erreur",
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': "Le lancement du jeu est désactivé et les réglages ne sont pas enregistrés, pour ne rien abîmer. Copiez l'erreur dans un rapport de bug",
@@ -3869,6 +3959,24 @@ FR = {
 
 # German.
 DE = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': '\n— das Spiel von Spieler {} wurde beendet (Code {}) —\n',
+    'Выберите контроллер для каждого игрока': 'Wähle für jeden Spieler einen Controller',
+    'Звук только у игрока 1': 'Ton nur für Spieler 1',
+    'Играть вместе': 'Zusammen spielen',
+    'Игрок {}': 'Spieler {}',
+    'Игроки': 'Spieler',
+    'Иначе звучат все игры сразу': 'Sonst spielen alle Spiele gleichzeitig Ton ab',
+    'Клавиатура и мышь могут быть только у одного игрока': 'Nur ein Spieler kann Tastatur und Maus nutzen',
+    'Контроллеры': 'Controller',
+    'Локальный кооп': 'Lokaler Koop',
+    'Не выбран': 'Keiner',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Mehrere Spiele auf diesem PC, eins pro Spieler, jedes in seinem Teil des Bildschirms und mit seinem Controller. Spieler 1 spielt mit den Einstellungen des Launchers; die anderen bekommen eigene Spielstände und eine eigene bbport.ini (eine Kopie der Einstellungen von Spieler 1), ohne Online-Spiel und Discord. Die Fenster werden über X11 platziert (unter Wayland über XWayland)',
+    'Один контроллер выбран у двух игроков': 'Zwei Spieler haben denselben Controller',
+    'Один над другим': 'Übereinander',
+    'Расположение': 'Anordnung',
+    'Рядом': 'Nebeneinander',
+    'С тремя и четырьмя игроками — четверти экрана': 'Bei drei und vier Spielern bekommt jeder ein Viertel des Bildschirms',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'Der Launcher konnte eine Seite nicht öffnen: Das Starten des Spiels ist aus, Einstellungen werden nicht gespeichert',
     'Эта страница не открылась из-за ошибки': 'Diese Seite wurde wegen eines Fehlers nicht geöffnet',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Das Starten des Spiels ist aus und Einstellungen werden nicht gespeichert, damit nichts kaputtgeht. Kopiere den Fehler in einen Fehlerbericht',
@@ -4617,6 +4725,24 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    # Local co-op (its page, bbport_coop.py).
+    '\n— игра игрока {} завершилась (код {}) —\n': '\n— 玩家 {} 的游戏已退出（代码 {}）—\n',
+    'Выберите контроллер для каждого игрока': '请为每位玩家选择一个控制器',
+    'Звук только у игрока 1': '仅玩家 1 有声音',
+    'Играть вместе': '一起游戏',
+    'Игрок {}': '玩家 {}',
+    'Игроки': '玩家人数',
+    'Иначе звучат все игры сразу': '否则所有游戏同时发声',
+    'Клавиатура и мышь могут быть только у одного игрока': '只有一位玩家可以使用键盘和鼠标',
+    'Контроллеры': '控制器',
+    'Локальный кооп': '本地合作',
+    'Не выбран': '无',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': '在这台电脑上运行多个游戏，每位玩家一个，各占屏幕的一部分并使用自己的控制器。玩家 1 使用启动器的设置；其他玩家有自己的存档和 bbport.ini（玩家 1 设置的副本），不联机，也不显示 Discord 状态。窗口通过 X11 放置（Wayland 下通过 XWayland）',
+    'Один контроллер выбран у двух игроков': '两位玩家选择了同一个控制器',
+    'Один над другим': '上下排列',
+    'Расположение': '布局',
+    'Рядом': '左右排列',
+    'С тремя и четырьмя игроками — четверти экрана': '三人和四人时，每人占屏幕的四分之一',
     'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': '启动器无法打开某个页面：已禁止启动游戏，设置不会保存',
     'Эта страница не открылась из-за ошибки': '此页面因错误未能打开',
     'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': '为避免损坏任何内容，已禁止启动游戏且不保存设置。请将错误复制到错误报告中',

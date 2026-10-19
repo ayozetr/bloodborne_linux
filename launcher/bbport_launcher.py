@@ -25,6 +25,7 @@ from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, system_game_language, tr
 import bbport_cache
+import bbport_coop
 import bbport_steam
 import bbport_update
 
@@ -166,6 +167,10 @@ DRAW_PIPE = [("Авто", "", "Включён при 8 и более поток�
              ("Выключен", "0", "Стабильнее, но медленнее")]
 # The button prompts (scripts/menu_prompts.py): automatic follows the controller in use, the
 # keyboard without one.
+COOP_LAYOUTS = [("Один над другим", "rows"), ("Рядом", "columns")]
+# Local co-op: the other players start this many seconds apart (each prepares its files and takes
+# its window's place in turn).
+COOP_START_DELAY = 8
 PROMPT_CHOICES = [("Автоматически (по контроллеру)", ""), ("PlayStation (оригинал)", "playstation"),
                   ("Xbox", "xbox"), ("Nintendo Switch", "switch"), ("Клавиатура", "keyboard")]
 # The game's language: the PS4 system language ("": from the desktop's locale).
@@ -238,6 +243,12 @@ DEFAULTS = {
     # Seamless co-op (BBSC): on or off, and the options the player changed ({mod.json id: value}).
     "bbsc": False,
     "bbsc_options": {},
+    # Local co-op (its page, bbport_coop.py): the players, the layout for two, each player's
+    # controller (a device path or "keyboard") and whether players 2-4 are silent.
+    "coop_players": 2,
+    "coop_layout": "rows",
+    "coop_controllers": [],
+    "coop_sound_first_only": True,
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -856,6 +867,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.ini_rows_seen = {}  # bbport.ini values as the rows showed them when last built or saved
         self.ini_controls_changed = {}  # key.* / pad.* bindings changed here, not yet saved
         self.process = None
+        self.coop_processes = {}  # local co-op: players 2-4's games by player; player 1's is process
         self.stream = None
         self.log_spool = None  # every line of the Journal since it was last cleared; False: failed
         self.fsr411_build = None  # tools/fsr4cap/build_assets.sh while it runs
@@ -900,6 +912,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         add_page(self.build_settings_page, "settings", tr("Настройки"), "preferences-system-symbolic")
         add_page(self.build_online_page, "online", tr("Онлайн"), "network-workgroup-symbolic")
+        add_page(self.build_coop_page, "coop", tr("Локальный кооп"), "system-users-symbolic")
         add_page(self.build_cheats_page, "cheats", tr("Читы"), "applications-games-symbolic")
         add_page(self.build_trophies_page, "trophies", tr("Трофеи"), "starred-symbolic")
         self.stack.connect("notify::visible-child-name", lambda *_: not self.build_errors and
@@ -939,6 +952,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_button.set_sensitive(self.fsr411_build is None)
         if hasattr(self, "fsr411_button"):
             self.fsr411_button.set_sensitive(not running)
+        if hasattr(self, "coop_button"):
+            self.coop_button.set_sensitive(not running and self.fsr411_build is None)
         if hasattr(self, "cache_button"):
             self.show_cache()
 
@@ -1784,6 +1799,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["trophy_key"] = self.trophy_key_row.get_text().strip()
         s["online"] = self.online_row.get_active()
         s.update(self.online_settings())
+        s["coop_players"] = int(self.coop_players_row.get_value())
+        s["coop_layout"] = combo_value(self.coop_layout_row)
+        s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
+        s["coop_sound_first_only"] = self.coop_sound_row.get_active()
         self.save_mod_profile()
         self.save_patch_profile()
         save_settings(s)
@@ -3009,6 +3028,151 @@ class LauncherWindow(Adw.ApplicationWindow):
         adj = self.log_scroller.get_vadjustment()
         GLib.idle_add(lambda: adj.set_value(adj.get_upper()) and False)
 
+    # --- local co-op page ----------------------------------------------------------------
+
+    def build_coop_page(self):
+        s = self.settings
+        page = Adw.PreferencesPage()
+        group = Adw.PreferencesGroup(description=tr(
+            "Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим "
+            "контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и "
+            "bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через "
+            "X11 (на Wayland — через XWayland)"))
+        self.coop_players_row = Adw.SpinRow.new_with_range(2, bbport_coop.MAX_PLAYERS, 1)
+        self.coop_players_row.set_title(tr("Игроки"))
+        self.coop_players_row.set_value(number(s["coop_players"], 2, int, "settings.json", "coop_players"))
+        self.coop_players_row.connect("notify::value", lambda *_: self.show_coop_players())
+        group.add(self.coop_players_row)
+        self.coop_layout_row = combo_row(tr("Расположение"), None, COOP_LAYOUTS, s["coop_layout"])
+        group.add(self.coop_layout_row)
+        self.coop_sound_row = Adw.SwitchRow(title=tr("Звук только у игрока 1"),
+                                            subtitle=tr("Иначе звучат все игры сразу"),
+                                            active=s["coop_sound_first_only"])
+        group.add(self.coop_sound_row)
+        page.add(group)
+
+        pads = Adw.PreferencesGroup(title=tr("Контроллеры"))
+        pads.set_header_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
+                                           lambda _button: self.fill_coop_controllers()))
+        self.coop_pad_rows = []
+        for player in range(1, bbport_coop.MAX_PLAYERS + 1):
+            row = Adw.ComboRow(title=tr("Игрок {}").format(player))
+            pads.add(row)
+            self.coop_pad_rows.append(row)
+        self.fill_coop_controllers()
+        page.add(pads)
+
+        start = Adw.PreferencesGroup()
+        self.coop_button = Gtk.Button(label=tr("Играть вместе"), halign=Gtk.Align.CENTER,
+                                      css_classes=["suggested-action", "pill"])
+        self.coop_button.connect("clicked", self.on_coop_start)
+        start.add(self.coop_button)
+        page.add(start)
+        self.show_coop_players()
+        return page
+
+    def fill_coop_controllers(self):
+        """Each player's controller choices: none, the keyboard and mouse, the connected
+        controllers by device path (two of one model are told apart by it), and the saved choice
+        while it is not connected. Without a saved choice the connected ones go in order, then
+        the keyboard."""
+        connected = [(path, name) for _guid, name, _type, path in connected_gamepads(paths=True)
+                     if path]
+        names = [name for _path, name in connected]
+        choices = [(tr("Не выбран"), ""), (tr("Клавиатура и мышь"), bbport_coop.KEYBOARD)]
+        choices += [(name if names.count(name) == 1 else f"{name} ({Path(path).name})", path)
+                    for path, name in connected]
+        saved = list(self.settings.get("coop_controllers") or [])
+        if not any(saved):
+            saved = [path for path, _name in connected] + [bbport_coop.KEYBOARD]
+        for player, row in enumerate(self.coop_pad_rows):
+            current = saved[player] if player < len(saved) else ""
+            row_choices = list(choices)
+            if current not in [value for _, value in row_choices]:
+                row_choices.append((tr("{} (не подключён)").format(current), current))
+            row.set_model(Gtk.StringList.new([label for label, _ in row_choices]))
+            row.values = [value for _, value in row_choices]
+            row.set_selected(row.values.index(current))
+
+    def show_coop_players(self):
+        players = int(self.coop_players_row.get_value())
+        for player, row in enumerate(self.coop_pad_rows):
+            row.set_visible(player < players)
+        # Three and four players always take the quarters of the display.
+        self.coop_layout_row.set_sensitive(players == 2)
+        self.coop_layout_row.set_subtitle(
+            "" if players == 2 else tr("С тремя и четырьмя игроками — четверти экрана"))
+
+    def on_coop_start(self, _button):
+        if self.process:
+            return
+        self.store()
+        players = self.settings["coop_players"]
+        controllers = self.settings["coop_controllers"]
+        problem = bbport_coop.problems(players, controllers)
+        if problem:
+            self.alert(tr("Локальный кооп"), {
+                "controller": tr("Выберите контроллер для каждого игрока"),
+                "same controller": tr("Один контроллер выбран у двух игроков"),
+                "keyboard twice": tr("Клавиатура и мышь могут быть только у одного игрока"),
+            }[problem[0]])
+            return
+        layout = self.settings["coop_layout"]
+        sound = self.settings["coop_sound_first_only"]
+        first = bbport_coop.player_environment(self.environment(), 1, players, controllers[0],
+                                               layout, sound)
+        self.start_game(first)
+        if not self.process:
+            return
+        for player in range(2, players + 1):
+            folder = bbport_coop.prepare_data_dir(DATA_DIR, player, ini_path())
+            env = game_environment(bbport_coop.player_settings(self.settings, player))
+            env = bbport_coop.player_environment(env, player, players, controllers[player - 1],
+                                                 layout, sound, folder)
+            GLib.timeout_add_seconds(COOP_START_DELAY * (player - 1), self.start_coop_player,
+                                     player, env)
+
+    def start_coop_player(self, player, env):
+        """Starts player 2-4's game while player 1's still runs; its lines go to the Journal
+        marked with the player."""
+        if not self.process:
+            return False
+        launcher = Gio.SubprocessLauncher.new(
+            Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
+        launcher.set_environ([f"{k}={v}" for k, v in env.items()])
+        launcher.set_cwd(str(PORT_DIR))
+        try:
+            process = launcher.spawnv(["setsid", "bash", str(PORT_DIR / "run.sh")])
+        except GLib.Error as error:
+            self.append_log(f"[P{player}] {tr('Не удалось запустить: {}').format(error.message)}\n")
+            return False
+        self.coop_processes[player] = process
+        stream = Gio.DataInputStream.new(process.get_stdout_pipe())
+        self.read_coop_line(player, stream)
+        process.wait_async(None, self.on_coop_exit, player)
+        return False
+
+    def read_coop_line(self, player, stream):
+        def on_line(stream, result):
+            try:
+                line, _length = stream.read_line_finish_utf8(result)
+            except GLib.Error:
+                return
+            if line is None:
+                return
+            self.append_log(f"[P{player}] {line}\n")
+            self.read_coop_line(player, stream)
+        stream.read_line_async(GLib.PRIORITY_DEFAULT, None, on_line)
+
+    def on_coop_exit(self, process, result, player):
+        try:
+            process.wait_finish(result)
+        except GLib.Error:
+            pass
+        status = process.get_exit_status() if process.get_if_exited() else -1
+        self.coop_processes.pop(player, None)
+        self.append_log(tr("\n— игра игрока {} завершилась (код {}) —\n").format(player, status))
+
     # --- process -------------------------------------------------------------------------
 
     def on_launch(self, _button):
@@ -3033,7 +3197,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             return
         self.start_game()
 
-    def start_game(self):
+    def start_game(self, env=None):
+        """Starts the game with the launcher's environment, or `env` (local co-op's player 1)."""
         if self.online_row.get_active() and "@" in self.npid_row.get_text():
             self.alert("Bloodborne", tr("Online ID — это имя учётной записи (NPID), "
                                         "зарегистрированное на сервере, а не адрес email"))
@@ -3043,7 +3208,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.clear_log()
         launcher = Gio.SubprocessLauncher.new(
             Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
-        launcher.set_environ([f"{k}={v}" for k, v in self.environment().items()])
+        launcher.set_environ([f"{k}={v}" for k, v in (env or self.environment()).items()])
         launcher.set_cwd(str(PORT_DIR))
         try:
             # setsid: the game and its helpers form one process group, stopped together.
@@ -3078,17 +3243,25 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.read_line()
 
     def stop_game(self):
-        if not self.process:
-            return
-        pid = int(self.process.get_identifier())
+        if self.process:
+            self.stop_process(self.process, lambda: self.process)
+        self.stop_coop_players()
+
+    def stop_coop_players(self):
+        for player, process in list(self.coop_processes.items()):
+            self.stop_process(process, lambda player=player: self.coop_processes.get(player))
+
+    def stop_process(self, process, running):
+        """SIGTERM to the game's process group, SIGKILL 3 s later if `running()` still has it."""
+        pid = int(process.get_identifier())
         try:
             os.killpg(pid, signal.SIGTERM)
         except OSError:
-            self.process.force_exit()
-        GLib.timeout_add_seconds(3, self.kill_if_running, pid)
+            process.force_exit()
+        GLib.timeout_add_seconds(3, self.kill_if_running, pid, running)
 
-    def kill_if_running(self, pid):
-        if self.process:
+    def kill_if_running(self, pid, running):
+        if running():
             try:
                 os.killpg(pid, signal.SIGKILL)
             except OSError:
@@ -3102,13 +3275,15 @@ class LauncherWindow(Adw.ApplicationWindow):
             pass
         status = process.get_exit_status() if process.get_if_exited() else -1
         self.process = None
+        # Local co-op is one session: the other players' games end with player 1's.
+        self.stop_coop_players()
         self.update_launch_button()
         self.update_game_status()
         self.append_log(tr("\n— игра завершилась (код {}) —\n").format(status))
 
     def on_close(self, _window):
         self.store()
-        if self.process:
+        if self.process or self.coop_processes:
             self.stop_game()
         if self.fsr411_build:
             self.stop_fsr411_build()
