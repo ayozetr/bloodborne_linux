@@ -16,6 +16,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 | [MaskZeus/bbbridge](https://github.com/MaskZeus/bbbridge) | Co-op on The Hunter's Dream's pool ([bbbridge/](../bbbridge/)). |
 | [Classmg22/BBSC](https://github.com/Classmg22/BBSC) | Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon ([bbsc/](../bbsc/)). |
 | [fhody125-web/NoDreamForHunter](https://github.com/fhody125-web/NoDreamForHunter) | The base of BBSC's game server. |
+| [MikeTat1988/HuntersAtlas](https://github.com/MikeTat1988/HuntersAtlas) | Hunter's Atlas: the fullscreen in-game map, its quick-menu tile, lamp travel and the map generator ([tools/hunters-atlas](../tools/hunters-atlas)), which runs with Grimrukh's [soulstruct](https://github.com/Grimrukh/soulstruct). |
 | [The Hunter's Dream](https://thehuntersdream.com) | The online server, by droogie and its team; droogie's bbhost also brought fast loading after a death or travel. |
 | [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR) | The groundwork for DLSS, and the FSR 4 model without trails. |
 | [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS) | DLSS. |
@@ -42,6 +43,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 - **[Wozzardman](https://github.com/Wozzardman)**: the online libraries and the co-op server.
 - **[droogie](https://github.com/droogie)**: The Hunter's Dream server, and fast loading (bbhost).
 - **[fhody125-web](https://github.com/fhody125-web)**: NoDreamForHunter, the base of BBSC's game server.
+- **[MikeTat1988](https://github.com/MikeTat1988)**: Hunter's Atlas, the fullscreen in-game map.
 - **[IFreemz](https://github.com/IFreemz)**: the groundwork for DLSS, and FSR 4 without trails.
 - **[FireBurn](https://github.com/FireBurn)**: FSR 3.1.
 - **[Jhony-Jhansen](https://github.com/Jhony-Jhansen)**: keyboard movement and the direct mouse camera.

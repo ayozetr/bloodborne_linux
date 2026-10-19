@@ -7,6 +7,7 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas: the fullscreen in-game map",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— player {}'s game exited (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choose a controller for every player',
@@ -804,6 +805,7 @@ EN = {
 }
 
 PT_BR = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas: o mapa em tela cheia dentro do jogo",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— o jogo do jogador {} foi encerrado (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Escolha um controle para cada jogador',
@@ -1661,6 +1663,7 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas: el mapa a pantalla completa dentro del juego",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— el juego del jugador {} se cerró (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Elige un mando para cada jugador',
@@ -2427,6 +2430,7 @@ ES = {
 
 # Italian.
 IT = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas: la mappa a schermo intero nel gioco",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— il gioco del giocatore {} è terminato (codice {}) —\n',
     'Выберите контроллер для каждого игрока': 'Scegli un controller per ogni giocatore',
@@ -3193,6 +3197,7 @@ IT = {
 
 # French.
 FR = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas : la carte plein écran dans le jeu",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— le jeu du joueur {} s'est fermé (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choisissez une manette pour chaque joueur',
@@ -3959,6 +3964,7 @@ FR = {
 
 # German.
 DE = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas: die Vollbildkarte im Spiel",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— das Spiel von Spieler {} wurde beendet (Code {}) —\n',
     'Выберите контроллер для каждого игрока': 'Wähle für jeden Spieler einen Controller',
@@ -4725,6 +4731,7 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    "Hunter's Atlas: карта на весь экран в игре": "Hunter's Atlas：游戏内全屏地图",
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— 玩家 {} 的游戏已退出（代码 {}）—\n',
     'Выберите контроллер для каждого игрока': '请为每位玩家选择一个控制器',
