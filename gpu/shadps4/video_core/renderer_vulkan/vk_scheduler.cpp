@@ -958,9 +958,13 @@ void Scheduler::SubmitExecution(SubmitInfo& info) {
     const vk::Semaphore timeline = work_semaphore.Handle();
     info.AddSignal(timeline, signal_value);
 
+    // bbport: every wait covers its earliest consumer. A prepared frame is first read by the
+    // present blit (Transfer) and by diagnostic dumps, before ColorAttachmentOutput: waiting
+    // only there let those reads race the work that produces the frame (single black or grey
+    // frames). From upstream bbport 0.6.
     static constexpr std::array<vk::PipelineStageFlags, 2> wait_stage_masks = {
         vk::PipelineStageFlagBits::eAllCommands,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        vk::PipelineStageFlagBits::eAllCommands,
     };
 
     const vk::TimelineSemaphoreSubmitInfo timeline_si = {
@@ -1039,9 +1043,10 @@ void Scheduler::SubmitAsync(SubmitInfo& info) {
         }
         recorded_segments.fetch_add(num_cmdbufs, std::memory_order_relaxed);
         recorded_submissions.fetch_add(1, std::memory_order_relaxed);
+        // bbport: as in the submit above, every wait covers its earliest consumer.
         static constexpr std::array<vk::PipelineStageFlags, 4> wait_stage_masks = {
             vk::PipelineStageFlagBits::eAllCommands,
-            vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            vk::PipelineStageFlagBits::eAllCommands,
             vk::PipelineStageFlagBits::eAllCommands,
             vk::PipelineStageFlagBits::eAllCommands,
         };
