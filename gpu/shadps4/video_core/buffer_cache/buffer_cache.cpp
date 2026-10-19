@@ -1654,9 +1654,15 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
         vk::Result result = vk::Result::eErrorOutOfDeviceMemory;
         vk::DeviceMemory memory{};
         // FixedArena: no VRAM in the arena (system memory, as the guest chunks it is bound with).
+        // bbport: out of memory there too gives none (the caller frees what it can and tries
+        // again); Vulkan::Check stopped the game (upstream #173, PR #206).
         if (FixedArena() && arena_fallback_type_index) {
-            memory = Vulkan::Check(device.allocateMemory(
-                {.allocationSize = size, .memoryTypeIndex = *arena_fallback_type_index}));
+            auto host = device.allocateMemory(
+                {.allocationSize = size, .memoryTypeIndex = *arena_fallback_type_index});
+            if (host.result != vk::Result::eSuccess) {
+                return vk::DeviceMemory{};
+            }
+            memory = host.value;
             BbStats::device_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
             BbStats::residency_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
             return memory;
@@ -1684,8 +1690,12 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
                             "go to system memory (slower)\n",
                             vk::to_string(result).c_str());
             }
-            memory = Vulkan::Check(device.allocateMemory(
-                {.allocationSize = size, .memoryTypeIndex = *arena_fallback_type_index}));
+            auto host = device.allocateMemory(
+                {.allocationSize = size, .memoryTypeIndex = *arena_fallback_type_index});
+            if (host.result != vk::Result::eSuccess) {
+                return vk::DeviceMemory{};
+            }
+            memory = host.value;
         } else {
             // No system-memory type for the arena (NVIDIA's sparse buffers take VRAM only):
             // AllocateResidency tries a smaller block and the other memory types.
@@ -1748,15 +1758,41 @@ std::pair<vk::DeviceMemory, u64> BufferCache::AllocateResidency(u64 bytes) {
                             memory ? "the request fits now" : "still not enough");
             }
         }
-        const auto& types = instance.GetMemoryProperties();
-        for (u32 i = 0; !memory && i < types.memoryTypeCount; ++i) {
-            if (((arena_memory_type_bits >> i) & 1) && i != arena_memory_type_index) {
-                auto other = instance.GetDevice().allocateMemory({.allocationSize = size, .memoryTypeIndex = i});
-                if (other.result == vk::Result::eSuccess) {
-                    memory = other.value;
-                    BbStats::device_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
-                    BbStats::residency_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
+        // Any other memory type the arena can be bound to.
+        const auto allocate_other = [&] {
+            vk::DeviceMemory any{};
+            const auto& types = instance.GetMemoryProperties();
+            for (u32 i = 0; !any && i < types.memoryTypeCount; ++i) {
+                if (((arena_memory_type_bits >> i) & 1) && i != arena_memory_type_index) {
+                    auto other = instance.GetDevice().allocateMemory({.allocationSize = size, .memoryTypeIndex = i});
+                    if (other.result == vk::Result::eSuccess) {
+                        any = other.value;
+                        BbStats::device_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
+                        BbStats::residency_alloc_bytes.fetch_add(size, std::memory_order_relaxed);
+                    }
                 }
+            }
+            return any;
+        };
+        if (!memory) {
+            memory = allocate_other();
+        }
+        if (!memory) {
+            // bbport: still full (upstream #163, 4 GB cards on area loads): the images the
+            // texture collector evicted are destroyed only once the GPU is past them, so their
+            // VRAM was still taken. Waits for the submitted work (not the one being recorded),
+            // runs those deletions, tries again. From upstream PR #206 (axpico).
+            scheduler.WaitSubmittedWork();
+            scheduler.PopPendingOperations();
+            memory = allocate(size);
+            if (!memory) {
+                memory = allocate_other();
+            }
+            static std::atomic<u32> waited{0};
+            if (memory && waited.fetch_add(1, std::memory_order_relaxed) < 8) {
+                std::printf("Guest memory: VRAM is full: waited for the GPU to free evicted "
+                            "textures (%llu MiB)\n",
+                            (unsigned long long)(size >> 20));
             }
         }
         ASSERT_MSG(memory,
