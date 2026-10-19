@@ -30,3 +30,20 @@ lines in BBSC's own files are marked `bbport:` in comments.
   - `emulator/src/core/bbsc_i18n.{h,cpp}` and `bbsc_translations.inc`, generated from
     `translations/*.json` by `translations/gen_translations.py`;
   - in `emulator/src/core/bloodborne_re.cpp`, BBSC's texts are passed through them.
+
+## 2026-10-19
+
+- **A host's placement goes to the sign it rings** (bbport issue #17). BBSC 0.0.1 sent a host's
+  placement to every player on the server, and a waiting guest followed the first host it heard
+  from. On a busy server (12 hosts on Seamless Hunt in one session) a guest followed a stranger:
+  its sign went to that stranger's map, its friend never found it, and a stranger could summon it
+  despite the password. BBSC's own `bbsc.dll` of 2026-10-17 (no source published yet) changed
+  the protocol; this is the same protocol, reimplemented from that binary
+  (`emulator/mod/bbsc_http.cpp`, `emulator/mod/bbsc_relay.cpp`):
+  - a guest keeps the `UserId` its sign is created under;
+  - a host ringing a sign (`/summon_messenger/request` with a `TargetUserId`) sends its placement
+    to that user only: relay frame `"SHAD"` 0x31 + `"<TargetUserId>|<placement>"`, and the
+    placement header to the broker;
+  - a guest takes only a placement sent to its own sign, and keeps it 90 s (20 s otherwise);
+  - placements sent to the whole server (0x30) are ignored, as BBSC's newer builds do;
+  - nothing is sent while polling for signs any more, so the "own sign out" check is gone.
