@@ -135,4 +135,13 @@ if [[ ${1:-} == --test ]]; then
     out/map-location-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -Isrc tests/test_atlas_state.c src/runtime_atlas_state.c -lm -o out/atlas-state-test
     out/atlas-state-test
+    # Hunter's Atlas: its tile's state machine, map styles, floor interiors, controller shortcut.
+    # (-Wno-misleading-indentation: Atlas's compact one-line style.)
+    atlas_cxx=(-std=c++20 -O2 -g -Wall -Wextra -Werror -Wno-misleading-indentation -Igpu/shim -Ibbbridge/third_party -Igpu/third_party/imgui "${includes[@]}")
+    for test in test_bbport_atlas_menu_state test_bbport_atlas_style test_bbport_atlas_interiors; do
+        "${CXX:-c++}" "${atlas_cxx[@]}" "tests/$test.cpp" -o "out/$test" || exit 1
+        (cd out && "./$test") || exit 1
+    done
+    "${CXX:-c++}" "${atlas_cxx[@]}" tests/test_map_controller.cpp gpu/shim/bbport_map_controller.cpp "${libraries[@]}" -o out/map-controller-test
+    out/map-controller-test
 fi
