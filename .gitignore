@@ -39,3 +39,8 @@ param.sfo
 *.dcx
 *.7z
 /CUSA*/
+# Hunter's Atlas's maps and their tools (launcher: Prepare maps)
+navigation-map*/
+atlas-tools/
+# Hunter's Atlas's own art (shipped; the launcher converts it for the game)
+!tools/hunters-atlas/art/*.png

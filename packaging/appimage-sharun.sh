@@ -47,6 +47,9 @@ font=$(fc-match -f '%{file}' 'DejaVu Sans:bold')
 install -Dm644 "$font" "$d/fonts/DejaVuSans-Bold.ttf"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
+# Hunter's Atlas's map generator and art: the launcher's Prepare maps runs it (bbport_atlas_maps.py).
+cp -r tools/hunters-atlas "$d/tools/"
+rm -rf "$d/tools/hunters-atlas/__pycache__"
 # bbbridge (GPL-3.0-or-later): its licence and notices next to the port; its source is bbbridge/.
 if [[ -x out/bbbridge/bbbridge-cli ]]; then
     install -Dm644 bbbridge/LICENSE "$d/bbbridge/LICENSE"

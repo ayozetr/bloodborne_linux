@@ -25,6 +25,7 @@ from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, system_game_language, tr
 import bbport_cache
+import bbport_atlas_maps
 import bbport_coop
 import bbport_steam
 import bbport_update
@@ -167,6 +168,23 @@ DRAW_PIPE = [("Авто", "", "Включён при 8 и более поток�
              ("Выключен", "0", "Стабильнее, но медленнее")]
 # The button prompts (scripts/menu_prompts.py): automatic follows the controller in use, the
 # keyboard without one.
+# Hunter's Atlas's map preparation (bbport_atlas_maps): its steps and errors, and the languages
+# of the names in the maps (the game's text folders, in their own language).
+ATLAS_STEPS = {"uv": "Загрузка uv", "python": "Установка Python", "packages": "Установка библиотек генератора",
+               "maps": "Создание карт", "names": "Названия на языке игры", "art": "Оформление карты",
+               "install": "Установка карт"}
+ATLAS_ERRORS = {
+    "game": "Нет eboot.bin в папке игры",
+    "space": "Недостаточно места в папке данных: нужно около 900 МБ",
+    "uv": "Не удалось скачать uv ({}). Проверьте подключение к интернету и попробуйте снова",
+    "python": "Не удалось установить Python ({}). Проверьте подключение к интернету и попробуйте снова",
+    "packages": "Не удалось установить библиотеки генератора ({}). Проверьте подключение к интернету и попробуйте снова",
+}
+ATLAS_LANGUAGE_NAMES = {"engus": "English", "enggb": "English", "spaes": "Español", "spaar": "Español (LatAm)",
+                        "frafr": "Français", "deude": "Deutsch", "itait": "Italiano", "porbr": "Português (BR)",
+                        "porpt": "Português", "rusru": "Русский", "jpnjp": "日本語", "korkr": "한국어",
+                        "zhocn": "简体中文", "zhotw": "繁體中文", "nldnl": "Nederlands", "polpl": "Polski",
+                        "finfi": "Suomi", "swese": "Svenska", "dandk": "Dansk", "norno": "Norsk", "turtr": "Türkçe"}
 COOP_LAYOUTS = [("Один над другим", "rows"), ("Рядом", "columns")]
 # Local co-op: the other players start this many seconds apart (each prepares its files and takes
 # its window's place in turn).
@@ -249,6 +267,10 @@ DEFAULTS = {
     "coop_layout": "rows",
     "coop_controllers": [],
     "coop_sound_first_only": True,
+    # Hunter's Atlas (its group in Settings): the in-game map, off by default; lamp travel and items.
+    "atlas": False,
+    "atlas_travel": True,
+    "atlas_items": True,
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -533,6 +555,38 @@ def online_module():
     return (binaries_dir() / "gpu" / "libbbnet.so").is_file()
 
 
+def atlas_dir():
+    """The maps Hunter's Atlas's generator made (tools/hunters-atlas: maps/ and art/), in the data
+    folder or, for the launcher run from the repository, where the AppImage keeps them; None
+    without them."""
+    data_home = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+    for folder in (DATA_DIR / "navigation-map", data_home / "bbport" / "navigation-map"):
+        if (folder / "maps" / "atlas.json").is_file() and (folder / "art").is_dir():
+            return folder
+    return None
+
+
+def atlas_environment(s):
+    """The game's Hunter's Atlas variables: the map on, where its files are and its options; off
+    (BB_ATLAS_ENABLED=0: none of its code runs) when the switch is off or there are no maps."""
+    folder = atlas_dir() if s.get("atlas") else None
+    if folder is None:
+        return {"BB_ATLAS_ENABLED": "0"}
+    return {
+        "BB_ATLAS_ENABLED": "1",
+        "BB_MAP_DIR": str(folder / "maps"),
+        "BB_MAP_ART_DIR": str(folder / "art"),
+        "BB_MAP_FONT": str(folder / "art" / "native-font.ttf"),
+        "BB_MAP_CATALOG": str(folder / "maps" / "catalog.json"),
+        "BB_MAP_CONFIG": str(folder / "settings.ini"),
+        "BB_MAP_TRAVEL_ENABLED": "1" if s.get("atlas_travel", True) else "0",
+        "BB_MAP_ITEMS_ENABLED": "1" if s.get("atlas_items", True) else "0",
+        "BB_MAP_ITEM_CATEGORIES": "healing,insight,equipment,echoes",
+        "BB_MAP_FOG_ENABLED": "0",
+        "BB_MAP_NPC_MODE": "all",
+    }
+
+
 def game_environment(s):
     """Environment for run.sh from the launcher settings."""
     env = dict(os.environ)
@@ -600,6 +654,7 @@ def game_environment(s):
         env["BB_TROPHY_KEY"] = s["trophy_key"].strip()
     if s.get("online") and online_module():
         env.update(online.environment(s))
+    env.update(atlas_environment(s))
     for item in s["extra_env"].split():
         if "=" in item:
             key, value = item.split("=", 1)
@@ -868,6 +923,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.ini_rows_seen = {}  # bbport.ini values as the rows showed them when last built or saved
         self.ini_controls_changed = {}  # key.* / pad.* bindings changed here, not yet saved
         self.process = None
+        self.atlas_job = None  # bbport_atlas_maps prepare while it runs
         self.coop_processes = {}  # local co-op: players 2-4's games by player; player 1's is process
         self.stream = None
         self.log_spool = None  # every line of the Journal since it was last cleared; False: failed
@@ -950,11 +1006,14 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_button.add_css_class("destructive-action" if running else "suggested-action")
         # The game and an FSR 4.1.1 build do not run together (both want the GPU, the build
         # replaces the assets the game reads).
-        self.launch_button.set_sensitive(self.fsr411_build is None)
+        # Nor while the map's files are being made (the game would read half-made maps).
+        self.launch_button.set_sensitive(self.fsr411_build is None and self.atlas_job is None)
         if hasattr(self, "fsr411_button"):
             self.fsr411_button.set_sensitive(not running)
         if hasattr(self, "coop_button"):
-            self.coop_button.set_sensitive(not running and self.fsr411_build is None)
+            self.coop_button.set_sensitive(not running and self.fsr411_build is None and self.atlas_job is None)
+        if hasattr(self, "atlas_maps_row"):
+            self.show_atlas()
         if hasattr(self, "cache_button"):
             self.show_cache()
 
@@ -1219,6 +1278,37 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mouse_look_row.connect("notify::active", mouse_rows_sensitive)
         mouse_rows_sensitive()
         page.add(controls)
+
+        # Hunter's Atlas (MikeTat1988): a fullscreen map in the game's quick menu. Its maps are made
+        # from the player's game files by its generator (bbport_atlas_maps: Prepare maps).
+        atlas = Adw.PreferencesGroup(title=tr("Карта (Hunter's Atlas)"))
+        self.atlas_row = Adw.SwitchRow(title=tr("Карта в игре"), active=self.settings["atlas"])
+        atlas.add(self.atlas_row)
+        self.atlas_travel_row = Adw.SwitchRow(title=tr("Путешествие к фонарям с карты"),
+                                              active=self.settings["atlas_travel"])
+        atlas.add(self.atlas_travel_row)
+        self.atlas_items_row = Adw.SwitchRow(title=tr("Предметы на карте"), active=self.settings["atlas_items"])
+        atlas.add(self.atlas_items_row)
+        self.atlas_maps_row = Adw.ActionRow(title=tr("Карты"))
+        self.atlas_prepare_button = Gtk.Button(valign=Gtk.Align.CENTER)
+        self.atlas_prepare_button.connect("clicked", self.on_atlas_prepare)
+        self.atlas_maps_row.add_suffix(self.atlas_prepare_button)
+        self.atlas_delete_button = flat_button("user-trash-symbolic", tr("Удалить карты"),
+                                               lambda _b: self.on_atlas_delete())
+        self.atlas_maps_row.add_suffix(self.atlas_delete_button)
+        atlas.add(self.atlas_maps_row)
+        # While the maps are made: the step, its progress and Cancel.
+        self.atlas_progress_row = Adw.ActionRow(title=tr("Подготовка карт"))
+        self.atlas_progress = Gtk.ProgressBar(valign=Gtk.Align.CENTER, hexpand=True, show_text=True)
+        self.atlas_progress_row.add_suffix(self.atlas_progress)
+        self.atlas_cancel_button = Gtk.Button(label=tr("Отмена"), valign=Gtk.Align.CENTER)
+        self.atlas_cancel_button.connect("clicked", lambda _b: self.stop_atlas_job())
+        self.atlas_progress_row.add_suffix(self.atlas_cancel_button)
+        self.atlas_progress_row.set_visible(False)
+        atlas.add(self.atlas_progress_row)
+        self.atlas_row.connect("notify::active", lambda *_: self.show_atlas())
+        self.show_atlas()
+        page.add(atlas)
 
         upscaler = Adw.PreferencesGroup(
             title=tr("Апскейлер"),
@@ -1604,7 +1694,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             tooltip = tr("Bloodborne {}, версия 1.09").format(title_id or "")
         self.game_status.set_from_icon_name("object-select-symbolic" if ok and not problem else "dialog-warning-symbolic")
         self.game_status.set_tooltip_text(tooltip)
-        self.launch_button.set_sensitive(ok or self.process is not None)
+        self.launch_button.set_sensitive((ok or self.process is not None) and self.atlas_job is None)
 
     def on_install_pkg(self, _button):
         """The packages, then the folder to install into; scripts/pkg_install.py does the rest."""
@@ -1800,6 +1890,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["trophy_key"] = self.trophy_key_row.get_text().strip()
         s["online"] = self.online_row.get_active()
         s.update(self.online_settings())
+        s["atlas"] = self.atlas_row.get_active()
+        s["atlas_travel"] = self.atlas_travel_row.get_active()
+        s["atlas_items"] = self.atlas_items_row.get_active()
         s["coop_players"] = int(self.coop_players_row.get_value())
         s["coop_layout"] = combo_value(self.coop_layout_row)
         s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
@@ -3288,7 +3381,173 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.stop_game()
         if self.fsr411_build:
             self.stop_fsr411_build()
+        if self.atlas_job:
+            self.stop_atlas_job()
         return False
+
+    # --- Hunter's Atlas: its maps ----------------------------------------------------------
+
+    def show_atlas(self):
+        """The map group as things are: the maps' state, what can be done now."""
+        state = bbport_atlas_maps.maps_state(DATA_DIR)
+        folder = atlas_dir()
+        working = self.atlas_job is not None
+        game_running = self.process is not None
+        if folder:
+            self.atlas_row.set_subtitle(tr("Карта на весь экран в меню игры (Start): где вы, фонари и предметы"))
+        else:
+            self.atlas_row.set_subtitle(tr("Сначала подготовьте карты (ниже)"))
+        self.atlas_row.set_sensitive(bool(folder))
+        for row in (self.atlas_travel_row, self.atlas_items_row):
+            row.set_sensitive(bool(folder) and self.atlas_row.get_active())
+        if state["ready"]:
+            language = ATLAS_LANGUAGE_NAMES.get(state["language"], state["language"] or "?")
+            lines = [tr("Готовы: {}, {} МБ").format(language, state["bytes"] >> 20)]
+            wanted = bbport_atlas_maps.language_folder(self.settings.get("language") or system_game_language())
+            english = ("engus", "enggb")
+            if state["language"] and wanted != state["language"] and \
+                    not (wanted in english and state["language"] in english):
+                lines.append(tr("Игра на другом языке: сделайте карты заново, чтобы названия были на нём"))
+        elif folder:
+            lines = [tr("Готовы (папка {})").format(folder)]
+        else:
+            lines = [tr("Не подготовлены. Их делают из ваших файлов игры: в первый раз скачивается около "
+                        "200 МБ (около 600 МБ на диске), это занимает несколько минут")]
+        self.atlas_maps_row.set_subtitle("\n".join(lines))
+        self.atlas_prepare_button.set_label(tr("Сделать заново") if state["ready"] else tr("Подготовить"))
+        if not state["ready"]:
+            self.atlas_prepare_button.add_css_class("suggested-action")
+        else:
+            self.atlas_prepare_button.remove_css_class("suggested-action")
+        self.atlas_prepare_button.set_sensitive(not working and not game_running)
+        has_files = state["ready"] or (DATA_DIR / bbport_atlas_maps.TOOLS).exists()
+        self.atlas_delete_button.set_sensitive(has_files and not working and not game_running)
+        self.atlas_progress_row.set_visible(working)
+
+    def confirm(self, heading, body, action, on_yes, destructive=False):
+        """Asks before something that downloads or removes files."""
+        dialog_type = getattr(Adw, "AlertDialog", None)
+        if dialog_type is not None:
+            dialog = dialog_type(heading=heading, body=body)
+        else:
+            dialog = Adw.MessageDialog(transient_for=self, heading=heading, body=body)
+        dialog.add_response("cancel", tr("Отмена"))
+        dialog.add_response("yes", action)
+        dialog.set_response_appearance(
+            "yes", Adw.ResponseAppearance.DESTRUCTIVE if destructive else Adw.ResponseAppearance.SUGGESTED)
+        dialog.set_default_response("cancel")
+        dialog.connect("response", lambda _d, response: response == "yes" and on_yes())
+        if dialog_type is not None:
+            dialog.present(self)
+        else:
+            dialog.present()
+
+    def on_atlas_prepare(self, _button):
+        if self.atlas_job or self.process:
+            return
+        game = Path(self.settings["game_dir"]).expanduser()
+        if not (game / "eboot.bin").is_file():
+            self.alert(tr("Карта (Hunter's Atlas)"), tr("Сначала выберите папку игры"))
+            return
+        if bbport_atlas_maps.maps_state(DATA_DIR)["ready"]:
+            body = tr("Карты будут сделаны заново из файлов игры (несколько минут). Нынешние остаются, "
+                      "пока новые не готовы")
+        else:
+            body = tr("Лаунчер скачает около 200 МБ (Python и библиотеки генератора карт) и сделает карты из "
+                      "ваших файлов игры; всё вместе займёт около 600 МБ в папке данных. Это займёт несколько "
+                      "минут; игру в это время запускать нельзя")
+        self.confirm(tr("Подготовить карты?"), body, tr("Подготовить"), lambda: self.start_atlas_job(game))
+
+    def start_atlas_job(self, game):
+        self.store()
+        language = self.settings.get("language") or str(system_game_language())
+        launcher = Gio.SubprocessLauncher.new(
+            Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
+        launcher.set_cwd(str(PORT_DIR))
+        try:
+            # setsid: uv and the generator stop with it (Cancel).
+            self.atlas_job = launcher.spawnv([
+                "setsid", sys.executable, str(PORT_DIR / "launcher" / "bbport_atlas_maps.py"), "prepare",
+                "--data-dir", str(DATA_DIR), "--game-dir", str(game), "--language", language])
+        except GLib.Error as error:
+            self.alert(tr("Карта (Hunter's Atlas)"), tr("Не удалось запустить: {}").format(error.message))
+            return
+        self.atlas_result = None
+        self.atlas_progress.set_fraction(0)
+        self.atlas_progress.set_text(tr(ATLAS_STEPS["uv"]))
+        self.append_log(tr("\n— подготовка карт —\n"))
+        self.update_launch_button()
+        stream = Gio.DataInputStream.new(self.atlas_job.get_stdout_pipe())
+        self.read_atlas_line(stream)
+        self.atlas_job.wait_async(None, self.on_atlas_exit)
+
+    def read_atlas_line(self, stream):
+        def on_line(stream, result):
+            try:
+                line, _length = stream.read_line_finish_utf8(result)
+            except GLib.Error:
+                return
+            if line is None:
+                return
+            self.append_log(f"[atlas] {line}\n")
+            try:
+                record = json.loads(line)
+            except ValueError:
+                record = None
+            if isinstance(record, dict):
+                if "progress" in record:
+                    self.atlas_progress.set_fraction(min(max(record["progress"], 0), 100) / 100)
+                    self.atlas_progress.set_text(f"{tr(ATLAS_STEPS.get(record.get('stage'), ''))} "
+                                                 f"{record['progress']} %")
+                elif "error" in record or "done" in record:
+                    self.atlas_result = record
+            self.read_atlas_line(stream)
+        stream.read_line_async(GLib.PRIORITY_DEFAULT, None, on_line)
+
+    def on_atlas_exit(self, process, result):
+        try:
+            process.wait_finish(result)
+        except GLib.Error:
+            pass
+        self.atlas_job = None
+        outcome = self.atlas_result or {"error": "unexpected", "detail": None}
+        if outcome.get("done"):
+            first = not self.atlas_row.get_active()
+            self.show_atlas()
+            if first:
+                self.atlas_row.set_active(True)
+            self.store()
+            self.toasts.add_toast(Adw.Toast(title=tr("Карты готовы")))
+        elif outcome.get("error") == "cancelled":
+            self.toasts.add_toast(Adw.Toast(title=tr("Подготовка карт отменена; прежние карты не тронуты")))
+        else:
+            key = ATLAS_ERRORS.get(outcome.get("error"), "Не удалось подготовить карты ({}). Подробности в журнале")
+            self.alert(tr("Карта (Hunter's Atlas)"), tr(key).format(outcome.get("detail") or outcome.get("error")))
+        self.update_launch_button()
+
+    def stop_atlas_job(self):
+        if not self.atlas_job:
+            return
+        try:
+            os.killpg(int(self.atlas_job.get_identifier()), signal.SIGTERM)
+        except (OSError, TypeError, ValueError):
+            self.atlas_job.force_exit()
+
+    def on_atlas_delete(self):
+        if self.atlas_job or self.process:
+            return
+        size = bbport_atlas_maps.maps_state(DATA_DIR)["bytes"] or \
+            bbport_atlas_maps.folder_bytes(DATA_DIR / bbport_atlas_maps.TOOLS)
+
+        def delete():
+            bbport_atlas_maps.delete(DATA_DIR)
+            self.atlas_row.set_active(False)
+            self.store()
+            self.show_atlas()
+            self.toasts.add_toast(Adw.Toast(title=tr("Карты удалены")))
+        self.confirm(tr("Удалить карты?"),
+                     tr("Карты и инструменты для них (около {} МБ) будут удалены. Их можно подготовить снова").format(
+                         size >> 20), tr("Удалить"), delete, destructive=True)
 
     # --- FSR 4.1.1 from the user's DLL -----------------------------------------------------
 
