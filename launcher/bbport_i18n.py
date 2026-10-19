@@ -7,6 +7,9 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'The launcher could not open a page: starting the game is off and settings are not saved',
+    'Эта страница не открылась из-за ошибки': 'This page did not open because of an error',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Starting the game is off and settings are not saved, so nothing gets damaged. Copy the error into a bug report',
     'Не загружен': 'Not loaded',
     'папка пуста': 'the folder is empty',
     'это ещё архив: распакуйте его сюда': 'still an archive: extract it here',
@@ -783,6 +786,9 @@ EN = {
 }
 
 PT_BR = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'O launcher não conseguiu abrir uma página: iniciar o jogo está desativado e as configurações não são salvas',
+    'Эта страница не открылась из-за ошибки': 'Esta página não abriu por causa de um erro',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Iniciar o jogo está desativado e as configurações não são salvas, para não estragar nada. Copie o erro para um relatório de bug',
     'Не загружен': 'Não carregado',
     'папка пуста': 'a pasta está vazia',
     'это ещё архив: распакуйте его сюда': 'ainda é um arquivo compactado: extraia-o aqui',
@@ -1619,6 +1625,9 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'El launcher no pudo abrir una página: iniciar el juego está desactivado y los ajustes no se guardan',
+    'Эта страница не открылась из-за ошибки': 'Esta página no se abrió por un error',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Iniciar el juego está desactivado y los ajustes no se guardan, para no estropear nada. Copia el error en un informe de fallo',
     'Не загружен': 'No se carga',
     'папка пуста': 'la carpeta está vacía',
     'это ещё архив: распакуйте его сюда': 'todavía es un archivo comprimido: extráelo aquí',
@@ -2364,6 +2373,9 @@ ES = {
 
 # Italian.
 IT = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': "Il launcher non è riuscito ad aprire una pagina: l'avvio del gioco è disattivato e le impostazioni non vengono salvate",
+    'Эта страница не открылась из-за ошибки': 'Questa pagina non si è aperta a causa di un errore',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': "L'avvio del gioco è disattivato e le impostazioni non vengono salvate, per non rovinare nulla. Copia l'errore in una segnalazione",
     'Не загружен': 'Non caricato',
     'папка пуста': 'la cartella è vuota',
     'это ещё архив: распакуйте его сюда': 'è ancora un archivio: estrailo qui',
@@ -3109,6 +3121,9 @@ IT = {
 
 # French.
 FR = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': "Le lanceur n'a pas pu ouvrir une page : le lancement du jeu est désactivé et les réglages ne sont pas enregistrés",
+    'Эта страница не открылась из-за ошибки': "Cette page ne s'est pas ouverte à cause d'une erreur",
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': "Le lancement du jeu est désactivé et les réglages ne sont pas enregistrés, pour ne rien abîmer. Copiez l'erreur dans un rapport de bug",
     'Не загружен': 'Non chargé',
     'папка пуста': 'le dossier est vide',
     'это ещё архив: распакуйте его сюда': 'c’est encore une archive : extrayez-la ici',
@@ -3854,6 +3869,9 @@ FR = {
 
 # German.
 DE = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': 'Der Launcher konnte eine Seite nicht öffnen: Das Starten des Spiels ist aus, Einstellungen werden nicht gespeichert',
+    'Эта страница не открылась из-за ошибки': 'Diese Seite wurde wegen eines Fehlers nicht geöffnet',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': 'Das Starten des Spiels ist aus und Einstellungen werden nicht gespeichert, damit nichts kaputtgeht. Kopiere den Fehler in einen Fehlerbericht',
     'Не загружен': 'Nicht geladen',
     'папка пуста': 'der Ordner ist leer',
     'это ещё архив: распакуйте его сюда': 'noch ein Archiv: hier entpacken',
@@ -4599,6 +4617,9 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются': '启动器无法打开某个页面：已禁止启动游戏，设置不会保存',
+    'Эта страница не открылась из-за ошибки': '此页面因错误未能打开',
+    'Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. Скопируйте ошибку в отчёт об ошибке': '为避免损坏任何内容，已禁止启动游戏且不保存设置。请将错误复制到错误报告中',
     'Не загружен': '未加载',
     'папка пуста': '文件夹为空',
     'это ещё архив: распакуйте его сюда': '仍是压缩包：请解压到此处',

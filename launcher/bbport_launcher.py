@@ -20,6 +20,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 from pathlib import Path
 from bbport_assets import fsr411_problem
 from bbport_i18n import language, set_language, system_game_language, tr
@@ -274,6 +275,16 @@ def load_settings():
     except (OSError, ValueError):
         pass
     return settings
+
+
+def number(value, default, kind=float, where="bbport.ini", key=""):
+    """A saved setting as a number; one that is not (written by hand, or by another version) keeps
+    the default instead of stopping the launcher (issue #18: a blank window)."""
+    try:
+        return kind(value)
+    except (TypeError, ValueError):
+        print(f"{where}: {key}={value!r} is not a number; {default} is used", file=sys.stderr)
+        return kind(default)
 
 
 def save_settings(settings):
@@ -867,20 +878,38 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.set_content(toolbar)
 
         log_text = self.log_text() if hasattr(self, "log_view") else ""
-        self.stack.add_titled_with_icon(self.build_settings_page(), "settings", tr("Настройки"),
-                                        "preferences-system-symbolic")
-        self.stack.add_titled_with_icon(self.build_online_page(), "online", tr("Онлайн"),
-                                        "network-workgroup-symbolic")
-        self.stack.add_titled_with_icon(self.build_cheats_page(), "cheats", tr("Читы"),
-                                        "applications-games-symbolic")
-        self.stack.add_titled_with_icon(self.build_trophies_page(), "trophies", tr("Трофеи"),
-                                        "starred-symbolic")
-        self.stack.connect("notify::visible-child-name", lambda *_: self.stack.get_visible_child_name()
-                           == "trophies" and self.refresh_trophies())
-        self.stack.add_titled_with_icon(self.build_log_page(), "log", tr("Журнал"),
-                                        "utilities-terminal-symbolic")
-        self.stack.add_titled_with_icon(self.build_about_page(), "about", tr("О программе"),
-                                        "help-about-symbolic")
+        # Issue #18: an error while building a page left the window blank for good (a saved value
+        # it could not read). A page that fails shows its error instead; the others are built.
+        self.build_errors = []
+
+        def add_page(build_page, name, title, icon):
+            try:
+                child = build_page()
+            except Exception:
+                error = traceback.format_exc()
+                self.build_errors.append(error)
+                print(error, file=sys.stderr, end="")
+                child = self.build_error_page(error)
+            self.stack.add_titled_with_icon(child, name, title, icon)
+
+        add_page(self.build_settings_page, "settings", tr("Настройки"), "preferences-system-symbolic")
+        add_page(self.build_online_page, "online", tr("Онлайн"), "network-workgroup-symbolic")
+        add_page(self.build_cheats_page, "cheats", tr("Читы"), "applications-games-symbolic")
+        add_page(self.build_trophies_page, "trophies", tr("Трофеи"), "starred-symbolic")
+        self.stack.connect("notify::visible-child-name", lambda *_: not self.build_errors and
+                           self.stack.get_visible_child_name() == "trophies" and self.refresh_trophies())
+        add_page(self.build_log_page, "log", tr("Журнал"), "utilities-terminal-symbolic")
+        add_page(self.build_about_page, "about", tr("О программе"), "help-about-symbolic")
+        if self.build_errors:
+            # Some of the settings' rows may be missing: nothing is saved (the user's files stay
+            # as they are) and the game is not started from a half-built window.
+            self.launch_button.set_label(tr("Запустить"))
+            self.launch_button.set_sensitive(False)
+            self.launch_button.set_tooltip_text(tr(
+                "Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются"))
+            if hasattr(self, "log_view"):
+                self.log_view.get_buffer().set_text(log_text + "".join(self.build_errors))
+            return
         self.log_view.get_buffer().set_text(log_text)
         self.update_launch_button()
         self.update_game_status()
@@ -1059,7 +1088,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fov_row.set_title(tr("Поле зрения"))
         self.fov_row.set_subtitle(tr("Градусы по вертикали; в игре 43"))
         try:
-            fov = min(max(float(self.ini.get("fov", "43")), 30.0), 90.0)
+            fov = min(max(number(self.ini.get("fov", "43"), "43", key="fov"), 30.0), 90.0)
         except ValueError:
             fov = 43.0
         self.fov_row.set_value(fov)
@@ -1147,7 +1176,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mouse_sensitivity_row = Adw.SpinRow.new_with_range(0.1, 10.0, 0.05)
         self.mouse_sensitivity_row.set_title(tr("Чувствительность мыши"))
         self.mouse_sensitivity_row.set_digits(2)
-        self.mouse_sensitivity_row.set_value(float(self.ini.get("mouse_sensitivity", "1.0")))
+        self.mouse_sensitivity_row.set_value(number(self.ini.get("mouse_sensitivity", "1.0"), "1.0",
+                                                    key="mouse_sensitivity"))
         controls.add(self.mouse_sensitivity_row)
         self.mouse_invert_row = Adw.SwitchRow(title=tr("Инвертировать мышь по вертикали"),
                                               active=self.ini.get("mouse_invert_y") == "1")
@@ -1189,7 +1219,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.dlss_row.add_suffix(self.dlss_reset_button)
         upscaler.add(self.dlss_row)
         self.update_dlss_row()
-        self.preset_row = combo_row(tr("Пресет"), None, PRESETS, int(self.ini.get("preset", "4")))
+        self.preset_row = combo_row(tr("Пресет"), None, PRESETS,
+                                    number(self.ini.get("preset", "4"), "4", int, key="preset"))
         self.preset_row.connect("notify::selected", lambda *_: self.update_upscaler_status())
         self.output_row.connect("notify::selected", lambda *_: self.update_upscaler_status())
         upscaler.add(self.preset_row)
@@ -1199,7 +1230,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.sharpness_row = Adw.SpinRow.new_with_range(0.0, 2.0, 0.05)
         self.sharpness_row.set_title(tr("Сила резкости"))
         self.sharpness_row.set_digits(2)
-        self.sharpness_row.set_value(float(self.ini.get("sharpness", "0.5")))
+        self.sharpness_row.set_value(number(self.ini.get("sharpness", "0.5"), "0.5",
+                                            key="sharpness"))
         upscaler.add(self.sharpness_row)
         self.motion_row = Adw.SwitchRow(
             title=tr("Векторы движения объектов"),
@@ -1254,7 +1286,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.limit_row = Adw.SpinRow.new_with_range(0, 480, 1)
         self.limit_row.set_title(tr("Ограничение FPS"))
         self.limit_row.set_subtitle(tr("0 — без ограничения; укажите число, чтобы ограничить FPS"))
-        self.limit_row.set_value(self.settings["fps_limit"])
+        self.limit_row.set_value(number(self.settings["fps_limit"], 0, int, "settings.json",
+                                        "fps_limit"))
         frames.add(self.limit_row)
         page.add(frames)
 
@@ -1708,6 +1741,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             line for line in (selected, tr("Выбранный берётся, как только подключится")) if line))
 
     def store(self):
+        if self.build_errors:
+            return  # a page failed to build (issue #18): its rows may be missing
         s = self.settings
         s["gamepad"] = combo_value(self.gamepad_row)
         s["gamepad_name"] = self.gamepad_row.names[self.gamepad_row.get_selected()]
@@ -2133,7 +2168,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.p2p_port_row.set_title(tr("Порт кооператива (UDP)"))
         self.p2p_port_row.set_subtitle(tr("0: случайный при каждом запуске. Закрепите его, чтобы "
                                           "открыть в брандмауэре или на роутере вручную"))
-        self.p2p_port_row.set_value(int(s["online_p2p_port"] or 0))
+        self.p2p_port_row.set_value(number(s["online_p2p_port"] or 0, 0, int, "settings.json",
+                                           "online_p2p_port"))
         connection.add(self.p2p_port_row)
         # ufw and firewalld drop the peers' packets and, for UPnP, the router's answers: UPnP opens
         # the port on the router only.
@@ -2713,7 +2749,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         game = Path(self.settings.get("game_dir") or "").expanduser()
         user = self.user_dir()
         key = trophies.parse_key(self.trophy_key_row.get_text())
-        language = int(self.settings.get("language") or system_game_language())
+        language = number(self.settings.get("language") or system_game_language(),
+                          system_game_language(), int, "settings.json", "language")
 
         def show(directory, problem):
             self.trophy_shown = (directory, problem)
@@ -2833,6 +2870,24 @@ class LauncherWindow(Adw.ApplicationWindow):
         control.connect("notify::active", lambda row, _p: row.get_active() and camera.set_active(False))
         camera.connect("notify::active", lambda row, _p: row.get_active() and control.set_active(False))
         return page
+
+    def build_error_page(self, error):
+        """In place of a page that failed to build: the error, to copy into a report."""
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=24,
+                      margin_bottom=24, margin_start=24, margin_end=24)
+        box.append(Gtk.Label(label=tr("Эта страница не открылась из-за ошибки"), wrap=True,
+                             css_classes=["title-2"]))
+        box.append(Gtk.Label(label=tr(
+            "Запуск игры отключён, а настройки не сохраняются, чтобы ничего не испортить. "
+            "Скопируйте ошибку в отчёт об ошибке"), wrap=True))
+        view = Gtk.TextView(editable=False, monospace=True, cursor_visible=False,
+                            wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        view.get_buffer().set_text(error)
+        box.append(Gtk.ScrolledWindow(vexpand=True, child=view))
+        copy = Gtk.Button(label=tr("Копировать"), halign=Gtk.Align.CENTER)
+        copy.connect("clicked", lambda _button: self.get_clipboard().set(error))
+        box.append(copy)
+        return box
 
     def build_log_page(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
