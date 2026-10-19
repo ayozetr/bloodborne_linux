@@ -9,7 +9,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** p
 |---|---|
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [BBPORT.md](../BBPORT.md). |
 | [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
-| [Awakenchan/BloodBorneButPc](https://github.com/Awakenchan/BloodBorneButPc) | Video memory on 4 GB cards, crash fixes, fewer stutters while areas load, stick options, save import and the version selector. |
+| [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Video memory on 4 GB cards, crash fixes, fewer stutters while areas load, stick options, save import and the version selector. |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler, and the online code. |
 | [Wozzardman/shadp2p](https://github.com/Wozzardman/shadp2p) | The network and PSN libraries for online play. |
 | [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([SERVER.md](SERVER.md)). |

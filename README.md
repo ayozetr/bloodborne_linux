@@ -107,7 +107,8 @@ Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 ## On Windows
 
 If you need a Windows version, I recommend
-[Supermedo's Windows port](https://github.com/Supermedo/bloodborne_pc).
+[Supermedo's Windows port](https://github.com/Supermedo/bloodborne_pc) and
+[Awakenchan's LanternEngine](https://github.com/Awakenchan/LanternEngine).
 
 ## Support
 
