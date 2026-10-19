@@ -65,6 +65,18 @@ static atomic_uint menu_decoded_move,menu_decoded_select;
 static pthread_mutex_t menu_mix_lock=PTHREAD_MUTEX_INITIALIZER;
 static int menu_playing;
 static uint32_t menu_cursor;
+/* bbport: the cursor sounds are mixed at this gain (BB_MAP_SOUND_GAIN, 0-2; 0.07 by default): at
+ * full level they were about ten times louder than the game's own menu cursor (measured on a
+ * recording of both, 2026-10-19). */
+static float menu_gain(void) {
+    static float gain=-1.f;
+    if(gain<0.f){
+        const char *env=getenv("BB_MAP_SOUND_GAIN");
+        const float v=env?(float)atof(env):0.07f;
+        gain=v>=0.f&&v<=2.f?v:0.07f;
+    }
+    return gain;
+}
 
 void runtime_audio_menu_event(int select) {
     const char *mode=getenv("BB_AUDIO");
@@ -116,7 +128,7 @@ static void menu_mix(void *converted,const Port *p) {
     }
     const BbMenuSound *sound=menu_playing==2?&menu_sounds.select:&menu_sounds.move;
     /* bbport: silent like the game's sound while the window is in the background. */
-    const float gain_all=bbgpu_audio_muted() ? 0.f : master_gain;
+    const float gain_all=bbgpu_audio_muted() ? 0.f : master_gain*menu_gain();
     if(menu_playing&&sound->pcm){
         for(int f=0;f<p->frames&&menu_cursor<sound->frames;++f,++menu_cursor){
             const float sample=(float)sound->pcm[menu_cursor]/32768.f*gain_all;
