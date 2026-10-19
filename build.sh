@@ -130,4 +130,9 @@ if [[ ${1:-} == --test ]]; then
     out/online-test
     "$CC" -std=c11 -D_GNU_SOURCE -O2 -g -Wall -Wextra -Werror -I. -Isrc tests/test_content.c src/runtime_content.c -o out/content-test
     out/content-test
+    # Hunter's Atlas: its guarded game-memory readers on synthetic images.
+    "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -Isrc tests/test_map_location.c src/runtime_map.c -lm -o out/map-location-test
+    out/map-location-test
+    "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -Isrc tests/test_atlas_state.c src/runtime_atlas_state.c -lm -o out/atlas-state-test
+    out/atlas-state-test
 fi
