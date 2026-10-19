@@ -13,8 +13,10 @@
  * Stick neutral: SDL exposes no way to read a pad's calibration and some clones report a
  * biased neutral (a Switch-style pad was seen returning both sticks at a constant ~ +/-16380).
  * The neutral of each axis is taken from a quiet window after the pad opens (SDL returns zero
- * until the first report arrives, so those samples are skipped) and subtracted when all four axes
- * are biased; otherwise (a genuine pad, perhaps opened with a stick held) the neutral is 0.
+ * until the first report arrives, so those samples are skipped; an axis at the end of its travel
+ * is skipped too: an 8BitDo Pro 2, as an Xbox One controller, reported -32768 on all four axes
+ * right after reconnecting, issue #20) and subtracted when all four axes are biased; otherwise (a
+ * genuine pad, perhaps opened with a stick held) the neutral is 0.
  *
  * Travel: such a clone also uses only part of SDL's -32768..32767 span (its neutral sits in the
  * middle of one half), so reading the axis as -128..127 would reach only half deflection and a
@@ -89,6 +91,7 @@ static uint8_t connected_count;
 #define PAD_CAL_QUIET_SAMPLES 8
 #define PAD_CAL_TIMEOUT_US 3000000u    /* after this, an all-zero reading is accepted as the neutral */
 #define PAD_CAL_BIAS 8192              /* |neutral| past this: a biased neutral and a reduced travel */
+#define PAD_CAL_RAIL 30000             /* |value| past this: an axis at the end of its travel, never a neutral */
 #define PAD_CAL_REFINE 90              /* % of the base travel a push must reach to count as the full scale */
 static int cal_enabled=-1, pad_deadzone=-1, pad_deadzone_outer=-1, cal_manual;
 static int cal_have_center, cal_started, cal_quiet_count;
@@ -146,7 +149,8 @@ static void cal_reset(void) {
     else { cal_have_center=0; memset(cal_center,0,sizeof cal_center); memset(cal_base,0,sizeof cal_base); }
     if (cal_have_center) cal_set_base();
 }
-/* The value each axis holds while the sticks are untouched (SDL's pre-report zeros are skipped);
+/* The value each axis holds while the sticks are untouched (SDL's pre-report zeros, and axes at
+ * the end of their travel, are skipped);
  * once it is known, the largest push seen per direction on a biased axis (see cal_travel). */
 static void cal_sample(const int16_t raw[4]) {
     if (cal_have_center) {
@@ -157,23 +161,28 @@ static void cal_sample(const int16_t raw[4]) {
         }
         return;
     }
-    int allzero=1; for (int i=0;i<4;++i) if (raw[i]) allzero=0;
+    int allzero=1, railed=0;
+    for (int i=0;i<4;++i) { if (raw[i]) allzero=0; if (abs(raw[i])>=PAD_CAL_RAIL) ++railed; }
     int quiet=1; for (int i=0;i<4;++i) if (cal_started && abs(raw[i]-cal_prev[i])>PAD_CAL_QUIET) quiet=0;
     const uint64_t now=now_us();
     if (!cal_started) { cal_started=1; cal_since=now; }
-    if (allzero && now-cal_since<PAD_CAL_TIMEOUT_US) quiet=0;
+    /* Before the first report: zeros, or (issue #20) axes at the end of their travel. */
+    if ((allzero || railed) && now-cal_since<PAD_CAL_TIMEOUT_US) quiet=0;
     if (quiet) {
         if (++cal_quiet_count>=PAD_CAL_QUIET_SAMPLES) {
             /* Only the clone pattern (all four axes biased) is taken as the neutral: a genuine pad
              * opened with a stick held steady would otherwise keep that push as its neutral. */
             int biased=0;
-            for (int i=0;i<4;++i) biased+=abs(raw[i])>=PAD_CAL_BIAS;
+            for (int i=0;i<4;++i) biased+=abs(raw[i])>=PAD_CAL_BIAS && abs(raw[i])<PAD_CAL_RAIL;
             for (int i=0;i<4;++i) cal_center[i]=biased==4 ? raw[i] : 0;
             cal_have_center=1;
             if (biased==4)
                 printf("Runtime: pad neutral: lx=%d ly=%d rx=%d ry=%d\n",cal_center[0],cal_center[1],cal_center[2],cal_center[3]);
             else if (biased)
                 printf("Runtime: pad neutral 0 (%d of 4 axes off-center at open: a stick held, not a biased pad)\n",biased);
+            else if (railed)
+                printf("Runtime: pad neutral 0 (%d of 4 axes still at the end of their travel after %u s: not a neutral)\n",
+                       railed,PAD_CAL_TIMEOUT_US/1000000u);
             cal_set_base();
         }
     } else cal_quiet_count=0;

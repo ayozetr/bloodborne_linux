@@ -136,6 +136,29 @@ int main(void) {
     fputs(controls,comma);
     fclose(comma);
     load_bindings();
+    /* Issue #20: right after reconnecting, an 8BitDo Pro 2 (as an Xbox One controller) reported
+       -32768 on all four axes before its first real report. That was taken as a biased neutral,
+       and the sticks at rest then read as pushed all the way: the camera and the player spun. */
+    {
+        const int16_t railed[4]={-32768,-32768,-32768,-32768}, rest[4]={120,-80,40,-20};
+        cal_reset();
+        for (int i=0;i<30;++i) cal_sample(railed);
+        assert(!cal_have_center); /* not a neutral: waits for a real report */
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(rest); /* the first one moved: not quiet */
+        assert(cal_have_center && !cal_center[0] && !cal_center[1] && !cal_center[2] && !cal_center[3]);
+        assert(stick_axis(0,0)==128 && stick_axis(3,0)==128);
+        /* A clone's biased neutral (both sticks at a constant ~ +/-16380) is still taken. */
+        const int16_t clone[4]={16380,-16380,16380,-16380};
+        cal_reset();
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(clone);
+        assert(cal_have_center && cal_center[0]==16380 && cal_center[1]==-16380);
+        assert(stick_axis(0,16380)==128);
+        /* Back to a genuine pad at rest for the checks below. */
+        const int16_t quiet_rest[4]={5,5,5,5};
+        cal_reset();
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(quiet_rest);
+        assert(cal_have_center && !cal_center[0]);
+    }
     mouse_sensitivity=1.0f; /* the mouse look checks below are at 1 */
     SDL_CloseJoystick(joystick);
     if (gamepad) SDL_CloseGamepad(gamepad);
