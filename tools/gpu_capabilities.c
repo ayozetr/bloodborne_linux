@@ -1,6 +1,6 @@
 /* Check whether native-size depth/stencil images can be blitted to reduced
  * renderer targets. The renderer needs both directions for live presets.
- * --gamepads: the connected gamepads, "GUID<tab>name<tab>type" per line (the launcher's
+ * --gamepads: the connected gamepads, "GUID<tab>name<tab>type<tab>path" per line (the launcher's
  * controller list, BB_GAMEPAD; type is SDL's: xbox360, xboxone, ps4, switchpro, ..., empty for
  * a generic gamepad, for the button prompts). --displays: the monitors,
  * "name<tab>WxH<tab>primary (1 or 0)" per line in SDL's order (the launcher's monitor list,
@@ -89,7 +89,10 @@ static int list_gamepads(void) {
         SDL_GUIDToString(SDL_GetGamepadGUIDForID(ids[i]), guid, sizeof guid);
         const char *name = SDL_GetGamepadNameForID(ids[i]);
         const char *type = SDL_GetGamepadStringForType(SDL_GetGamepadTypeForID(ids[i]));
-        printf("%s\t%s\t%s\n", guid, name ? name : "?", type ? type : "");
+        /* The device path tells two controllers of the same model apart (local co-op: one per
+         * player, BB_GAMEPAD=<path>). */
+        const char *path = SDL_GetGamepadPathForID(ids[i]);
+        printf("%s\t%s\t%s\t%s\n", guid, name ? name : "?", type ? type : "", path ? path : "");
     }
     SDL_free(ids);
     SDL_Quit();

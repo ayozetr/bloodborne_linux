@@ -675,16 +675,17 @@ CONTROLS = [
 ]
 
 
-def connected_gamepads(types=False):
+def connected_gamepads(types=False, paths=False):
     """(GUID, name) of the connected gamepads (bb-gpu-capabilities --gamepads), [] if unknown;
-    with `types`, (GUID, name, SDL type) ("" for a generic gamepad)."""
+    with `types`, (GUID, name, SDL type) ("" for a generic gamepad); with `paths`, also the device
+    path, which tells two of one model apart (local co-op)."""
     tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
     try:
         run = subprocess.run([str(tool), "--gamepads"], capture_output=True, text=True, timeout=5)
     except (OSError, subprocess.SubprocessError):
         return []
-    pads = [(line.split("\t") + [""])[:3] for line in run.stdout.splitlines() if "\t" in line]
-    return [tuple(pad if types else pad[:2]) for pad in pads]
+    pads = [(line.split("\t") + ["", ""])[:4] for line in run.stdout.splitlines() if "\t" in line]
+    return [tuple(pad if paths else pad[:3] if types else pad[:2]) for pad in pads]
 
 
 def gamepad_type(s):
