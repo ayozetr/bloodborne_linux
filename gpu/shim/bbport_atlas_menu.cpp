@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
+#include "bbport_atlas_i18n.h" // bbport: the tile in the game's language
 #include "bbport_atlas_menu.h"
 #include "bbport_atlas_menu_state.h"
 #include "bbport_map.h"
@@ -96,8 +97,8 @@ void Draw() {
         draw->AddRectFilled(p(160,321),p(276,343),plate);
         draw->AddRectFilledMultiColor(p(155,321),p(160,343),clear,plate,plate,clear);
         draw->AddRectFilledMultiColor(p(276,321),p(281,343),plate,clear,clear,plate);
-        const char* language=std::getenv("BB_LANGUAGE");const char* label=language&&std::atoi(language)==8?"Карта":"Map";
-        ImFont* font=language&&std::atoi(language)==8?ImGui::GetFont():BbMap::TitleFont();const float size=20*s;const auto extent=font->CalcTextSizeA(size,1000,0,label);
+        const char* label=BbAtlasText::Game("Map");
+        ImFont* font=BbMap::TitleFont(); /* bbport: the port's font where the game's has no glyphs */const float size=20*s;const auto extent=font->CalcTextSizeA(size,1000,0,label);
         draw->AddText(font,size,ImVec2(offset.x+269*s-extent.x,offset.y+323*s),IM_COL32(196,177,125,255),label);
         if(state.anchor==2||state.anchor==0){
             const float x=state.anchor==2?414.f:294.f;
@@ -108,6 +109,6 @@ void Draw() {
     }
     BbMapArt::DrawMenuIcon(draw,ImVec2((tile_min.x+tile_max.x)*.5f,(tile_min.y+tile_max.y)*.5f),56*s,mouse_held?IM_COL32(180,170,145,255):IM_COL32_WHITE);
     draw->AddRect(tile_min,tile_max,active?IM_COL32(235,233,220,255):IM_COL32(131,123,103,255),0,0,(active?1.7f:.8f)*s);
-    if(hovered)ImGui::SetTooltip("Map");
+    if(hovered)ImGui::SetTooltip("%s",BbAtlasText::Game("Map"));
 }
 }

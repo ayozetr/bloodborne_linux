@@ -679,4 +679,8 @@ void Poll() {
     BbSettings::Save();
 }
 
+BbSettings::MenuLanguage Language() {
+    const int game = game_language.load();
+    return game < 0 ? BbSettings::Get().menu_language.load() : BbSettings::MenuLanguage(game);
+}
 } // namespace BbGameMenu

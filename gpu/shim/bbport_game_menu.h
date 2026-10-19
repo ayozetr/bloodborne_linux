@@ -7,6 +7,8 @@
 
 #include <cstdint>
 
+#include "bbport_settings.h"
+
 namespace BbGameMenu {
 /// Installs the hooks (the loader calls it once, before any game code runs, while the image is
 /// still writable). Each hooked function is checked byte for byte against the 1.09 eboot.
@@ -14,4 +16,8 @@ void PatchImage(unsigned char* image, std::uint64_t size);
 
 /// Applies what the player changed on the port's pages (each presented frame).
 void Poll();
+
+/// The language the port's texts in the game's menus follow: the game's own (once its menu has
+/// looked up a text), else the port's menu language.
+BbSettings::MenuLanguage Language();
 } // namespace BbGameMenu

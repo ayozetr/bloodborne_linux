@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
+#include "bbport_atlas_i18n.h" // bbport: texts in the game's language
 #include "bbport_map.h"
 #include "bbport_map_art.h"
 #include "bbport_atlas_style.h"
@@ -219,7 +220,7 @@ std::string LocationSubtitle(const Area& a) {
         if(horizontal>landmark.max_horizontal||dy>landmark.max_vertical)continue;
         const float distance=std::hypot(horizontal,dy);if(distance<best){best=distance;nearest=&landmark;}
     }
-    return nearest?nearest->prefix+nearest->name:std::string{};
+    return nearest?(nearest->prefix=="Near "?std::string(BbAtlasText::Game("Near ")):nearest->prefix)+nearest->name:std::string{};
 }
 float MapUiScale() {
     const auto size=ImGui::GetIO().DisplaySize;
@@ -337,7 +338,7 @@ void MappedPad(unsigned rising,unsigned char lx,unsigned char ly,unsigned char r
     pointer_x=axis(lx);pointer_y=axis(ly);padx=axis(rx);pady=axis(ry);
 }
 bool CapturesInput(){return open || controller_chord.WantsCapture();}
-void Tick(){std::lock_guard<std::recursive_mutex> map_guard(map_mutex);if(controller_chord.Tick(SDL_GetTicks()))SetOpen(!open);if(travel_monitor&&runtime_atlas_travel_status()<0){travel_monitor=false;travel_message="Travel was rejected or did not complete. No second request was sent.";SetOpen(true);}}
+void Tick(){std::lock_guard<std::recursive_mutex> map_guard(map_mutex);if(controller_chord.Tick(SDL_GetTicks()))SetOpen(!open);if(travel_monitor&&runtime_atlas_travel_status()<0){travel_monitor=false;travel_message=BbAtlasText::Game("Travel was rejected or did not complete. No second request was sent.");SetOpen(true);}}
 void Close(){std::lock_guard<std::recursive_mutex> map_guard(map_mutex);open=false;padx=pady=0;pointer_x=pointer_y=0;zoom_held=0;travel_dialog=-1;}
 void Back(){back_request=true;}
 namespace {
@@ -465,20 +466,21 @@ bool HandleEvent(const SDL_Event& e) {
 }
 void Settings() {
     std::lock_guard<std::recursive_mutex> map_guard(map_mutex);
-    ImGui::SeparatorText("Navigation map");
+    ImGui::SeparatorText(BbAtlasText::Menu("Navigation map"));
     ImGui::BeginDisabled(std::getenv("BB_ATLAS_ENABLED")!=nullptr);
-    if(ImGui::Checkbox("Enable full-screen map",&enabled)){if(!enabled)Close();controller_chord.SetEnabled(enabled && chord==2);Save();}
+    if(ImGui::Checkbox(BbAtlasText::Menu("Enable full-screen map"),&enabled)){if(!enabled)Close();controller_chord.SetEnabled(enabled && chord==2);Save();}
     ImGui::EndDisabled();
-    if(std::getenv("BB_ATLAS_ENABLED"))ImGui::TextDisabled("Enable or disable Hunter's Atlas in the launcher.");
-    if(ImGui::Combo("Map key",&keyboard,key_names,3))Save();
-    const char* chords[]={"Disabled","Open game menu, then click right stick (R3)","Hold LB / L1 + RB / R1 + Menu / Options for about 650 ms"};
-    if(ImGui::Combo("Map controller shortcut",&chord,chords,3)){controller_chord.SetEnabled(enabled && chord==2);Save();}
-    if(enabled && ImGui::Button("Open map"))SetOpen(true);
+    if(std::getenv("BB_ATLAS_ENABLED"))ImGui::TextDisabled("%s",BbAtlasText::Menu("Enable or disable Hunter's Atlas in the launcher."));
+    if(ImGui::Combo(BbAtlasText::Menu("Map key"),&keyboard,key_names,3))Save();
+    const char* chords[]={BbAtlasText::Menu("Disabled"),BbAtlasText::Menu("Open game menu, then click right stick (R3)"),BbAtlasText::Menu("Hold LB / L1 + RB / R1 + Menu / Options for about 650 ms")};
+    if(ImGui::Combo(BbAtlasText::Menu("Map controller shortcut"),&chord,chords,3)){controller_chord.SetEnabled(enabled && chord==2);Save();}
+    if(enabled && ImGui::Button(BbAtlasText::Menu("Open map")))SetOpen(true);
     ImGui::TextWrapped("Select Map in the game's quick menu, or click its fourth tile. Back returns to the same menu. Keyboard and controller shortcuts are optional.");
     if(!atlas_error.empty())ImGui::TextWrapped("Map data unavailable: %s",atlas_error.c_str());
 }
 void SetTitleFont(ImFont* font){title_font=font;}
-ImFont* TitleFont(){return title_font?title_font:ImGui::GetFont();}
+// bbport: the game's font has no Cyrillic or CJK glyphs; the port's font then.
+ImFont* TitleFont(){return title_font&&!BbAtlasText::NeedsPortFont()?title_font:ImGui::GetFont();}
 void Draw() {
     std::lock_guard<std::recursive_mutex> map_guard(map_mutex);
     if(!open)return;
@@ -500,7 +502,7 @@ void Draw() {
                 (int(found-available_destinations.begin())+direction+int(available_destinations.size()))%int(available_destinations.size());
             selected_destination=available_destinations[next];const auto& d=destinations[selected_destination];
             for(size_t i=0;i<areas.size();++i)if(areas[i].id==d.area){selected=int(i);preview_active=true;preview_area=selected;follow=false;Load(areas[i]);cx=d.x;cz=d.z;cursor_u=cursor_v=.5f;break;}
-        }else travel_message="No available lamps for this character.";
+        }else travel_message=BbAtlasText::Game("No available lamps for this character.");
     }
     const int current=CurrentArea();
     if(!preview_active) {
@@ -522,9 +524,9 @@ void Draw() {
     // Frame details remain decoration; no semantic map geometry is created.
     for(float x:{10.f,1270.f})for(float y:{8.f,710.f}){const float sx=x<640?1.f:-1.f,sy=y<360?1.f:-1.f;draw->AddBezierCubic(at(x,y+sy*42),at(x+sx*3,y+sy*4),at(x+sx*24,y+sy*26),at(x+sx*42,y),rule,.7f*scale);ornament(x+sx*16,y+sy*15,4,rule);}
     const bool available=selected>=0&&Load(areas[selected])&&(!preview_active?location.valid&&current==selected:true);
-    const std::string title=available?(preview_active?areas[selected].name:LocationTitle(areas[selected])):(location.valid?"Location unavailable":"Awaiting your location");
+    const std::string title=available?(preview_active?areas[selected].name:LocationTitle(areas[selected])):(location.valid?BbAtlasText::Game("Location unavailable"):BbAtlasText::Game("Awaiting your location"));
     const std::string subtitle=available?(preview_active&&selected_destination>=0?destinations[selected_destination].name:LocationSubtitle(areas[selected])):std::string{};
-    ImFont* font=title_font?title_font:ImGui::GetFont();
+    ImFont* font=TitleFont();
     // Fit the actual UTF-8 string, then align visible glyph bounds rather than
     // assuming a font's nominal point size equals its cap height.
     auto centered=[&](const std::string& text,float visible_top,float preferred,float minimum,float max_width,float region_height,ImU32 color){
@@ -564,7 +566,7 @@ void Draw() {
     float render_y=location.y;
     auto visible=[&](float minx,float minz,float maxx,float maxz){if(selected>=0&&(!BbMapFeatures::Revealed(areas[selected].id,(minx+maxx)*.5f,render_y,(minz+maxz)*.5f)||!BbMapFeatures::Revealed(areas[selected].id,minx,render_y,minz)||!BbMapFeatures::Revealed(areas[selected].id,maxx,render_y,maxz)))return false;const auto p=project(minx,maxz),q=project(maxx,minz);return !(q.x<origin.x||p.x>origin.x+canvas_size.x||q.y<origin.y||p.y>origin.y+canvas_size.y);};
     auto outline=[&](const std::vector<Point>& ring,ImU32 color,float width){for(size_t i=0;i<ring.size();++i){const auto a=ring[i],b=ring[(i+1)%ring.size()];if(visible(std::min(a.x,b.x),std::min(a.z,b.z),std::max(a.x,b.x),std::max(a.z,b.z)))draw->AddLine(project(a.x,a.z),project(b.x,b.z),color,width);}};
-    if(!available){const char* message=location.valid?"Map data is not available for this location":"Your position is unavailable while loading or outside a supported area";const ImVec2 extent=font->CalcTextSizeA(20*scale,FLT_MAX,0,message);draw->AddText(font,20*scale,ImVec2(canvas_center.x-extent.x*.5f,canvas_center.y-10*scale),muted,message);}
+    if(!available){const char* message=location.valid?BbAtlasText::Game("Map data is not available for this location"):BbAtlasText::Game("Your position is unavailable while loading or outside a supported area");const ImVec2 extent=font->CalcTextSizeA(20*scale,FLT_MAX,0,message);draw->AddText(font,20*scale,ImVec2(canvas_center.x-extent.x*.5f,canvas_center.y-10*scale),muted,message);}
     else {
         auto& a=areas[selected];
         int active=current==selected&&!preview_active?AutoLayer(a):PrimaryLayer(a);
@@ -678,7 +680,7 @@ void Draw() {
             BbMapArt::DrawIcon(draw,"lamp",p,32*scale,0,d.available?IM_COL32_WHITE:IM_COL32(100,100,100,125));
             if((pointer_near || (confirm&&selected_destination==int(i)))&&!dialog_was_open&&(UsesControllerGlyphs()||hovered||confirm)) {
                 if(UsesControllerGlyphs())ImGui::SetNextWindowPos(ImVec2(pointer.x+22*scale,pointer.y+18*scale));
-                ImGui::SetTooltip("%s\n%s",d.name.c_str(),d.available?(BbMapFeatures::TravelEnabled()?"Select to travel":"Map fast travel is disabled in the launcher"):"Locked or currently unavailable");
+                ImGui::SetTooltip("%s\n%s",d.name.c_str(),d.available?(BbMapFeatures::TravelEnabled()?BbAtlasText::Game("Select to travel"):BbAtlasText::Game("Map fast travel is disabled in the launcher")):BbAtlasText::Game("Locked or currently unavailable"));
                 if(BbMapFeatures::TravelEnabled()&&d.available&&(confirm||(!UsesControllerGlyphs()&&ImGui::IsMouseReleased(ImGuiMouseButton_Left)&&!map_dragged))){selected_destination=int(i);travel_dialog=int(i);ImGui::OpenPopup("Travel to lamp");}
             }
         }
@@ -707,7 +709,7 @@ void Draw() {
     if(available){
         constexpr float x=BbAtlasStyle::Layout::key_x;
         float bottom=BbAtlasStyle::Layout::key_y;
-        const char* labels[]={"Floor","Other levels","Interior"};
+        const char* labels[]={BbAtlasText::Game("Floor"),BbAtlasText::Game("Other levels"),BbAtlasText::Game("Interior")};
         const ImU32 colors[]={IM_COL32(207,204,196,255),IM_COL32(70,70,63,255),IM_COL32(53,48,39,255)};
         draw->AddLine(at(x,bottom-8),at(x+BbAtlasStyle::Layout::key_w,bottom-8),rule,.6f*scale);
         for(int i=0;i<3;++i){const float row=bottom+i*18;draw->AddRectFilled(at(x,row+2),at(x+13,row+13),colors[i]);draw->AddRect(at(x,row+2),at(x+13,row+13),rule,0,0,.6f*scale);draw->AddText(font,13*scale,at(x+20,row-1),muted,labels[i]);}
@@ -716,13 +718,13 @@ void Draw() {
             const float top=bottom-86;
             draw->AddRectFilledMultiColor(at(x,top),at(x+13,bottom),IM_COL32(225,220,202,195),IM_COL32(225,220,202,195),IM_COL32(52,55,51,195),IM_COL32(52,55,51,195));
             draw->AddRect(at(x,top),at(x+13,bottom),rule,0,0,.8f*scale);
-            draw->AddText(font,13*scale,at(x+20,top-2),muted,"High");draw->AddText(font,13*scale,at(x+20,bottom-15),muted,"Low");bottom=top-24;
+            draw->AddText(font,13*scale,at(x+20,top-2),muted,BbAtlasText::Game("High"));draw->AddText(font,13*scale,at(x+20,bottom-15),muted,BbAtlasText::Game("Low"));bottom=top-24;
         }
         struct Key {const char* category;const char* label;ImU32 color;};
-        const Key keys[]={{"healing","Blood vials",IM_COL32(230,81,76,255)},{"insight","Insight",IM_COL32(189,121,234,255)},
-                          {"equipment","Equipment",IM_COL32(93,172,242,255)},{"echoes","Coldblood",IM_COL32(235,193,79,255)}};
+        const Key keys[]={{"healing",BbAtlasText::Game("Blood vials"),IM_COL32(230,81,76,255)},{"insight",BbAtlasText::Game("Insight"),IM_COL32(189,121,234,255)},
+                          {"equipment",BbAtlasText::Game("Equipment"),IM_COL32(93,172,242,255)},{"echoes",BbAtlasText::Game("Coldblood"),IM_COL32(235,193,79,255)}};
         int count=0;for(const auto& k:keys)if(BbMapFeatures::ItemCategoryEnabled(k.category))++count;
-        if(count){float row=bottom-18*count;draw->AddText(font,12*scale,at(x,row-20),muted,"Pickups");
+        if(count){float row=bottom-18*count;draw->AddText(font,12*scale,at(x,row-20),muted,BbAtlasText::Game("Pickups"));
             for(const auto& k:keys)if(BbMapFeatures::ItemCategoryEnabled(k.category)){const auto dot=at(x+6,row+7);draw->AddCircleFilled(dot,3*scale,k.color,12);draw->AddText(font,13*scale,at(x+20,row-1),paper,k.label);row+=18;}}
     }
     draw->AddLine(at(152,BbAtlasStyle::Layout::footer_rule),at(1116,BbAtlasStyle::Layout::footer_rule),rule,.8f*scale);ornament(157,659,3,rule);ornament(1111,659,3,rule);
@@ -743,11 +745,11 @@ void Draw() {
         if(ImGui::BeginPopupModal("Travel to lamp",nullptr,ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoScrollWithMouse)) {
             auto* dialog=ImGui::GetWindowDrawList();
             auto point=[&](float x,float y){return ImVec2(box.x+x*scale,box.y+y*scale);};
-            dialog->AddText(font,19*scale,point(20,13),paper,"Travel to lamp");
+            dialog->AddText(font,19*scale,point(20,13),paper,BbAtlasText::Game("Travel to lamp"));
             dialog->AddLine(point(20,43),point(330,43),rule,scale);
             const auto& d=destinations[travel_dialog];
             const bool ready=!cancel_dialog&&d.available&&BbMapFeatures::TravelEnabled()&&runtime_atlas_travel_supported();
-            std::string message=ready?"Travel to "+d.name+"?":"This lamp is currently unavailable.";
+            std::string message=ready?BbAtlasText::Game("Travel to ")+d.name+"?":std::string(BbAtlasText::Game("This lamp is currently unavailable."));
             dialog->AddText(font,17*scale,point(20,57),paper,message.c_str(),nullptr,310*scale);
             auto button=[&](const char* id,const char* text,float x,bool enabled){
                 ImGui::SetCursorScreenPos(point(x,116));ImGui::BeginDisabled(!enabled);
@@ -759,11 +761,11 @@ void Draw() {
                 dialog->AddText(font,16*scale,ImVec2(box.x+(x+73)*scale-extent.x*.5f,box.y+123*scale),enabled?paper:muted,text);
                 return pressed;
             };
-            if((button("travel-confirm","Travel",20,ready)||(confirm&&dialog_was_open))&&ready){
+            if((button("travel-confirm",BbAtlasText::Game("Travel"),20,ready)||(confirm&&dialog_was_open))&&ready){
                 if(runtime_atlas_travel_request(&d.native)){travel_monitor=true;travel_message.clear();travel_dialog=-1;ImGui::CloseCurrentPopup();Close();}
-                else travel_message="The destination changed or the game cannot travel now.";
+                else travel_message=BbAtlasText::Game("The destination changed or the game cannot travel now.");
             }
-            if(button("travel-cancel","Cancel",184,true)||cancel_dialog){travel_dialog=-1;ImGui::CloseCurrentPopup();}
+            if(button("travel-cancel",BbAtlasText::Game("Cancel"),184,true)||cancel_dialog){travel_dialog=-1;ImGui::CloseCurrentPopup();}
             ImGui::EndPopup();
         }
         ImGui::PopStyleColor(3);ImGui::PopStyleVar(3);
@@ -774,14 +776,14 @@ void Draw() {
     struct Control {const char* label;const char* key;const char* icon;int action;};
     std::vector<Control> controls;
     if(BbMapFeatures::TravelEnabled()){
-        controls.push_back({"Lamps",controller?(ps?"L1/R1":"LB/RB"):"Q/E",nullptr,1});
-        if(controller)controls.push_back({"Pointer","LS",nullptr,0});
+        controls.push_back({BbAtlasText::Game("Lamps"),controller?(ps?"L1/R1":"LB/RB"):"Q/E",nullptr,1});
+        if(controller)controls.push_back({BbAtlasText::Game("Pointer"),"LS",nullptr,0});
     }
-    controls.push_back({"Pan",controller?"RS":"Drag",nullptr,0});
-    controls.push_back({"Zoom",controller?(ps?"L2/R2":"LT/RT"):"-/+",nullptr,2});
-    controls.push_back({"Recenter",controller?(ps?"Triangle":"Y"):"Home",controller&&!ps?"Y":nullptr,3});
-    if(BbMapFeatures::TravelEnabled())controls.push_back({"Travel",controller?(ps?(cancel_cross?"Circle":"Cross"):(cancel_cross?"B":"A")):"Click",nullptr,4});
-    controls.push_back({"Back",controller?(ps?(cancel_cross?"Cross":"Circle"):(cancel_cross?"A":"B")):"Esc",controller&&!ps&&!cancel_cross?"B":nullptr,5});
+    controls.push_back({BbAtlasText::Game("Pan"),controller?"RS":BbAtlasText::Game("Drag"),nullptr,0});
+    controls.push_back({BbAtlasText::Game("Zoom"),controller?(ps?"L2/R2":"LT/RT"):"-/+",nullptr,2});
+    controls.push_back({BbAtlasText::Game("Recenter"),controller?(ps?BbAtlasText::Game("Triangle"):"Y"):"Home",controller&&!ps?"Y":nullptr,3});
+    if(BbMapFeatures::TravelEnabled())controls.push_back({BbAtlasText::Game("Travel"),controller?(ps?(cancel_cross?BbAtlasText::Game("Circle"):BbAtlasText::Game("Cross")):(cancel_cross?"B":"A")):BbAtlasText::Game("Click"),nullptr,4});
+    controls.push_back({BbAtlasText::Game("Back"),controller?(ps?(cancel_cross?BbAtlasText::Game("Cross"):BbAtlasText::Game("Circle")):(cancel_cross?"A":"B")):"Esc",controller&&!ps&&!cancel_cross?"B":nullptr,5});
     for(size_t i=0;i<controls.size();++i){
         const auto& c=controls[i];const auto box=layout.FooterSlot(int(i),int(controls.size()));
         const float label_font=16*scale,key_font=12*scale;
@@ -799,7 +801,7 @@ void Draw() {
         }
         if(ImGui::IsItemHovered()){
             draw->AddLine(ImVec2(box.x+8*scale,box.y+box.h),ImVec2(box.x+box.w-8*scale,box.y+box.h),rule,.8f*scale);
-            if(c.action==0)ImGui::SetTooltip("%s",c.label==std::string("Pointer")?"Move the left stick to point at a lamp.":controller?"Move the right stick to pan.":"Drag the map to pan.");
+            if(c.action==0)ImGui::SetTooltip("%s",c.label==std::string(BbAtlasText::Game("Pointer"))?BbAtlasText::Game("Move the left stick to point at a lamp."):controller?BbAtlasText::Game("Move the right stick to pan."):BbAtlasText::Game("Drag the map to pan."));
         }
         ImGui::PopID();
         if(c.icon)BbMapArt::DrawIcon(draw,c.icon,ImVec2(px+12*scale,box.y+17*scale),24*scale);

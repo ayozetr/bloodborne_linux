@@ -146,4 +146,6 @@ if [[ ${1:-} == --test ]]; then
     out/map-controller-test
     "${CXX:-c++}" "${atlas_cxx[@]}" tests/test_atlas_features.cpp gpu/shim/bbport_map_features.cpp "${libraries[@]}" -o out/atlas-features-test
     rm -rf out/atlas-features && out/atlas-features-test out/atlas-features
+    "${CXX:-c++}" "${atlas_cxx[@]}" -Igpu/shadps4 tests/test_atlas_i18n.cpp -o out/atlas-i18n-test
+    out/atlas-i18n-test
 fi
