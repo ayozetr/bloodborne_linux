@@ -451,7 +451,13 @@ extern "C" int bbgpu_overlay_captures_input(void) {
 }
 
 extern "C" int bbgpu_audio_muted(void) {
-    return g_window && BbSettings::Get().mute_unfocused && !g_window->IsFocused() ? 1 : 0;
+    // Local co-op (BB_PAD_BACKGROUND=1): a player's window is out of focus while another player
+    // has it, and the game keeps its sound (players 2-4 are silenced by BB_AUDIO=none instead).
+    static const bool coop = [] {
+        const char* background = std::getenv("BB_PAD_BACKGROUND");
+        return background && background[0] == '1';
+    }();
+    return g_window && !coop && BbSettings::Get().mute_unfocused && !g_window->IsFocused() ? 1 : 0;
 }
 
 extern "C" void bbgpu_trophy_notice(int id, char grade, const char* name_utf8, const char* icon_path) {
