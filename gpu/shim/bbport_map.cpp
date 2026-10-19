@@ -479,7 +479,7 @@ void Settings() {
     if(!atlas_error.empty())ImGui::TextWrapped("Map data unavailable: %s",atlas_error.c_str());
 }
 void SetTitleFont(ImFont* font){title_font=font;}
-// bbport: the game's font has no Cyrillic or CJK glyphs; the port's font then.
+// bbport: the game's font has no CJK glyphs; the port's font then.
 ImFont* TitleFont(){return title_font&&!BbAtlasText::NeedsPortFont()?title_font:ImGui::GetFont();}
 void Draw() {
     std::lock_guard<std::recursive_mutex> map_guard(map_mutex);

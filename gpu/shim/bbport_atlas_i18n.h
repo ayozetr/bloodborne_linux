@@ -175,11 +175,10 @@ inline const char* Menu(const char* english) {
     return In(BbSettings::Get().menu_language.load(), english);
 }
 
-/// Whether the game's language needs the port's font: the map's font, made from the game's
-/// English menu font, has no Cyrillic or CJK glyphs.
+/// Whether the game's language needs the port's font: the map's font (made from the game's own
+/// menu font) keeps Latin and Cyrillic, every text above but the Chinese, and no CJK glyphs.
 inline bool NeedsPortFont() {
-    const auto language = BbGameMenu::Language();
-    return language == BbSettings::MenuLanguage::Russian || language == BbSettings::MenuLanguage::ChineseSimplified;
+    return BbGameMenu::Language() == BbSettings::MenuLanguage::ChineseSimplified;
 }
 
 } // namespace BbAtlasText
