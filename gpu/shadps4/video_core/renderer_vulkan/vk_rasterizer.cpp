@@ -299,8 +299,17 @@ bool Rasterizer::WriteTimestampOnGpu(VAddr address, bool end_of_pipe) {
 }
 
 bool Rasterizer::WriteLabelOnGpu(VAddr address, u64 value, u32 num_bytes) {
-    static const bool enabled = [] {
+    // bbport: off by default on GFX8 (Polaris, RX 4xx/5xx): the game stalls there with labels
+    // written by the GPU (upstream #203, an RX 580: nothing submitted for 5 s after the first
+    // cinematic, or a guest fault at character creation; BB_FREE_CHECK=1, which also turns them
+    // off, fixed it). BB_GPU_LABELS=1 forces them on. From upstream bbport 0.6.
+    static const bool enabled = [this] {
         const char* env = std::getenv("BB_GPU_LABELS");
+        if (!env && instance.IsAmdGfx8()) {
+            std::printf("GPU: end-of-pipe labels are written by a CPU thread after the GPU "
+                        "(GFX8; BB_GPU_LABELS=1: by the GPU)\n");
+            return false;
+        }
         return !env || env[0] != '0';
     }();
     if (!enabled || !VideoCore::GuestInPlace() || !HonestLabels() ||

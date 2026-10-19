@@ -383,6 +383,23 @@ public:
         return properties.deviceName;
     }
 
+    /// bbport: AMD GCN 3/4 (GFX8: Polaris, Tonga, Fiji, Carrizo, Stoney). RADV puts the chip in
+    /// the device name ("... (RADV POLARIS10)"); the proprietary and PAL drivers name the card
+    /// only. From upstream bbport 0.6.
+    bool IsAmdGfx8() const {
+        if (properties.vendorID != 0x1002) {
+            return false;
+        }
+        const std::string_view name{properties.deviceName.data()};
+        for (const std::string_view chip :
+             {"POLARIS", "TONGA", "FIJI", "ICELAND", "CARRIZO", "STONEY", "VEGAM"}) {
+            if (name.find(chip) != std::string_view::npos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// Returns if the device is an integrated GPU.
     bool IsIntegrated() const {
         return properties.deviceType == vk::PhysicalDeviceType::eIntegratedGpu;
