@@ -405,7 +405,9 @@ void JobSlotDrop(u64 runner) {
     NoteJobSlotReleased("destroyed with its slot");
 }
 
-/// Runs `code` (the instructions the jump covers) after the stub's own part, then goes back.
+/// Runs `code` (the instructions the jump covers) after the stub's own part, then goes back. The
+/// jump is written as plain bytes: InstallGameFixes runs while the image is still being prepared
+/// (writable, no game thread yet), and the loader sets each segment's protection afterwards.
 bool PlaceJumpTo(Emitter& e, u64 address, const u8* code, std::size_t size) {
     for (std::size_t i = 0; i < size; ++i) {
         e.Bytes({code[i]});
@@ -417,7 +419,9 @@ bool PlaceJumpTo(Emitter& e, u64 address, const u8* code, std::size_t size) {
     if (!stub || !Rel32To(address + 5, stub, rel)) {
         return false;
     }
-    WriteJumpOverTrap(address, 0xe9, rel);
+    auto* p = reinterpret_cast<u8*>(address);
+    p[0] = 0xe9; // jmp rel32
+    std::memcpy(p + 1, &rel, 4);
     return true;
 }
 
@@ -546,6 +550,9 @@ void Install(RangeCallback on_gpu_range_allocated) {
 }
 
 void InstallGameFixes() {
+    // bbgpu_patch_image: after the relocations and the patches, before the segments get their
+    // protection (installed earlier, at the GPU's start, the jump made a code page read-only
+    // while the loader still had relocations to write there: a fault at start).
     static std::atomic<bool> installed{false};
     if (installed.exchange(true)) {
         return;

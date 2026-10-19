@@ -581,10 +581,6 @@ BufferCache::BufferCache(const Vulkan::Instance& instance_, Vulkan::Scheduler& s
     } else if (GuestInPlace() && game) {
         std::printf("Guest hooks: off (BB_GUEST_HOOKS=0): nothing in the game's own code is hooked\n");
     }
-    // Fixes for the game's own bugs, with either memory model (BB_GUEST_HOOKS=0: none either).
-    if (game && game->install_fixes && !(hooks_env && hooks_env[0] == '0')) {
-        game->install_fixes();
-    }
     if (LayerMode()) {
         BbLayer::GpuMemory::Get().SetTranslate(&LayerTranslate);
         std::printf("Guest memory: the layer's memory module binds the game's memory in place "

@@ -381,6 +381,12 @@ extern "C" int bbgpu_handle_fault(void* ucontext, void* address) {
 extern "C" void bbgpu_patch_image(unsigned char* image, uint64_t size) {
     BbGnmHooks::PatchImage(image, size);
     BbGameMenu::PatchImage(image, size);
+    // Fixes for the game's own bugs, with either memory model (BB_GUEST_HOOKS=0: none either).
+    const char* hooks_env = std::getenv("BB_GUEST_HOOKS");
+    const Game::Profile* game = Game::Active();
+    if (game && game->install_fixes && !(hooks_env && hooks_env[0] == '0')) {
+        game->install_fixes();
+    }
 }
 
 extern "C" unsigned bbgpu_symbol_count(void) {
