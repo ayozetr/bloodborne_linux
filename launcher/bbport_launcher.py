@@ -852,6 +852,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.settings = load_settings()
         set_language(self.settings.get("ui_language", ""))
         self.ini, self.ini_lines = load_ini()
+        self.ini_rows_seen = {}  # bbport.ini values as the rows showed them when last built or saved
+        self.ini_controls_changed = {}  # key.* / pad.* bindings changed here, not yet saved
         self.process = None
         self.stream = None
         self.log_spool = None  # every line of the Journal since it was last cleared; False: failed
@@ -914,6 +916,8 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.log_view.get_buffer().set_text(log_text + "".join(self.build_errors))
             return
         self.log_view.get_buffer().set_text(log_text)
+        # What the rows show now is the file's: only later changes are written (store).
+        self.ini_rows_seen = self.ini_rows()
         self.update_launch_button()
         self.update_game_status()
         self.update_user_status()
@@ -1669,6 +1673,7 @@ class LauncherWindow(Adw.ApplicationWindow):
     def set_control(self, kind, name, value):
         """value: the binding, or None for the default."""
         self.ini[f"{kind}.{name}"] = value
+        self.ini_controls_changed[f"{kind}.{name}"] = value
         self.show_control(kind, name)
         self.store()
         if kind == "pad" and name in ("cross", "circle"):
@@ -1781,7 +1786,25 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.save_mod_profile()
         self.save_patch_profile()
         save_settings(s)
-        self.ini.update({
+        # Issue #21: only what was changed here (since the page was built or last saved) is
+        # written; every other key keeps the file's current value. The whole page used to be
+        # written back, on Play and on closing the launcher, so a setting changed in the game's
+        # menu or by hand while the launcher was open went back to the launcher's old value.
+        rows = self.ini_rows()
+        _values, lines = load_ini()
+        present = {line.split("=", 1)[0].strip() for line in lines
+                   if "=" in line and not line.lstrip().startswith("#")}
+        changed = {key: value for key, value in rows.items()
+                   if key not in present or self.ini_rows_seen.get(key) != value}
+        changed.update(self.ini_controls_changed)
+        save_ini(changed, lines)
+        self.ini_rows_seen = rows
+        self.ini_controls_changed = {}
+        self.ini, self.ini_lines = load_ini()
+
+    def ini_rows(self):
+        """The bbport.ini values the launcher's rows show."""
+        return {
             "upscaler": combo_value(self.upscaler_row),
             "preset": str(combo_value(self.preset_row)),
             "sharpen": "1" if self.sharpen_row.get_active() else "0",
@@ -1802,9 +1825,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.streaming_rows.items()},
-        })
-        save_ini(self.ini, self.ini_lines)
-        self.ini, self.ini_lines = load_ini()
+        }
 
     def environment(self):
         return game_environment(self.settings)
