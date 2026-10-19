@@ -43,7 +43,7 @@ It also writes the language and the new file hashes into `maps/generated-assets.
 The in-game map is then pointed at them with `BB_ATLAS_ENABLED=1`, `BB_MAP_DIR=<output>/maps`,
 `BB_MAP_CATALOG=<output>/maps/catalog.json`, `BB_MAP_FONT=<output>/art/native-font.ttf` and
 `BB_MAP_ART_DIR` (Atlas's own art, `background`, `icons`, `menu` and `parchment` as `.bbra`).
-`BB_MAP_SOUND_GAIN` (0-2, 0.07 by default) sets the map's cursor sounds' level. `BB_ATLAS_DEBUG=1` logs what the map reads from the game's quick menu whenever it changes (lines
+`BB_MAP_SOUND_GAIN` (0-2, 0.024 by default, the game's own menu cursor level) sets the map's cursor sound's level. `BB_ATLAS_DEBUG=1` logs what the map reads from the game's quick menu whenever it changes (lines
 starting with `Atlas debug:`).
 
 ## Changes for Linux

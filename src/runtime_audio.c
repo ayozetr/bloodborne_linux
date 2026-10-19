@@ -65,15 +65,16 @@ static atomic_uint menu_decoded_move,menu_decoded_select;
 static pthread_mutex_t menu_mix_lock=PTHREAD_MUTEX_INITIALIZER;
 static int menu_playing;
 static uint32_t menu_cursor;
-/* bbport: the cursor sounds are mixed at this gain (BB_MAP_SOUND_GAIN, 0-2; 0.07 by default): at
- * full level they were about ten times louder than the game's own menu cursor (measured on a
- * recording of both, 2026-10-19). */
+/* bbport: the cursor sound is mixed at this gain (BB_MAP_SOUND_GAIN, 0-2; 0.024 by default), the
+ * level of the game's own quick-menu cursor: on a recording of both, every cursor move of the game
+ * holds CURSOL_SELECT at 0.0097 +- 0.0003 of the recording's scale, where the map's sound at gain
+ * 0.5 was at 0.203 (2026-10-19). */
 static float menu_gain(void) {
     static float gain=-1.f;
     if(gain<0.f){
         const char *env=getenv("BB_MAP_SOUND_GAIN");
-        const float v=env?(float)atof(env):0.07f;
-        gain=v>=0.f&&v<=2.f?v:0.07f;
+        const float v=env?(float)atof(env):0.024f;
+        gain=v>=0.f&&v<=2.f?v:0.024f;
     }
     return gain;
 }
@@ -126,7 +127,9 @@ static void menu_mix(void *converted,const Port *p) {
     }else if(atomic_exchange(&menu_move_pending,0)){
         menu_playing=1;menu_cursor=0;
     }
-    const BbMenuSound *sound=menu_playing==2?&menu_sounds.select:&menu_sounds.move;
+    /* bbport: the game's quick menu moves its cursor with CURSOL_SELECT, not CURSOL_MOVE (the same
+     * recording: CURSOL_MOVE is not in its clicks). Both events play it, as the game's own. */
+    const BbMenuSound *sound=&menu_sounds.select;
     /* bbport: silent like the game's sound while the window is in the background. */
     const float gain_all=bbgpu_audio_muted() ? 0.f : master_gain*menu_gain();
     if(menu_playing&&sound->pcm){
