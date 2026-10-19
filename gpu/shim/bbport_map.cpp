@@ -64,6 +64,7 @@ std::atomic<int> zoom_request{0},zoom_held{0};
 uint64_t zoom_repeat=0;
 float cursor_u=.5f,cursor_v=.5f;
 int selected_destination=-1,travel_dialog=-1;
+int travel_choice=0; // bbport: the travel dialog's selected button (0 Travel, 1 Cancel)
 bool travel_monitor=false;
 bool map_dragged=false;
 std::string travel_message;
@@ -333,6 +334,8 @@ void MappedPad(unsigned rising,unsigned char lx,unsigned char ly,unsigned char r
     if((rising&0x300u)==0x100u)zoom_request=-1;
     if((rising&0x300u)==0x200u)zoom_request=1;
     zoom_held=(held&0x300u)==0x100u?-1:(held&0x300u)==0x200u?1:0;
+    // bbport: Left/Right choose the travel dialog's button, as in the game's own dialogs.
+    if(travel_dialog>=0&&(rising&0xa0u)){const int choice=(rising&0x80u)?0:1;if(choice!=travel_choice){travel_choice=choice;runtime_audio_menu_event(0);}}
     if(rising&runtime_map_confirm_button())confirm_request=true;
     auto axis=[](unsigned char value){const float v=(int(value)-128)/127.f;return std::abs(v)>.18f?v:0.f;};
     pointer_x=axis(lx);pointer_y=axis(ly);padx=axis(rx);pady=axis(ry);
@@ -461,7 +464,9 @@ bool HandleEvent(const SDL_Event& e) {
     }
     // Actual mapped controller input is routed once at runtime_pad's logical
     // sample boundary. SDL physical events cannot bypass remapped bindings.
-    if(e.type==SDL_EVENT_WINDOW_FOCUS_LOST)Close();
+    // bbport: losing the window's focus (Alt+Tab, local co-op) no longer closes the map; only
+    // what is held is let go, as the game does with its own menus.
+    if(e.type==SDL_EVENT_WINDOW_FOCUS_LOST){padx=pady=0;pointer_x=pointer_y=0;zoom_held=0;}
     return false;
 }
 void Settings() {
@@ -751,21 +756,29 @@ void Draw() {
             const bool ready=!cancel_dialog&&d.available&&BbMapFeatures::TravelEnabled()&&runtime_atlas_travel_supported();
             std::string message=ready?BbAtlasText::Game("Travel to ")+d.name+"?":std::string(BbAtlasText::Game("This lamp is currently unavailable."));
             dialog->AddText(font,17*scale,point(20,57),paper,message.c_str(),nullptr,310*scale);
-            auto button=[&](const char* id,const char* text,float x,bool enabled){
+            if(!dialog_was_open)travel_choice=ready?0:1;
+            if(!ready)travel_choice=1;
+            // bbport: the selected button is marked (it was only marked under the mouse, so with a
+            // controller neither looked chosen); the mouse selects what it is over.
+            auto button=[&](const char* id,const char* text,float x,bool enabled,int choice){
                 ImGui::SetCursorScreenPos(point(x,116));ImGui::BeginDisabled(!enabled);
                 bool pressed=ImGui::InvisibleButton(id,ImVec2(146*scale,34*scale));
                 const bool hover=ImGui::IsItemHovered();ImGui::EndDisabled();
-                dialog->AddRectFilled(point(x,116),point(x+146,150),hover?IM_COL32(103,91,63,255):IM_COL32(63,60,46,255),2*scale);
-                dialog->AddRect(point(x,116),point(x+146,150),enabled?rule:IM_COL32(80,80,75,150),2*scale,0,scale);
+                if(hover&&enabled&&!UsesControllerGlyphs())travel_choice=choice;
+                const bool chosen=travel_choice==choice;
+                dialog->AddRectFilled(point(x,116),point(x+146,150),chosen?IM_COL32(103,91,63,255):IM_COL32(63,60,46,255),2*scale);
+                dialog->AddRect(point(x,116),point(x+146,150),chosen?IM_COL32(235,233,220,255):enabled?rule:IM_COL32(80,80,75,150),2*scale,0,(chosen?1.7f:1.f)*scale);
                 const auto extent=font->CalcTextSizeA(16*scale,FLT_MAX,0,text);
                 dialog->AddText(font,16*scale,ImVec2(box.x+(x+73)*scale-extent.x*.5f,box.y+123*scale),enabled?paper:muted,text);
                 return pressed;
             };
-            if((button("travel-confirm",BbAtlasText::Game("Travel"),20,ready)||(confirm&&dialog_was_open))&&ready){
-                if(runtime_atlas_travel_request(&d.native)){travel_monitor=true;travel_message.clear();travel_dialog=-1;ImGui::CloseCurrentPopup();Close();}
+            const bool confirm_travel=confirm&&dialog_was_open&&travel_choice==0;
+            const bool confirm_cancel=confirm&&dialog_was_open&&travel_choice==1;
+            if((button("travel-confirm",BbAtlasText::Game("Travel"),20,ready,0)||confirm_travel)&&ready){
+                if(runtime_atlas_travel_request(&d.native)){travel_monitor=true;travel_message.clear();travel_dialog=-1;ImGui::CloseCurrentPopup();Close();BbAtlasMenu::HideUntilMenuCloses();}
                 else travel_message=BbAtlasText::Game("The destination changed or the game cannot travel now.");
             }
-            if(button("travel-cancel",BbAtlasText::Game("Cancel"),184,true)||cancel_dialog){travel_dialog=-1;ImGui::CloseCurrentPopup();}
+            if(button("travel-cancel",BbAtlasText::Game("Cancel"),184,true,1)||cancel_dialog||confirm_cancel){travel_dialog=-1;ImGui::CloseCurrentPopup();}
             ImGui::EndPopup();
         }
         ImGui::PopStyleColor(3);ImGui::PopStyleVar(3);
