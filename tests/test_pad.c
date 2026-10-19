@@ -6,6 +6,9 @@
 
 static int capture;
 int bbgpu_overlay_captures_input(void) { return capture; }
+uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx, uint8_t ry) {
+    (void)lx; (void)ly; (void)rx; (void)ry; return buttons; /* Hunter's Atlas off here */
+}
 void bbgpu_mouse_take(double *dx, double *dy, int *up, int *down) { *dx=*dy=0; *up=*down=0; }
 int bbgpu_mouse_captured(void) { return 0; }
 void bbgpu_mouse_look_enable(int enabled) { (void)enabled; }

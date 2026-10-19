@@ -449,6 +449,10 @@ ScreenshotRequests ConsumeScreenshotRequests() { return {}; }
 extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
 }
+extern "C" uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx,
+                                          uint8_t ry) {
+    return BbOverlay::RoutePad(buttons, lx, ly, rx, ry);
+}
 
 extern "C" int bbgpu_audio_muted(void) {
     // Local co-op (BB_PAD_BACKGROUND=1): a player's window is out of focus while another player

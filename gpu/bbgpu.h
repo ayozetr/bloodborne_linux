@@ -30,6 +30,9 @@ int bbgpu_text_input_begin(const char *initial_utf8, const char *prompt_utf8);
 int bbgpu_text_input_poll(char *out_utf8, uint64_t size);
 /* 1 while the in-game settings menu is open: the game's pad input is held neutral. */
 int bbgpu_overlay_captures_input(void);
+/* Hunter's Atlas: the pad's buttons with what its tile or map took out (the game gets the rest);
+ * the buttons unchanged while it is off or not in use. */
+uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx, uint8_t ry);
 /* 1 while the game should be silent: bbport.ini mute_unfocused is on and the window does not
  * have focus. Safe from any thread (the audio ports read it for every buffer). */
 int bbgpu_audio_muted(void);

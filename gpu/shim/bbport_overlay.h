@@ -35,6 +35,10 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent);
 
 /// The menu or the text dialog is open: the game's input is held neutral.
 bool CapturesInput();
+/// Hunter's Atlas: the pad's buttons once its tile or map has taken what it uses (the game gets
+/// the rest), and whether the window lets the mouse go for it.
+uint32_t RoutePad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx, uint8_t ry);
+bool ReleasesMouse();
 
 /// The settings menu is open: the window shows the system cursor over it.
 bool MenuOpen();

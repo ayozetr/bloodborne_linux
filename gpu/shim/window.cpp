@@ -284,7 +284,8 @@ bool WindowSDL::PollEvents() {
         // button: runtime_pad.c reads the buttons only while it is held); F1 and leaving the
         // window let it go.
         if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && !mouse_captured.load(std::memory_order_relaxed) &&
-            mouse_look.load(std::memory_order_relaxed) && !BbOverlay::MenuOpen()) {
+            mouse_look.load(std::memory_order_relaxed) && !BbOverlay::MenuOpen() &&
+            !BbOverlay::ReleasesMouse()) { // Hunter's Atlas: its map and tile use the pointer
             CaptureMouse(true);
             continue;
         }
@@ -322,9 +323,10 @@ bool WindowSDL::PollEvents() {
             break;
         }
     }
-    // The menu, the name dialog and mouse_look=0 want the cursor.
+    // The menu, the name dialog, Hunter's Atlas's map and tile, and mouse_look=0 want the cursor.
     if (mouse_captured.load(std::memory_order_relaxed) &&
-        (BbOverlay::MenuOpen() || text_active || !mouse_look.load(std::memory_order_relaxed))) {
+        (BbOverlay::MenuOpen() || BbOverlay::ReleasesMouse() || text_active ||
+         !mouse_look.load(std::memory_order_relaxed))) {
         CaptureMouse(false);
     }
     UpdateMouseCamera();

@@ -31,6 +31,7 @@
 #define _GNU_SOURCE
 #include "runtime.h"
 #include "gpu/bbgpu.h"
+#include "runtime_atlas_release.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -782,6 +783,13 @@ static void apply_stick_options(PadData *d) {
     if (pad_invert_look_y) d->right_y=(uint8_t)(256-d->right_y>255 ? 255 : 256-d->right_y);
 }
 
+/* Hunter's Atlas (BB_ATLAS_ENABLED=1): its map and quick-menu tile read the pad; off, nothing of
+ * the input path below changes. */
+static int atlas_on(void) {
+    static int on=-1;
+    if (on<0) { const char *v=getenv("BB_ATLAS_ENABLED"); on=v && v[0] && strcmp(v,"0"); }
+    return on;
+}
 static void sample_host(PadData *d) {
     report_guest_heap();
     memset(d,0,sizeof(*d));
@@ -803,7 +811,9 @@ static void sample_host(PadData *d) {
     int wheel_up=0, wheel_down=0;
     bbgpu_mouse_take(&mouse_dx,&mouse_dy,&wheel_up,&wheel_down);
     const int captured=bbgpu_mouse_captured();
-    if (bbgpu_overlay_captures_input()) { apply_mouse_look(d,0,0,d->timestamp,0); return; } /* menu open: neutral input */
+    /* Menu open: neutral input. With Hunter's Atlas the input is read anyway (its map is driven by
+     * it) and sample_atlas() gives the game the neutral input. */
+    if (bbgpu_overlay_captures_input() && !atlas_on()) { apply_mouse_look(d,0,0,d->timestamp,0); return; }
     if (!keyboard_enabled()) { mouse_dx=mouse_dy=0; wheel_up=wheel_down=0; }
     const bool *k=keyboard_enabled() && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetKeyboardState(NULL) : NULL;
     mouse_buttons=keyboard_enabled() && captured && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
@@ -990,7 +1000,41 @@ static void touch_ids(PadData *d) {
  * shows at once (0xCydral's port; before, every button waited until all were released). From
  * Supermedo/bloodborne_pc 1d34202 (hold_after_capture), via Awaken's BloodBorneButPc. */
 static uint32_t hold_after_capture;
+/* Hunter's Atlas's input routing (MikeTat1988): the tile and the map take what they use from
+ * the pad (bbgpu_atlas_route_pad); while the overlay or the map holds the input, the game gets
+ * neutral input, and what is still held when they let it go stays hidden until released
+ * (runtime_atlas_release.h, the same as hold_after_capture for the menu). */
+static BbAtlasRelease atlas_release;
+static void sample_atlas(PadData *d) {
+    sample_host(d);
+    record_sample(d);
+    read_inject();
+    replay_sample(d);
+    d->buttons|=injected.buttons;
+    if (injected.touch_side>=0) touch_click(d,injected.touch_side);
+    else if ((d->buttons & BTN_TOUCHPAD) && !d->touch_count) touch_click(d,0);
+    if (!d->touch_count) touch_down=0;
+    if (injected.buttons & BTN_L2) d->l2=255;
+    if (injected.buttons & BTN_R2) d->r2=255;
+    uint8_t *axes[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
+    for (int i=0;i<4;++i) if (injected.stick[i]>=0) *axes[i]=(uint8_t)injected.stick[i];
+    const uint32_t raw_buttons=d->buttons;
+    uint8_t sampled_axes[4]={d->left_x,d->left_y,d->right_x,d->right_y},sampled_triggers[2]={d->l2,d->r2};
+    const int capture_before=bbgpu_overlay_captures_input();
+    d->buttons=bbgpu_atlas_route_pad(d->buttons,d->left_x,d->left_y,d->right_x,d->right_y);
+    if (capture_before || bbgpu_overlay_captures_input()) {
+        bb_atlas_remember(&atlas_release,raw_buttons,sampled_axes,sampled_triggers);
+        d->buttons=0; d->left_x=d->left_y=d->right_x=d->right_y=128; d->l2=d->r2=0; d->touch_count=0;
+        return;
+    }
+    bb_atlas_release_filter(&atlas_release,raw_buttons,&d->buttons,sampled_axes,sampled_triggers);
+    d->left_x=sampled_axes[0]; d->left_y=sampled_axes[1]; d->right_x=sampled_axes[2]; d->right_y=sampled_axes[3];
+    d->l2=sampled_triggers[0]; d->r2=sampled_triggers[1];
+    camera_diagonal(d);
+    touch_ids(d);
+}
 static void sample(PadData *d) {
+    if (atlas_on()) { sample_atlas(d); return; }
     sample_host(d);
     if (bbgpu_overlay_captures_input()) { hold_after_capture=UINT32_MAX; return; }
     record_sample(d);

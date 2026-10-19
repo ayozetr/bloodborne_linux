@@ -153,6 +153,9 @@ target_compile_definitions(bbgpu PRIVATE IMGUI_IMPL_VULKAN_NO_PROTOTYPES
 set_source_files_properties(shim/bbport_overlay.cpp PROPERTIES
     OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fonts/DejaVuSans.ttf")
 target_include_directories(bbgpu PRIVATE shim layer games cp shadps4 ${SHADER_INCLUDE} third_party/gcn/include third_party/half/include)
+# Hunter's Atlas (shim/bbport_map*.cpp) reads its map packs with nlohmann/json: the copy the
+# bridge already carries (bbbridge/third_party/nlohmann, MIT), not a new host dependency.
+target_include_directories(bbgpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../bbbridge/third_party)
 target_compile_definitions(bbgpu PRIVATE BOOST_ASIO_STANDALONE NDEBUG)
 target_compile_options(bbgpu PRIVATE -Wno-deprecated-declarations -Wno-missing-field-initializers)
 # Loaded with bb-probe at startup (DT_NEEDED, never dlopen): thread_local access without a
