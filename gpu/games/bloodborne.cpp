@@ -36,6 +36,7 @@ extern const Profile BloodborneProfile = {
     .name = "Bloodborne",
     .serials = Serials,
     .install_hooks = InstallHooks,
+    .install_fixes = BbGuestHooks::InstallGameFixes,
     .dynamic_writers = DynamicWriters,
     // The game's buffer-copy compute shader (not the export-stage copy shader).
     .buffer_copy_shader = 0xfefebf9f,

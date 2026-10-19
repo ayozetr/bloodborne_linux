@@ -14,4 +14,10 @@ using RangeCallback = void (*)(std::uint64_t address, std::uint64_t size);
 
 /// Installs the hooks once (GPU side, after the game is loaded).
 void Install(RangeCallback on_gpu_range_allocated);
+
+/// Fixes for bugs of the game's own, with every memory model (once, before the game's threads
+/// run): failed render jobs give their pool slot back (Laurence's cinematic above 30 FPS hung),
+/// and the blur kernel's sample count is kept valid (exception 0xa0020007). From upstream bbport
+/// 0.6.
+void InstallGameFixes();
 } // namespace BbGuestHooks

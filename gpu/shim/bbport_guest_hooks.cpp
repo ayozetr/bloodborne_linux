@@ -358,6 +358,133 @@ bool Patch(u64 address, const unsigned char* expected, std::size_t size) {
     mprotect(page, span, PROT_READ | PROT_EXEC);
     return true;
 }
+
+/// Render jobs (the cutscene and area streaming jobs: FD4 job runners) take a slot from a pool of
+/// the game's at their start (held at [runner + 0x120]) and give it back when they end well. A job
+/// that ends with a failure (result 1) left it held: above 30 FPS Laurence's cinematic fails
+/// enough of them to empty the pool, and the game then waits for a slot for good (a hang).
+std::atomic<u64> job_slots_released{0};
+using GiveBack = void (*)(u64 queue, u64 item); // 0x1056990, the pool's own give-back
+
+void NoteJobSlotReleased(const char* how) {
+    const u64 n = job_slots_released.fetch_add(1) + 1;
+    if (n <= 5 || (n & (n - 1)) == 0) {
+        std::printf("Guest hooks: a render job %s gave its slot back (%llu so far)\n", how,
+                    static_cast<unsigned long long>(n));
+    }
+}
+
+/// At the shared exit of the job's run (0x1068092): r14 the runner, the pool in r12, r15d the
+/// result.
+void JobSlotFix(u64 runner, u64 queue, std::uint32_t result) {
+    if (result != 1) {
+        return;
+    }
+    u64& held = *reinterpret_cast<u64*>(runner + 0x120);
+    const u64 item = held;
+    if (!item) {
+        return;
+    }
+    reinterpret_cast<GiveBack>(ImageBase + 0x1056990)(queue, item);
+    held = 0;
+    NoteJobSlotReleased("that failed");
+}
+
+/// The runner destroyed or reset (`mov qword [rbx + 0x120], 0` at 0x106798a and 0x1067a5c) with a
+/// slot still held (a job cancelled in the middle): the slot goes back first, to the pool the
+/// game's own 0x1057350 returns (the global at 0x54b8788).
+void JobSlotDrop(u64 runner) {
+    u64& held = *reinterpret_cast<u64*>(runner + 0x120);
+    const u64 item = held;
+    const u64 queue = *reinterpret_cast<const u64*>(ImageBase + 0x54b8788);
+    if (!item || !queue) {
+        return;
+    }
+    reinterpret_cast<GiveBack>(ImageBase + 0x1056990)(queue, item);
+    held = 0;
+    NoteJobSlotReleased("destroyed with its slot");
+}
+
+/// Runs `code` (the instructions the jump covers) after the stub's own part, then goes back.
+bool PlaceJumpTo(Emitter& e, u64 address, const u8* code, std::size_t size) {
+    for (std::size_t i = 0; i < size; ++i) {
+        e.Bytes({code[i]});
+    }
+    e.Bytes({0xff, 0x25, 0x00, 0x00, 0x00, 0x00}); // jmp [rip]
+    e.U64(address + size);
+    const u64 stub = PlaceStub(e);
+    std::uint32_t rel = 0;
+    if (!stub || !Rel32To(address + 5, stub, rel)) {
+        return false;
+    }
+    WriteJumpOverTrap(address, 0xe9, rel);
+    return true;
+}
+
+bool InstallJobSlotDropHook(u64 offset) {
+    static constexpr std::array<u8, 11> code = {0x48, 0xc7, 0x83, 0x20, 0x01, 0x00,
+                                                0x00, 0x00, 0x00, 0x00, 0x00};
+    const u64 address = ImageBase + offset;
+    if (std::memcmp(reinterpret_cast<const void*>(address), code.data(), code.size())) {
+        return false;
+    }
+    Emitter e;
+    e.SaveVolatile();
+    e.Bytes({0x48, 0x89, 0xdf}); // mov rdi, rbx (the runner)
+    e.CallAbs(reinterpret_cast<const void*>(&JobSlotDrop));
+    e.RestoreVolatile();
+    return PlaceJumpTo(e, address, code.data(), code.size());
+}
+
+/// BB_JOB_SLOT_FIX=0: not installed.
+bool InstallJobSlotFix() {
+    if (const char* env = std::getenv("BB_JOB_SLOT_FIX"); env && env[0] == '0') {
+        return false;
+    }
+    // mov rax, [rbx]; cmp rax, [rbp - 0x30]: the stack check every exit of that function ends in.
+    static constexpr std::array<u8, 7> code = {0x48, 0x8b, 0x03, 0x48, 0x3b, 0x45, 0xd0};
+    const u64 address = ImageBase + 0x1068092;
+    if (std::memcmp(reinterpret_cast<const void*>(address), code.data(), code.size()) ||
+        std::memcmp(reinterpret_cast<const void*>(ImageBase + 0x106798a),
+                    "\x48\xc7\x83\x20\x01\x00\x00\x00\x00\x00\x00", 11) ||
+        std::memcmp(reinterpret_cast<const void*>(ImageBase + 0x1067a5c),
+                    "\x48\xc7\x83\x20\x01\x00\x00\x00\x00\x00\x00", 11)) {
+        return false; // all three or none
+    }
+    Emitter e;
+    e.SaveVolatile();
+    e.Bytes({0x4c, 0x89, 0xf7});       // mov rdi, r14 (the runner)
+    // SaveVolatile keeps its stack anchor in r12 and the game's r12 (the pool) at [r12].
+    e.Bytes({0x49, 0x8b, 0x34, 0x24}); // mov rsi, [r12]
+    e.Bytes({0x44, 0x89, 0xfa});       // mov edx, r15d (the result)
+    e.CallAbs(reinterpret_cast<const void*>(&JobSlotFix));
+    e.RestoreVolatile();
+    if (!PlaceJumpTo(e, address, code.data(), code.size())) {
+        return false;
+    }
+    return InstallJobSlotDropHook(0x106798a) & InstallJobSlotDropHook(0x1067a5c);
+}
+
+/// Yebis's blur-kernel sample parameters (GPUTexUtil_GetRecursiveSampleParameters, 0xbbc3e0): its
+/// first argument, the base sample count, must be at least 3 (the game's own assertion, raised as
+/// exception 0xa0020007: upstream issue #207). Game data now and then gives 2; the count is raised
+/// to 3 at the entry. BB_KERNEL_CLAMP=0: not installed.
+bool InstallKernelSampleClamp() {
+    if (const char* env = std::getenv("BB_KERNEL_CLAMP"); env && env[0] == '0') {
+        return false;
+    }
+    // push rbp; mov rbp, rsp; push r15
+    static constexpr std::array<u8, 6> entry = {0x55, 0x48, 0x89, 0xe5, 0x41, 0x57};
+    const u64 address = ImageBase + 0xbbc3e0;
+    if (std::memcmp(reinterpret_cast<const void*>(address), entry.data(), entry.size())) {
+        return false;
+    }
+    Emitter e;
+    e.Bytes({0x83, 0xff, 0x03});             // cmp edi, 3
+    e.Bytes({0x7d, 0x05});                   // jge over
+    e.Bytes({0xbf, 0x03, 0x00, 0x00, 0x00}); // mov edi, 3
+    return PlaceJumpTo(e, address, entry.data(), entry.size());
+}
 } // namespace
 
 void Install(RangeCallback on_gpu_range_allocated) {
@@ -416,5 +543,24 @@ void Install(RangeCallback on_gpu_range_allocated) {
     if (const char* env = std::getenv("BB_HEAP_SITES"); env && env[0] == '1') {
         Patch(ImageBase + ReleaseCheck, ReleaseCheckCode, sizeof(ReleaseCheckCode));
     }
+}
+
+void InstallGameFixes() {
+    static std::atomic<bool> installed{false};
+    if (installed.exchange(true)) {
+        return;
+    }
+    // A page of its own: Install's (new memory model only) is read-only once it is done.
+    stub_page = MapStubPage();
+    stub_used = 0;
+    if (!stub_page) {
+        std::printf("Guest hooks: no page near the game for the fixes of its own bugs\n");
+        return;
+    }
+    std::printf("Guest hooks: render job slot leak fix %s\n",
+                InstallJobSlotFix() ? "on" : "not installed");
+    std::printf("Guest hooks: blur-kernel sample count clamp %s\n",
+                InstallKernelSampleClamp() ? "on" : "not installed");
+    mprotect(stub_page, StubPageSize, PROT_READ | PROT_EXEC);
 }
 } // namespace BbGuestHooks
