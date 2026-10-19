@@ -93,12 +93,19 @@ def configure(env, manifest_dirs=MANIFEST_DIRS, library_dirs=LIBRARY_DIRS,
     # the driver's siblings as well as its ICD. Never link generic host libs.
     # libcuda.so.1 is NVIDIA's too: with DLSS loaded, NGX makes the driver load it, and
     # without it vkCreateDevice fails with VK_ERROR_INITIALIZATION_FAILED (#135).
+    # The ICD's own directory first, then the host's library directories: Debian puts the ICD
+    # in nvidia/current/ but libnvidia-glsi/-tls/-glcore one level up (upstream #205). The
+    # first file of each name wins.
     sources = [driver]
-    for pattern in ("libnvidia-*.so*", "libGLX_nvidia.so*", "libEGL_nvidia.so*", "libcuda.so*"):
-        sources.extend(sorted(driver.parent.glob(pattern)))
+    for directory in dict.fromkeys((driver.parent, *library_dirs)):
+        for pattern in ("libnvidia-*.so*", "libGLX_nvidia.so*", "libEGL_nvidia.so*",
+                        "libcuda.so*"):
+            sources.extend(sorted(directory.glob(pattern)))
+    names = set()
     for source in sources:
-        if not elf64(source):
+        if source.name in names or not elf64(source):
             continue
+        names.add(source.name)
         link = libraries / source.name
         try:
             link.symlink_to(source.resolve())
