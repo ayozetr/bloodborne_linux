@@ -21,6 +21,8 @@ inline const char* In(BbSettings::MenuLanguage language, const char* english) {
     static const std::unordered_map<std::string_view, Row> table{
         // The quick-menu tile and the map.
         {"Map", {"Карта", "Mapa", "Mappa", "Carte", "Karte", "Mapa", "地图"}},
+        // The game's own label of the tile left of the Map tile, which the Map tile's label covers.
+        {"System", {"Система", "Sistema", "Sistema", "Système", "System", "Sistema", "系统"}},
         {"Lamps", {"Фонари", "Faroles", "Lanterne", "Lanternes", "Laternen", "Lanternas", "提灯"}},
         {"Pointer", {"Указатель", "Puntero", "Puntatore", "Pointeur", "Zeiger", "Ponteiro", "指针"}},
         {"Pan", {"Сдвиг", "Desplazar", "Sposta", "Déplacer", "Verschieben", "Mover", "平移"}},

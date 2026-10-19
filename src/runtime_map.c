@@ -72,7 +72,10 @@ static uintptr_t pointer(uintptr_t at) {
 int runtime_map_menu_open(void) {
     uintptr_t menu=pointer(menu_slot);int value=0;
     if(!menu || !read_at(menu+0x54,&value,sizeof(value)))return 0;
-    return value==2; /* Stable shown state, verified against the actual quick menu. */
+    if(value==2)return 1; /* Stable shown state, verified against the actual quick menu. */
+    /* bbport: 0 back from the System page while the quick menu is shown (runtime_map_menu_state). */
+    BbMapMenu state;
+    return value==0 && runtime_map_menu_state(&state) && state.top_level;
 }
 uint32_t runtime_map_confirm_button(void) {
     /* The game uses its region predicate, not the platform enter-button setting.
@@ -99,6 +102,19 @@ int runtime_map_menu_state(BbMapMenu *out) {
     uintptr_t menu=pointer(menu_slot),main=pointer(menu_main_slot);
     uintptr_t list=pointer(main?main+0x80:0);
     uint32_t status=0,shown=0;int shape[6]={0};
+    /* bbport: BB_ATLAS_DEBUG=1 logs what the menu reader sees whenever it changes. */
+    static int debug=-1;
+    if(debug<0){const char *d=getenv("BB_ATLAS_DEBUG");debug=d&&d[0]=='1';}
+    if(debug){
+        static char last[256];char now[256];uint32_t s=0,st=0;int sh[6]={0};
+        const uintptr_t vt=list?pointer(list):0;
+        if(menu)read_at(menu+0x54,&s,sizeof(s));
+        if(list){read_at(list+0x98,&st,sizeof(st));read_at(list+0xae0,sh,sizeof(sh));}
+        snprintf(now,sizeof(now),"menu=%d main=%#lx list=%#lx vt=%s shown=%u status=%u shape=%d,%d,%d,%d,%d,%d",
+                 menu!=0,(unsigned long)main,(unsigned long)list,vt==image_base+0x539c680?"ok":"other",s,st,
+                 sh[0],sh[1],sh[2],sh[3],sh[4],sh[5]);
+        if(strcmp(now,last)){strcpy(last,now);printf("Atlas debug: %s\n",now);fflush(stdout);}
+    }
     if(!menu || !main || !list || pointer(list)!=image_base+0x539c680 ||
        !read_at(menu+0x54,&shown,sizeof(shown)) ||
        !read_at(list+0x98,&status,sizeof(status)) ||
@@ -108,7 +124,11 @@ int runtime_map_menu_state(BbMapMenu *out) {
      * while hidden behind nested dialogs; manager+0x54 stays 2 in both. */
     if(shape[0]!=24 || shape[3]!=6 || shape[4]!=4 || shape[1]<0 || shape[1]>=24 || shape[2]!=-1)return 0;
     if(main!=pointer(menu_main_slot) || list!=pointer(main+0x80))return 0;
-    out->supported=1;out->top_level=shown==2 && status==1;out->selected=shape[1];return 1;
+    /* bbport: back from the System page the manager's +0x54 stays 0 while the list is shown and
+     * interactive again (until the menu is closed and opened): 0 counts as shown then. The list
+     * itself is freed when the menu closes (its vtable check above fails), so a closed menu is
+     * never taken for a shown one (BB_ATLAS_DEBUG=1 log, 2026-10-19). */
+    out->supported=1;out->top_level=(shown==2 || shown==0) && status==1;out->selected=shape[1];return 1;
 }
 int runtime_map_location(BbMapLocation *out) {
     if (!out) return 0;
