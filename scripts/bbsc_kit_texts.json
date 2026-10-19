@@ -1,0 +1,178 @@
+{
+ "spaes": {
+  "4016": [
+   "Campana de cacería",
+   "Vieja campana que portaban los cazadores del\ntaller, cuyo tañido se oye en todos los mundos.\n\nTócala, y los cazadores que respondan con una\nCampana fraterna podrán unirse a tu cacería.\nJuntos recorréis la noche, entre faroles,\nmuertes y sueños, hasta el fin de la cacería."
+  ],
+  "4121": [
+   "Campana fraterna",
+   "Pequeña campana del coro, de tañido\ndébil, pero fiel.\n\nLos cazadores que oyen una Campana de cacería\npueden responder con ella y cruzar a otro mundo\npara luchar junto a los suyos. Lo que allí\ncae, cae para ambos."
+  ],
+  "11201": [
+   "Campana sanguinaria",
+   "Campana que solo tañe para los ebrios de sangre.\n\nNo hace falta doncella alguna para que se oiga\nsu tañido: todo cazador de la noche es presa,\nsolo o en compañía, allá donde vaya.\n\nLa cacería de cazadores no termina jamás."
+  ],
+  "4313": [
+   "Campana de duelo",
+   "Campana agrietada de tañido agrio y discordante.\n\nAl tocarla durante una cacería conjunta, la\nresonancia que une a los cazadores se torna\nrivalidad: podrán herirse como enemigos.\n\nVuelve a tocarla para restaurar el vínculo.\nSolo el anfitrión decide; el cooperador\nque la toca se limita a pedirlo."
+  ],
+  "11251": [
+   "Cartucho de despedida",
+   "Cartucho de pólvora silenciosa.\n\nSu estallido inaudible rompe la resonancia\nque une a cazadores de mundos distintos, y\ncada uno regresa a su propia noche."
+  ]
+ },
+ "spaar": {
+  "4016": [
+   "Campana de cacería",
+   "Vieja campana que portaban los cazadores del\ntaller, cuyo tañido se oye en todos los mundos.\n\nTócala, y los cazadores que respondan con una\nCampana fraterna podrán unirse a tu cacería.\nJuntos recorréis la noche, entre faroles,\nmuertes y sueños, hasta el fin de la cacería."
+  ],
+  "4121": [
+   "Campana fraterna",
+   "Pequeña campana del coro, de tañido\ndébil, pero fiel.\n\nLos cazadores que oyen una Campana de cacería\npueden responder con ella y cruzar a otro mundo\npara luchar junto a los suyos. Lo que allí\ncae, cae para ambos."
+  ],
+  "11201": [
+   "Campana sanguinaria",
+   "Campana que solo tañe para los ebrios de sangre.\n\nNo hace falta doncella alguna para que se oiga\nsu tañido: todo cazador de la noche es presa,\nsolo o en compañía, allá donde vaya.\n\nLa cacería de cazadores no termina jamás."
+  ],
+  "4313": [
+   "Campana de duelo",
+   "Campana agrietada de tañido agrio y discordante.\n\nAl tocarla durante una cacería conjunta, la\nresonancia que une a los cazadores se torna\nrivalidad: podrán herirse como enemigos.\n\nVuelve a tocarla para restaurar el vínculo.\nSolo el anfitrión decide; el cooperador\nque la toca se limita a pedirlo."
+  ],
+  "11251": [
+   "Cartucho de despedida",
+   "Cartucho de pólvora silenciosa.\n\nSu estallido inaudible rompe la resonancia\nque une a cazadores de mundos distintos, y\ncada uno regresa a su propia noche."
+  ]
+ },
+ "frafr": {
+  "4016": [
+   "Cloche de chasse",
+   "Vieille cloche des chasseurs de l'atelier,\ndont le glas résonne à travers les mondes.\n\nSonnez-la, et ceux qui répondent d'une\nCloche fraternelle rejoindront votre chasse.\nEnsemble, vous arpentez la nuit, de lanterne\nen mort et en rêve, jusqu'au bout de la chasse."
+  ],
+  "4121": [
+   "Cloche fraternelle",
+   "Petite cloche du Chœur, au tintement\nfaible, mais sincère.\n\nLes chasseurs qui entendent une Cloche de\nchasse peuvent y répondre et passer dans\nun autre monde, aux côtés des leurs. Ce qui\ny est abattu l'est pour tous deux."
+  ],
+  "11201": [
+   "Cloche sanguinaire",
+   "Cloche qui ne sonne que pour les ivres de sang.\n\nNulle sonneuse n'est requise pour que son\nglas soit entendu : tout chasseur de la nuit\nest une proie, seul ou accompagné, où qu'il aille.\n\nLa chasse aux chasseurs n'a pas de fin."
+  ],
+  "4313": [
+   "Cloche de duel",
+   "Cloche fêlée au tintement aigre et discordant.\n\nSonnez-la en pleine chasse commune, et la\nrésonance qui lie les chasseurs vire à la\nrivalité : ils peuvent se frapper en ennemis.\n\nSonnez-la à nouveau pour rétablir le lien.\nSeul l'hôte décide ; le coopérateur\nqui la sonne ne fait que le demander."
+  ],
+  "11251": [
+   "Cartouche d'adieu",
+   "Cartouche de poudre silencieuse.\n\nSa détonation inaudible brise la résonance\nqui lie les chasseurs de mondes différents,\net chacun regagne sa propre nuit."
+  ]
+ },
+ "deude": {
+  "4016": [
+   "Jagdglocke",
+   "Eine alte Glocke der Jäger der Werkstatt,\nderen Schlag in allen Welten erklingt.\n\nLäute sie, und Jäger, die mit einer\nSippenglocke antworten, schließen sich\ndeiner Jagd an. Gemeinsam durchwandert\nihr die Nacht, durch jede Laterne, jeden\nTod und Traum, bis die Jagd vollendet ist."
+  ],
+  "4121": [
+   "Sippenglocke",
+   "Eine kleine Glocke des Chors, ihr Klang\nleise, doch aufrichtig.\n\nJäger, die eine Jagdglocke hören, können\nmit ihr antworten, in eine andere Welt\nhinübertreten und der Sippe beistehen.\nWas dort erschlagen wird, ist für\nbeide erschlagen."
+  ],
+  "11201": [
+   "Blutrauschglocke",
+   "Eine Glocke, die nur für die Blutberauschten\nerklingt.\n\nKeine Glockenfrau muss sie läuten, damit\nihr Schlag gehört wird: Jeder Jäger der\nNacht ist Beute, allein oder in Begleitung,\nwohin er auch geht.\n\nDie Jagd auf Jäger endet niemals."
+  ],
+  "4313": [
+   "Duellglocke",
+   "Eine gesprungene Glocke, ihr Klang herb\nund misstönend.\n\nLäute sie auf gemeinsamer Jagd, und die\nResonanz, die die Jäger verbindet, wird zu\nRivalität: Sie dürfen einander als Feinde\nschlagen.\n\nLäute sie erneut, um das alte Band\nwiederherzustellen. Nur der Rufende\nentscheidet; ein Mitstreiter, der sie\nläutet, bittet lediglich darum."
+  ],
+  "11251": [
+   "Abschiedspatrone",
+   "Eine Patrone aus lautlosem Pulver.\n\nIhr unhörbarer Knall bricht die Resonanz,\ndie Jäger verschiedener Welten verbindet,\nund jeder kehrt in seine eigene Nacht\nzurück."
+  ]
+ },
+ "itait": {
+  "4016": [
+   "Campana della caccia",
+   "Antica campana dei cacciatori della bottega,\nil cui rintocco si ode in ogni mondo.\n\nSuonala, e i cacciatori che rispondono con\nuna Campana fraterna si uniranno alla tua\ncaccia. Insieme attraverserete la notte,\nogni lanterna, morte e sogno, fino alla fine."
+  ],
+  "4121": [
+   "Campana fraterna",
+   "Piccola campana del Coro, dal rintocco\nflebile, ma sincero.\n\nChi ode una Campana della caccia può\nrispondere con essa, varcando un altro\nmondo per stare al fianco dei fratelli.\nCiò che là viene ucciso, muore per entrambi."
+  ],
+  "11201": [
+   "Campana sanguinaria",
+   "Campana che suona solo per gli ebbri di sangue.\n\nNessuna fanciulla deve suonarla perché il\nsuo rintocco sia udito: ogni cacciatore\nnella notte è una preda, solo o in compagnia,\novunque egli cammini.\n\nLa caccia ai cacciatori non ha mai fine."
+  ],
+  "4313": [
+   "Campana del duello",
+   "Campana incrinata dal rintocco aspro e stonato.\n\nSuonala durante una caccia comune, e la\nrisonanza che lega i cacciatori si muta in\nrivalità: potranno colpirsi come nemici.\n\nSuonala di nuovo per ripristinare il legame.\nSolo l'ospitante decide; un cooperatore\nche la suona si limita a chiederlo."
+  ],
+  "11251": [
+   "Cartuccia del commiato",
+   "Cartuccia di polvere silenziosa.\n\nIl suo scoppio impercettibile spezza la\nrisonanza che lega cacciatori di mondi\ndiversi, e ognuno torna alla propria notte."
+  ]
+ },
+ "porbr": {
+  "4016": [
+   "Sino da Caçada",
+   "Um velho sino levado pelos caçadores da\noficina, cujo dobre ecoa em todos os mundos.\n\nToque-o, e caçadores que responderem com um\nSino Fraterno poderão se unir à sua caçada.\nJuntos, vocês percorrem a noite, por lampião,\nmorte e sonho, até que a caçada termine."
+  ],
+  "4121": [
+   "Sino Fraterno",
+   "Um pequeno sino do coro, de toque\nfraco, porém verdadeiro.\n\nCaçadores que ouvem um Sino da Caçada podem\nrespondê-lo, cruzando para outro mundo para\nficar ao lado dos seus. O que ali é abatido\né abatido para ambos."
+  ],
+  "11201": [
+   "Sino Sanguinário",
+   "Um sino que soa apenas para os ébrios de sangue.\n\nNenhuma donzela precisa tocá-lo para que seu\ndobre seja ouvido: todo caçador da noite é presa,\nsozinho ou acompanhado, onde quer que ande.\n\nA caçada aos caçadores nunca termina."
+  ],
+  "4313": [
+   "Sino do Duelo",
+   "Um sino rachado, de toque azedo e dissonante.\n\nToque-o durante uma caçada conjunta, e a\nressonância que une os caçadores vira\nrivalidade: podem golpear uns aos outros.\n\nToque-o de novo para restaurar o antigo laço.\nSó o anfitrião decide; o cooperador\nque o toca apenas pede."
+  ],
+  "11251": [
+   "Cartucho de Despedida",
+   "Um cartucho de pólvora silenciosa.\n\nSua explosão inaudível rompe a ressonância\nque une caçadores de mundos diferentes, e\ncada um retorna à sua própria noite."
+  ]
+ },
+ "porpt": {
+  "4016": [
+   "Sino da Caçada",
+   "Um velho sino levado pelos caçadores da\noficina, cujo dobre ecoa em todos os mundos.\n\nToque-o, e caçadores que responderem com um\nSino Fraterno poderão se unir à sua caçada.\nJuntos, vocês percorrem a noite, por lampião,\nmorte e sonho, até que a caçada termine."
+  ],
+  "4121": [
+   "Sino Fraterno",
+   "Um pequeno sino do coro, de toque\nfraco, porém verdadeiro.\n\nCaçadores que ouvem um Sino da Caçada podem\nrespondê-lo, cruzando para outro mundo para\nficar ao lado dos seus. O que ali é abatido\né abatido para ambos."
+  ],
+  "11201": [
+   "Sino Sanguinário",
+   "Um sino que soa apenas para os ébrios de sangue.\n\nNenhuma donzela precisa tocá-lo para que seu\ndobre seja ouvido: todo caçador da noite é presa,\nsozinho ou acompanhado, onde quer que ande.\n\nA caçada aos caçadores nunca termina."
+  ],
+  "4313": [
+   "Sino do Duelo",
+   "Um sino rachado, de toque azedo e dissonante.\n\nToque-o durante uma caçada conjunta, e a\nressonância que une os caçadores vira\nrivalidade: podem golpear uns aos outros.\n\nToque-o de novo para restaurar o antigo laço.\nSó o anfitrião decide; o cooperador\nque o toca apenas pede."
+  ],
+  "11251": [
+   "Cartucho de Despedida",
+   "Um cartucho de pólvora silenciosa.\n\nSua explosão inaudível rompe a ressonância\nque une caçadores de mundos diferentes, e\ncada um retorna à sua própria noite."
+  ]
+ },
+ "rusru": {
+  "4016": [
+   "Колокол охоты",
+   "Старый колокол охотников мастерской;\nего звон слышен во всех мирах.\n\nПозвоните в него, и охотники, что ответят\nКолоколом родства, разделят вашу охоту.\nВместе вы пройдёте ночь — через каждый\nфонарь, смерть и сон, пока охота не кончится."
+  ],
+  "4121": [
+   "Колокол родства",
+   "Малый колокол хора, чей звон\nслаб, но верен.\n\nУслышав Колокол охоты, охотник может\nответить им и перейти в иной мир, чтобы\nвстать плечом к плечу с родными. Всё, что\nпало там, пало для обоих."
+  ],
+  "11201": [
+   "Колокол кровожадности",
+   "Колокол, звучащий лишь для опьянённых кровью.\n\nЧтобы его звон услышали, не нужна дева\nс колоколом: любой охотник ночи — добыча,\nодин или в компании, где бы он ни был.\n\nОхота на охотников не кончается никогда."
+  ],
+  "4313": [
+   "Колокол дуэли",
+   "Треснувший колокол с резким, нестройным звоном.\n\nЕсли позвонить в него на совместной охоте,\nрезонанс, что связывает охотников, обратится\nсоперничеством: они смогут разить друг друга.\n\nПозвоните вновь, чтобы вернуть прежние узы.\nРешает лишь призвавший; союзник,\nпозвонив в него, лишь просит об этом."
+  ],
+  "11251": [
+   "Прощальный патрон",
+   "Патрон с беззвучным порохом.\n\nЕго неслышный выстрел рвёт резонанс,\nсвязующий охотников разных миров, и\nкаждый возвращается в свою ночь."
+  ]
+ }
+}

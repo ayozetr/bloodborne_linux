@@ -89,7 +89,8 @@ BBSC gives every character its own items, which cost no Insight: the **Hunt Bell
 players), the **Kin Bell** (join another player), the **Bloodlust Bell** (invade), the **Duel Bell**
 (PvP on and off during co-op) and the **Parting Blank** (end co-op). It takes the game's Beckoning
 Bell, Small Resonant Bell and Silencing Blank out of the inventory, and they do not come back when
-BBSC is turned off. Before changing anything it backs the saves up to `user/bbsc/save-backups/`:
+BBSC is turned off; BBSC's own items stay, with their names (scripts/bbsc_kit_texts.py), and work again
+when it is back on. Before changing anything it backs the saves up to `user/bbsc/save-backups/`:
 copy a character's save from there to play it without BBSC with its old bells. Its texts follow the game's language (Spanish, French, German, Italian,
 Portuguese and Russian; English otherwise). **F8** puts you back on the ground if you get stuck
 inside another player.

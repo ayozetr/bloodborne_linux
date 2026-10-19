@@ -141,6 +141,12 @@ ui_mods=$("$PYTHON" scripts/menu_prompts.py "$game" --out "$out" --prompts "${BB
 # made) the code is left out too and the game starts without the entries (scripts/quit_menu.py).
 quit_layer=$("$PYTHON" scripts/quit_menu.py "$game" --out "$out/quit-menu" --config "$BB_CONFIG") || quit_layer=
 if [[ -n $quit_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$quit_layer; fi
+# Seamless co-op's kit items (the Hunt, Kin, Bloodlust and Duel Bells, the Parting Blank) get their
+# names from BBSC while it runs; with Seamless co-op off this layer names them in the game's item
+# texts, in slots the game leaves empty (scripts/bbsc_kit_texts.py). Optional, like the others.
+bbsc_on=0; [[ ${BB_BBSC:-0} == 1 && ${BB_ONLINE:-0} == 1 ]] && bbsc_on=1
+kit_layer=$("$PYTHON" scripts/bbsc_kit_texts.py "$game" --out "$out/bbsc-kit" --bbsc "$bbsc_on") || kit_layer=
+if [[ -n $kit_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$kit_layer; fi
 # Ultrawide (BB_UI_RES above): the menu movies with full-screen backdrops widened and the HUD's
 # corner groups toward the screen edges (bbport.ini hud_position, 0 centred .. 100 edges), laid
 # after the prompts and Quit to Desktop (its gestures menu and six-row menus are built on theirs).
