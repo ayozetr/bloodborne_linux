@@ -226,6 +226,13 @@ bool Rasterizer::WriteDataOnGpu(VAddr address, const void* data, u32 size) {
         runtime.UpdateBuffer(mirror->first, mirror->second, {static_cast<const u8*>(data), size});
     }
     runtime.UpdateBuffer(target->first, target->second, {static_cast<const u8*>(data), size});
+    // bbport: a bulk WRITE_DATA can initialize texture memory (the effects' private history
+    // clears): an image cached there is uploaded again from the new contents, or a reload kept
+    // the previous owner's picture despite the clear. Label and fence writes (8 bytes or less)
+    // keep their fast path. From upstream bbport 0.6.
+    if (size > sizeof(u64)) {
+        texture_cache.InvalidateMemoryFromGPU(address, size);
+    }
     if (size <= sizeof(u64) && HonestLabels()) {
         u64 value = 0;
         std::memcpy(&value, data, size);
