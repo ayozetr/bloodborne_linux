@@ -23,6 +23,7 @@ from pathlib import Path
 import re
 import struct
 import sys
+import threading
 import time
 import xml.etree.ElementTree as ET
 
@@ -423,7 +424,7 @@ def prepare(game, user, key=None, language=None):
                 write_rgba(data, raw)
     lines = [f'{i}\t{t["grade"]}\t{int(t["hidden"])}\t{_clean(t["name"])}\t{_clean(t["detail"])}'
              f'\t{int(t.get("platinum", False))}' for i, t in sorted(trophies.items())]
-    temp = directory / 'trophies.tsv.tmp'
+    temp = directory / f'trophies.tsv.{os.getpid()}.{threading.get_ident()}.tmp'  # two at once
     temp.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     os.replace(temp, directory / 'trophies.tsv')
     stamp.write_text(source)

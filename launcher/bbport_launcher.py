@@ -1075,8 +1075,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.stack.connect("notify::visible-child-name", lambda *_: self.on_section_changed())
         if where[1] and hasattr(self, "multiplayer_stack"):
             self.multiplayer_stack.set_visible_child_name(where[1])
+        first = self.stack.get_visible_child_name()
         self.show_section(where[0] or "graphics", reveal=where[2])
-        self.on_section_changed()  # already the visible page: no notify for the title
+        if self.stack.get_visible_child_name() == first:
+            self.on_section_changed()  # already the visible page: no notify for the title
         if self.build_errors:
             # Some of the settings' rows may be missing: nothing is saved (the user's files stay
             # as they are) and the game is not started from a half-built window.
@@ -1778,7 +1780,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.working.discard(name)
         if self.rebuild_waiting and not self.busy():
             self.rebuild_waiting = False
-            GLib.idle_add(lambda: self.build() and False)
+            # What changed meanwhile (an account signed in included) is kept: build() reads the
+            # settings and bbport.ini, and starts change tracking (issue #21) afresh.
+            GLib.idle_add(lambda: (self.store(), self.build()) and False)
 
     def game_found(self):
         return bool(self.settings["game_dir"]) and (self.game_dir() / "eboot.bin").is_file()
@@ -2500,8 +2504,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         npid = self.npid_row.get_text().strip()
         item = self.server_kind_row.get_selected_item()
         server = item.get_string() if item is not None else ""
-        checked = self.last_login if self.last_login and self.last_login[:3] == (
-            npid, combo_value(self.server_kind_row), self.password_row.get_text()) else None
+        missing = self.own_server_missing()
+        server_address = None if missing else online.addresses(self.online_settings())[0]
+        checked = self.last_login if self.last_login and self.last_login[:4] == (
+            npid, combo_value(self.server_kind_row), self.password_row.get_text(), server_address) else None
         if not online_module():
             icon, text = "network-offline-symbolic", tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн")
         elif not self.online_row.get_active():
@@ -2510,16 +2516,17 @@ class LauncherWindow(Adw.ApplicationWindow):
             icon, text = "dialog-warning-symbolic", tr("Введите адрес своего сервера или выберите Seamless Hunt")
         elif not npid:
             icon, text = "dialog-warning-symbolic", tr("Нет учётной записи: создайте её или введите свою ниже")
-        elif checked and checked[3]:
+        elif checked and checked[4]:
             icon, text = "object-select-symbolic", tr("Вход выполнен: «{}» на {}").format(npid, server)
         elif checked:
-            icon, text = "dialog-warning-symbolic", tr("Не удалось войти: {}").format(checked[4])
+            icon, text = "dialog-warning-symbolic", tr("Не удалось войти: {}").format(checked[5])
         else:
             icon, text = "network-idle-symbolic", tr("Учётная запись «{}» на {}: нажмите «Проверить», "
                                                      "чтобы войти").format(npid, server)
         self.online_status_icon.set_from_icon_name(icon)
         self.online_status_row.set_subtitle(GLib.markup_escape_text(text))
-        self.test_button.set_sensitive(online_module() and "test" not in self.working)
+        self.test_button.set_sensitive(online_module() and "test" not in self.working and not missing)
+        self.register_button.set_sensitive("register" not in self.working and not missing)
 
     def own_server_missing(self):
         return combo_value(self.server_kind_row) == "own" and not self.server_row.get_text().strip()
@@ -2706,6 +2713,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             row.set_subtitle(GLib.markup_escape_text("\n".join(lines)))
 
     def on_test_connection(self, _button):
+        if self.own_server_missing():
+            self.toasts.add_toast(Adw.Toast(title=tr("Введите адрес своего сервера или выберите Seamless Hunt")))
+            return
         server, webapi, community = online.addresses(self.online_settings())
         names = {"game": tr("Игровой сервер"), "shadnet": tr("Сервер shadNet"),
                  "stun": tr("UDP сервера shadNet (призывы)"), "webapi": "WebAPI",
@@ -2731,7 +2741,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 elif name == "login":
                     status = tr("вход выполнен") if ok else login_errors.get(
                         detail, tr("вход не удался ({})").format(detail))
-                    self.last_login = (account[0], kind, account[1], ok, status)
+                    self.last_login = (account[0], kind, account[1], server, ok, status)
                 else:
                     status = tr("доступен") if ok else f'{tr("недоступен")} ({detail})'
                 # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
@@ -2749,12 +2759,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         def work():
             # The Hunter's Dream: the bridge starts with the game, so only the game server is checked.
             results = (online.check(server, webapi, community, account)[:1]
-                       if combo_value(self.server_kind_row) == "thd"
+                       if kind == "thd"
                        else online.check(server, webapi, community, account))
             GLib.idle_add(show, results)
         threading.Thread(target=work, daemon=True).start()
 
     def on_register(self, _button):
+        if self.own_server_missing():
+            self.toasts.add_toast(Adw.Toast(title=tr("Введите адрес своего сервера или выберите Seamless Hunt")))
+            return
         server = online.addresses(self.online_settings())[0]
         npid, password = self.npid_row.get_text().strip(), self.password_row.get_text()
         if not npid or not password:
@@ -2769,8 +2782,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.working.add("register")
 
         def done(ok, detail):
-            self.register_button.set_sensitive(True)
             self.work_done("register")
+            self.show_online_status()  # Create back on, unless the own server has no address
             message = (tr("Учётная запись {} создана на {}").format(npid, host) if ok else
                        tr("Не удалось создать учётную запись: {}").format(errors.get(detail, detail)))
             self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(message), timeout=6))
@@ -3136,7 +3149,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         generation = self.trophy_generation
 
         def show(directory, problem):
-            if generation == self.trophy_generation:
+            # Not over trophies being marked: their checks would go.
+            if generation == self.trophy_generation and not self.trophy_editing:
                 self.trophy_shown = (directory, problem)
                 self.trophy_editing = False
                 self.show_trophies()
@@ -3147,7 +3161,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             try:
                 try:
                     directory = trophies.prepare(game, user, key, language)
-                except (OSError, ValueError, trophies.ET.ParseError):
+                except (ValueError, trophies.ET.ParseError):  # what a wrong key gives
                     problem = tr("Неверный ключ трофеев: названия недоступны")
                     try:
                         directory = trophies.prepare(game, user, None, language)
