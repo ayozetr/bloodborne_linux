@@ -11,7 +11,7 @@ which is installed from PyPI instead.
 
 ## In the launcher
 
-**Settings → Map (Hunter's Atlas) → Prepare** makes the maps (`launcher/bbport_atlas_maps.py`):
+**Mods → Map (Hunter's Atlas) → Prepare** makes the maps (`launcher/bbport_atlas_maps.py`):
 the first time it downloads uv (a pinned static build, checked against its SHA-256), CPython
 3.12 and the packages of `requirements.lock` (exact versions with their hashes) into
 `atlas-tools/` in the data folder, about 200 MB (about 600 MB on disk with the maps). It then runs
@@ -54,7 +54,7 @@ Names it cannot find stay in English; the generator's own matching is not touche
 It also writes the language and the new file hashes into `maps/generated-assets.json`.
 
 With the output in `navigation-map` in the data folder (`~/.local/share/bbport/navigation-map` for the AppImage),
-the launcher's **Settings → Map (Hunter's Atlas)** turns the map on and sets these variables. By hand, the in-game map is pointed at them with `BB_ATLAS_ENABLED=1`, `BB_MAP_DIR=<output>/maps`,
+the launcher's **Mods → Map (Hunter's Atlas)** turns the map on and sets these variables. By hand, the in-game map is pointed at them with `BB_ATLAS_ENABLED=1`, `BB_MAP_DIR=<output>/maps`,
 `BB_MAP_CATALOG=<output>/maps/catalog.json`, `BB_MAP_FONT=<output>/art/native-font.ttf` and
 `BB_MAP_ART_DIR` (Atlas's own art, `background`, `icons`, `menu` and `parchment` as `.bbra`).
 `BB_MAP_SOUND_GAIN` (0-2, 0.024 by default, the game's own menu cursor level) sets the map's cursor sound's level. `BB_ATLAS_DEBUG=1` logs what the map reads from the game's quick menu whenever it changes (lines

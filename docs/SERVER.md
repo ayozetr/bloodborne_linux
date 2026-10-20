@@ -144,7 +144,7 @@ In **Multiplayer → Online**:
 | Online ID / Password | The player's own account |
 | UPnP | Off (Tailscale needs no router ports) |
 
-Then **Test the connection**. Every line should be green, the shadNet server's UDP among them: it
+Then press **Test** in the **Status** row. Every line should be green, the shadNet server's UDP among them: it
 shows the address the server sees for you, a `100.` one through Tailscale. A red UDP line means
 summons cannot connect: check that the server is running and that its log lists the UDP listener.
 

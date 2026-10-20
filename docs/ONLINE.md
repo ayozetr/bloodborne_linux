@@ -37,7 +37,7 @@ where Windows players join with BBSC's package for the Windows port.
    shadNet server, WebAPI and game server come with it.
 2. Type a name and a password under **Account** and press **Create** (once). The server wants an
    email for each account; the launcher makes one from the name, as Seamless Hunt's own tool does.
-3. Turn on **Seamless co-op (BBSC)** and **Test the connection**.
+3. Turn on **Seamless co-op (BBSC)** and press **Test** in the **Status** row.
 
 Its bloodstains and death visions crash the game with "Transaction failed", on Windows too: they
 are off by default, as in Seamless Hunt's package (**Bloodstains on Seamless Hunt** brings them
@@ -51,7 +51,7 @@ Its owner creates the account ([SERVER.md](SERVER.md)), or you make it with **Cr
 1. In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose **Your own server** with
    its address, and enter the **account name** (not the email) and the password. The password is
    kept on this computer with the launcher's settings.
-2. **Test the connection**: the game server, the shadNet server, its UDP port and its WebAPI
+2. Press **Test** in the **Status** row: the game server, the shadNet server, its UDP port and its WebAPI
    should all answer, and with the account filled in, the sign-in should work. A wrong name or
    password shows there (the server does not say which of the two).
 

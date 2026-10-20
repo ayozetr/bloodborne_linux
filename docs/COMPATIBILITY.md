@@ -33,7 +33,7 @@ The alpha tests (`CUSA01318`, `CUSA01322`, `CUSA01333`, `CUSA01335`) are not sup
 The Game of the Year and The Old Hunters editions include the DLC. With a base game (such as the
 US `CUSA00900`), dump your add-ons too: each one is a folder (`SPEXPANSIONDLC03`,
 `SPDLCMESSENGER00`…) with only `sce_sys` inside, because their data ships with the 1.09 update. Put
-them in one folder and choose it in the launcher (**Game → DLC folder**), or set
+them in one folder and choose it in the launcher (**Setup → DLC folder**), or set
 `BB_DLC_DIR=/path/to/dlc` for `run.sh`; the launcher shows how many it found. Each folder must keep
 the add-on's name (its entitlement label, such as `SPEXPANSIONDLC03`). Copying them to
 `user/addcont/<title id>/`, shadPS4's layout, works too.

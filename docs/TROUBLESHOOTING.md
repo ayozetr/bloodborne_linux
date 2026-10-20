@@ -1,6 +1,6 @@
 # Troubleshooting
 
-When asking for help, attach the log: in the launcher's **Log** page, **Export log…** saves it to
+When asking for help, attach the log: in the launcher's **Log** section, **Export log…** saves it to
 a file and **Copy** puts it on the clipboard.
 
 ## The launcher rejects the game
@@ -41,7 +41,7 @@ The log says why, on a line starting with `DLSS:`.
 
 ## Spanish shows the Latin American text (or the other way round)
 
-The game picks a language's regional text by the dump's region. Choose it in **Settings → Game
+The game picks a language's regional text by the dump's region. Choose it in **Setup → Game
 region**: *Europe* for Spanish from Spain, *The Americas* for Latin American Spanish.
 
 ## The game crashes after playing a while, on a card with little VRAM
@@ -53,7 +53,7 @@ other programs that use the GPU (browsers, video players, other games).
 
 ## The picture is stretched on an ultrawide screen
 
-**Settings → Display → Output resolution** lists 2560×1080, 3440×1440, 3840×1600 and 5120×2160
+**Graphics → Display → Output resolution** lists 2560×1080, 3440×1440, 3840×1600 and 5120×2160
 (21:9) and 3840×1080 and 5120×1440 (32:9); any other size written as `output_res=WxH` in
 bbport.ini works too. The view gets wider instead of stretched: the game's camera, its HUD and the
 lock-on and health-bar markers are patched at start for the screen's own aspect ratio. **HUD
@@ -64,7 +64,7 @@ stretched. `aspect_patch=0` in bbport.ini turns the wider view off.
 
 ## Quit to Desktop is missing from the menus, or shows another name
 
-**Settings → Game effects → Quit to Desktop in the title and System menus** (also in the in-game
+**Graphics → Game effects → Quit to Desktop in the title and System menus** (also in the in-game
 menu; on by default) adds the entry to the title menu and to the System menu. The title entry
 closes the game at once; the System entry runs the game's own *Exit Game* first (it saves, and
 its confirmation asks to quit to the desktop), and the game closes when it is back at the intro
@@ -101,7 +101,7 @@ camera can feel heavier: the game's own *Camera speed* setting makes up for it.
 
 ## Summons never connect
 
-Run **Test the connection** in **Multiplayer → Online**. A red line for the shadNet server's UDP means
+Press **Test** in the **Status** row of **Multiplayer → Online**. A red line for the shadNet server's UDP means
 the server never learns your address, and no summon can connect: check that the server is running
 and that its log lists the UDP listener, and that no firewall blocks UDP 31314 on its side
 ([SERVER.md](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The

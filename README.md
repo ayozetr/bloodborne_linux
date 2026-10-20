@@ -53,20 +53,20 @@ projects ([credits](docs/CREDITS.md)).
 3. Choose your game folder (the one with `eboot.bin`) and press **Play**.
 
 Saves and settings go to `~/.local/share/bbport`. The Game of the Year edition already has The Old
-Hunters; with the base game, its DLC goes in **Game → DLC folder** ([how](docs/COMPATIBILITY.md)).
+Hunters; with the base game, its DLC goes in **Setup → DLC folder** ([how](docs/COMPATIBILITY.md)).
 
 ## Online play
 
-In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose a server and press **Test the
-connection** (every line should be green):
+In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose a server and press **Test**
+in the **Status** row (every line should be green):
 
+- **Seamless Hunt** (the default): the community server of Seamless Co-op (BBSC), with players on
+  the Windows port. Make an account from the launcher with **Create** ([docs/ONLINE.md](docs/ONLINE.md#seamless-hunt)).
 - **The Hunter's Dream**: sign in with Discord, or create an account with just a name. You play
   with bbhost's players. This connection is unofficial: report problems here, not to The Hunter's
   Dream.
-- **Seamless Hunt**: the community server of Seamless Co-op (BBSC), with players on the Windows
-  port. Make an account from the launcher with **Create** ([docs/ONLINE.md](docs/ONLINE.md#seamless-hunt)).
 - **Your own server**: for your group, with Docker and Tailscale ([docs/SERVER.md](docs/SERVER.md)).
-- **Seamless Co-op (BBSC)**, in the same page: every player needs it, and summons across areas need
+- **Seamless Co-op (BBSC)**, in the same tab: every player needs it, and summons across areas need
   its game server, which your own server can run ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).
 
 With online play on, the game starts online by itself, as PLAY ONLINE on a PS4. If you turned off
@@ -79,7 +79,7 @@ firewalls and the rest: [docs/ONLINE.md](docs/ONLINE.md).
 ## Local co-op (experimental)
 
 Several games on one PC, one per player, each in its part of the screen with its own controller
-(the launcher's **Local co-op** page): choose the players (2 to 4), the layout and each player's
+(the launcher's **Multiplayer → Local** tab): choose the players (2 to 4), the layout and each player's
 controller, then press **Play together**. Player 1 plays with the launcher's settings and saves;
 players 2 to 4 get their own saves and settings in `~/.local/share/bbport/coop/player<N>` (copied
 from player 1's the first time, about 400 MB each), without online play or Discord. One player can
@@ -104,7 +104,7 @@ python3 launcher/bbport_launcher.py
 
 With [Nix](https://nixos.org), `bash build.sh` gets every dependency by itself. DLSS needs
 `bash tools/build_dlss.sh` once; the AppImage is `bash packaging/appimage-sharun.sh`. Environment
-variables for the launcher's **Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+variables for the launcher's **Advanced → Developer → Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## On Windows

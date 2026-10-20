@@ -5,7 +5,7 @@ one line (`Host fault`, `Guest fault`, `STOP: GPU library assertion failed`) and
 `BB_FAULT_WAIT=1` keeps the process alive at that point, stopped inside its handler, so a
 debugger can look at the faulting thread with its registers, stack and memory still there.
 
-1. Launcher → *Mode → Extra environment*: `BB_FAULT_WAIT=1` (or export it before `run.sh`).
+1. Launcher → *Advanced → Developer → Extra variables*: `BB_FAULT_WAIT=1` (or export it before `run.sh`).
    Nothing changes while the game runs; it costs nothing.
 2. When it crashes, the game freezes, a desktop notification says so, and the log ends with
    `bbport: ... the process stays alive for a debugger: bash tools/debug_attach.sh <pid>`.

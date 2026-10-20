@@ -1,6 +1,6 @@
 # Mods and third-party patches
 
-Both are on the launcher's **Settings** page and apply at the next start. The game folder itself
+Both are in the launcher's **Mods** section and apply at the next start. The game folder itself
 is never changed.
 
 ## File mods

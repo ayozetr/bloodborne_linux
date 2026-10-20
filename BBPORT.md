@@ -39,7 +39,7 @@ Mesa/RADV) has been tested thoroughly.
 - **Native execution.** The eboot is converted offline into a flat memory image; PS4 libc and
   libSceFios2 are linked into it as native code. No CPU emulation and no per-instruction
   translation: the game code runs at full speed.
-- **Two modes** (launcher → *Mode*):
+- **Two modes** (launcher → *Advanced → Memory and translation model*):
   - **Switch off (the default) — as in 0.3.** The old memory model: VRAM copies of the game's
     memory, writes tracked through page protection. With every fix made since 0.3 (motion
     vectors and the upscaler, flicker with DoF on, a damaged shader cache).
@@ -179,7 +179,7 @@ By default the game folder is expected next to the repository (`../CUSA03173`). 
 shader cache go to `user/` (the launcher lets you choose another folder, and imports saves from
 shadPS4, another port or a PS4 save exported unencrypted, after backing up the current ones in
 `user/savedata-backups/`; `scripts/save_import.py`); settings to `bbport.ini`. A gamepad is used
-through SDL3 (the launcher's *Controls → Controller* picks one when several are connected,
+through SDL3 (the launcher's *Controls → Gamepad → Controller* picks one when several are connected,
 `BB_GAMEPAD=<GUID or part of the name>`; with none picked, the one you press a button on or move
 takes over). The keyboard works too,
 also next to a connected gamepad (the Steam Deck always has one); both are remapped in the
@@ -190,14 +190,14 @@ left / right half. *Controls* in the launcher also swaps the sticks and inverts 
 camera (`pad_swap_sticks`, `pad_invert_look_x`, `pad_invert_look_y` in bbport.ini). With *Direct
 mouse camera* (`mouse_camera=direct`) the mouse turns the camera itself, 1:1, with no stick dead
 zone or turn curve (the game's 1.09 code is hooked while the window holds the mouse; locked on, the
-mouse moves the stick again so a flick switches targets). *Screen → Field of view* (`fov`, 30-90 degrees, the game's
+mouse moves the stick again so a flick switches targets). *Graphics → Display → Field of view* (`fov`, 30-90 degrees, the game's
 43) scales every camera of the game's camera table, as a layer under the mods (`scripts/fov.py`; a mod's own
 `gameparam.parambnd.dcx` wins). There is no PSN: the *Play online / offline* screen is skipped and the game opens
-its main menu offline (a game patch; the launcher's *Game effects → Skip the “play online / offline” choice*,
-`BB_SKIP_NETWORK_CHOICE=0` shows it). With several monitors, *Screen → Monitor* in the launcher
+its main menu offline (a game patch; the launcher's *Multiplayer → Online → Skip the “play online / offline” choice*,
+`BB_SKIP_NETWORK_CHOICE=0` shows it). With several monitors, *Graphics → Display → Monitor* in the launcher
 (`BB_DISPLAY=<number or part of the name>`) picks the one for the game.
 
-Add-ons: `BB_DLC_DIR=/path/to/dlc` (the launcher's *DLC folder*) holds the dumped add-ons of
+Add-ons: `BB_DLC_DIR=/path/to/dlc` (the launcher's *Setup → DLC folder*) holds the dumped add-ons of
 the game, one folder each named by its entitlement label (`SPEXPANSIONDLC03/sce_sys/...`).
 Their data ships with the 1.09 update, so a folder with only `sce_sys` is enough. `run.sh` links
 it as `user/addcont/<title id>`, where the runtime finds add-ons (see **DLC** below); a real
@@ -232,11 +232,11 @@ layout, e.g. `user/addcont/CUSA03173/SPEXPANSIONDLC03` for The Old Hunters): eac
 reported to the game as an installed add-on.
 
 **Launcher language:** Russian, English, Brazilian Portuguese, Spanish, Italian, French, German or Simplified Chinese (follows the system language by default).
-**Game language:** the PS4 system language, *System language* in the launcher; by default it
+**Game language:** the PS4 system language, *Setup → Game language* in the launcher; by default it
 follows the desktop's locale (Japanese, English, French, Spanish, German, Italian or Russian,
 English for the rest). `run.sh` takes it as `BB_LANGUAGE` (PS4 code: 0 Japanese, 1 English,
 2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; without it, the desktop's locale as above).
-**Game region:** *Game region* in the launcher, `BB_REGION=eu|na` for `run.sh`: the regional text
+**Game region:** *Setup → Game region* in the launcher, `BB_REGION=eu|na` for `run.sh`: the regional text
 of a language, such as Spanish from Spain (`eu`) or Latin American Spanish (`na`). It sets the
 game's `USER_DEFINED_PARAM_1` (13 Europe, 2 the Americas) for the launch; by default the dump's
 `param.sfo` decides.
@@ -267,7 +267,7 @@ bash tools/fetch_fsr4_assets.sh      # FSR 4 v07 (MIT, built from AMD's source b
 bash tools/fsr4cap/build_assets.sh <amd_fidelityfx_upscaler_dx12.dll>
 ```
 
-**FSR 4.1.1 from your own DLL.** The easiest way is the launcher: *Upscaler → FSR 4.1.1 from your
+**FSR 4.1.1 from your own DLL.** The easiest way is the launcher: *Graphics → Upscaler → FSR 4.1.1 from your
 own AMD DLL → Choose DLL…*, then pick `amd_fidelityfx_upscaler_dx12.dll` version 4.1.x: from
 OptiScaler's `FSR4_LATEST` folder or from a game with FSR 4.1. That one file is enough: AMD's DLL
 exports the FidelityFX API itself, so no loader is needed (only a DLL without these exports would
@@ -275,7 +275,7 @@ be recorded through `amd_fidelityfx_loader_dx12.dll`, and the launcher would ask
 without a long capture; these do not fit: AMD's official FSR 4.0.x (e.g. Pragmata's 4.0.3 —
 AMD enables it on RDNA4 only, and under Proton it does not start on other GPUs) and community
 builds (4.0.2b, 4.1.1b and similar OptiScaler INT8 builds: another model and pass count). Then
-the DLL runs under Proton and is recorded at 20 sizes (progress in the row and in the *Log* tab;
+the DLL runs under Proton and is recorded at 20 sizes (progress in the row and in the *Log* section;
 on RDNA4 a second time, for the FP8 variant),
 the passes are translated to SPIR-V, and FSR 4.1.1 is selected. The Proton build is picked
 automatically — the first under which the DLL enables FSR 4.1: GE-Proton 10 or newer,
@@ -308,7 +308,7 @@ module's signing key using the distribution's [MOK procedure](https://documentat
 The AppImage built with `DLSS_SDK_ROOT` carries the bridge and NVIDIA's library (NVIDIA's RTX SDK
 license allows that in an application; its text is `NVIDIA-DLSS-LICENSE.txt` in the package). A
 newer `libnvidia-ngx-dlss.so.<version>` (from the SDK's `lib/Linux_x86_64/rel`) is chosen in the
-launcher: *Upscaler → DLSS: NVIDIA's library → Choose a file…*, as the FSR 4.1.1 DLL; it is
+launcher: *Graphics → Upscaler → DLSS: NVIDIA's library → Choose a file…*, as the FSR 4.1.1 DLL; it is
 copied to `<user>/dlss/`, which the game prefers. A game's `nvngx_dlss.dll` is the Windows
 library: NVIDIA's Linux driver does not load it.
 
@@ -392,10 +392,11 @@ More in [docs/](docs); recent changes: [docs/CHANGES_0.4.md](docs/CHANGES_0.4.md
 **Online play (shadNet).** A separate module, `out/gpu/libbbnet.so` (`gpu/bbnet`: shadPS4's network
 and PSN libraries from shadp2p, a shadPS4 fork, with the shadNet client), built when protobuf,
 nlohmann_json, OpenSSL, zlib and miniupnpc are there (`shell.nix`) and included in the AppImage.
-The launcher's *Online* page turns it on (`BB_ONLINE=1`): messages, bloodstains and ghosts come
-from The Hunter's Dream, bells and summons go through a shadNet server with a shadNet account (Online ID and password):
-The Hunter's Dream's pool through bbbridge, or a server of your own (`docs/SERVER.md`); shadPS4's
-public one (`srv.shadps4.net:31313`) no longer accepts bbport builds. Offline the module is never loaded; a
+The launcher's *Multiplayer → Online* tab turns it on (`BB_ONLINE=1`): bells and summons go through
+a shadNet server with a shadNet account (Online ID and password), messages, bloodstains and ghosts
+through a game server. Seamless Hunt (the default) runs both; The Hunter's Dream's pool goes
+through bbbridge; or a server of your own (`docs/SERVER.md`). shadPS4's public one
+(`srv.shadps4.net:31313`) no longer accepts bbport builds. Offline the module is never loaded; a
 build without it plays offline only.
 
 ## Repository layout
