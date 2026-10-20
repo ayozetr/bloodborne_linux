@@ -176,9 +176,10 @@ bash launcher/bb-launcher.sh         # launcher/install-desktop.sh adds it to th
 ```
 
 By default the game folder is expected next to the repository (`../CUSA03173`). Saves and the
-shader cache go to `user/` (the launcher lets you choose another folder, and imports saves from
-shadPS4, another port or a PS4 save exported unencrypted, after backing up the current ones in
-`user/savedata-backups/`; `scripts/save_import.py`); settings to `bbport.ini`. A gamepad is used
+shader cache go to `user/` (the launcher's *Setup → Saves* lets you choose another folder, exports
+the saves into a .zip, and imports them from such a .zip, shadPS4, another port or a PS4 save
+exported unencrypted, after backing up the current ones in `user/savedata-backups/`;
+`scripts/save_import.py`); settings to `bbport.ini`. A gamepad is used
 through SDL3 (the launcher's *Controls → Gamepad → Controller* picks one when several are connected,
 `BB_GAMEPAD=<GUID or part of the name>`; with none picked, the one you press a button on or move
 takes over). The keyboard works too,

@@ -2,6 +2,7 @@ from paths import ROOT
 import os
 import tempfile
 import unittest
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from unittest import mock
@@ -107,6 +108,54 @@ class SaveImportTests(unittest.TestCase):
                 save_import.import_saves(source, self.user, self.game)
         self.assertEqual((target / 'userdata0000').read_bytes(), b'mineuserdata0000')
         self.assertFalse((target.parent / 'SPRJ0005.importing').exists())
+
+
+    def test_export_then_import_gives_the_same_saves(self):
+        mine = save_folder(self.user / 'savedata/1/CUSA00207/SPRJ0005', b'mine')
+        archive = self.root / 'Bloodborne-saves.zip'
+        self.assertEqual(save_import.export_saves(self.user, archive, self.game), 4)
+        with zipfile.ZipFile(archive) as z:
+            self.assertEqual(sorted(z.namelist())[0], 'CUSA00207_SPRJ0005/backup0000')
+        # On another computer (or after the saves changed): imported back as they were.
+        other = self.root / 'other-user'
+        folder = save_import.unpack_export(archive, self.root / 'unpacked')
+        target, backup = save_import.import_saves(folder, other, self.game)
+        for path in save_import.save_files(mine):
+            self.assertEqual((target / path.name).read_bytes(), path.read_bytes())
+        self.assertIsNone(backup)
+
+    def test_no_saves_no_export(self):
+        with self.assertRaises(save_import.SaveImportError):
+            save_import.export_saves(self.user, self.root / 'x.zip', self.game)
+        self.assertFalse((self.root / 'x.zip').exists())
+
+    def test_an_archive_cannot_write_outside_or_hand_in_other_files(self):
+        archive = self.root / 'evil.zip'
+        with zipfile.ZipFile(archive, 'w') as z:
+            z.writestr('../../escaped/SPRJ0005/userdata0000', b'save')
+            z.writestr('../../escaped/SPRJ0005/userdata0010', b'system')
+            z.writestr('../../escaped/SPRJ0005/run.sh', b'evil')
+        into = save_import.unpack_export(archive, self.root / 'unpacked')
+        self.assertEqual(sorted(p.name for p in into.iterdir()), ['userdata0000', 'userdata0010'])
+        self.assertFalse((self.root.parent / 'escaped').exists())
+
+    def test_an_archive_without_saves_or_not_an_archive(self):
+        archive = self.root / 'photos.zip'
+        with zipfile.ZipFile(archive, 'w') as z:
+            z.writestr('holiday/userdata.jpg', b'x')  # no save folder around it
+        with self.assertRaises(save_import.SaveImportError):
+            save_import.unpack_export(archive, self.root / 'unpacked')
+        (self.root / 'broken.zip').write_bytes(b'PK not really')
+        with self.assertRaises(save_import.SaveImportError):
+            save_import.unpack_export(self.root / 'broken.zip', self.root / 'unpacked2')
+
+    def test_a_ps4_export_zipped_on_windows(self):
+        archive = self.root / 'ps4.zip'
+        with zipfile.ZipFile(archive, 'w') as z:
+            for name in ('userdata0000', 'userdata0010'):
+                z.writestr(f'PS4\\SAVEDATA\\CUSA00207_SPRJ0005\\{name}', name.encode())
+        into = save_import.unpack_export(archive, self.root / 'unpacked')
+        self.assertTrue(save_import.is_save_folder(into))
 
 
 if __name__ == '__main__':

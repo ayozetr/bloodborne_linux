@@ -52,7 +52,8 @@ projects ([credits](docs/CREDITS.md)).
 2. Make it executable and run it.
 3. Choose your game folder (the one with `eboot.bin`) and press **Play**.
 
-Saves and settings go to `~/.local/share/bbport`. The Game of the Year edition already has The Old
+Saves and settings go to `~/.local/share/bbport`; **Setup → Saves** exports your saves into a
+.zip and imports them back, or from shadPS4. The Game of the Year edition already has The Old
 Hunters; with the base game, its DLC goes in **Setup → DLC folder** ([how](docs/COMPATIBILITY.md)).
 
 ## Online play

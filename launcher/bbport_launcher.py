@@ -160,8 +160,13 @@ MODEL_LOD = [("Как в игре", "0"), ("Максимальная (-2)", "-2"
              ("Минимальная (2)", "2")]
 FPS_MODES = [("Без ограничения (патч)", "uncap"), ("60", "60"), ("90", "90"),
              ("30 (как на PS4)", "30")]
-PRESENT_MODES = [("Mailbox", "Mailbox"), ("FIFO (VSync)", "Fifo"),
-                 ("FIFO Relaxed", "FifoRelaxed"), ("Immediate", "Immediate")]
+PRESENT_MODES = [
+    ("Mailbox", "Mailbox", "По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше"),
+    ("FIFO (VSync)", "Fifo", "Без разрывов, не чаще частоты экрана: чуть больше задержка, меньше нагрузка "
+                             "(хорошо для Steam Deck)"),
+    ("FIFO Relaxed", "FifoRelaxed", "Как VSync, но опоздавший кадр даёт разрыв вместо рывка"),
+    ("Immediate", "Immediate", "Наименьшая задержка, с разрывами изображения"),
+]
 # A third element is a note shown under the row's title while that choice is selected: the
 # choice labels stay short, so the selected one is shown in full.
 DRAW_PIPE = [("Авто", "", "Включён при 8 и более потоках процессора"), ("Включён", "1"),
@@ -198,7 +203,9 @@ LANGUAGES = [("Как в системе", ""), ("Английский", "1"), ("
 # as Spanish from Spain (Europe) or Latin American Spanish (the Americas). "": the dump's param.sfo.
 REGIONS = [("Как в дампе игры", ""), ("Европа", "eu"), ("Америка", "na")]
 LIVE_RESOLUTION = [("Авто (по видеокарте)", "auto"), ("Выключена (быстрее)", "0"), ("Включена", "1")]
-READBACKS = [("Relaxed", "", "По умолчанию"), ("Выключены", "0"), ("Precise", "2")]
+READBACKS = [("Мягкие", "", "По умолчанию: без них у персонажей «взрываются» вершины"),
+             ("Выключены", "0", "Быстрее, но персонажи могут искажаться"),
+             ("Точные", "2", "Самые точные и самые медленные: для поиска ошибок")]
 # Background pre-upload of the game's GPU memory into VRAM (BB_PREUPLOAD): auto = on with a discrete GPU.
 PREUPLOAD = [("Обычная", "", "Без лишней видеопамяти"), ("Полная", "2", "Около 3 ГБ видеопамяти сверху"),
              ("Выключена", "0")]
@@ -668,6 +675,26 @@ def flat_button(icon, tooltip, handler):
     button.add_css_class("flat")
     button.connect("clicked", handler)
     return button
+
+
+def folder_actions(row, change, more):
+    """A folder row's actions in words: "Change…" as its button, the others ((label, handler)) in a
+    "⋯" menu. Icons alone were hard to tell apart and gave a screen reader nothing to say.
+    Returns the menu's actions, to turn one off (set_enabled)."""
+    button = Gtk.Button(label=tr("Изменить…"), valign=Gtk.Align.CENTER)
+    button.connect("clicked", change)
+    row.add_suffix(button)
+    group, menu, actions = Gio.SimpleActionGroup(), Gio.Menu(), []
+    for number, (label, handler) in enumerate(more):
+        action = Gio.SimpleAction(name=f"item{number}")
+        action.connect("activate", lambda _a, _p, handler=handler: handler(None))
+        group.add_action(action)
+        menu.append(label, f"folder.item{number}")
+        actions.append(action)
+    row.insert_action_group("folder", group)
+    row.add_suffix(Gtk.MenuButton(icon_name="view-more-symbolic", menu_model=menu, valign=Gtk.Align.CENTER,
+                                  tooltip_text=tr("Ещё"), css_classes=["flat"]))
+    return actions
 
 
 def open_folder(window, path):
@@ -1151,35 +1178,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.game_row = Adw.ActionRow(title=tr("Папка игры"))
         self.game_status = Gtk.Image()
         self.game_row.add_suffix(self.game_status)
-        self.game_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку с eboot.bin"),
-                                             self.on_choose_game))
-        self.game_row.add_suffix(flat_button("system-file-manager-symbolic",
-                                             tr("Открыть в файловом менеджере"),
-                                             lambda _b: open_folder(self, self.game_dir())))
+        folder_actions(self.game_row, self.on_choose_game, [
+            (tr("Открыть в файловом менеджере"), lambda _b: open_folder(self, self.game_dir()))])
         game.add(self.game_row)
-        # Saves and the shader cache: user/ in the data directory unless chosen.
-        self.user_row = Adw.ActionRow(title=tr("Папка сохранений"))
-        self.user_status = Gtk.Image()
-        self.user_row.add_suffix(self.user_status)
-        self.user_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку сохранений"),
-                                             self.on_choose_user))
-        self.user_row.add_suffix(flat_button("system-file-manager-symbolic",
-                                             tr("Открыть в файловом менеджере"),
-                                             lambda _b: open_folder(self, self.user_dir())))
-        self.user_row.add_suffix(flat_button("folder-download-symbolic", tr("Импортировать сохранения…"),
-                                             self.on_import_saves))
-        self.user_reset = flat_button("edit-undo-symbolic", tr("Вернуть папку по умолчанию"),
-                                      self.on_reset_user)
-        self.user_row.add_suffix(self.user_reset)
-        game.add(self.user_row)
         # Dumped add-ons (one folder each); their data ships with the 1.09 update.
         self.dlc_row = Adw.ActionRow(title=tr("Папка DLC"))
         self.dlc_status = Gtk.Image()
         self.dlc_row.add_suffix(self.dlc_status)
-        self.dlc_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку DLC"),
-                                            self.on_choose_dlc))
-        self.dlc_reset = flat_button("edit-undo-symbolic", tr("Не использовать DLC"), self.on_reset_dlc)
-        self.dlc_row.add_suffix(self.dlc_reset)
+        self.dlc_reset, = folder_actions(self.dlc_row, self.on_choose_dlc, [
+            (tr("Не использовать DLC"), self.on_reset_dlc)])
         game.add(self.dlc_row)
         self.language_row = combo_row(tr("Язык игры"), None, LANGUAGES, self.settings["language"])
         game.add(self.language_row)
@@ -1202,7 +1209,41 @@ class LauncherWindow(Adw.ApplicationWindow):
                                          active=self.settings.get("discord", True))
         self.discord_row.add_prefix(themed_icon("discord-symbolic"))
         game.add(self.discord_row)
+        self.setup_game_group = game  # "Mute in the background" joins it (the display's rows)
         self.place("setup", 20, game)
+
+        # Saves and the shader cache: user/ in the data directory unless chosen. Exported into a
+        # .zip and imported back (scripts/save_import.py).
+        saves = Adw.PreferencesGroup(title=tr("Сохранения"))
+        self.user_row = Adw.ActionRow(title=tr("Папка сохранений"))
+        _open, self.user_reset = folder_actions(self.user_row, self.on_choose_user, [
+            (tr("Открыть в файловом менеджере"), lambda _b: open_folder(self, self.user_dir())),
+            (tr("Вернуть папку по умолчанию"), self.on_reset_user)])
+        saves.add(self.user_row)
+        export = Adw.ActionRow(title=tr("Экспортировать сохранения"),
+                               subtitle=tr("В архив .zip: резервная копия или сохранения для другого "
+                                           "компьютера. Импортируется ниже"))
+        export_button = Gtk.Button(label=tr("Экспортировать…"), valign=Gtk.Align.CENTER)
+        export_button.connect("clicked", self.on_export_saves)
+        export.add_suffix(export_button)
+        saves.add(export)
+        imports = Adw.ActionRow(title=tr("Импортировать сохранения"),
+                                subtitle=tr("Из shadPS4, другого порта, расшифрованной копии с PS4 или "
+                                            "экспортированного .zip. Текущие сначала копируются в "
+                                            "savedata-backups"))
+        menu = Gio.Menu()
+        menu.append(tr("Из папки…"), "saves.folder")
+        menu.append(tr("Из архива .zip…"), "saves.archive")
+        actions = Gio.SimpleActionGroup()
+        for name, handler in (("folder", self.on_import_saves), ("archive", self.on_import_saves_archive)):
+            action = Gio.SimpleAction(name=name)
+            action.connect("activate", lambda _a, _p, handler=handler: handler(None))
+            actions.add_action(action)
+        imports.insert_action_group("saves", actions)
+        imports.add_suffix(Gtk.MenuButton(label=tr("Импортировать"), menu_model=menu,
+                                          valign=Gtk.Align.CENTER))
+        saves.add(imports)
+        self.place("setup", 30, saves)
 
         # Auto: the new memory model on AMD, the 0.3 one elsewhere; or either by hand.
         mode = Adw.PreferencesGroup()
@@ -1219,12 +1260,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                                                active=self.settings["mods_enabled"])
         self.mods_group.add(self.mods_enabled_row)
         self.mods_folder_row = Adw.ActionRow(title=tr("Папка модов"))
-        self.mods_folder_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку модов"),
-                                                    self.on_choose_mods))
-        self.mods_folder_row.add_suffix(flat_button("system-file-manager-symbolic", tr("Открыть папку модов"),
-                                                    lambda _b: open_folder(self, self.mods_dir())))
-        self.mods_folder_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                                    self.on_refresh_mods))
+        folder_actions(self.mods_folder_row, self.on_choose_mods, [
+            (tr("Открыть в файловом менеджере"), lambda _b: open_folder(self, self.mods_dir())),
+            (tr("Обновить список"), self.on_refresh_mods)])
         self.mods_group.add(self.mods_folder_row)
         self.mod_list = FolderList(self.mods_group)
         self.refresh_mods()
@@ -1235,13 +1273,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             description=tr("XML-патчи в формате shadPS4 для версии 01.09 из папки патчей. "
                            "Применяются при запуске."))
         self.patches_folder_row = Adw.ActionRow(title=tr("Папка патчей"))
-        self.patches_folder_row.add_suffix(flat_button("folder-open-symbolic", tr("Выбрать папку патчей"),
-                                                       self.on_choose_patches))
-        self.patches_folder_row.add_suffix(flat_button(
-            "system-file-manager-symbolic", tr("Открыть папку патчей"),
-            lambda _b: open_folder(self, patches_dir(self.settings))))
-        self.patches_folder_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                                       self.on_refresh_patches))
+        folder_actions(self.patches_folder_row, self.on_choose_patches, [
+            (tr("Открыть в файловом менеджере"), lambda _b: open_folder(self, patches_dir(self.settings))),
+            (tr("Обновить список"), self.on_refresh_patches)])
         self.patches_group.add(self.patches_folder_row)
         self.patch_list = FolderList(self.patches_group)
         self.refresh_patches()
@@ -1288,7 +1322,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mute_row = Adw.SwitchRow(title=tr("Без звука в фоне"),
                                       subtitle=tr("Пока окно игры не в фокусе"),
                                       active=self.ini.get("mute_unfocused", "0") == "1")
-        screen.add(self.mute_row)
+        self.setup_game_group.add(self.mute_row)  # how the game behaves on the desktop, as Discord
         # Issue #69: the window (and fullscreen) went to the monitor SDL calls primary.
         self.display_row = readable_choice(Adw.ComboRow(title=tr("Монитор")))
         self.display_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
@@ -1629,13 +1663,12 @@ class LauncherWindow(Adw.ApplicationWindow):
     def update_user_status(self):
         path = self.user_dir()
         custom = bool(self.settings["user_dir"])
-        self.user_row.set_subtitle(str(path) if custom else tr("По умолчанию: {}").format(path))
         saves = path / "savedata"
         found = saves.is_dir() and any(saves.iterdir())
-        self.user_status.set_from_icon_name("object-select-symbolic" if found else "document-new-symbolic")
-        self.user_status.set_tooltip_text(tr("Найдены сохранения") if found
-                                          else tr("Сохранений пока нет: игра создаст их здесь"))
-        self.user_reset.set_sensitive(custom)
+        self.user_row.set_subtitle(GLib.markup_escape_text("\n".join((
+            str(path) if custom else tr("По умолчанию: {}").format(path),
+            tr("Найдены сохранения") if found else tr("Сохранений пока нет: игра создаст их здесь")))))
+        self.user_reset.set_enabled(custom)
         if hasattr(self, "cache_row"):
             self.show_cache()
 
@@ -1654,7 +1687,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                            "dialog-warning-symbolic" if path else None)
         self.dlc_status.set_tooltip_text(", ".join(found)
                                          or (tr("Нет DLC этой игры в папке") if path else None))
-        self.dlc_reset.set_sensitive(bool(path))
+        self.dlc_reset.set_enabled(bool(path))
 
     def on_choose_dlc(self, _button):
         def chosen(path):
@@ -1698,7 +1731,72 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.choose_folder(tr("Папка с сохранениями Bloodborne"),
                            shadps4 if shadps4.is_dir() else Path.home(), self.confirm_import_saves)
 
-    def confirm_import_saves(self, folder):
+    def on_export_saves(self, _button):
+        """The saves in use into a .zip, a backup or the saves for another computer; Import takes
+        it back (scripts/save_import.py)."""
+        if self.process is not None or save_import.game_running():
+            self.alert(tr("Экспорт сохранений"), tr("Сначала закройте игру"))
+            return
+        if save_import.saves_in_use(self.user_dir(), self.settings["game_dir"] or None) is None:
+            self.alert(tr("Экспорт сохранений"), tr("Сохранений пока нет: игра создаст их здесь"))
+            return
+        dialog = Gtk.FileDialog(title=tr("Экспорт сохранений"))
+        dialog.set_initial_name(f"Bloodborne-saves-{time.strftime('%Y-%m-%d')}.zip")
+
+        def finish(dialog, result):
+            try:
+                chosen = dialog.save_finish(result)
+            except GLib.Error:
+                return
+            if not chosen or not chosen.get_path():
+                return
+            target = Path(chosen.get_path())
+            if target.suffix.lower() != ".zip":
+                target = target.with_name(target.name + ".zip")
+            try:
+                count = save_import.export_saves(self.user_dir(), target, self.settings["game_dir"] or None)
+            except (save_import.SaveImportError, OSError) as error:
+                self.alert(tr("Не удалось экспортировать сохранения"), str(error))
+                return
+            self.append_log(f"Saves exported into {target} ({count} files)\n")
+            self.toasts.add_toast(Adw.Toast(title=tr("Сохранения экспортированы: {}").format(target)))
+        dialog.save(self, None, finish)
+
+    def on_import_saves_archive(self, _button):
+        """A .zip exported here (or a PS4 export zipped): its save files are read out into a
+        folder of its own, then imported as a folder would be."""
+        if self.process is not None or save_import.game_running():
+            self.alert(tr("Импорт сохранений"), tr("Сначала закройте игру"))
+            return
+        dialog = Gtk.FileDialog(title=tr("Архив с сохранениями (.zip)"))
+        archives = Gtk.FileFilter()
+        archives.set_name("ZIP")
+        archives.add_pattern("*.zip")
+        archives.add_pattern("*.ZIP")
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(archives)
+        dialog.set_filters(filters)
+        dialog.set_default_filter(archives)
+
+        def finish(dialog, result):
+            try:
+                chosen = dialog.open_finish(result)
+            except GLib.Error:
+                return
+            if not chosen or not chosen.get_path():
+                return
+            unpacked = Path(tempfile.mkdtemp(prefix="bbport-saves-")) / save_import.SAVE_DIR
+            try:
+                save_import.unpack_export(chosen.get_path(), unpacked)
+            except (save_import.SaveImportError, OSError) as error:
+                shutil.rmtree(unpacked.parent, ignore_errors=True)
+                self.alert(tr("Не удалось импортировать сохранения"), str(error))
+                return
+            self.confirm_import_saves(unpacked, shown=chosen.get_path(),
+                                      done=lambda: shutil.rmtree(unpacked.parent, ignore_errors=True))
+        dialog.open(self, None, finish)
+
+    def confirm_import_saves(self, folder, shown=None, done=None):
         found = save_import.find(folder)
         if not found:
             self.alert(tr("Импорт сохранений"), tr(
@@ -1706,29 +1804,40 @@ class LauncherWindow(Adw.ApplicationWindow):
                 "сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard")
                 if save_import.encrypted_ps4_save(folder)
                 else tr("В этой папке нет сохранений Bloodborne (SPRJ0005, userdata)"))
+            if done:
+                done()
             return
         source, when = found[0]
         dialog = Adw.AlertDialog(heading=tr("Импортировать сохранения?"), body=tr(
             "Из {} (изменены {}). Текущие сохранения сначала копируются в {}").format(
-                source, time.strftime("%Y-%m-%d %H:%M", time.localtime(when)),
+                shown or source, time.strftime("%Y-%m-%d %H:%M", time.localtime(when)),
                 self.user_dir() / "savedata-backups"))
         dialog.add_response("cancel", tr("Отмена"))
         dialog.add_response("import", tr("Импортировать"))
         dialog.set_response_appearance("import", Adw.ResponseAppearance.SUGGESTED)
 
         def answered(_dialog, response):
-            if response != "import":
-                return
+            try:
+                if response == "import":
+                    imported(*save_import_now())
+            finally:
+                if done:
+                    done()  # an archive's unpacked copy
+
+        def save_import_now():
             if self.process is not None or save_import.game_running():
                 self.alert(tr("Импорт сохранений"), tr("Сначала закройте игру"))
-                return
+                return None, None
             try:
-                target, backup = save_import.import_saves(
-                    source, self.user_dir(), self.settings["game_dir"] or None)
+                return save_import.import_saves(source, self.user_dir(), self.settings["game_dir"] or None)
             except (save_import.SaveImportError, OSError) as error:
                 self.alert(tr("Не удалось импортировать сохранения"), str(error))
+                return None, None
+
+        def imported(target, backup):
+            if target is None:
                 return
-            self.append_log(f"Saves imported from {source} into {target}"
+            self.append_log(f"Saves imported from {shown or source} into {target}"
                             + (f"; previous saves in {backup}\n" if backup else "\n"))
             self.update_user_status()
             self.toasts.add_toast(Adw.Toast(title=tr("Сохранения импортированы")))

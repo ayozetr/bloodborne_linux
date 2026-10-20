@@ -4,6 +4,7 @@
 decrypted (Apollo Save Tool, Save Wizard), a copy on a USB stick.
 
     save_import.py --user USER_DIR [--game GAME_DIR] SOURCE
+    save_import.py --user USER_DIR [--game GAME_DIR] --export ARCHIVE.zip
 
 Every build keeps the game's save folder SPRJ0005 the same way (userdata0000..0010 and backup*
 files, read and written by the game itself), so the files need no conversion: they are copied in
@@ -13,13 +14,21 @@ USER_DIR/savedata-backups/<date>/, and the new ones are staged next to them and 
 failed copy leaves them as they were. A console's own USB copy (sdimg_SPRJ0005) is encrypted with
 that console's keys and cannot be read: it has to be exported decrypted on the PS4.
 
+--export writes the saves in use into a .zip, in a folder named as a PS4 export
+(CUSA00207_SPRJ0005/userdata0000...): a backup, or the saves for another computer. Such a .zip
+is a SOURCE too; only its save files are read out of it, by name, whatever paths it holds.
+
 Idea and rules from Awaken's BloodBorneButPc (SaveImport.cs).
 """
 import argparse
 from datetime import datetime
+import os
 from pathlib import Path
 import shutil
 import sys
+import tempfile
+import time
+import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prepare import sfo  # noqa: E402
@@ -27,6 +36,8 @@ from prepare import sfo  # noqa: E402
 SAVE_DIR = 'SPRJ0005'
 # The game's system save, always written next to the character slots.
 SYSTEM_FILE = 'userdata0010'
+# A save file is a few MB; anything much bigger in an archive is not one.
+MAX_SAVE_FILE = 64 << 20
 # Folders that hold no saves: game files (thousands of folders in a dump) and our own backups.
 SKIPPED = {'dvdroot_ps4', 'sce_sys', 'savedata-backups', 'shader_cache', 'mods'}
 
@@ -156,15 +167,103 @@ def import_saves(source, user_dir, game_dir=None, now=None):
     return target, backup
 
 
+def saves_in_use(user_dir, game_dir=None):
+    """The save folder the game uses (user 1's SPRJ0005), or None without saves."""
+    try:
+        folder = Path(user_dir).expanduser() / 'savedata/1' / save_id(user_dir, game_dir) / SAVE_DIR
+    except SaveImportError:
+        return None
+    return folder if save_files(folder) else None
+
+
+def export_saves(user_dir, archive, game_dir=None):
+    """Writes the saves in use into the .zip archive (replaced whole, or left as it was on an
+    error); returns how many files went in."""
+    folder = saves_in_use(user_dir, game_dir)
+    if folder is None:
+        raise SaveImportError('there are no saves to export yet')
+    archive = Path(archive).expanduser()
+    inside = f'{folder.parent.name}_{SAVE_DIR}'
+    temp = archive.with_name(archive.name + '.part')
+    try:
+        with zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED) as out:
+            for path in save_files(folder):
+                out.write(path, f'{inside}/{path.name}')
+        os.replace(temp, archive)
+    except BaseException:
+        temp.unlink(missing_ok=True)
+        raise
+    return len(save_files(folder))
+
+
+def unpack_export(archive, into):
+    """The save files of a .zip (an export, or a PS4 export zipped) written flat into the folder
+    `into`, with their dates; returns it. By the names of the files only: no path in the archive
+    can place anything outside `into`."""
+    try:
+        with zipfile.ZipFile(archive) as source:
+            folders = {}
+            for member in source.infolist():
+                parts = member.filename.replace('\\', '/').split('/')
+                name = parts[-1]
+                if member.is_dir() or not name.startswith(('userdata', 'backup')):
+                    continue
+                folders.setdefault('/'.join(parts[:-1]), []).append((name, member))
+            # Its save folder: as is_save_folder, the newest when there are several.
+            usable = {folder: files for folder, files in folders.items()
+                      if (folder.upper().endswith(SAVE_DIR) or any(n == SYSTEM_FILE for n, _m in files))
+                      and any(n.startswith('userdata') for n, _m in files)}
+            if not usable:
+                raise SaveImportError(f'{archive} has no Bloodborne save files (userdata)')
+            files = max(usable.values(), key=lambda fs: max(m.date_time for _n, m in fs))
+            into = Path(into)
+            into.mkdir(parents=True, exist_ok=True)
+            for name, member in files:
+                if member.file_size > MAX_SAVE_FILE:
+                    raise SaveImportError(f'{member.filename} is too big to be a save file')
+                target = into / name
+                with source.open(member) as data, open(target, 'wb') as out:
+                    shutil.copyfileobj(data, out)
+                stamp = time.mktime(member.date_time + (0, 0, -1))
+                os.utime(target, (stamp, stamp))
+    except (zipfile.BadZipFile, zipfile.LargeZipFile) as error:
+        raise SaveImportError(f'{archive}: {error}') from error
+    return into
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--user', required=True, help='the user folder (saves, shader cache)')
     parser.add_argument('--game', help='the game folder (its param.sfo gives the save id)')
-    parser.add_argument('source', help='a save folder, or a folder to search for one')
+    parser.add_argument('source', nargs='?',
+                        help='a save folder, a folder to search for one, or an exported .zip')
+    parser.add_argument('--export', metavar='ARCHIVE', help='write the saves in use into this .zip')
     a = parser.parse_args()
     if game_running():
-        print('Import failed: close the game first', file=sys.stderr)
+        print('Failed: close the game first', file=sys.stderr)
         return 1
+    if a.export:
+        try:
+            count = export_saves(a.user, a.export, a.game)
+        except (SaveImportError, OSError) as error:
+            print(f'Export failed: {error}', file=sys.stderr)
+            return 1
+        print(f'Exported {count} save files into {a.export}')
+        return 0
+    if not a.source:
+        parser.error('a source to import, or --export')
+    if zipfile.is_zipfile(a.source):
+        with tempfile.TemporaryDirectory() as unpacked:
+            try:
+                folder = unpack_export(a.source, Path(unpacked) / SAVE_DIR)
+                target, backup = import_saves(folder, a.user, a.game)
+            except (SaveImportError, OSError) as error:
+                print(f'Import failed: {error}', file=sys.stderr)
+                return 1
+        print(f'Imported {a.source} into {target}')
+        if backup:
+            print(f'Previous saves backed up in {backup}')
+        return 0
     found = find(a.source)
     if not found:
         reason = ('it is a PS4 USB copy (sdimg_*), encrypted with the console\'s keys: export it '
