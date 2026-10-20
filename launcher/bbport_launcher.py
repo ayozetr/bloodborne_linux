@@ -765,14 +765,18 @@ GAMEPADS_KEPT = 3.0  # seconds: one look at the gamepads serves a whole build of
 _gamepads = (0.0, None)
 
 
-def connected_gamepads(types=False, paths=False, fresh=False):
+def connected_gamepads(types=False, paths=False, fresh=False, look=True):
     """(GUID, name) of the connected gamepads (bb-gpu-capabilities --gamepads), [] if unknown;
     with `types`, (GUID, name, SDL type) ("" for a generic gamepad); with `paths`, also the device
     path, which tells two of one model apart (local co-op). Each look starts the tool (0.3 s):
-    one taken less than GAMEPADS_KEPT ago is used again, unless `fresh` (Refresh)."""
+    one taken less than GAMEPADS_KEPT ago is used again, unless `fresh`. Without `look`, the last
+    one whatever its age ([] before any): the window's lists, filled again once the launcher has
+    looked in a thread (LauncherWindow.with_gamepads)."""
     global _gamepads
     taken, pads = _gamepads
-    if fresh or pads is None or time.monotonic() - taken > GAMEPADS_KEPT:
+    if not look:
+        pads = pads or []
+    elif fresh or pads is None or time.monotonic() - taken > GAMEPADS_KEPT:
         tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
         try:
             run = subprocess.run([str(tool), "--gamepads"], capture_output=True, text=True, timeout=5)
@@ -1101,6 +1105,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         if self.settings.get("check_updates", True) and self.latest is None and \
                 self.update_state == "idle":
             self.on_check_update(None, quiet=True)
+        # The controller lists were filled from the last look (none on the first build): again
+        # once the gamepads are looked at in a thread.
+        self.with_gamepads(lambda: (self.fill_gamepads(), self.fill_coop_controllers()))
 
     def update_launch_button(self):
         running = self.process is not None
@@ -1303,7 +1310,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Controller names are long: the selected one is shown in full under the title.
         self.gamepad_row.connect("notify::selected", lambda *_: self.show_gamepad())
         self.gamepad_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                                lambda _button: self.fill_gamepads(fresh=True)))
+                                                lambda _button: self.with_gamepads(self.fill_gamepads)))
         self.fill_gamepads()
         controls.add(self.gamepad_row)
         # Xbox / Switch prompts and the gestures menu: Dommo's mods (Nexus, Bloodborne mod 30);
@@ -1613,7 +1620,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.show_cache()
 
         dialog.connect("response", answered)
-        dialog.present(self)
+        self.present_dialog(dialog)
 
     def user_dir(self):
         return Path(self.settings["user_dir"]).expanduser() if self.settings["user_dir"] \
@@ -1727,7 +1734,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.toasts.add_toast(Adw.Toast(title=tr("Сохранения импортированы")))
 
         dialog.connect("response", answered)
-        dialog.present(self)
+        self.present_dialog(dialog)
 
     def on_reset_user(self, _button):
         self.settings["user_dir"] = ""
@@ -1783,17 +1790,46 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.rebuild_waiting = False
             # What changed meanwhile (an account signed in included) is kept: build() reads the
             # settings and bbport.ini, and starts change tracking (issue #21) afresh.
-            GLib.idle_add(lambda: (self.store(), self.build()) and False)
+            GLib.idle_add(self.waited_rebuild)
+
+    def waited_rebuild(self):
+        if self.busy():  # the game started meanwhile (Play right after the work)
+            self.rebuild_waiting = True
+        else:
+            self.store()
+            self.build()
+        return False
 
     def game_found(self):
         return bool(self.settings["game_dir"]) and (self.game_dir() / "eboot.bin").is_file()
+
+    def with_gamepads(self, then):
+        """Looks at the gamepads in a thread (bb-gpu-capabilities, 0.3 s) and then calls `then` on
+        the main loop, with the look fresh in connected_gamepads: Play (the button prompts follow
+        the controller), local co-op and Refresh no longer freeze the window. Play waits for it."""
+        if "gamepads" in self.working:
+            return
+        self.working.add("gamepads")
+        self.update_launch_sensitivity()
+
+        def work():
+            connected_gamepads(fresh=True)
+            GLib.idle_add(done)
+
+        def done():
+            self.work_done("gamepads")
+            self.update_launch_sensitivity()
+            then()
+            return False
+        threading.Thread(target=work, daemon=True).start()
 
     def can_start(self):
         """Whether a game can start now: not from a half-built window (build), not without the
         game, and not with an FSR 4.1.1 build (both want the GPU, the build replaces the assets
         the game reads) or the map's files being made (the game would read half-made maps)."""
         return (not self.build_errors and self.process is None and self.game_found()
-                and self.fsr411_build is None and self.atlas_job is None)
+                and self.fsr411_build is None and self.atlas_job is None
+                and "gamepads" not in self.working)
 
     def update_launch_sensitivity(self):
         # Stop is always there.
@@ -1964,7 +2000,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.show_control(kind, name)
         process.communicate_utf8_async(None, None, done)
 
-    def fill_gamepads(self, fresh=False):
+    def fill_gamepads(self):
         """The controller choices: the first connected one, the connected ones, and the chosen
         one while it is not connected (on Refresh, the row's choice, saved or not)."""
         if hasattr(self.gamepad_row, "values"):
@@ -1974,7 +2010,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             current = self.settings.get("gamepad", "")
             chosen = self.settings.get("gamepad_name") or current
         choices = [(tr("Авто"), "", tr("Тот, которым играете"))]
-        choices += [(name, guid, name) for guid, name in connected_gamepads(fresh=fresh)]
+        choices += [(name, guid, name) for guid, name in connected_gamepads(look=False)]
         if current and current not in [guid for _, guid, _ in choices]:
             choices.append((tr("{} (не подключён)").format(chosen), current, chosen))
         self.gamepad_row.set_model(Gtk.StringList.new([label for label, _, _ in choices]))
@@ -2130,7 +2166,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 return
             self.close_steam_then_add(steam, configs)
         dialog.connect("response", on_response)
-        dialog.present(self)
+        self.present_dialog(dialog)
 
     def close_steam_then_add(self, steam, configs):
         if not bbport_steam.steam_running():
@@ -2150,7 +2186,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 bbport_steam.shutdown_steam(bbport_steam.is_flatpak(steam))
                 self.wait_for_steam(steam, configs, tries=60)
         dialog.connect("response", on_response)
-        dialog.present(self)
+        self.present_dialog(dialog)
 
     def wait_for_steam(self, steam, configs, tries):
         """Polls until Steam has exited (it writes its files as it goes), then adds the game."""
@@ -2886,17 +2922,26 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(owners)
         return page
 
-    def show_thanks(self):
-        """Everyone whose work is in this fork or who helped it: their GitHub profile on a click.
-        The dialog is made once (thanks_dialog). With the cairo renderer it opens and closes
-        without its animation: each frame of it redraws the whole window on the CPU (some 50 ms,
-        20 frames a second), so it would stutter."""
-        dialog = self.thanks_dialog()
+    def present_dialog(self, dialog):
+        """Shows an Adw dialog. With the cairo renderer (kept: GTK's GPU renderers cut the top of
+        capitals at fractional scales), each frame of a dialog's animation redraws the whole window
+        on the CPU, some 50 ms: 20 frames a second, a stutter. So it opens and closes without
+        it; animations come back once it is gone ("closed" comes as it starts closing, "unmap"
+        once it is off the window)."""
         settings = Gtk.Settings.get_default()
         if os.environ.get("GSK_RENDERER") == "cairo" and settings.get_property("gtk-enable-animations"):
             settings.set_property("gtk-enable-animations", False)
-            dialog.animations_off = True  # back on once it has closed
+
+            def gone(_dialog):
+                dialog.disconnect(handler)
+                GLib.timeout_add(300, lambda: settings.set_property("gtk-enable-animations", True) and False)
+            handler = dialog.connect("unmap", gone)
         dialog.present(self)
+
+    def show_thanks(self):
+        """Everyone whose work is in this fork or who helped it: their GitHub profile on a click
+        (the dialog is made once: thanks_dialog)."""
+        self.present_dialog(self.thanks_dialog())
 
     def thanks_dialog(self):
         """The thanks dialog, made the first time it is needed or while the window is idle (some
@@ -2916,16 +2961,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.set_description(tr("Без них ничего этого не было бы"))
         self.thanks = Adw.PreferencesDialog(title=tr("Благодарности"))
         self.thanks.add(page)
-        self.thanks.animations_off = False
-
-        # Back on once it is gone ("closed" comes as it starts closing, "unmap" once it is off the
-        # window), after the window has redrawn without it.
-        def gone(dialog):
-            if dialog.animations_off:
-                dialog.animations_off = False
-                GLib.timeout_add(300, lambda: Gtk.Settings.get_default().set_property(
-                    "gtk-enable-animations", True) and False)
-        self.thanks.connect("unmap", gone)
         return self.thanks
 
     def open_uri(self, uri):
@@ -3001,7 +3036,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         dialog.set_response_appearance("install", Adw.ResponseAppearance.SUGGESTED)
         dialog.connect("response", lambda _d, response:
                        response == "install" and self.install_update(release))
-        dialog.present(self)
+        self.present_dialog(dialog)
 
     def on_update_button(self, _button):
         latest = self.latest
@@ -3140,6 +3175,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.trophy_checks = {}
         self.trophy_editing = False
         self.trophy_shown = (None, None)
+        self.trophy_seen = None  # a new page shows its list on the first visit
         return page
 
     def refresh_trophies(self):
@@ -3153,12 +3189,23 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.trophy_generation = getattr(self, "trophy_generation", 0) + 1
         generation = self.trophy_generation
 
+        def state(directory):
+            # The list, the earned ones and the marks are in these files.
+            if directory is None:
+                return None
+            return tuple((Path(directory) / name).stat().st_mtime_ns
+                         if (Path(directory) / name).exists() else None
+                         for name in ("trophies.tsv", "earned.tsv"))
+
         def show(directory, problem):
-            # Not over trophies being marked: their checks would go.
+            # Not over trophies being marked: their checks would go. Nor again when nothing has
+            # changed since the last visit (some 40 rows and icons).
             if generation == self.trophy_generation and not self.trophy_editing:
-                self.trophy_shown = (directory, problem)
-                self.trophy_editing = False
-                self.show_trophies()
+                seen = (directory, problem, state(directory))
+                if seen != getattr(self, "trophy_seen", None):
+                    self.trophy_seen = seen
+                    self.trophy_shown = (directory, problem)
+                    self.show_trophies()
             return False
 
         def work():
@@ -3449,8 +3496,16 @@ class LauncherWindow(Adw.ApplicationWindow):
         extra = buffer.get_line_count() - MAX_LOG_LINES
         if extra > 0:
             buffer.delete(buffer.get_start_iter(), buffer.get_iter_at_line(extra)[1])
-        adj = self.log_scroller.get_vadjustment()
-        GLib.idle_add(lambda: adj.set_value(adj.get_upper()) and False)
+        # To the end once per burst of lines, not once per line.
+        if not getattr(self, "log_scroll_queued", False):
+            self.log_scroll_queued = True
+            adj = self.log_scroller.get_vadjustment()
+
+            def scroll():
+                self.log_scroll_queued = False
+                adj.set_value(adj.get_upper())
+                return False
+            GLib.idle_add(scroll)
 
     # --- local co-op page ----------------------------------------------------------------
 
@@ -3478,7 +3533,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         pads = Adw.PreferencesGroup(title=tr("Контроллеры"), description=tr(
             "Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад"))
         pads.set_header_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                           lambda _button: self.fill_coop_controllers(fresh=True)))
+                                           lambda _button: self.with_gamepads(self.fill_coop_controllers)))
         self.coop_pad_rows = []
         for player in range(1, bbport_coop.MAX_PLAYERS + 1):
             row = readable_choice(Adw.ComboRow(title=tr("Игрок {}").format(player)))
@@ -3496,12 +3551,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.show_coop_players()
         return page
 
-    def fill_coop_controllers(self, fresh=False):
+    def fill_coop_controllers(self):
         """Each player's controller choices: none, the keyboard and mouse, the connected
         controllers by device path (two of one model are told apart by it), and the saved choice
         while it is not connected. Without a saved choice the connected ones go in order, then
         the keyboard."""
-        connected = [(path, name) for _guid, name, _type, path in connected_gamepads(paths=True, fresh=fresh)
+        connected = [(path, name) for _guid, name, _type, path in connected_gamepads(paths=True, look=False)
                      if path]
         names = [name for _path, name in connected]
         choices = [(tr("Не выбран"), ""), (tr("Клавиатура и мышь"), bbport_coop.KEYBOARD)]
@@ -3530,7 +3585,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.coop_layout_row.set_subtitle(
             "" if players == 2 else tr("С тремя и четырьмя игроками — четверти экрана"))
 
-    def on_coop_start(self, _button):
+    def on_coop_start(self, _button, looked=False):
+        if not looked:  # the players' controllers and prompts from a fresh look, in a thread
+            if self.can_start():
+                self.with_gamepads(lambda: self.on_coop_start(None, True))
+            return
         if not self.can_start():
             return
         self.store()
@@ -3618,11 +3677,11 @@ class LauncherWindow(Adw.ApplicationWindow):
             def on_response(_dialog, response):
                 if response != "cancel":
                     self.online_row.set_active(response == "online")
-                    self.start_game()
+                    self.with_gamepads(self.start_game)
             dialog.connect("response", on_response)
-            dialog.present(self)
+            self.present_dialog(dialog)
             return
-        self.start_game()
+        self.with_gamepads(self.start_game)
 
     def start_game(self, env=None):
         """Starts the game with the launcher's environment, or `env` (local co-op's player 1)."""
@@ -3778,7 +3837,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         dialog.set_default_response("cancel")
         dialog.connect("response", lambda _d, response: response == "yes" and on_yes())
         if dialog_type is not None:
-            dialog.present(self)
+            self.present_dialog(dialog)
         else:
             dialog.present()
 
@@ -3913,7 +3972,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         if hasattr(Adw, "AlertDialog"):
             dialog = Adw.AlertDialog(heading=heading, body=body)
             dialog.add_response("ok", "OK")
-            dialog.present(self)
+            self.present_dialog(dialog)
         else:
             self.toasts.add_toast(Adw.Toast(title=f"{heading}: {body}", timeout=10))
 
