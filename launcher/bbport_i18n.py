@@ -7,6 +7,20 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'The keyboard player in menus: I, J, K, L move, Space confirms, Left Shift goes back',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Signed in: “{}” on {}',
+    'Графика': 'Graphics',
+    'Дополнительно': 'Advanced',
+    'Игра по сети выключена': 'Online play is off',
+    'Локально': 'Local',
+    'Модификации': 'Mods',
+    'Мультиплеер': 'Multiplayer',
+    'Начальная настройка': 'Setup',
+    'Нет учётной записи: создайте её или введите свою ниже': 'No account: create one or enter yours below',
+    'По сети': 'Online',
+    'Состояние': 'Status',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Account “{}” on {}: press Test to sign in',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— preparing the maps —\n',
     'Готовы (папка {})': 'Ready (folder {})',
@@ -846,6 +860,20 @@ EN = {
 }
 
 PT_BR = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'O jogador com teclado nos menus: I, J, K, L para mover, Espaço para confirmar, Shift esquerdo para voltar',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Sessão iniciada: “{}” em {}',
+    'Графика': 'Gráficos',
+    'Дополнительно': 'Avançado',
+    'Игра по сети выключена': 'O jogo online está desligado',
+    'Локально': 'Local',
+    'Модификации': 'Modificações',
+    'Мультиплеер': 'Multijogador',
+    'Начальная настройка': 'Configuração inicial',
+    'Нет учётной записи: создайте её или введите свою ниже': 'Sem conta: crie uma ou digite a sua abaixo',
+    'По сети': 'Online',
+    'Состояние': 'Estado',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Conta “{}” em {}: pressione Testar para entrar',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— preparando os mapas —\n',
     'Готовы (папка {})': 'Prontos (pasta {})',
@@ -1745,6 +1773,20 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'El jugador con teclado, en los menús: I, J, K, L para moverse, Espacio para aceptar y Mayús izquierda para volver',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Sesión iniciada: «{}» en {}',
+    'Графика': 'Gráficos',
+    'Дополнительно': 'Avanzado',
+    'Игра по сети выключена': 'El juego en línea está apagado',
+    'Локально': 'Local',
+    'Модификации': 'Modificaciones',
+    'Мультиплеер': 'Multijugador',
+    'Начальная настройка': 'Configuración inicial',
+    'Нет учётной записи: создайте её или введите свою ниже': 'Sin cuenta: crea una o escribe la tuya abajo',
+    'По сети': 'En línea',
+    'Состояние': 'Estado',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Cuenta «{}» en {}: pulsa Probar para iniciar sesión',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— preparando los mapas —\n',
     'Готовы (папка {})': 'Listos (carpeta {})',
@@ -2553,6 +2595,20 @@ ES = {
 
 # Italian.
 IT = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Il giocatore con la tastiera nei menu: I, J, K, L per muoversi, Spazio per confermare, Maiusc sinistro per tornare indietro',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Accesso effettuato: «{}» su {}',
+    'Графика': 'Grafica',
+    'Дополнительно': 'Avanzate',
+    'Игра по сети выключена': 'Il gioco online è disattivato',
+    'Локально': 'Locale',
+    'Модификации': 'Modifiche',
+    'Мультиплеер': 'Multigiocatore',
+    'Начальная настройка': 'Configurazione iniziale',
+    'Нет учётной записи: создайте её или введите свою ниже': 'Nessun account: creane uno o inserisci il tuo qui sotto',
+    'По сети': 'Online',
+    'Состояние': 'Stato',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Account «{}» su {}: premi Prova per accedere',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— preparazione delle mappe —\n',
     'Готовы (папка {})': 'Pronte (cartella {})',
@@ -3361,6 +3417,20 @@ IT = {
 
 # French.
 FR = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Le joueur au clavier dans les menus : I, J, K, L pour se déplacer, Espace pour valider, Maj gauche pour revenir',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Connecté : « {} » sur {}',
+    'Графика': 'Graphismes',
+    'Дополнительно': 'Avancé',
+    'Игра по сети выключена': 'Le jeu en ligne est désactivé',
+    'Локально': 'Local',
+    'Модификации': 'Modifications',
+    'Мультиплеер': 'Multijoueur',
+    'Начальная настройка': 'Configuration initiale',
+    'Нет учётной записи: создайте её или введите свою ниже': 'Aucun compte : créez-en un ou saisissez le vôtre ci-dessous',
+    'По сети': 'En ligne',
+    'Состояние': 'État',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Compte « {} » sur {} : appuyez sur Tester pour vous connecter',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— préparation des cartes —\n',
     'Готовы (папка {})': 'Prêtes (dossier {})',
@@ -4169,6 +4239,20 @@ FR = {
 
 # German.
 DE = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Der Tastaturspieler in Menüs: I, J, K, L zum Bewegen, Leertaste zum Bestätigen, linke Umschalttaste zurück',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': 'Angemeldet: „{}“ auf {}',
+    'Графика': 'Grafik',
+    'Дополнительно': 'Erweitert',
+    'Игра по сети выключена': 'Online-Spiel ist aus',
+    'Локально': 'Lokal',
+    'Модификации': 'Modifikationen',
+    'Мультиплеер': 'Mehrspieler',
+    'Начальная настройка': 'Ersteinrichtung',
+    'Нет учётной записи: создайте её или введите свою ниже': 'Kein Konto: lege eins an oder gib deins unten ein',
+    'По сети': 'Online',
+    'Состояние': 'Status',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Konto „{}“ auf {}: drücke Testen, um dich anzumelden',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— Karten werden vorbereitet —\n',
     'Готовы (папка {})': 'Bereit (Ordner {})',
@@ -4977,6 +5061,20 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': '键盘玩家在菜单中：I、J、K、L 移动，空格确认，左 Shift 返回',
+    # The sidebar's sections and the Multiplayer page.
+    'Вход выполнен: «{}» на {}': '已登录：“{}”，服务器 {}',
+    'Графика': '图形',
+    'Дополнительно': '高级',
+    'Игра по сети выключена': '联机游戏已关闭',
+    'Локально': '本地',
+    'Модификации': '修改',
+    'Мультиплеер': '多人游戏',
+    'Начальная настройка': '初始设置',
+    'Нет учётной записи: создайте её или введите свою ниже': '没有账户：在下方创建一个或填写你的账户',
+    'По сети': '联机',
+    'Состояние': '状态',
+    'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': '账户“{}”，服务器 {}：点击“检测”以登录',
     # Hunter's Atlas: preparing its maps.
     '\n— подготовка карт —\n': '\n— 正在准备地图 —\n',
     'Готовы (папка {})': '已就绪（文件夹 {}）',

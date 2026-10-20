@@ -38,7 +38,7 @@ import gi
 os.environ.setdefault("GSK_RENDERER", "cairo")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk, Pango  # noqa: E402
 
 PORT_DIR = Path(__file__).resolve().parent.parent  # native_probe (or the package's copy)
 sys.path.insert(0, str(PORT_DIR / 'scripts'))
@@ -916,7 +916,14 @@ THANKS = (
 class LauncherWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="Bloodborne")
-        self.set_default_size(760, 820)
+        self.set_default_size(980, 820)
+        # Narrow (the Steam Deck in game mode, a small window): the sidebar becomes a list of the
+        # sections, each one opened over it with a back button.
+        self.narrow = False
+        breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 640sp"))
+        breakpoint.connect("apply", lambda *_: self.on_width_breakpoint(True))
+        breakpoint.connect("unapply", lambda *_: self.on_width_breakpoint(False))
+        self.add_breakpoint(breakpoint)
         self.settings = load_settings()
         set_language(self.settings.get("ui_language", ""))
         self.ini, self.ini_lines = load_ini()
@@ -936,46 +943,89 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.connect("close-request", self.on_close)
 
     def build(self):
-        """(Re)creates the window's content in the current launcher language."""
-        toolbar = Adw.ToolbarView()
-        header = Adw.HeaderBar()
+        """(Re)creates the window's content in the current launcher language: the sections in a
+        sidebar (collapsed into a list on a narrow window, the Steam Deck's), each one's page
+        beside it, and Play always in the header."""
+        self.split = Adw.NavigationSplitView(min_sidebar_width=210, max_sidebar_width=260,
+                                             sidebar_width_fraction=0.26)
         self.stack = Adw.ViewStack()
-        switcher = Adw.ViewSwitcher(stack=self.stack, policy=Adw.ViewSwitcherPolicy.NARROW)
-        header.set_title_widget(switcher)
+        content = Adw.ToolbarView()
+        header = Adw.HeaderBar()
+        self.section_title = Adw.WindowTitle(title="Bloodborne")
+        header.set_title_widget(self.section_title)
         self.launch_button = Gtk.Button()
         self.launch_button.connect("clicked", self.on_launch)
         header.pack_end(self.launch_button)
-        toolbar.add_top_bar(header)
-
+        content.add_top_bar(header)
         self.toasts = Adw.ToastOverlay()
         self.toasts.set_child(self.stack)
-        toolbar.set_content(self.toasts)
-        self.set_content(toolbar)
+        content.set_content(self.toasts)
+        self.split.set_content(Adw.NavigationPage(child=content, title="Bloodborne"))
+
+        self.sidebar = Gtk.ListBox(css_classes=["navigation-sidebar"])
+        self.sidebar.set_header_func(self.sidebar_header)
+        self.sidebar.connect("row-activated", lambda _list, row: self.show_section(row.section))
+        sidebar = Adw.ToolbarView()
+        sidebar.add_top_bar(Adw.HeaderBar(title_widget=Adw.WindowTitle(title="Bloodborne")))
+        sidebar.set_content(Gtk.ScrolledWindow(child=self.sidebar,
+                                               hscrollbar_policy=Gtk.PolicyType.NEVER))
+        self.split.set_sidebar(Adw.NavigationPage(child=sidebar, title="Bloodborne"))
+        self.set_content(self.split)
+        self.split.set_collapsed(self.narrow)
 
         log_text = self.log_text() if hasattr(self, "log_view") else ""
         # Issue #18: an error while building a page left the window blank for good (a saved value
         # it could not read). A page that fails shows its error instead; the others are built.
         self.build_errors = []
+        self.section_groups = {}
 
-        def add_page(build_page, name, title, icon):
+        def built(build_page):
             try:
-                child = build_page()
+                return build_page()
             except Exception:
                 error = traceback.format_exc()
                 self.build_errors.append(error)
                 print(error, file=sys.stderr, end="")
-                child = self.build_error_page(error)
-            self.stack.add_titled_with_icon(child, name, title, icon)
+                return self.build_error_page(error)
 
-        add_page(self.build_settings_page, "settings", tr("Настройки"), "preferences-system-symbolic")
-        add_page(self.build_online_page, "online", tr("Онлайн"), "network-workgroup-symbolic")
-        add_page(self.build_coop_page, "coop", tr("Локальный кооп"), "system-users-symbolic")
-        add_page(self.build_cheats_page, "cheats", tr("Читы"), "applications-games-symbolic")
-        add_page(self.build_trophies_page, "trophies", tr("Трофеи"), "starred-symbolic")
-        self.stack.connect("notify::visible-child-name", lambda *_: not self.build_errors and
-                           self.stack.get_visible_child_name() == "trophies" and self.refresh_trophies())
-        add_page(self.build_log_page, "log", tr("Журнал"), "utilities-terminal-symbolic")
-        add_page(self.build_about_page, "about", tr("О программе"), "help-about-symbolic")
+        # The settings' groups are shared out among sections; a failure there marks them all.
+        settings_failed = isinstance(built(self.build_settings_page), Gtk.Widget)
+        cheats_failed = not settings_failed and isinstance(built(self.build_cheats_page), Gtk.Widget)
+
+        def placed(section, failed):
+            if failed:
+                return self.build_error_page(self.build_errors[-1])
+            page = Adw.PreferencesPage()
+            for _rank, group in sorted(self.section_groups.get(section, []), key=lambda item: item[0]):
+                page.add(group)
+            return page
+
+        multiplayer = built(self.build_multiplayer_page)
+        sections = (
+            ("graphics", tr("Графика"), "video-display-symbolic", placed("graphics", settings_failed)),
+            ("controls", tr("Управление"), "input-gaming-symbolic", placed("controls", settings_failed)),
+            ("multiplayer", tr("Мультиплеер"), "system-users-symbolic", multiplayer),
+            ("mods", tr("Модификации"), "application-x-addon-symbolic",
+             placed("mods", settings_failed or cheats_failed)),
+            ("trophies", tr("Трофеи"), "starred-symbolic", built(self.build_trophies_page)),
+            ("setup", tr("Начальная настройка"), "folder-symbolic", placed("setup", settings_failed)),
+            ("advanced", tr("Дополнительно"), "preferences-other-symbolic", placed("advanced", settings_failed)),
+            ("log", tr("Журнал"), "utilities-terminal-symbolic", built(self.build_log_page)),
+            ("about", tr("О программе"), "help-about-symbolic", built(self.build_about_page)),
+        )
+        for name, title, icon, page in sections:
+            self.stack.add_titled_with_icon(page, name, title, icon)
+            row = Gtk.ListBoxRow()
+            row.section = name
+            box = Gtk.Box(spacing=12, margin_top=6, margin_bottom=6, margin_start=6, margin_end=6)
+            box.append(Gtk.Image(icon_name=icon))
+            box.append(Gtk.Label(label=title, xalign=0, hexpand=True, ellipsize=Pango.EllipsizeMode.END))
+            row.set_child(box)
+            row.set_tooltip_text(title)
+            self.sidebar.append(row)
+        self.stack.connect("notify::visible-child-name", lambda *_: self.on_section_changed())
+        self.show_section("graphics", reveal=False)
+        self.on_section_changed()  # already the visible page: no notify for the title
         if self.build_errors:
             # Some of the settings' rows may be missing: nothing is saved (the user's files stay
             # as they are) and the game is not started from a half-built window.
@@ -1020,7 +1070,8 @@ class LauncherWindow(Adw.ApplicationWindow):
     # --- settings page -------------------------------------------------------------------
 
     def build_settings_page(self):
-        page = Adw.PreferencesPage()
+        """The settings' groups, placed in their sections (place): Graphics, Controls, Mods,
+        Setup and Advanced."""
 
         launcher = Adw.PreferencesGroup()
         # In English too, so that a language one cannot read still leads back here; once.
@@ -1031,7 +1082,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                          UI_LANGUAGES, self.settings.get("ui_language", ""))
         self.ui_language_row.connect("notify::selected", self.on_ui_language)
         launcher.add(self.ui_language_row)
-        page.add(launcher)
+        self.place("setup", 10, launcher)
 
         game = Adw.PreferencesGroup(title=tr("Игра"))
         # The game from your own PS4 packages: extracted, the update merged, the add-ons apart.
@@ -1096,14 +1147,14 @@ class LauncherWindow(Adw.ApplicationWindow):
                                          active=self.settings.get("discord", True))
         self.discord_row.add_prefix(themed_icon("discord-symbolic"))
         game.add(self.discord_row)
-        page.add(game)
+        self.place("setup", 20, game)
 
         # Auto: the new memory model on AMD, the 0.3 one elsewhere; or either by hand.
         mode = Adw.PreferencesGroup(title=tr("Режим работы"))
         self.memory_model_row = combo_row(tr("Модель памяти и трансляции"), tr(PC_MODEL_SUBTITLE),
                                           MEMORY_MODELS, self.settings.get("memory_model", "auto"))
         mode.add(self.memory_model_row)
-        page.add(mode)
+        self.place("advanced", 10, mode)
 
         self.mods_group = Adw.PreferencesGroup(
             title=tr("Моды"), description=tr(
@@ -1122,7 +1173,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mods_group.add(self.mods_folder_row)
         self.mod_list = FolderList(self.mods_group)
         self.refresh_mods()
-        page.add(self.mods_group)
+        self.place("mods", 40, self.mods_group)
 
         self.patches_group = Adw.PreferencesGroup(
             title=tr("Сторонние патчи"),
@@ -1139,7 +1190,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.patches_group.add(self.patches_folder_row)
         self.patch_list = FolderList(self.patches_group)
         self.refresh_patches()
-        page.add(self.patches_group)
+        self.place("mods", 50, self.patches_group)
 
         screen = Adw.PreferencesGroup(title=tr("Экран"))
         # A size written by hand in bbport.ini (5120x2160, ...) stays a choice instead of 720p.
@@ -1194,10 +1245,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         screen.add(self.present_row)
         self.hdr_row = Adw.SwitchRow(title=tr("Разрешить HDR"), active=self.settings["hdr"])
         screen.add(self.hdr_row)
-        page.add(screen)
+        self.place("graphics", 10, screen)
 
         # Issue #15: the first gamepad SDL found was taken (wheels and other controllers too).
-        controls = Adw.PreferencesGroup(title=tr("Управление"))
+        # Controls: the gamepad, then the keyboard and the mouse.
+        controls = Adw.PreferencesGroup(title=tr("Геймпад"))
+        keys = Adw.PreferencesGroup(title=tr("Клавиатура и мышь"))
         self.gamepad_row = Adw.ComboRow(title=tr("Контроллер"))
         # Controller names are long: the selected one is shown in full under the title.
         self.gamepad_row.connect("notify::selected", lambda *_: self.show_gamepad())
@@ -1249,35 +1302,36 @@ class LauncherWindow(Adw.ApplicationWindow):
                 expander.add_row(row)
                 self.control_rows[(kind, name)] = (row, default)
                 self.show_control(kind, name)
-            controls.add(expander)
+            (keys if kind == "key" else controls).add(expander)
         # Mouse look (runtime_pad.c): a click in the game takes the mouse, F1 lets it go.
         self.mouse_look_row = Adw.SwitchRow(
             title=tr("Камера мышью"),
             subtitle=tr("Щелчок в окне игры захватывает мышь, F1 — отпускает"),
             active=self.ini.get("mouse_look", "1") == "1")
-        controls.add(self.mouse_look_row)
+        keys.add(self.mouse_look_row)
         self.mouse_sensitivity_row = Adw.SpinRow.new_with_range(0.1, 10.0, 0.05)
         self.mouse_sensitivity_row.set_title(tr("Чувствительность мыши"))
         self.mouse_sensitivity_row.set_digits(2)
         self.mouse_sensitivity_row.set_value(number(self.ini.get("mouse_sensitivity", "1.0"), "1.0",
                                                     key="mouse_sensitivity"))
-        controls.add(self.mouse_sensitivity_row)
+        keys.add(self.mouse_sensitivity_row)
         self.mouse_invert_row = Adw.SwitchRow(title=tr("Инвертировать мышь по вертикали"),
                                               active=self.ini.get("mouse_invert_y") == "1")
-        controls.add(self.mouse_invert_row)
+        keys.add(self.mouse_invert_row)
         # mouse_camera=direct (gpu/shim/bloodborne_cam.cpp): the mouse turns the camera itself.
         self.mouse_camera_row = Adw.SwitchRow(
             title=tr("Прямая камера мышью (1:1)"),
             subtitle=tr("Мышь поворачивает камеру сама, без мёртвой зоны и разгона стика, как в "
                         "игре для ПК. При захвате цели мышь снова работает как стик"),
             active=self.ini.get("mouse_camera") == "direct")
-        controls.add(self.mouse_camera_row)
+        keys.add(self.mouse_camera_row)
         def mouse_rows_sensitive(*_):
             for row in (self.mouse_sensitivity_row, self.mouse_invert_row, self.mouse_camera_row):
                 row.set_sensitive(self.mouse_look_row.get_active())
         self.mouse_look_row.connect("notify::active", mouse_rows_sensitive)
         mouse_rows_sensitive()
-        page.add(controls)
+        self.place("controls", 10, controls)
+        self.place("controls", 20, keys)
 
         # Hunter's Atlas (MikeTat1988): a fullscreen map in the game's quick menu. Its maps are made
         # from the player's game files by its generator (bbport_atlas_maps: Prepare maps).
@@ -1308,7 +1362,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         atlas.add(self.atlas_progress_row)
         self.atlas_row.connect("notify::active", lambda *_: self.show_atlas())
         self.show_atlas()
-        page.add(atlas)
+        self.place("mods", 10, atlas)
 
         upscaler = Adw.PreferencesGroup(
             title=tr("Апскейлер"),
@@ -1355,7 +1409,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.show_fps_row = Adw.SwitchRow(title=tr("Показывать FPS"),
                                           active=self.ini.get("show_fps") == "1")
         upscaler.add(self.show_fps_row)
-        page.add(upscaler)
+        self.place("graphics", 20, upscaler)
 
         effects = Adw.PreferencesGroup(title=tr("Эффекты игры"),
                                        description=tr("Патчи игры, применяются при запуске"))
@@ -1380,8 +1434,10 @@ class LauncherWindow(Adw.ApplicationWindow):
             subtitle=tr("Игра сразу открывает главное меню: в сети, если включена игра по сети, "
                         "иначе вне сети (патч игры)"),
             active=self.settings.get("skip_network_choice", True))
-        effects.add(self.skip_network_row)
-        page.add(effects)
+        # On the Multiplayer page's online tab (build_online_page).
+        self.netchoice_group = Adw.PreferencesGroup()
+        self.netchoice_group.add(self.skip_network_row)
+        self.place("graphics", 40, effects)
 
         streaming = Adw.PreferencesGroup(title=tr("Загрузки и плавность"),
                                          description=tr("Патчи игры из bbhost, применяются при запуске"))
@@ -1391,7 +1447,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                 active=self.ini.get(key, "1" if default else "0") == "1")
             self.streaming_rows[key] = row
             streaming.add(row)
-        page.add(streaming)
+        self.place("mods", 60, streaming)
 
         frames = Adw.PreferencesGroup(title=tr("Частота кадров"))
         self.fps_row = combo_row(tr("Режим"), tr("Какой патч частоты кадров применить к игре"),
@@ -1403,7 +1459,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.limit_row.set_value(number(self.settings["fps_limit"], 0, int, "settings.json",
                                         "fps_limit"))
         frames.add(self.limit_row)
-        page.add(frames)
+        self.place("graphics", 30, frames)
 
         perf = Adw.PreferencesGroup(title=tr("Производительность"))
         self.pipe_row = combo_row(
@@ -1425,7 +1481,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.cache_row.add_suffix(self.cache_button)
         perf.add(self.cache_row)
         self.show_cache()
-        page.add(perf)
+        self.place("advanced", 20, perf)
 
         dev = Adw.PreferencesGroup(title=tr("Для разработчика"))
         self.mangohud_row = Adw.SwitchRow(title="MangoHud", active=self.settings["mangohud"])
@@ -1460,8 +1516,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.extra_row = Adw.EntryRow(title=tr("Доп. переменные (ИМЯ=значение через пробел)"),
                                       text=self.settings["extra_env"])
         dev.add(self.extra_row)
-        page.add(dev)
-        return page
+        self.place("advanced", 30, dev)
 
     def on_ui_language(self, row, _param):
         choice = combo_value(row)
@@ -2165,6 +2220,14 @@ class LauncherWindow(Adw.ApplicationWindow):
             "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы "
             "идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия "
             "игры 1.09 и тот же сервер"))
+        # Whether the account works, at a glance (the connection test signs in).
+        self.online_status_row = Adw.ActionRow(title=tr("Состояние"))
+        self.online_status_icon = Gtk.Image()
+        self.online_status_row.add_prefix(self.online_status_icon)
+        self.online_status_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
+        self.online_status_button.connect("clicked", self.on_test_connection)
+        self.online_status_row.add_suffix(self.online_status_button)
+        play.add(self.online_status_row)
         self.online_row = Adw.SwitchRow(title=tr("Играть онлайн"),
                                         subtitle=tr("Выключено: игра остаётся офлайн, как раньше"),
                                         active=s["online"])
@@ -2173,6 +2236,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.online_row.set_sensitive(False)
             self.online_row.set_subtitle(tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн"))
         page.add(play)
+        if hasattr(self, "netchoice_group"):
+            page.add(self.netchoice_group)
 
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
         self.community_row = Adw.EntryRow(title=tr("Игровой сервер"), text=s["online_community"])
@@ -2331,7 +2396,37 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(connection)
         self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
         self.show_server_kind()
+        self.last_login = getattr(self, "last_login", None)
+        for row, signal in ((self.online_row, "notify::active"), (self.server_kind_row, "notify::selected"),
+                            (self.npid_row, "changed"), (self.password_row, "changed")):
+            row.connect(signal, lambda *_: self.show_online_status())
+        self.show_online_status()
         return page
+
+    def show_online_status(self):
+        """The Online tab's first row: off, no account, an account not checked yet, or the last
+        connection test's sign-in with this account on this server."""
+        npid = self.npid_row.get_text().strip()
+        item = self.server_kind_row.get_selected_item()
+        server = item.get_string() if item is not None else ""
+        checked = self.last_login if self.last_login and self.last_login[:3] == (
+            npid, combo_value(self.server_kind_row), self.password_row.get_text()) else None
+        if not online_module():
+            icon, text = "network-offline-symbolic", tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн")
+        elif not self.online_row.get_active():
+            icon, text = "network-offline-symbolic", tr("Игра по сети выключена")
+        elif not npid:
+            icon, text = "dialog-warning-symbolic", tr("Нет учётной записи: создайте её или введите свою ниже")
+        elif checked and checked[3]:
+            icon, text = "object-select-symbolic", tr("Вход выполнен: «{}» на {}").format(npid, server)
+        elif checked:
+            icon, text = "dialog-warning-symbolic", tr("Не удалось войти: {}").format(checked[4])
+        else:
+            icon, text = "network-idle-symbolic", tr("Учётная запись «{}» на {}: нажмите «Проверить», "
+                                                     "чтобы войти").format(npid, server)
+        self.online_status_icon.set_from_icon_name(icon)
+        self.online_status_row.set_subtitle(GLib.markup_escape_text(text))
+        self.online_status_button.set_sensitive(online_module() and self.test_button.get_sensitive())
 
     def online_settings(self):
         """The Online page's settings (the keys of DEFAULTS)."""
@@ -2510,6 +2605,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.test_rows = []
         self.test_button.set_sensitive(False)
         self.test_button.set_label(tr("Проверка…"))
+        kind = combo_value(self.server_kind_row)
+        self.online_status_button.set_sensitive(False)
 
         def show(results):
             for name, address, ok, detail in results:
@@ -2520,6 +2617,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 elif name == "login":
                     status = tr("вход выполнен") if ok else login_errors.get(
                         detail, tr("вход не удался ({})").format(detail))
+                    self.last_login = (account[0], kind, account[1], ok, status)
                 else:
                     status = tr("доступен") if ok else f'{tr("недоступен")} ({detail})'
                 # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
@@ -2530,6 +2628,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.test_rows.append(row)
             self.test_button.set_sensitive(True)
             self.test_button.set_label(tr("Проверить"))
+            self.show_online_status()
             return False
 
         def work():
@@ -2769,7 +2868,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             if quiet and isinstance(result, dict) and bbport_update.is_newer(result["tag"]):
                 toast = Adw.Toast(title=tr("Доступна версия {}").format(result["tag"]),
                                   button_label=tr("Подробнее"), timeout=8)
-                toast.connect("button-clicked", lambda *_: self.stack.set_visible_child_name("about"))
+                toast.connect("button-clicked", lambda *_: self.show_section("about"))
                 self.toasts.add_toast(toast)
             return False
 
@@ -2990,24 +3089,80 @@ class LauncherWindow(Adw.ApplicationWindow):
     # --- cheats page ---------------------------------------------------------------------
 
     def build_cheats_page(self):
-        page = Adw.PreferencesPage()
+        """The cheats and gameplay tweaks, in the Mods section."""
         self.cheat_rows = {}
-        for title, description, items in (
-                (tr("Читы"), tr("Патчи игры версии 1.09, применяются при запуске. Для обычного "
-                                "прохождения и игры по сети оставьте их выключенными"), CHEATS),
-                (tr("Изменения игрового процесса"), None, TWEAKS)):
+        for rank, title, description, items in (
+                (20, tr("Читы"), tr("Патчи игры версии 1.09, применяются при запуске. Для обычного "
+                                    "прохождения и игры по сети оставьте их выключенными"), CHEATS),
+                (30, tr("Изменения игрового процесса"), None, TWEAKS)):
             group = Adw.PreferencesGroup(title=title, description=description)
             for key, name, subtitle in items:
                 row = Adw.SwitchRow(title=tr(name), subtitle=tr(subtitle),
                                     active=self.ini.get(key, "0") == "1")
                 self.cheat_rows[key] = row
                 group.add(row)
-            page.add(group)
+            self.place("mods", rank, group)
         # Enemy control and the free camera use the same buttons: one at a time.
         control, camera = self.cheat_rows["cheat_enemy_control"], self.effect_rows["debug_camera"]
         control.connect("notify::active", lambda row, _p: row.get_active() and camera.set_active(False))
         camera.connect("notify::active", lambda row, _p: row.get_active() and control.set_active(False))
-        return page
+
+    # --- sections ------------------------------------------------------------------------
+
+    def place(self, section, rank, group):
+        """Puts a settings group in a section's page, in `rank` order."""
+        self.section_groups.setdefault(section, []).append((rank, group))
+
+    def sidebar_header(self, row, before):
+        # The sections set up once (and the Journal, About) apart from the everyday ones.
+        row.set_header(Gtk.Separator(margin_top=6, margin_bottom=6)
+                       if before is not None and row.section == "setup" else None)
+
+    def show_section(self, name, reveal=True):
+        """Shows a section; "online" and "coop" are the Multiplayer page's tabs."""
+        if name in ("online", "coop"):
+            self.multiplayer_stack.set_visible_child_name(name)
+            name = "multiplayer"
+        self.stack.set_visible_child_name(name)
+        if reveal:
+            self.split.set_show_content(True)
+
+    def on_section_changed(self):
+        name = self.stack.get_visible_child_name()
+        row = next((row for row in self.sidebar if getattr(row, "section", None) == name), None)
+        if row is not None and self.sidebar.get_selected_row() is not row:
+            self.sidebar.select_row(row)
+        page = self.stack.get_page(self.stack.get_visible_child())
+        self.section_title.set_title(page.get_title() if page else "Bloodborne")
+        if name == "trophies" and not self.build_errors:
+            self.refresh_trophies()
+
+    def on_width_breakpoint(self, narrow):
+        self.narrow = narrow
+        if hasattr(self, "split"):
+            self.split.set_collapsed(narrow)
+
+    def build_multiplayer_page(self):
+        """Online play and local co-op, as two tabs of one page."""
+        self.multiplayer_stack = Adw.ViewStack()
+        for build_page, name, title, icon in (
+                (self.build_online_page, "online", tr("По сети"), "network-workgroup-symbolic"),
+                (self.build_coop_page, "coop", tr("Локально"), "computer-symbolic")):
+            self.multiplayer_stack.add_titled_with_icon(build_page(), name, title, icon)
+        switcher_type = getattr(Adw, "InlineViewSwitcher", None)
+        if switcher_type is not None:
+            switcher = switcher_type(stack=self.multiplayer_stack, halign=Gtk.Align.CENTER,
+                                     display_mode=Adw.InlineViewSwitcherDisplayMode.BOTH)
+        else:
+            switcher = Adw.ViewSwitcher(stack=self.multiplayer_stack, policy=Adw.ViewSwitcherPolicy.WIDE,
+                                        halign=Gtk.Align.CENTER)
+        switcher.set_margin_top(12)
+        switcher.set_margin_bottom(6)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.append(switcher)
+        self.multiplayer_stack.set_vexpand(True)
+        box.append(self.multiplayer_stack)
+        return box
 
     def build_error_page(self, error):
         """In place of a page that failed to build: the error, to copy into a report."""
@@ -3145,7 +3300,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         group.add(self.coop_sound_row)
         page.add(group)
 
-        pads = Adw.PreferencesGroup(title=tr("Контроллеры"))
+        pads = Adw.PreferencesGroup(title=tr("Контроллеры"), description=tr(
+            "Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад"))
         pads.set_header_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
                                            lambda _button: self.fill_coop_controllers()))
         self.coop_pad_rows = []
@@ -3296,7 +3452,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         if self.online_row.get_active() and "@" in self.npid_row.get_text():
             self.alert("Bloodborne", tr("Online ID — это имя учётной записи (NPID), "
                                         "зарегистрированное на сервере, а не адрес email"))
-            self.stack.set_visible_child_name("online")
+            self.show_section("online")
             return
         self.store()
         self.clear_log()
@@ -3315,7 +3471,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.read_line()
         self.process.wait_async(None, self.on_exit)
         self.update_launch_button()
-        self.stack.set_visible_child_name("log")
+        self.show_section("log")
 
     def read_line(self):
         self.stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.on_line)
