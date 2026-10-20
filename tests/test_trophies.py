@@ -2,6 +2,7 @@ from paths import ROOT  # noqa: F401
 import struct
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import trophies
@@ -140,6 +141,19 @@ class TrophyFileTests(unittest.TestCase):
             (directory / 'earned.tsv').write_text('1\t1700000000\n1\t1800000000\nbad\n')
             self.assertEqual(trophies.read_earned(directory), {1: 1700000000})
             self.assertIsNone(trophies.prepare(Path(tmp) / 'nothing', user))
+
+    def test_prepared_once_for_the_same_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            game, user = self.game(tmp), Path(tmp) / 'user'
+            trophies.prepare(game, user, KEY, 3)
+            with mock.patch.object(trophies, 'trophy_list', wraps=trophies.trophy_list) as made:
+                directory = trophies.prepare(game, user, KEY, 3)
+                self.assertEqual(made.call_count, 0)
+                self.assertEqual(trophies.read_list(directory)[1]['name'], 'Primero')
+                trophies.prepare(game, user, KEY, 1)  # another language
+                trophies.prepare(game, user, None, 1)  # no key
+                self.assertEqual(made.call_count, 2)
+            self.assertNotIn(KEY.hex(), (directory / 'trophies.source').read_text())
 
 
     def test_marked_by_hand(self):

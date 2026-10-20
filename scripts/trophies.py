@@ -17,6 +17,7 @@ to earned.tsv there (id, Unix time) and shows it in the overlay (src/runtime_ser
 launcher's Trophies page can mark trophies earned on a PS4 (a third column, "manual").
 """
 import argparse
+import hashlib
 import os
 from pathlib import Path
 import re
@@ -394,9 +395,22 @@ def prepare(game, user, key=None, language=None):
     trp = Path(game) / 'sce_sys' / 'trophy' / 'trophy00.trp'
     if comm_id is None or not trp.is_file():
         return None
+    directory = trophy_dir(user, comm_id)
+    # The launcher asks on every visit to its Trophies page, and decrypting the names in Python
+    # takes half a second: the same .trp, key, language and script are made once. The key is in
+    # the digest only, not written down.
+    st = trp.stat()
+    source = hashlib.sha256(f'{trp.resolve()}\0{st.st_size}\0{st.st_mtime_ns}\0{language}\0'.encode()
+                            + (key or b'-') + Path(__file__).read_bytes()).hexdigest()
+    stamp = directory / 'trophies.source'
+    try:
+        if stamp.read_text() == source and (directory / 'trophies.tsv').is_file() \
+                and (directory / 'icons').is_dir():
+            return directory
+    except OSError:
+        pass
     entries = read_trp(trp)
     trophies = trophy_list(entries, key, comm_id, language)
-    directory = trophy_dir(user, comm_id)
     icons = directory / 'icons'
     icons.mkdir(parents=True, exist_ok=True)
     for name, data in entries.items():
@@ -412,6 +426,7 @@ def prepare(game, user, key=None, language=None):
     temp = directory / 'trophies.tsv.tmp'
     temp.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     os.replace(temp, directory / 'trophies.tsv')
+    stamp.write_text(source)
     return directory
 
 

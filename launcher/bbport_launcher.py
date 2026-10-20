@@ -761,16 +761,25 @@ CONTROLS = [
 ]
 
 
-def connected_gamepads(types=False, paths=False):
+GAMEPADS_KEPT = 3.0  # seconds: one look at the gamepads serves a whole build of the window
+_gamepads = (0.0, None)
+
+
+def connected_gamepads(types=False, paths=False, fresh=False):
     """(GUID, name) of the connected gamepads (bb-gpu-capabilities --gamepads), [] if unknown;
     with `types`, (GUID, name, SDL type) ("" for a generic gamepad); with `paths`, also the device
-    path, which tells two of one model apart (local co-op)."""
-    tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
-    try:
-        run = subprocess.run([str(tool), "--gamepads"], capture_output=True, text=True, timeout=5)
-    except (OSError, subprocess.SubprocessError):
-        return []
-    pads = [(line.split("\t") + ["", ""])[:4] for line in run.stdout.splitlines() if "\t" in line]
+    path, which tells two of one model apart (local co-op). Each look starts the tool (0.3 s):
+    one taken less than GAMEPADS_KEPT ago is used again, unless `fresh` (Refresh)."""
+    global _gamepads
+    taken, pads = _gamepads
+    if fresh or pads is None or time.monotonic() - taken > GAMEPADS_KEPT:
+        tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
+        try:
+            run = subprocess.run([str(tool), "--gamepads"], capture_output=True, text=True, timeout=5)
+        except (OSError, subprocess.SubprocessError):
+            return []
+        pads = [(line.split("\t") + ["", ""])[:4] for line in run.stdout.splitlines() if "\t" in line]
+        _gamepads = (time.monotonic(), pads)
     return [tuple(pad if paths else pad[:3] if types else pad[:2]) for pad in pads]
 
 
@@ -1290,7 +1299,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Controller names are long: the selected one is shown in full under the title.
         self.gamepad_row.connect("notify::selected", lambda *_: self.show_gamepad())
         self.gamepad_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                                lambda _button: self.fill_gamepads()))
+                                                lambda _button: self.fill_gamepads(fresh=True)))
         self.fill_gamepads()
         controls.add(self.gamepad_row)
         # Xbox / Switch prompts and the gestures menu: Dommo's mods (Nexus, Bloodborne mod 30);
@@ -1945,7 +1954,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.show_control(kind, name)
         process.communicate_utf8_async(None, None, done)
 
-    def fill_gamepads(self):
+    def fill_gamepads(self, fresh=False):
         """The controller choices: the first connected one, the connected ones, and the chosen
         one while it is not connected (on Refresh, the row's choice, saved or not)."""
         if hasattr(self.gamepad_row, "values"):
@@ -1955,7 +1964,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             current = self.settings.get("gamepad", "")
             chosen = self.settings.get("gamepad_name") or current
         choices = [(tr("Авто"), "", tr("Тот, которым играете"))]
-        choices += [(name, guid, name) for guid, name in connected_gamepads()]
+        choices += [(name, guid, name) for guid, name in connected_gamepads(fresh=fresh)]
         if current and current not in [guid for _, guid, _ in choices]:
             choices.append((tr("{} (не подключён)").format(chosen), current, chosen))
         self.gamepad_row.set_model(Gtk.StringList.new([label for label, _, _ in choices]))
@@ -3423,7 +3432,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         pads = Adw.PreferencesGroup(title=tr("Контроллеры"), description=tr(
             "Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад"))
         pads.set_header_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
-                                           lambda _button: self.fill_coop_controllers()))
+                                           lambda _button: self.fill_coop_controllers(fresh=True)))
         self.coop_pad_rows = []
         for player in range(1, bbport_coop.MAX_PLAYERS + 1):
             row = readable_choice(Adw.ComboRow(title=tr("Игрок {}").format(player)))
@@ -3441,12 +3450,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.show_coop_players()
         return page
 
-    def fill_coop_controllers(self):
+    def fill_coop_controllers(self, fresh=False):
         """Each player's controller choices: none, the keyboard and mouse, the connected
         controllers by device path (two of one model are told apart by it), and the saved choice
         while it is not connected. Without a saved choice the connected ones go in order, then
         the keyboard."""
-        connected = [(path, name) for _guid, name, _type, path in connected_gamepads(paths=True)
+        connected = [(path, name) for _guid, name, _type, path in connected_gamepads(paths=True, fresh=fresh)
                      if path]
         names = [name for _path, name in connected]
         choices = [(tr("Не выбран"), ""), (tr("Клавиатура и мышь"), bbport_coop.KEYBOARD)]

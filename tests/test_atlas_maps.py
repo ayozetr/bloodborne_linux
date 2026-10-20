@@ -50,6 +50,17 @@ class StateTests(unittest.TestCase):
         os.link(tools / 'cache' / 'numpy.so', tools / 'venv' / 'numpy.so')
         self.assertEqual(maps.folder_bytes(tools), 1000)
 
+    def test_size_counted_once_per_state_of_the_folders(self):
+        make_maps(self.data / maps.MAPS)
+        first = maps.maps_state(self.data)['bytes']
+        with mock.patch.object(maps, 'folder_bytes', return_value=1) as walk:
+            self.assertEqual(maps.maps_state(self.data)['bytes'], first)
+            self.assertEqual(walk.call_count, 0)
+            # Prepared again: a new folder swapped in.
+            (self.data / maps.MAPS).rename(self.data / maps.OLD)
+            make_maps(self.data / maps.MAPS)
+            self.assertEqual(maps.maps_state(self.data)['bytes'], 1)
+
     def test_language_of_maps_made_by_hand(self):
         folder = self.data / maps.MAPS
         make_maps(folder)

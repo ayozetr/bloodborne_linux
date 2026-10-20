@@ -87,8 +87,29 @@ def maps_state(data_dir):
             break
         except (OSError, ValueError, AttributeError):
             continue
-    info["bytes"] = folder_bytes(folder, Path(data_dir) / TOOLS)
+    info["bytes"] = maps_bytes(folder, Path(data_dir) / TOOLS)
     return info
+
+
+_sizes = {}
+
+
+def maps_bytes(maps, tools):
+    """folder_bytes of the maps and their tools, counted once per state of the folders: the
+    launcher asks on every start and stop of the game, and a count walks some 14 000 files
+    (half a second). Preparing the maps again swaps the folder in, and deleting removes it,
+    so either is a new state."""
+    def state(folder):
+        try:
+            st = folder.stat()
+        except OSError:
+            return None
+        return st.st_dev, st.st_ino, st.st_mtime_ns
+    key = (str(maps), state(maps), state(maps / "maps"), state(tools))
+    if key not in _sizes:
+        _sizes.clear()
+        _sizes[key] = folder_bytes(maps, tools)
+    return _sizes[key]
 
 
 def folder_bytes(*folders):
