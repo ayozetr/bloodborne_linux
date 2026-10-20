@@ -522,7 +522,7 @@ BBSC_OPTION_TEXTS = {
     "p2p_channel": ("Канал P2P",
                    "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)"),
     "relay": ("Адрес ретранслятора",
-             "host:20444; пусто — адрес игрового сервера из настроек сети"),
+             "host:20444; пусто — адрес игрового сервера"),
 }
 
 
@@ -1343,9 +1343,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                 if default is None:
                     continue
                 row = Adw.ActionRow(title=tr(label))
-                row.add_suffix(flat_button(icon, tr("Назначить"),
+                # The control's name in the tooltips too: a screen reader says which one they are for.
+                row.add_suffix(flat_button(icon, f'{tr("Назначить")}: {tr(label)}',
                                            lambda _b, k=kind, n=name: self.assign_control(k, n)))
-                row.add_suffix(flat_button("edit-undo-symbolic", tr("Сбросить"),
+                row.add_suffix(flat_button("edit-undo-symbolic", f'{tr("Сбросить")}: {tr(label)}',
                                            lambda _b, k=kind, n=name: self.set_control(k, n, None)))
                 expander.add_row(row)
                 self.control_rows[(kind, name)] = (row, default)
@@ -1812,8 +1813,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.game_row.set_title(tr("Папка игры ({})").format(title_id) if title_id else tr("Папка игры"))
         # Other versions of the game start and then crash in its code (issues #7, #13, #14).
         problem = self.game_problem(path) if ok else None
-        if not ok:
+        if not self.settings["game_dir"]:
+            tooltip = tr("Сначала выберите папку игры")
+        elif not ok:
             tooltip = tr("Нет eboot.bin в папке")
+            self.game_row.set_subtitle(f"{path}\n{tooltip}")  # the reason, not only in a tooltip
         elif problem:
             kind, title, version = problem
             tooltip = {
@@ -2357,7 +2361,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         guide.connect("activated", lambda _row: self.open_uri(SERVER_GUIDE_URL))
         for row in (self.server_row, self.webapi_row, guide):
             coop.add(row)
-        self.own_server_rows = (self.server_row, self.webapi_row)
+        self.own_server_rows = (self.server_row, self.webapi_row, guide)
         page.add(coop)
 
         # Seamless co-op: BBSC (bbsc/, CLS_AMG) in the game, on any server; its options are
@@ -2747,7 +2751,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 # Plain text: an error such as "<urlopen error ...>" is not Pango markup.
                 row = Adw.ActionRow(title=GLib.markup_escape_text(f"{names[name]}: {address}"),
                                     subtitle=GLib.markup_escape_text(status))
-                row.add_prefix(Gtk.Image(icon_name="object-select-symbolic" if ok else "dialog-warning-symbolic"))
+                row.add_prefix(Gtk.Image(icon_name="object-select-symbolic" if ok else "dialog-error-symbolic"))
                 self.test_group.add(row)
                 self.test_rows.append(row)
             self.test_group.set_visible(bool(self.test_rows))
@@ -2784,7 +2788,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         def done(ok, detail):
             self.work_done("register")
             self.show_online_status()  # Create back on, unless the own server has no address
-            message = (tr("Учётная запись {} создана на {}").format(npid, host) if ok else
+            message = (tr("Учётная запись «{}» создана на {}").format(npid, host) if ok else
                        tr("Не удалось создать учётную запись: {}").format(errors.get(detail, detail)))
             self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(message), timeout=6))
             if ok:
@@ -2803,7 +2807,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def build_about_page(self):
         page = Adw.PreferencesPage()
-        about = Adw.PreferencesGroup(title=tr("О программе"))
+        about = Adw.PreferencesGroup()  # the section's title already says it
         app = Adw.ActionRow(title="bbport Linux",
                             subtitle=tr("Версия {}").format(bbport_update.VERSION))
         app.add_prefix(Gtk.Image(file=str(PORT_DIR / "launcher" / "bloodborne.png"), pixel_size=48))
@@ -3116,6 +3120,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         menu = Gio.Menu()
         menu.append(tr("Отметить трофеи"), "win.trophy-edit")
         self.trophy_menu = Gtk.MenuButton(icon_name="view-more-symbolic", menu_model=menu,
+                                          tooltip_text=tr("Действия с трофеями"),
                                           halign=Gtk.Align.END, valign=Gtk.Align.CENTER, css_classes=["flat"],
                                           sensitive=False)
         cancel = Gtk.Button(label=tr("Отмена"))

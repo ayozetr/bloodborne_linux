@@ -144,9 +144,9 @@ In **Multiplayer → Online**:
 | Online ID / Password | The player's own account |
 | UPnP | Off (Tailscale needs no router ports) |
 
-Then press **Test** in the **Status** row. Every line should be green, the shadNet server's UDP among them: it
-shows the address the server sees for you, a `100.` one through Tailscale. A red UDP line means
-summons cannot connect: check that the server is running and that its log lists the UDP listener.
+Then press **Test** in the **Status** row. Every line should get a check mark, the shadNet server's UDP among them: it
+shows the address the server sees for you, a `100.` one through Tailscale. An error mark on the UDP line
+means summons cannot connect: check that the server is running and that its log lists the UDP listener.
 
 Summons go through the server's own summon service: the log of a game says
 `Co-op: summon signs through http://100.x.y.z:31315`.
@@ -199,7 +199,7 @@ settings).
   wrong (`tailscale ip -4`).
 - **The game says it is not signed in to PlayStation Network:** a wrong name or password (code 8 in
   the log), or two players using one account.
-- **The test is green but summons fail:** every player's computer must be in the tailnet, not only
+- **The test passes but summons fail:** every player's computer must be in the tailnet, not only
   the server; `tailscale ping <player>` from each side. Everyone needs the game at version 1.09
   and the same co-op mode.
 

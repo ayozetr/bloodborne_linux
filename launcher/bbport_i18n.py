@@ -7,6 +7,9 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Учётная запись «{}» создана на {}': 'Account “{}” created on {}',
+    'host:20444; пусто — адрес игрового сервера': "host:20444; empty: the game server's address",
+    'Действия с трофеями': 'Trophy actions',
     'Язык игры': 'Game language',
     'Проверка соединения': 'Connection test',
     'Включено: игра входит на сервер при запуске': 'On: the game signs in to the server when it starts',
@@ -115,7 +118,6 @@ EN = {
     "это имя уже занято": "that name is taken",
     "серверу нужен ключ регистрации: спросите его владельца": "the server needs its registration key: ask its owner",
     "недопустимое имя или пароль": "invalid name or password",
-    "Учётная запись {} создана на {}": "Account {} created on {}",
     "Не удалось создать учётную запись: {}": "Couldn't create the account: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): seamless co-op",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: the base of BBSC's game server",
@@ -179,7 +181,6 @@ EN = {
     "Канал P2P": "P2P channel",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "BBSC's messages go straight between the players when there is no BBSC relay (needed on public servers: The Hunter's Dream)",
     "Адрес ретранслятора": "Relay address",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; empty: the game server's address from the online settings",
     "Бесшовный кооператив (BBSC)": "Seamless co-op (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "The session lives through deaths, lamps, areas, bosses and the Hunter's Dream; up to 5 hunters. BBSC by CLS_AMG. Everyone in the session needs it",
     "Включить BBSC": "Turn on BBSC",
@@ -194,7 +195,6 @@ EN = {
     # Window, pages, buttons
     "Запустить": "Play",
     "Остановить": "Stop",
-    "Настройки": "Settings",
     "Журнал": "Log",
     "Не удалось запустить: {}": "Couldn't start: {}",
     "Копировать": "Copy",
@@ -220,7 +220,6 @@ EN = {
     "Найдены сохранения": "Saves found",
     "Сохранений пока нет: игра создаст их здесь": "No saves yet: the game will create them here",
     "не выбрана": "not chosen",
-    "Найден eboot.bin": "eboot.bin found",
     "Нет eboot.bin в папке": "No eboot.bin in the folder",
     "Управление": "Controls",
     "Клавиатура": "Keyboard",
@@ -391,7 +390,6 @@ EN = {
     'Играть офлайн': 'Play offline',
     'Игровой сервер': 'Game server',
     'Игровой сервер (сообщения, пятна крови, призраки)': 'Game server (messages, bloodstains, ghosts)',
-    'Онлайн': 'Online',
     'Отмена': 'Cancel',
     'Пароль': 'Password',
     'Проверить': 'Test',
@@ -478,7 +476,6 @@ EN = {
     "Полная": "Full",
     "Около 3 ГБ видеопамяти сверху": "About 3 GB more VRAM",
     # Mode
-    "Новая модель памяти и трансляции": "New memory and translation model",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "The new one: the GPU works with the game's memory directly, as in a PC game, and graphics commands are translated rather than emulated. The old one: the memory model of 0.3 with all the fixes. If the driver fails the startup check, the old one",
     "Модель памяти и трансляции": "Memory and translation model",
@@ -543,7 +540,6 @@ EN = {
     "Не удалось добавить игру в Steam: {}": "Couldn't add the game to Steam: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne was added to your Steam library",
     # Online page
-    "Онлайн": "Online",
     "Играть онлайн": "Play online",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Game server (messages, bloodstains, ghosts)",
     "Пятна крови на Seamless Hunt": "Bloodstains on Seamless Hunt",
@@ -566,8 +562,6 @@ EN = {
     "Играть офлайн": "Play offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "The Online ID is the account name (NPID) you registered on the server, not your email address",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Needs an NVIDIA RTX graphics card and the proprietary driver; otherwise FSR 3.1 is used",
-    "Нет файлов DLSS: tools/build_dlss.sh": "No DLSS files: tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Discord status",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Playing Bloodborne” on your Discord profile, online or offline",
@@ -605,7 +599,7 @@ EN = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "The regional text of languages that have one: Spanish from Spain (Europe) or Latin American Spanish (the Americas). It also picks the address of the game's server",
     "Как в дампе игры":
-        "As in the game dump",
+        "From the dump",
     "Европа":
         "Europe",
     "Америка":
@@ -623,7 +617,7 @@ EN = {
     "Проверять обновления при запуске":
         "Check for updates at start",
     "Спрашивает GitHub о последнем выпуске; ничего не скачивается без вашего согласия":
-        "Asks GitHub for the latest release; nothing is downloaded without your say",
+        "Asks GitHub for the latest release; nothing is downloaded without asking you",
     "Последняя версия":
         "Latest version",
     "Загрузка…":
@@ -688,18 +682,12 @@ EN = {
         "WebAPI address (empty: the server's port 31315)",
     'Адрес сервера (host:port)':
         'Server address (host:port)',
-    'Бесшовный кооператив (экспериментально)':
-        'Seamless co-op (experimental)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Pin the co-op port above (for example {}): a random port cannot be opened in a firewall',
     'Как запустить свой сервер':
         'How to host your own server',
     'Порт кооператива (UDP)':
         'Co-op port (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'Not ready: it only sends summons to a server with BloodborneSeamlessCoop=true; the guest is not moved to the host yet. For testing',
-    'Публичный сервер shadPS4':
-        "shadPS4's public server",
     'Свой сервер':
         'Your own server',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -862,6 +850,9 @@ EN = {
 }
 
 PT_BR = {
+    'Учётная запись «{}» создана на {}': 'Conta “{}” criada em {}',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444; vazio: o endereço do servidor de jogo',
+    'Действия с трофеями': 'Ações dos troféus',
     'Язык игры': 'Idioma do jogo',
     'Проверка соединения': 'Teste de conexão',
     'Включено: игра входит на сервер при запуске': 'Ativado: o jogo entra no servidor ao iniciar',
@@ -970,7 +961,6 @@ PT_BR = {
     "это имя уже занято": "esse nome já está em uso",
     "серверу нужен ключ регистрации: спросите его владельца": "o servidor precisa da chave de registro: peça ao dono",
     "недопустимое имя или пароль": "nome ou senha inválidos",
-    "Учётная запись {} создана на {}": "Conta {} criada em {}",
     "Не удалось создать учётную запись: {}": "Não foi possível criar a conta: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): cooperativo contínuo",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: a base do servidor de jogo do BBSC",
@@ -1034,7 +1024,6 @@ PT_BR = {
     "Канал P2P": "Canal P2P",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "As mensagens do BBSC vão direto entre os jogadores quando não há relé do BBSC (necessário em servidores públicos: The Hunter's Dream)",
     "Адрес ретранслятора": "Endereço do relé",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; vazio: o endereço do servidor de jogo das configurações online",
     "Бесшовный кооператив (BBSC)": "Cooperativo contínuo (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "A sessão sobrevive a mortes, lanternas, áreas, chefes e ao Sonho do Caçador; até 5 caçadores. BBSC de CLS_AMG. Todos os jogadores da sessão precisam dele",
     "Включить BBSC": "Ativar o BBSC",
@@ -1049,7 +1038,6 @@ PT_BR = {
     # Window, pages, buttons
     "Запустить": "Jogar",
     "Остановить": "Parar",
-    "Настройки": "Configurações",
     "Журнал": "Log",
     "Не удалось запустить: {}": "Não foi possível iniciar: {}",
     "Копировать": "Copiar",
@@ -1075,7 +1063,6 @@ PT_BR = {
     "Найдены сохранения": "Salvamentos encontrados",
     "Сохранений пока нет: игра создаст их здесь": "Ainda não há salvamentos: o jogo os criará aqui",
     "не выбрана": "não selecionada",
-    "Найден eboot.bin": "eboot.bin encontrado",
     "Нет eboot.bin в папке": "Não há eboot.bin na pasta",
     "Папка игры (с eboot.bin)": "Pasta do jogo (com eboot.bin)",
     # Languages
@@ -1224,21 +1211,15 @@ PT_BR = {
     "Без ограничения (патч)": "Sem limite (patch)",
     "30 (как на PS4)": "30 (como no PS4)",
     "Ограничение FPS": "Limite de FPS",
-    "0 — по частоте экрана (не выше 120 Гц); укажите число, чтобы ограничить иначе":
-        "0: taxa de atualização da tela (até 120 Hz); defina um número para usar outro limite",
     # Performance
     "Производительность": "Desempenho",
     "Двухстадийный конвейер GPU": "Pipeline de GPU em dois estágios",
     "Быстрее на 20–30%; при нестабильности выключите": "20–30% mais rápido; desative se houver instabilidade",
-    "Авто (8+ потоков)": "Automático (8+ threads)",
     "Включён": "Ativado",
-    "Выключен (стабильнее)": "Desativado (mais estável)",
     "Чтение данных GPU процессором": "Leitura de dados da GPU pela CPU",
-    "Relaxed (по умолчанию)": "Relaxed (padrão)",
     "Выключены": "Desativado",
     # Developer
     "Для разработчика": "Desenvolvedor",
-    "Новая модель памяти и трансляции": "Novo modelo de memória e tradução",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "O novo: a GPU usa a memória do jogo diretamente, como em um jogo de PC, e os comandos gráficos são traduzidos em vez de emulados. O antigo: o modelo de memória da 0.3 com todas as correções. Se o driver falhar na verificação inicial, o antigo",
     "Модель памяти и трансляции": "Modelo de memória e tradução",
@@ -1293,7 +1274,6 @@ PT_BR = {
     "Не удалось добавить игру в Steam: {}": "Não foi possível adicionar o jogo ao Steam: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne foi adicionado à sua biblioteca do Steam",
     # Online page
-    "Онлайн": "Online",
     "Играть онлайн": "Jogar online",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor do jogo (mensagens, manchas de sangue, fantasmas)",
     "Пятна крови на Seamless Hunt": "Manchas de sangue no Seamless Hunt",
@@ -1316,8 +1296,6 @@ PT_BR = {
     "Играть офлайн": "Jogar offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "O Online ID é o nome da conta (NPID) registrado no servidor, não o seu e-mail",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Requer uma placa NVIDIA RTX e o driver proprietário; caso contrário, é usado o FSR 3.1",
-    "Нет файлов DLSS: tools/build_dlss.sh": "Sem arquivos do DLSS: tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Status no Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Jogando Bloodborne” no seu perfil do Discord, online ou offline",
@@ -1473,7 +1451,7 @@ PT_BR = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "A variante de texto dos idiomas que têm uma: espanhol da Espanha (Europa) ou da América Latina (Américas). Também escolhe o endereço do servidor do jogo",
     "Как в дампе игры":
-        "Como no dump do jogo",
+        "Conforme o dump",
     "Европа":
         "Europa",
     "Америка":
@@ -1605,18 +1583,12 @@ PT_BR = {
         'Endereço do WebAPI (vazio: a porta 31315 do servidor)',
     'Адрес сервера (host:port)':
         'Endereço do servidor (host:porta)',
-    'Бесшовный кооператив (экспериментально)':
-        'Cooperativo seamless (experimental)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Fixe a porta do cooperativo acima (por exemplo, {}): uma porta aleatória não pode ser aberta no firewall',
     'Как запустить свой сервер':
         'Como hospedar seu próprio servidor',
     'Порт кооператива (UDP)':
         'Porta do cooperativo (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'Não está pronto: só envia as invocações a um servidor com BloodborneSeamlessCoop=true; o convidado ainda não é levado ao anfitrião. Para testes',
-    'Публичный сервер shadPS4':
-        'Servidor público do shadPS4',
     'Свой сервер':
         'Servidor próprio',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -1781,6 +1753,9 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Учётная запись «{}» создана на {}': 'Cuenta «{}» creada en {}',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444; vacío: la dirección del servidor del juego',
+    'Действия с трофеями': 'Acciones de trofeos',
     'Язык игры': 'Idioma del juego',
     'Проверка соединения': 'Prueba de conexión',
     'Включено: игра входит на сервер при запуске': 'Activado: el juego inicia sesión en el servidor al arrancar',
@@ -1889,7 +1864,6 @@ ES = {
     "это имя уже занято": "ese nombre ya está en uso",
     "серверу нужен ключ регистрации: спросите его владельца": "el servidor necesita su clave de registro: pídesela a su dueño",
     "недопустимое имя или пароль": "nombre o contraseña no válidos",
-    "Учётная запись {} создана на {}": "Cuenta {} creada en {}",
     "Не удалось создать учётную запись: {}": "No se pudo crear la cuenta: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): Seamless Co-op",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: la base del servidor de juego de BBSC",
@@ -1953,7 +1927,6 @@ ES = {
     "Канал P2P": "Canal P2P",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "Los mensajes de BBSC van directos entre los jugadores cuando no hay relé de BBSC (hace falta en servidores públicos: The Hunter's Dream)",
     "Адрес ретранслятора": "Dirección del relé",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; vacío: la dirección del servidor de juego de los ajustes online",
     "Бесшовный кооператив (BBSC)": "Seamless Co-op (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "La sesión sobrevive a muertes, lámparas, zonas, jefes y el Sueño del Cazador; hasta 5 cazadores. BBSC, de CLS_AMG. Lo necesitan todos los jugadores de la sesión",
     "Включить BBSC": "Activar BBSC",
@@ -1967,7 +1940,6 @@ ES = {
     "Нет DLC этой игры в папке": "No hay DLC de este juego en la carpeta",
     "Запустить": "Jugar",
     "Остановить": "Detener",
-    "Настройки": "Ajustes",
     "Журнал": "Registro",
     "Не удалось запустить: {}": "No se pudo iniciar: {}",
     "\n— игра завершилась (код {}) —\n": "\n— el juego ha terminado (código {}) —\n",
@@ -1985,7 +1957,6 @@ ES = {
     "Найдены сохранения": "Partidas guardadas encontradas",
     "Сохранений пока нет: игра создаст их здесь": "Aún no hay partidas guardadas: el juego las creará aquí",
     "не выбрана": "sin elegir",
-    "Найден eboot.bin": "eboot.bin encontrado",
     "Нет eboot.bin в папке": "No hay eboot.bin en la carpeta",
     "Управление": "Controles",
     "Клавиатура": "Teclado",
@@ -2128,7 +2099,6 @@ ES = {
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Debug menu (panel táctil izquierdo / Tab; requiere fuentes)",
     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»": "Salir al escritorio en el menú principal y en el menú Sistema",
     "В меню «Система» игра сначала сохраняется, как при «Выходе из игры», и потом закрывается": "En el menú Sistema el juego guarda primero, como con Salir del juego, y luego se cierra",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253": "Instala DbgFont14h.ccm y DbgFont14h.tpf en dvdroot_ps4/font desde el mod n.º 253 de Nexus",
     "Частота кадров": "Tasa de fotogramas",
     "Режим": "Modo",
     "Какой патч частоты кадров применить к игре": "Qué parche de tasa de fotogramas aplicar al juego",
@@ -2151,9 +2121,6 @@ ES = {
     "Без лишней видеопамяти": "Sin VRAM adicional",
     "Полная": "Completa",
     "Около 3 ГБ видеопамяти сверху": "Unos 3 GB más de VRAM",
-    "Новая модель памяти и трансляции": "Nuevo modelo de memoria y traducción",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Experimental, solo GPU AMD. La GPU trabaja directamente con la memoria del juego, como en un juego de PC, y los comandos gráficos se traducen en lugar de emularse; pueden producirse errores. Desactivado: el modelo de memoria antiguo, como en la 0.3, con todas las correcciones",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Solo para GPU AMD, y este equipo no tiene ninguna. Se usa el modelo de memoria antiguo, como en la 0.3, con todas las correcciones",
     "Синхронизация как в 0.3": "Sincronización como en la 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3": "Para encontrar regresiones: el modelo de memoria antiguo y las esperas de copia tal como se publicaron en la 0.3",
     "Выключена": "Desactivado",
@@ -2204,7 +2171,6 @@ ES = {
     "Не удалось добавить игру в Steam: {}": "No se pudo añadir el juego a Steam: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne se ha añadido a tu biblioteca de Steam",
     # Online page
-    "Онлайн": "Online",
     "Играть онлайн": "Jugar online",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor del juego (mensajes, manchas de sangre, fantasmas)",
     "Пятна крови на Seamless Hunt": "Manchas de sangre en Seamless Hunt",
@@ -2227,8 +2193,6 @@ ES = {
     "Играть офлайн": "Jugar sin conexión",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "El Online ID es el nombre de cuenta (NPID) que registraste en el servidor, no tu correo",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Necesita una gráfica NVIDIA RTX y el driver propietario; si no, se usa FSR 3.1",
-    "Нет файлов DLSS: tools/build_dlss.sh": "No están los archivos de DLSS: tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Estado en Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "«Jugando a Bloodborne» en tu perfil de Discord, online o sin conexión",
@@ -2302,7 +2266,7 @@ ES = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "La variante de texto de los idiomas que la tienen: español de España (Europa) o de Latinoamérica (América). También elige la dirección del servidor del juego",
     "Как в дампе игры":
-        "Como en el volcado del juego",
+        "Según el volcado",
     "Европа":
         "Europa",
     "Америка":
@@ -2434,18 +2398,12 @@ ES = {
         'Dirección del WebAPI (vacía: el puerto 31315 del servidor)',
     'Адрес сервера (host:port)':
         'Dirección del servidor (host:puerto)',
-    'Бесшовный кооператив (экспериментально)':
-        'Cooperativo seamless (experimental)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Fija el puerto del cooperativo arriba (por ejemplo, {}): un puerto aleatorio no se puede abrir en el cortafuegos',
     'Как запустить свой сервер':
         'Cómo montar tu propio servidor',
     'Порт кооператива (UDP)':
         'Puerto del cooperativo (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'No está listo: solo envía las invocaciones a un servidor con BloodborneSeamlessCoop=true; el invitado aún no se lleva junto al anfitrión. Para pruebas',
-    'Публичный сервер shadPS4':
-        'Servidor público de shadPS4',
     'Свой сервер':
         'Servidor propio',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -2610,6 +2568,9 @@ ES = {
 
 # Italian.
 IT = {
+    'Учётная запись «{}» создана на {}': 'Account «{}» creato su {}',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444; vuoto: l’indirizzo del server di gioco',
+    'Действия с трофеями': 'Azioni sui trofei',
     'Язык игры': 'Lingua del gioco',
     'Проверка соединения': 'Test della connessione',
     'Включено: игра входит на сервер при запуске': "Attivo: il gioco accede al server all'avvio",
@@ -2718,7 +2679,6 @@ IT = {
     "это имя уже занято": "quel nome è già in uso",
     "серверу нужен ключ регистрации: спросите его владельца": "il server richiede la sua chiave di registrazione: chiedila al proprietario",
     "недопустимое имя или пароль": "nome o password non validi",
-    "Учётная запись {} создана на {}": "Account {} creato su {}",
     "Не удалось создать учётную запись: {}": "Impossibile creare l'account: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): cooperativo continuo",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: la base del server di gioco di BBSC",
@@ -2782,7 +2742,6 @@ IT = {
     "Канал P2P": "Canale P2P",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "I messaggi di BBSC passano direttamente tra i giocatori quando non c’è un relay BBSC (serve sui server pubblici: The Hunter's Dream)",
     "Адрес ретранслятора": "Indirizzo del relay",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; vuoto: l’indirizzo del server di gioco dalle impostazioni online",
     "Бесшовный кооператив (BBSC)": "Cooperativo continuo (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "La sessione sopravvive a morti, lanterne, zone, boss e al Sogno del Cacciatore; fino a 5 cacciatori. BBSC di CLS_AMG. Serve a tutti i giocatori della sessione",
     "Включить BBSC": "Attiva BBSC",
@@ -2796,7 +2755,6 @@ IT = {
     "Нет DLC этой игры в папке": "Nessun DLC di questo gioco nella cartella",
     "Запустить": "Gioca",
     "Остановить": "Ferma",
-    "Настройки": "Impostazioni",
     "Журнал": "Log",
     "Не удалось запустить: {}": "Impossibile avviare: {}",
     "\n— игра завершилась (код {}) —\n": "\n— il gioco è terminato (codice {}) —\n",
@@ -2814,7 +2772,6 @@ IT = {
     "Найдены сохранения": "Salvataggi trovati",
     "Сохранений пока нет: игра создаст их здесь": "Ancora nessun salvataggio: il gioco li creerà qui",
     "не выбрана": "non scelta",
-    "Найден eboot.bin": "eboot.bin trovato",
     "Нет eboot.bin в папке": "Nessun eboot.bin nella cartella",
     "Управление": "Controlli",
     "Клавиатура": "Tastiera",
@@ -2957,7 +2914,6 @@ IT = {
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Debug menu (touchpad sinistro / Tab; richiede i font)",
     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»": "Esci al desktop nel menu principale e nel menu Sistema",
     "В меню «Система» игра сначала сохраняется, как при «Выходе из игры», и потом закрывается": "Nel menu Sistema il gioco prima salva, come con Esci dal gioco, poi si chiude",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253": "Installa DbgFont14h.ccm e DbgFont14h.tpf in dvdroot_ps4/font dalla mod Nexus n. 253",
     "Частота кадров": "Frequenza dei fotogrammi",
     "Режим": "Modalità",
     "Какой патч частоты кадров применить к игре": "Quale patch della frequenza dei fotogrammi applicare al gioco",
@@ -2980,9 +2936,6 @@ IT = {
     "Без лишней видеопамяти": "Nessuna VRAM extra",
     "Полная": "Completo",
     "Около 3 ГБ видеопамяти сверху": "Circa 3 GB di VRAM in più",
-    "Новая модель памяти и трансляции": "Nuovo modello di memoria e traduzione",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Sperimentale, solo GPU AMD. La GPU lavora direttamente con la memoria del gioco, come in un gioco per PC, e i comandi grafici vengono tradotti anziché emulati; sono possibili errori. Disattivato: il vecchio modello di memoria, come nella 0.3, con tutte le correzioni",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Solo GPU AMD, e questo computer non ne ha. Viene usato il vecchio modello di memoria, come nella 0.3, con tutte le correzioni",
     "Синхронизация как в 0.3": "Sincronizzazione come nella 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3": "Per trovare regressioni: il vecchio modello di memoria e le attese di copia come rilasciati nella 0.3",
     "Выключена": "Disattivata",
@@ -3033,7 +2986,6 @@ IT = {
     "Не удалось добавить игру в Steam: {}": "Impossibile aggiungere il gioco a Steam: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne è stato aggiunto alla tua libreria di Steam",
     # Online page
-    "Онлайн": "Online",
     "Играть онлайн": "Gioca online",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Server di gioco (messaggi, macchie di sangue, fantasmi)",
     "Пятна крови на Seamless Hunt": "Macchie di sangue su Seamless Hunt",
@@ -3056,8 +3008,6 @@ IT = {
     "Играть офлайн": "Gioca offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID è il nome dell'account (NPID) registrato sul server, non il tuo indirizzo email",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Richiede una scheda NVIDIA RTX e il driver proprietario; altrimenti si usa FSR 3.1",
-    "Нет файлов DLSS: tools/build_dlss.sh": "File DLSS mancanti: tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Stato su Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Sta giocando a Bloodborne” sul tuo profilo Discord, online o offline",
@@ -3131,7 +3081,7 @@ IT = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "La variante del testo delle lingue che ne hanno una: spagnolo di Spagna (Europa) o dell'America Latina (America). Sceglie anche l'indirizzo del server di gioco",
     "Как в дампе игры":
-        "Come nel dump del gioco",
+        "Come nel dump",
     "Европа":
         "Europa",
     "Америка":
@@ -3263,18 +3213,12 @@ IT = {
         'Indirizzo WebAPI (vuoto: la porta 31315 del server)',
     'Адрес сервера (host:port)':
         'Indirizzo del server (host:porta)',
-    'Бесшовный кооператив (экспериментально)':
-        'Cooperativa seamless (sperimentale)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Fissa la porta della cooperativa qui sopra (per esempio {}): una porta casuale non si può aprire nel firewall',
     'Как запустить свой сервер':
         'Come ospitare un tuo server',
     'Порт кооператива (UDP)':
         'Porta della cooperativa (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'Non è pronto: invia solo le evocazioni a un server con BloodborneSeamlessCoop=true; l’ospite non viene ancora portato dall’host. Per i test',
-    'Публичный сервер shadPS4':
-        'Server pubblico di shadPS4',
     'Свой сервер':
         'Server tuo',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -3439,6 +3383,9 @@ IT = {
 
 # French.
 FR = {
+    'Учётная запись «{}» создана на {}': 'Compte « {} » créé sur {}',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444 ; vide : l’adresse du serveur de jeu',
+    'Действия с трофеями': 'Actions sur les trophées',
     'Язык игры': 'Langue du jeu',
     'Проверка соединения': 'Test de connexion',
     'Включено: игра входит на сервер при запуске': 'Activé : le jeu se connecte au serveur au démarrage',
@@ -3547,7 +3494,6 @@ FR = {
     "это имя уже занято": "ce nom est déjà pris",
     "серверу нужен ключ регистрации: спросите его владельца": "le serveur demande sa clé d'inscription : demandez-la à son propriétaire",
     "недопустимое имя или пароль": "nom ou mot de passe non valide",
-    "Учётная запись {} создана на {}": "Compte {} créé sur {}",
     "Не удалось создать учётную запись: {}": "Impossible de créer le compte : {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG) : coop continue",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter : la base du serveur de jeu de BBSC",
@@ -3611,7 +3557,6 @@ FR = {
     "Канал P2P": "Canal P2P",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "Les messages de BBSC passent directement entre les joueurs quand il n’y a pas de relais BBSC (nécessaire sur les serveurs publics : The Hunter's Dream)",
     "Адрес ретранслятора": "Adresse du relais",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444 ; vide : l’adresse du serveur de jeu des réglages en ligne",
     "Бесшовный кооператив (BBSC)": "Coop continue (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "La session survit aux morts, aux lanternes, aux zones, aux boss et au Rêve du Chasseur ; jusqu’à 5 chasseurs. BBSC par CLS_AMG. Tous les joueurs de la session en ont besoin",
     "Включить BBSC": "Activer BBSC",
@@ -3625,7 +3570,6 @@ FR = {
     "Нет DLC этой игры в папке": "Aucun DLC de ce jeu dans le dossier",
     "Запустить": "Jouer",
     "Остановить": "Arrêter",
-    "Настройки": "Paramètres",
     "Журнал": "Journal",
     "Не удалось запустить: {}": "Impossible de lancer : {}",
     "\n— игра завершилась (код {}) —\n": "\n— le jeu s'est arrêté (code {}) —\n",
@@ -3643,7 +3587,6 @@ FR = {
     "Найдены сохранения": "Sauvegardes trouvées",
     "Сохранений пока нет: игра создаст их здесь": "Aucune sauvegarde pour l'instant : le jeu les créera ici",
     "не выбрана": "non choisi",
-    "Найден eboot.bin": "eboot.bin trouvé",
     "Нет eboot.bin в папке": "Pas de eboot.bin dans le dossier",
     "Управление": "Commandes",
     "Клавиатура": "Clavier",
@@ -3786,7 +3729,6 @@ FR = {
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Debug menu (pavé tactile gauche / Tab ; nécessite des polices)",
     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»": "Quitter vers le bureau dans le menu principal et le menu Système",
     "В меню «Система» игра сначала сохраняется, как при «Выходе из игры», и потом закрывается": "Dans le menu Système, le jeu sauvegarde d’abord, comme avec Quitter le jeu, puis se ferme",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253": "Installez DbgFont14h.ccm et DbgFont14h.tpf dans dvdroot_ps4/font depuis le mod Nexus n° 253",
     "Частота кадров": "Fréquence d'images",
     "Режим": "Mode",
     "Какой патч частоты кадров применить к игре": "Quel correctif de fréquence d'images appliquer au jeu",
@@ -3809,9 +3751,6 @@ FR = {
     "Без лишней видеопамяти": "Pas de VRAM supplémentaire",
     "Полная": "Complet",
     "Около 3 ГБ видеопамяти сверху": "Environ 3 Go de VRAM en plus",
-    "Новая модель памяти и трансляции": "Nouveau modèle de mémoire et de traduction",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Expérimental, GPU AMD uniquement. Le GPU travaille directement avec la mémoire du jeu, comme dans un jeu PC, et les commandes graphiques sont traduites plutôt qu'émulées ; des erreurs sont possibles. Désactivé : l'ancien modèle de mémoire, comme dans la 0.3, avec tous les correctifs",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "GPU AMD uniquement, et cet ordinateur n'en a pas. L'ancien modèle de mémoire est utilisé, comme dans la 0.3, avec tous les correctifs",
     "Синхронизация как в 0.3": "Synchronisation comme dans la 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3": "Pour trouver des régressions : l'ancien modèle de mémoire et les attentes de copie tels que publiés dans la 0.3",
     "Выключена": "Désactivé",
@@ -3862,7 +3801,6 @@ FR = {
     "Не удалось добавить игру в Steam: {}": "Impossible d'ajouter le jeu à Steam : {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne a été ajouté à votre bibliothèque Steam",
     # Online page
-    "Онлайн": "En ligne",
     "Играть онлайн": "Jouer en ligne",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Serveur de jeu (messages, taches de sang, fantômes)",
     "Пятна крови на Seamless Hunt": "Taches de sang sur Seamless Hunt",
@@ -3885,8 +3823,6 @@ FR = {
     "Играть офлайн": "Jouer hors ligne",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID est le nom du compte (NPID) enregistré sur le serveur, pas votre adresse e-mail",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Nécessite une carte NVIDIA RTX et le pilote propriétaire ; sinon FSR 3.1 est utilisé",
-    "Нет файлов DLSS: tools/build_dlss.sh": "Fichiers DLSS absents : tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Statut Discord",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "« Joue à Bloodborne » sur votre profil Discord, en ligne ou hors ligne",
@@ -3960,7 +3896,7 @@ FR = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "La variante du texte des langues qui en ont une : espagnol d'Espagne (Europe) ou d'Amérique latine (Amériques). Elle choisit aussi l'adresse du serveur du jeu",
     "Как в дампе игры":
-        "Comme dans le dump du jeu",
+        "Selon le dump",
     "Европа":
         "Europe",
     "Америка":
@@ -4092,18 +4028,12 @@ FR = {
         'Adresse WebAPI (vide : le port 31315 du serveur)',
     'Адрес сервера (host:port)':
         'Adresse du serveur (hôte:port)',
-    'Бесшовный кооператив (экспериментально)':
-        'Coopération seamless (expérimental)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Fixez le port de coopération ci-dessus (par exemple {}) : un port aléatoire ne peut pas être ouvert dans un pare-feu',
     'Как запустить свой сервер':
         'Héberger votre propre serveur',
     'Порт кооператива (UDP)':
         'Port de coopération (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'Pas encore prêt : envoie seulement les invocations à un serveur avec BloodborneSeamlessCoop=true ; l’invité n’est pas encore amené chez l’hôte. Pour les tests',
-    'Публичный сервер shadPS4':
-        'Serveur public de shadPS4',
     'Свой сервер':
         'Votre propre serveur',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -4268,6 +4198,9 @@ FR = {
 
 # German.
 DE = {
+    'Учётная запись «{}» создана на {}': 'Konto „{}“ auf {} erstellt',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444; leer: die Adresse des Spielservers',
+    'Действия с трофеями': 'Trophäen-Aktionen',
     'Язык игры': 'Spielsprache',
     'Проверка соединения': 'Verbindungstest',
     'Включено: игра входит на сервер при запуске': 'An: Das Spiel meldet sich beim Start am Server an',
@@ -4376,7 +4309,6 @@ DE = {
     "это имя уже занято": "dieser Name ist vergeben",
     "серверу нужен ключ регистрации: спросите его владельца": "der Server braucht seinen Registrierungsschlüssel: frag den Betreiber",
     "недопустимое имя или пароль": "ungültiger Name oder ungültiges Passwort",
-    "Учётная запись {} создана на {}": "Konto {} auf {} erstellt",
     "Не удалось создать учётную запись: {}": "Konto konnte nicht erstellt werden: {}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC (CLS_AMG): nahtloser Koop",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter: die Grundlage des Spielservers von BBSC",
@@ -4440,7 +4372,6 @@ DE = {
     "Канал P2P": "P2P-Kanal",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "BBSC-Nachrichten gehen direkt zwischen den Spielern, wenn es kein BBSC-Relay gibt (nötig auf öffentlichen Servern: The Hunter's Dream)",
     "Адрес ретранслятора": "Relay-Adresse",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; leer: die Adresse des Spielservers aus den Online-Einstellungen",
     "Бесшовный кооператив (BBSC)": "Nahtloser Koop (BBSC)",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "Die Sitzung übersteht Tode, Laternen, Gebiete, Bosse und den Traum des Jägers; bis zu 5 Jäger. BBSC von CLS_AMG. Alle Spieler der Sitzung brauchen es",
     "Включить BBSC": "BBSC einschalten",
@@ -4454,7 +4385,6 @@ DE = {
     "Нет DLC этой игры в папке": "Keine DLC dieses Spiels im Ordner",
     "Запустить": "Spielen",
     "Остановить": "Stoppen",
-    "Настройки": "Einstellungen",
     "Журнал": "Protokoll",
     "Не удалось запустить: {}": "Start fehlgeschlagen: {}",
     "\n— игра завершилась (код {}) —\n": "\n— das Spiel wurde beendet (Code {}) —\n",
@@ -4472,7 +4402,6 @@ DE = {
     "Найдены сохранения": "Spielstände gefunden",
     "Сохранений пока нет: игра создаст их здесь": "Noch keine Spielstände: Das Spiel legt sie hier an",
     "не выбрана": "nicht ausgewählt",
-    "Найден eboot.bin": "eboot.bin gefunden",
     "Нет eboot.bin в папке": "Keine eboot.bin im Ordner",
     "Управление": "Steuerung",
     "Клавиатура": "Tastatur",
@@ -4615,7 +4544,6 @@ DE = {
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "Debug menu (linkes Touchpad / Tab; benötigt Schriftarten)",
     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»": "Zum Desktop beenden im Hauptmenü und im Systemmenü",
     "В меню «Система» игра сначала сохраняется, как при «Выходе из игры», и потом закрывается": "Im Systemmenü speichert das Spiel zuerst, wie bei Spiel beenden, und schließt dann",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253": "Installiere DbgFont14h.ccm und DbgFont14h.tpf aus der Nexus-Mod #253 nach dvdroot_ps4/font",
     "Частота кадров": "Bildrate",
     "Режим": "Modus",
     "Какой патч частоты кадров применить к игре": "Welcher Bildraten-Patch auf das Spiel angewendet wird",
@@ -4638,9 +4566,6 @@ DE = {
     "Без лишней видеопамяти": "Kein zusätzlicher VRAM",
     "Полная": "Voll",
     "Около 3 ГБ видеопамяти сверху": "Etwa 3 GB mehr VRAM",
-    "Новая модель памяти и трансляции": "Neues Speicher- und Übersetzungsmodell",
-    "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Experimentell, nur für AMD-GPUs. Die GPU arbeitet direkt mit dem Speicher des Spiels, wie bei einem PC-Spiel, und Grafikbefehle werden übersetzt statt emuliert; Fehler sind möglich. Aus: das alte Speichermodell wie in 0.3, mit allen Korrekturen",
-    "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Nur für AMD-GPUs, und dieser Computer hat keine. Es wird das alte Speichermodell wie in 0.3 verwendet, mit allen Korrekturen",
     "Синхронизация как в 0.3": "Synchronisierung wie in 0.3",
     "Для поиска регрессий: старая модель памяти и ожидания копий как в релизе 0.3": "Zum Aufspüren von Regressionen: das alte Speichermodell und die Kopier-Wartezeiten wie in 0.3 veröffentlicht",
     "Выключена": "Aus",
@@ -4691,7 +4616,6 @@ DE = {
     "Не удалось добавить игру в Steam: {}": "Spiel konnte nicht zu Steam hinzugefügt werden: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne wurde deiner Steam-Bibliothek hinzugefügt",
     # Online page
-    "Онлайн": "Online",
     "Играть онлайн": "Online spielen",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Spielserver (Nachrichten, Blutflecken, Geister)",
     "Пятна крови на Seamless Hunt": "Blutflecken auf Seamless Hunt",
@@ -4714,8 +4638,6 @@ DE = {
     "Играть офлайн": "Offline spielen",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "Die Online-ID ist der auf dem Server registrierte Kontoname (NPID), nicht deine E-Mail-Adresse",
     # DLSS
-    "Нужны видеокарта NVIDIA RTX и проприетарный драйвер; иначе используется FSR 3.1": "Benötigt eine NVIDIA-RTX-Grafikkarte und den proprietären Treiber; sonst wird FSR 3.1 verwendet",
-    "Нет файлов DLSS: tools/build_dlss.sh": "Keine DLSS-Dateien: tools/build_dlss.sh",
     # Discord
     "Статус в Discord": "Discord-Status",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "„Spielt Bloodborne“ in deinem Discord-Profil, online oder offline",
@@ -4789,7 +4711,7 @@ DE = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "Die regionale Textvariante von Sprachen, die eine haben: Spanisch aus Spanien (Europa) oder Lateinamerika (Amerika). Sie bestimmt auch die Adresse des Spielservers",
     "Как в дампе игры":
-        "Wie im Dump des Spiels",
+        "Wie im Dump",
     "Европа":
         "Europa",
     "Америка":
@@ -4921,18 +4843,12 @@ DE = {
         'WebAPI-Adresse (leer: Port 31315 des Servers)',
     'Адрес сервера (host:port)':
         'Serveradresse (Host:Port)',
-    'Бесшовный кооператив (экспериментально)':
-        'Nahtloser Koop (experimentell)',
     'Закрепите порт кооператива выше (например, {}): случайный порт в брандмауэре не открыть':
         'Lege oben den Koop-Port fest (zum Beispiel {}): ein zufälliger Port lässt sich in der Firewall nicht öffnen',
     'Как запустить свой сервер':
         'Eigenen Server betreiben',
     'Порт кооператива (UDP)':
         'Koop-Port (UDP)',
-    'Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки':
-        'Noch nicht fertig: schickt nur die Beschwörungen an einen Server mit BloodborneSeamlessCoop=true; der Gast wird noch nicht zum Gastgeber gebracht. Zum Testen',
-    'Публичный сервер shadPS4':
-        'Öffentlicher Server von shadPS4',
     'Свой сервер':
         'Eigener Server',
     'shadnet-p2p: на вашем ПК или VPS':
@@ -5097,6 +5013,34 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Учётная запись «{}» создана на {}': '已在 {1} 上创建账户“{0}”',
+    'host:20444; пусто — адрес игрового сервера': 'host:20444；留空则使用游戏服务器地址',
+    'Действия с трофеями': '奖杯操作',
+    'Бессмертие': '不死',
+    'Урон проходит, но здоровье не опускается ниже 1': '会受到伤害，但生命值不会低于 1',
+    'Невидимость': '隐身',
+    'Враги не видят вас и не реагируют, пока вы не атакуете': '在你攻击之前，敌人看不见你，也不会有反应',
+    'Бесшумность': '无声脚步',
+    'Враги не слышат вас, но видят': '敌人听不到你，但能看到你',
+    'Rally не угасает': '回血不消失',
+    'Здоровье для Rally не исчезает со временем': '可通过回血（Rally）恢复的生命值不会随时间消失',
+    'Управление врагом': '控制敌人',
+    'R3: управлять целью, L3: вернуться. Не вместе со свободной камерой': 'R3：控制锁定的敌人，L3：返回。不能与自由视角同时使用',
+    'Без Rally': '无回血',
+    'Атаки не возвращают здоровье': '攻击不会恢复生命值',
+    'Камера дальше': '镜头更远',
+    'Камера дальше от персонажа': '镜头离角色更远',
+    'Без автоповорота камеры': '关闭镜头自动转向',
+    'Камера не поворачивается сама при движении; ручное управление и захват цели работают': '移动时镜头不会自动转向；手动控制镜头和锁定目标仍然可用',
+    'Бег с меньшим наклоном стика': '更容易奔跑',
+    'Бег примерно с 70% наклона стика вместо 90%': '摇杆推到约 70% 即可奔跑，而不是 90%',
+    'Физика тел как в Dark Souls': '黑暗之魂式布娃娃物理',
+    'Тела и предметы разлетаются от ударов': '尸体和物品被击中时会飞散',
+    'shadnet-p2p: на вашем ПК или VPS': 'shadnet-p2p：在你的电脑或 VPS 上',
+    'Платиновый': '白金',
+    'Золотой': '金',
+    'Серебряный': '银',
+    'Бронзовый': '铜',
     'Язык игры': '游戏语言',
     'Проверка соединения': '连接检测',
     'Включено: игра входит на сервер при запуске': '开启：游戏启动时登录服务器',
@@ -5205,7 +5149,6 @@ ZH_CN = {
     "это имя уже занято": "该名称已被占用",
     "серверу нужен ключ регистрации: спросите его владельца": "服务器需要注册密钥：请向服务器所有者索取",
     "недопустимое имя или пароль": "名称或密码无效",
-    "Учётная запись {} создана на {}": "已在 {1} 上创建账户 {0}",
     "Не удалось создать учётную запись: {}": "无法创建账户：{}",
     "BBSC (CLS_AMG): бесшовный кооператив": "BBSC（CLS_AMG）：无缝合作",
     "NoDreamForHunter: основа игрового сервера BBSC": "NoDreamForHunter：BBSC 游戏服务器的基础",
@@ -5269,7 +5212,6 @@ ZH_CN = {
     "Канал P2P": "P2P 通道",
     "Сообщения BBSC идут напрямую между игроками, когда нет ретранслятора BBSC (нужно для публичных серверов, The Hunter's Dream)": "没有 BBSC 中继时，BBSC 的消息直接在玩家之间传递（公共服务器 The Hunter's Dream 上需要）",
     "Адрес ретранслятора": "中继地址",
-    "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444；留空则使用联机设置中的游戏服务器地址",
     "Бесшовный кооператив (BBSC)": "无缝合作（BBSC）",
     "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "会话可在死亡、灯、区域、首领和猎人梦境之间延续；最多 5 名猎人。BBSC 作者 CLS_AMG。会话中的所有玩家都需要它",
     "Включить BBSC": "启用 BBSC",
@@ -5278,7 +5220,6 @@ ZH_CN = {
     # Window, pages, buttons
     "Запустить": "启动",
     "Остановить": "停止",
-    "Настройки": "设置",
     "Журнал": "日志",
     "Не удалось запустить: {}": "无法启动：{}",
     "\n— игра завершилась (код {}) —\n": "\n— 游戏已退出（代码 {}）—\n",
@@ -5298,7 +5239,6 @@ ZH_CN = {
     "Найдены сохранения": "已找到存档",
     "Сохранений пока нет: игра создаст их здесь": "暂无存档：游戏会在此创建",
     "не выбрана": "未选择",
-    "Найден eboot.bin": "已找到 eboot.bin",
     "Нет eboot.bin в папке": "文件夹中没有 eboot.bin",
     "Управление": "操作设置",
     "Клавиатура": "键盘",
@@ -5501,8 +5441,6 @@ ZH_CN = {
     "Debug menu (левый touchpad / Tab; нужны шрифты)": "调试菜单（左触摸板 / Tab；需要字体文件）",
     "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»": "在主菜单和“系统”菜单中退出到桌面",
     "В меню «Система» игра сначала сохраняется, как при «Выходе из игры», и потом закрывается": "在“系统”菜单中，游戏会先像“退出游戏”一样存档，然后关闭",
-    "Установите DbgFont14h.ccm и DbgFont14h.tpf в dvdroot_ps4/font из мода Nexus #253":
-        "请从 Nexus 模组 #253 中，将 DbgFont14h.ccm 和 DbgFont14h.tpf 安装到 dvdroot_ps4/font",
     # Frame rate
     "Частота кадров": "帧率",
     "Режим": "模式",
@@ -5529,7 +5467,6 @@ ZH_CN = {
     "Полная": "完整",
     "Около 3 ГБ видеопамяти сверху": "额外占用约 3 GB 显存",
     # Mode
-    "Новая модель памяти и трансляции": "新内存与指令转译模型",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "新模型：显卡像 PC 游戏那样直接读写游戏内存，图形指令被转译而非模拟。旧模型：0.3 版的内存模型，包含所有修复。如果驱动未通过启动检查，则使用旧模型",
     "Модель памяти и трансляции": "内存与指令转译模型",
@@ -5566,7 +5503,7 @@ ZH_CN = {
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
         "有地区版本的语言所用的文本：西班牙的西班牙语（欧洲）或拉丁美洲西班牙语（美洲）。也决定游戏服务器的地址",
     "Как в дампе игры":
-        "与游戏转储相同",
+        "与转储相同",
     "Европа":
         "欧洲",
     "Америка":
@@ -5653,7 +5590,6 @@ ZH_CN = {
     "Автоматически (по контроллеру)": "自动（按手柄）",
     "Адрес WebAPI (пусто: порт 31315 сервера)": "WebAPI 地址（留空：使用服务器的 31315 端口）",
     "Адрес сервера (host:port)": "服务器地址（主机:端口）",
-    "Бесшовный кооператив (экспериментально)": "无缝联机合作（实验性）",
     "В дампе игры нет трофеев (sce_sys/trophy)": "游戏转储中没有奖杯（sce_sys/trophy）",
     "Выбрать папку DLC": "选择 DLC 文件夹",
     "Выключите при Tailscale или другом VPN": "使用 Tailscale 或其他 VPN 时请关闭",
@@ -5707,7 +5643,6 @@ ZH_CN = {
     "Неверный ключ трофеев: названия недоступны": "奖杯密钥错误：无法显示名称",
     "Нет DLC этой игры в папке": "该文件夹中没有本游戏的 DLC",
     "Нужна папка adhoc из мода Nexus #253 (шрифты adhoc/font) — в dvdroot_ps4 игры или модом; без неё патч не применяется": "需要 Nexus 模组 #253 中的 adhoc 文件夹（字体位于 adhoc/font），放入游戏的 dvdroot_ps4 或作为模组加载；缺少它时不会应用此补丁",
-    "Онлайн": "联机",
     "Основной": "主显示器",
     "Отмена": "取消",
     "Папка DLC": "DLC 文件夹",
@@ -5722,12 +5657,10 @@ ZH_CN = {
     'Отмечен вручную {}': '手动标记于 {}',
     "Получено {} из {}": "已获得 {} / {}",
     "Порт кооператива (UDP)": "联机合作端口（UDP）",
-    "Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки": "尚未完成：只会把召唤发送到设置了 BloodborneSeamlessCoop=true 的服务器，访客还不会被移到房主那里。仅供测试",
     "Применяется при запуске игры": "在游戏启动时生效",
     "Проверить": "检测",
     "Проверка…": "检测中…",
     "Пропускать выбор «по сети / вне сети»": "跳过「在线 / 离线」选择",
-    "Публичный сервер shadPS4": "shadPS4 公共服务器",
     "Свой сервер": "自己的服务器",
     "Сервер shadNet": "shadNet 服务器",
     "Сервер кооператива (колокола и призывы)": "联机合作服务器（铃铛与召唤）",

@@ -58,7 +58,7 @@ Hunters; with the base game, its DLC goes in **Setup → DLC folder** ([how](doc
 ## Online play
 
 In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose a server and press **Test**
-in the **Status** row (every line should be green):
+in the **Status** row (every line should get a check mark):
 
 - **Seamless Hunt** (the default): the community server of Seamless Co-op (BBSC), with players on
   the Windows port. Make an account from the launcher with **Create** ([docs/ONLINE.md](docs/ONLINE.md#seamless-hunt)).

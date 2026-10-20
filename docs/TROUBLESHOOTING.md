@@ -101,7 +101,7 @@ camera can feel heavier: the game's own *Camera speed* setting makes up for it.
 
 ## Summons never connect
 
-Press **Test** in the **Status** row of **Multiplayer → Online**. A red line for the shadNet server's UDP means
+Press **Test** in the **Status** row of **Multiplayer → Online**. An error mark on the shadNet server's UDP line means
 the server never learns your address, and no summon can connect: check that the server is running
 and that its log lists the UDP listener, and that no firewall blocks UDP 31314 on its side
 ([SERVER.md](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The
