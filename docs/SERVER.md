@@ -2,7 +2,7 @@
 
 Bells and summons go through a shadNet server. shadPS4's public one (`srv.shadps4.net`) no longer
 accepts bbport builds, and the public pool for bbport is now The Hunter's Dream's, through
-bbbridge (the launcher's **Online** page; [README](../README.md#online-play)). A group of friends
+bbbridge (the launcher's **Multiplayer → Online** tab; [README](../README.md#online-play)). A group of friends
 can also run their own server:
 [shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) by Wozzardman, the shadNet server with
 that UDP port working and a summon service of its own.
@@ -133,7 +133,7 @@ To back up the accounts, stop the server and copy the volume's `db/shadnet.db`.
 
 ## 4. Each player's launcher
 
-In the **Online** page:
+In **Multiplayer → Online**:
 
 | Setting | Value |
 |---|---|
@@ -187,7 +187,7 @@ place of The Hunter's Dream for messages, bloodstains and the server list.
 | 3478 | UDP | The relay BBSC players fall back to when they cannot reach each other directly |
 
 Each player then sets **Game server** to `http://100.x.y.z:20443` in the launcher's
-Online page, keeps the same shadNet server and account, and turns on **Seamless co-op (BBSC)**.
+**Multiplayer → Online** tab, keeps the same shadNet server and account, and turns on **Seamless co-op (BBSC)**.
 BBSC finds its relay at the game server's address (or `BBSC_RELAY`, the relay address in BBSC's
 settings).
 

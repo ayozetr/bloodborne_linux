@@ -7,6 +7,10 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Your shadNet account name, not your email: create one with the Create button below or ask the server's owner. The password is saved on this computer with the launcher settings",
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'The shadNet server does not accept bbport, so the game stayed offline. Choose Seamless Hunt or your own server (Multiplayer → Online).',
+    'Введите адрес своего сервера или выберите Seamless Hunt': "Enter your server's address or choose Seamless Hunt",
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': "shadPS4's public server no longer accepts bbport: Seamless Hunt is now selected",
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'The keyboard player in menus: I, J, K, L move, Space confirms, Left Shift goes back',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Signed in: “{}” on {}',
@@ -380,7 +384,6 @@ EN = {
     'Играть офлайн': 'Play offline',
     'Игровой сервер': 'Game server',
     'Игровой сервер (сообщения, пятна крови, призраки)': 'Game server (messages, bloodstains, ghosts)',
-    'Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'Your shadNet account name, not your email. Register at shadnet.shadps4.net or ask the owner of a private server. The password is saved on this computer with the launcher settings',
     'Онлайн': 'Online',
     'Отмена': 'Cancel',
     'Пароль': 'Password',
@@ -547,7 +550,6 @@ EN = {
     "Игровой сервер": "Game server",
     "Сервер кооператива (колокола и призывы)": "Co-op server (bells and summons)",
     "Учётная запись": "Account",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Your shadNet account name, not your email. Register at shadnet.shadps4.net or ask the owner of a private server. The password is saved on this computer with the launcher settings",
     "Пароль": "Password",
     "Соединение": "Connection",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together",
@@ -835,7 +837,6 @@ EN = {
     'Игра установлена: {}': 'Game installed: {}',
     'Не удалось установить: подробности в журнале': 'Could not install: details in the log',
     'Игра по сети': 'Online play',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'The shadNet server does not accept bbport, so the game stayed offline. For online play, use your own server (Online page).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Quitting from the menu with a controller, the menu kept within the screen, and the touchpad halves on Xbox pads',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': "A video player crash when it stops; 21:9 and 32:9 ultrawide screens: camera, HUD and its position; Quit to Desktop in the game's menus",
     'Язык внутриигрового меню при запуске без окна лаунчера': "The in-game menu's language when starting without the launcher window",
@@ -860,6 +861,10 @@ EN = {
 }
 
 PT_BR = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'O nome da sua conta shadNet, não o e-mail: crie uma com o botão Criar abaixo ou peça ao dono do servidor. A senha fica salva neste computador com as configurações do launcher',
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'O servidor shadNet não aceita o bbport, então o jogo ficou offline. Escolha o Seamless Hunt ou seu próprio servidor (Multijogador → Online).',
+    'Введите адрес своего сервера или выберите Seamless Hunt': 'Digite o endereço do seu servidor ou escolha o Seamless Hunt',
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'O servidor público do shadPS4 não aceita mais o bbport: o Seamless Hunt foi selecionado',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'O jogador com teclado nos menus: I, J, K, L para mover, Espaço para confirmar, Shift esquerdo para voltar',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Sessão iniciada: “{}” em {}',
@@ -1291,7 +1296,6 @@ PT_BR = {
     "Игровой сервер": "Servidor do jogo",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (sinos e invocações)",
     "Учётная запись": "Conta",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "O nome da sua conta shadNet, não o e-mail. Registre-se em shadnet.shadps4.net ou peça ao dono de um servidor privado. A senha fica salva neste computador com as configurações do launcher",
     "Пароль": "Senha",
     "Соединение": "Conexão",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Todos na sessão precisam da mesma versão do jogo (1.09) e do mesmo servidor. As trapaças mudam o jogo também para os outros jogadores: desligue-as ao jogar junto",
@@ -1746,7 +1750,6 @@ PT_BR = {
     'Игра установлена: {}': 'Jogo instalado: {}',
     'Не удалось установить: подробности в журнале': 'Não foi possível instalar: detalhes no registro',
     'Игра по сети': 'Jogo online',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'O servidor shadNet não aceita o bbport, então o jogo ficou offline. Para jogar online, use seu próprio servidor (página Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Sair do jogo pelo menu com o controle, o menu dentro da tela e as metades do touchpad no controle Xbox',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Um travamento do reprodutor de vídeo ao parar; telas ultrawide 21:9 e 32:9: câmera, HUD e sua posição; Sair para a área de trabalho nos menus do jogo',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'O idioma do menu do jogo ao iniciar sem a janela do launcher',
@@ -1773,6 +1776,10 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'El nombre de tu cuenta de shadNet, no el correo: créala con el botón Crear de abajo o pídesela a quien gestione el servidor. La contraseña se guarda en este ordenador con los ajustes del launcher',
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Elige Seamless Hunt o tu propio servidor (Multijugador → En línea).',
+    'Введите адрес своего сервера или выберите Seamless Hunt': 'Escribe la dirección de tu servidor o elige Seamless Hunt',
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'El servidor público de shadPS4 ya no acepta bbport: se ha elegido Seamless Hunt',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'El jugador con teclado, en los menús: I, J, K, L para moverse, Espacio para aceptar y Mayús izquierda para volver',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Sesión iniciada: «{}» en {}',
@@ -2195,7 +2202,6 @@ ES = {
     "Игровой сервер": "Servidor del juego",
     "Сервер кооператива (колокола и призывы)": "Servidor cooperativo (campanas e invocaciones)",
     "Учётная запись": "Cuenta",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "El nombre de tu cuenta de shadNet, no el correo. Regístrate en shadnet.shadps4.net o pídesela a quien gestione un servidor privado. La contraseña se guarda en este ordenador con los ajustes del launcher",
     "Пароль": "Contraseña",
     "Соединение": "Conexión",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Todos en la sesión necesitan la misma versión del juego (1.09) y el mismo servidor. Los trucos cambian el juego también para los demás jugadores: desactívalos al jugar juntos",
@@ -2568,7 +2574,6 @@ ES = {
     'Игра установлена: {}': 'Juego instalado: {}',
     'Не удалось установить: подробности в журнале': 'No se pudo instalar: detalles en el registro',
     'Игра по сети': 'Juego en línea',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Para jugar en línea, usa tu propio servidor (página Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Salir del juego desde el menú con el mando, el menú dentro de la pantalla y las mitades del panel táctil en mandos Xbox',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Un cierre del reproductor de vídeo al detenerse; pantallas ultrapanorámicas 21:9 y 32:9: cámara, HUD y su posición; Salir al escritorio en los menús del juego',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',
@@ -2595,6 +2600,10 @@ ES = {
 
 # Italian.
 IT = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Il nome del tuo account shadNet, non l'email: crealo con il pulsante Crea qui sotto o chiedilo a chi gestisce il server. La password viene salvata su questo computer con le impostazioni del launcher",
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'Il server shadNet non accetta bbport, quindi il gioco è rimasto offline. Scegli Seamless Hunt o il tuo server (Multigiocatore → Online).',
+    'Введите адрес своего сервера или выберите Seamless Hunt': "Inserisci l'indirizzo del tuo server o scegli Seamless Hunt",
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'Il server pubblico di shadPS4 non accetta più bbport: è stato scelto Seamless Hunt',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Il giocatore con la tastiera nei menu: I, J, K, L per muoversi, Spazio per confermare, Maiusc sinistro per tornare indietro',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Accesso effettuato: «{}» su {}',
@@ -3017,7 +3026,6 @@ IT = {
     "Игровой сервер": "Server di gioco",
     "Сервер кооператива (колокола и призывы)": "Server cooperativo (campane ed evocazioni)",
     "Учётная запись": "Account",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Il nome del tuo account shadNet, non l'email. Registrati su shadnet.shadps4.net o chiedi a chi gestisce un server privato. La password viene salvata su questo computer con le impostazioni del launcher",
     "Пароль": "Password",
     "Соединение": "Connessione",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Tutti nella sessione devono avere la stessa versione del gioco (1.09) e lo stesso server. I cheat cambiano il gioco anche per gli altri giocatori: disattivali quando giocate insieme",
@@ -3390,7 +3398,6 @@ IT = {
     'Игра установлена: {}': 'Gioco installato: {}',
     'Не удалось установить: подробности в журнале': 'Impossibile installare: dettagli nel registro',
     'Игра по сети': 'Gioco online',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Il server shadNet non accetta bbport, quindi il gioco è rimasto offline. Per giocare online usa un tuo server (pagina Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Uscire dal gioco dal menu con il controller, il menu entro lo schermo e le metà del touchpad sui controller Xbox',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Un crash del lettore video quando si ferma; schermi ultrawide 21:9 e 32:9: telecamera, HUD e la sua posizione; Esci al desktop nei menu del gioco',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La lingua del menu di gioco avviando senza la finestra del launcher',
@@ -3417,6 +3424,10 @@ IT = {
 
 # French.
 FR = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Le nom de votre compte shadNet, pas votre e-mail : créez-le avec le bouton Créer ci-dessous ou demandez-le à l'administrateur du serveur. Le mot de passe est enregistré sur cet ordinateur avec les réglages du launcher",
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': "Le serveur shadNet n'accepte pas bbport, le jeu est donc resté hors ligne. Choisissez Seamless Hunt ou votre propre serveur (Multijoueur → En ligne).",
+    'Введите адрес своего сервера или выберите Seamless Hunt': "Saisissez l'adresse de votre serveur ou choisissez Seamless Hunt",
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': "Le serveur public de shadPS4 n'accepte plus bbport : Seamless Hunt est maintenant sélectionné",
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Le joueur au clavier dans les menus : I, J, K, L pour se déplacer, Espace pour valider, Maj gauche pour revenir',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Connecté : « {} » sur {}',
@@ -3839,7 +3850,6 @@ FR = {
     "Игровой сервер": "Serveur de jeu",
     "Сервер кооператива (колокола и призывы)": "Serveur coopératif (cloches et invocations)",
     "Учётная запись": "Compte",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Le nom de votre compte shadNet, pas votre e-mail. Inscrivez-vous sur shadnet.shadps4.net ou demandez à l'administrateur d'un serveur privé. Le mot de passe est enregistré sur cet ordinateur avec les réglages du launcher",
     "Пароль": "Mot de passe",
     "Соединение": "Connexion",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Tout le monde dans la session doit avoir la même version du jeu (1.09) et le même serveur. Les triches modifient aussi le jeu des autres joueurs : désactivez-les en jouant ensemble",
@@ -4212,7 +4222,6 @@ FR = {
     'Игра установлена: {}': 'Jeu installé : {}',
     'Не удалось установить: подробности в журнале': 'Échec de l’installation : détails dans le journal',
     'Игра по сети': 'Jeu en ligne',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Le serveur shadNet n’accepte pas bbport, le jeu est donc resté hors ligne. Pour jouer en ligne, utilisez votre propre serveur (page En ligne).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Quitter le jeu depuis le menu à la manette, le menu qui tient dans l’écran et les moitiés du pavé tactile sur les manettes Xbox',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Un plantage du lecteur vidéo à son arrêt ; écrans ultra-larges 21:9 et 32:9 : caméra, ATH et sa position ; Quitter vers le bureau dans les menus du jeu',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'La langue du menu en jeu au lancement sans la fenêtre du launcher',
@@ -4239,6 +4248,10 @@ FR = {
 
 # German.
 DE = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'Dein shadNet-Kontoname, nicht deine E-Mail: Erstelle ihn unten mit „Erstellen“ oder frag den Betreiber des Servers. Das Passwort wird mit den Launcher-Einstellungen auf diesem Computer gespeichert',
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'Der shadNet-Server akzeptiert bbport nicht, das Spiel ist offline geblieben. Wähle Seamless Hunt oder deinen eigenen Server (Mehrspieler → Online).',
+    'Введите адрес своего сервера или выберите Seamless Hunt': 'Gib die Adresse deines Servers ein oder wähle Seamless Hunt',
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'Der öffentliche Server von shadPS4 akzeptiert bbport nicht mehr: Seamless Hunt ist jetzt ausgewählt',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'Der Tastaturspieler in Menüs: I, J, K, L zum Bewegen, Leertaste zum Bestätigen, linke Umschalttaste zurück',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': 'Angemeldet: „{}“ auf {}',
@@ -4661,7 +4674,6 @@ DE = {
     "Игровой сервер": "Spielserver",
     "Сервер кооператива (колокола и призывы)": "Koop-Server (Glocken und Beschwörungen)",
     "Учётная запись": "Konto",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "Dein shadNet-Kontoname, nicht deine E-Mail. Registriere dich auf shadnet.shadps4.net oder frag den Betreiber eines privaten Servers. Das Passwort wird mit den Launcher-Einstellungen auf diesem Computer gespeichert",
     "Пароль": "Passwort",
     "Соединение": "Verbindung",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Alle in einer Sitzung brauchen dieselbe Spielversion (1.09) und denselben Server. Cheats verändern das Spiel auch für die anderen Spieler: Schalte sie beim gemeinsamen Spielen aus",
@@ -5034,7 +5046,6 @@ DE = {
     'Игра установлена: {}': 'Spiel installiert: {}',
     'Не удалось установить: подробности в журнале': 'Installation fehlgeschlagen: Details im Protokoll',
     'Игра по сети': 'Online-Spiel',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'Der shadNet-Server akzeptiert bbport nicht, daher blieb das Spiel offline. Für das Online-Spiel einen eigenen Server verwenden (Seite Online).',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Das Spiel im Menü mit dem Controller beenden, das Menü innerhalb des Bildschirms und die Touchpad-Hälften auf Xbox-Controllern',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Ein Absturz des Videoplayers beim Anhalten; Ultrawide-Bildschirme 21:9 und 32:9: Kamera, HUD und seine Position; Zum Desktop beenden in den Menüs des Spiels',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'Die Sprache des Spielmenüs beim Start ohne Launcher-Fenster',
@@ -5061,6 +5072,10 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'shadNet 账号名，不是邮箱：用下面的“创建”按钮创建，或向服务器的主人索取。密码会和启动器设置一起保存在这台电脑上',
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'shadNet 服务器不接受 bbport，游戏保持离线。请选择 Seamless Hunt 或你自己的服务器（多人游戏 → 联机）。',
+    'Введите адрес своего сервера или выберите Seamless Hunt': '请输入你自己服务器的地址，或选择 Seamless Hunt',
+    'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'shadPS4 公共服务器已不再接受 bbport：已改为 Seamless Hunt',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': '键盘玩家在菜单中：I、J、K、L 移动，空格确认，左 Shift 返回',
     # The sidebar's sections and the Multiplayer page.
     'Вход выполнен: «{}» на {}': '已登录：“{}”，服务器 {}',
@@ -5632,7 +5647,6 @@ ZH_CN = {
     "Иконки кнопок": "按键图标",
     "Поменять местами A и B": "交换 A 和 B",
     "Для контроллеров в стиле Nintendo: подтверждение на A, отмена на B. Применяется при запуске игры": "适用于任天堂风格的手柄：A 确认，B 返回。启动游戏时生效",
-    "Имя учётной записи shadNet, не email. Зарегистрируйтесь на shadnet.shadps4.net или спросите владельца частного сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера": "shadNet 账号名，不是邮箱。请在 shadnet.shadps4.net 注册，或向私人服务器的主人索取。密码会和启动器设置一起保存在这台电脑上",
     "Как запустить свой сервер": "如何搭建自己的服务器",
     "Ключ трофеев": "奖杯密钥",
     'Ключ трофеев PS4 (TrophyKey в shadPS4), 32 шестнадцатеричных символа: с ним названия и описания на языке игры. Хранится на этом компьютере. Без него они на английском':
@@ -5795,7 +5809,6 @@ ZH_CN = {
     'Игра установлена: {}': '游戏已安装：{}',
     'Не удалось установить: подробности в журнале': '无法安装：详情见日志',
     'Игра по сети': '联机游戏',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети используйте свой сервер (страница «Онлайн»).': 'shadNet 服务器不接受 bbport，因此游戏保持离线。如需联机，请使用自己的服务器（“联机”页面）。',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': '用手柄从菜单退出游戏、菜单不超出屏幕，以及 Xbox 手柄上的触摸板左右两半',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': '视频播放器停止时的崩溃；21:9 与 32:9 超宽屏：镜头、HUD 及其位置；游戏菜单中的“退出到桌面”',
     'Язык внутриигрового меню при запуске без окна лаунчера': '不经启动器窗口启动时游戏内菜单的语言',

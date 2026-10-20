@@ -295,7 +295,8 @@ fi
 # Online play (BB_ONLINE=1, launcher: Online; the online module gpu/bbnet): the game's own server
 # goes to the community server, summon signs to the shadNet WebAPI (scripts/online.py).
 if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then
-    export BB_SHADNET_SERVER=${BB_SHADNET_SERVER:-srv.shadps4.net:31313}
+    # Seamless Hunt's by default: shadPS4's public server signs this port out (scripts/online.py).
+    export BB_SHADNET_SERVER=${BB_SHADNET_SERVER:-play.seamlesshunt.com:31313}
     # HTTPS needs CA certificates: OpenSSL from Nix looks only in its own store path (the
     # packaged wrapper brings a bundle; from source the system's is taken).
     if [[ ! -r ${SSL_CERT_FILE:-} ]]; then

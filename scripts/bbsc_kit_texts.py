@@ -50,14 +50,14 @@ KIT = {
 }
 # The help line, by the game's text folder (English for the others).
 OFF_HELP = {  # one line: the inventory list shows only the first line of an item's help
-    'engus': "Needs BBSC on (the launcher's Online page).",
-    'spaes': "Requiere BBSC (página Online del lanzador).",
-    'itait': "Richiede BBSC (pagina Online del launcher).",
-    'frafr': "Nécessite BBSC (page En ligne du lanceur).",
-    'deude': "Benötigt BBSC (Online-Seite des Launchers).",
-    'porbr': "Requer o BBSC (página Online do launcher).",
-    'rusru': "Нужен BBSC (страница «Онлайн» в лаунчере).",
-    'zhocn': "需要开启 BBSC（启动器的“联机”页面）。",
+    'engus': "Needs BBSC on (the launcher's Multiplayer page).",
+    'spaes': "Requiere BBSC (página Multijugador del lanzador).",
+    'itait': "Richiede BBSC (pagina Multigiocatore del launcher).",
+    'frafr': "Nécessite BBSC (page Multijoueur du lanceur).",
+    'deude': "Benötigt BBSC (Mehrspieler-Seite des Launchers).",
+    'porbr': "Requer o BBSC (página Multijogador do launcher).",
+    'rusru': "Нужен BBSC (страница «Мультиплеер» в лаунчере).",
+    'zhocn': "需要开启 BBSC（启动器的“多人游戏”页面）。",
 }
 OFF_HELP.update(spaar=OFF_HELP['spaes'], porpt=OFF_HELP['porbr'], enggb=OFF_HELP['engus'])
 # BBSC's translations (bbsc/translations/<code>.json) by the game's text folders.

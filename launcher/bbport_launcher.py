@@ -240,8 +240,9 @@ DEFAULTS = {
     "discord": True,
     # The PS4's trophy key (shadPS4's TrophyKey): the trophies' names (scripts/trophies.py).
     "trophy_key": "",
-    # Co-op (Online page): off by default; shadPS4's public shadNet server and The Hunter's Dream.
-    # online_server_kind: "public" or "own" (docs/SERVER.md); unset, online.server_kind decides.
+    # Co-op (Multiplayer, Online tab): off by default; Seamless Hunt's server and The Hunter's Dream.
+    # online_server_kind: "own", "seamlesshunt" or "thd" (docs/SERVER.md); unset or the old "public"
+    # (shadPS4's server, which signs this port out), online.server_kind gives Seamless Hunt.
     "online": False,
     "online_community": online.COMMUNITY_SERVER,
     "online_server_kind": None,
@@ -249,8 +250,8 @@ DEFAULTS = {
     "online_webapi": "",
     "online_npid": "",
     "online_password": "",
-    # The account of each kind of server ({"public": {"npid", "password"}, "own": ...}): the
-    # Online page swaps them when the server changes; online_npid/password are the chosen one's.
+    # The account of each kind of server ({"own": {"npid", "password"}, "seamlesshunt": ...}): the
+    # Online tab swaps them when the server changes; online_npid/password are the chosen one's.
     "online_accounts": {},
     "online_upnp": True,
     # Seamless Hunt's bloodstains and death visions, off by default: they crash the game there
@@ -446,12 +447,12 @@ def fsr411_build_command(upscaler, loader=None):
 # Trophy grades (scripts/trophies.py) as the Trophies page names them.
 TROPHY_GRADES = {"P": "Платиновый", "G": "Золотой", "S": "Серебряный", "B": "Бронзовый"}
 
-# The Online page's shadNet server choice (online.server_kind).
+# The Online tab's shadNet server choice (online.server_kind). shadPS4's public server is not one:
+# it signs this port out since 2026-10-12.
 SERVER_KINDS = [
-    ("Публичный сервер shadPS4", "public", "srv.shadps4.net:31313"),
-    ("Свой сервер", "own", "shadnet-p2p: на вашем ПК или VPS"),
     # Seamless Hunt's servers, as its guide sets them up (online.SEAMLESSHUNT_*).
     ("Seamless Hunt", "seamlesshunt", "play.seamlesshunt.com: сервер сообщества BBSC, с игроками на Windows"),
+    ("Свой сервер", "own", "shadnet-p2p: на вашем ПК или VPS"),
 ]
 # The Hunter's Dream, with bbhost's players: bbbridge on this PC (scripts/online.py, run.sh).
 THD_KIND = ("The Hunter's Dream (с игроками bbhost)", "thd",
@@ -2254,7 +2255,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         kinds = SERVER_KINDS + ([THD_KIND] if bridge_cli() else [])
         kind = online.server_kind(s)
         self.server_kind_row = combo_row(tr("Сервер shadNet"), None, kinds,
-                                         kind if kind in (k[1] for k in kinds) else "public")
+                                         kind if kind in (k[1] for k in kinds) else "seamlesshunt")
         coop.add(self.server_kind_row)
         own = s["online_server"] if s["online_server"] != online.SHADNET_SERVER else ""
         self.server_row = Adw.EntryRow(title=tr("Адрес сервера (host:port)"), text=own)
@@ -2337,12 +2338,12 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         account = Adw.PreferencesGroup(
             title=tr("Учётная запись"),
-            description=tr("Имя учётной записи shadNet, не email. Зарегистрируйтесь на "
-                           "shadnet.shadps4.net или спросите владельца частного сервера. Пароль "
-                           "хранится на этом компьютере вместе с настройками лаунчера"))
+            description=tr("Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» "
+                           "ниже или спросите владельца сервера. Пароль хранится на этом компьютере "
+                           "вместе с настройками лаунчера"))
         self.account_kind = combo_value(self.server_kind_row)
         self.online_accounts = {kind: dict(zip(("npid", "password"), online.account(s, kind)))
-                                for kind in ("public", "own", "seamlesshunt", "thd")}
+                                for kind in ("public", "own", "seamlesshunt", "thd")}  # "public": kept, unused
         npid, password = online.account(s, self.account_kind)
         self.npid_row = Adw.EntryRow(title=tr("Online ID (NPID)"), text=npid)
         self.password_row = Adw.PasswordEntryRow(title=tr("Пароль"), text=password)
@@ -2398,9 +2399,15 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.show_server_kind()
         self.last_login = getattr(self, "last_login", None)
         for row, signal in ((self.online_row, "notify::active"), (self.server_kind_row, "notify::selected"),
-                            (self.npid_row, "changed"), (self.password_row, "changed")):
+                            (self.npid_row, "changed"), (self.password_row, "changed"),
+                            (self.server_row, "changed")):
             row.connect(signal, lambda *_: self.show_online_status())
         self.show_online_status()
+        # Saved with shadPS4's public server, gone from the choice: said once, as the next save
+        # stores Seamless Hunt.
+        if s["online"] and online.stored_kind(s) == "public":
+            self.toasts.add_toast(Adw.Toast(title=tr("Публичный сервер shadPS4 больше не принимает "
+                                                     "bbport: выбран Seamless Hunt"), timeout=8))
         return page
 
     def show_online_status(self):
@@ -2415,6 +2422,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             icon, text = "network-offline-symbolic", tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн")
         elif not self.online_row.get_active():
             icon, text = "network-offline-symbolic", tr("Игра по сети выключена")
+        elif self.own_server_missing():
+            icon, text = "dialog-warning-symbolic", tr("Введите адрес своего сервера или выберите Seamless Hunt")
         elif not npid:
             icon, text = "dialog-warning-symbolic", tr("Нет учётной записи: создайте её или введите свою ниже")
         elif checked and checked[3]:
@@ -2427,6 +2436,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.online_status_icon.set_from_icon_name(icon)
         self.online_status_row.set_subtitle(GLib.markup_escape_text(text))
         self.online_status_button.set_sensitive(online_module() and self.test_button.get_sensitive())
+
+    def own_server_missing(self):
+        return combo_value(self.server_kind_row) == "own" and not self.server_row.get_text().strip()
 
     def online_settings(self):
         """The Online page's settings (the keys of DEFAULTS)."""
@@ -3454,6 +3466,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                                         "зарегистрированное на сервере, а не адрес email"))
             self.show_section("online")
             return
+        if self.online_row.get_active() and self.own_server_missing():
+            self.alert("Bloodborne", tr("Введите адрес своего сервера или выберите Seamless Hunt"))
+            self.show_section("online")
+            return
         self.store()
         self.clear_log()
         launcher = Gio.SubprocessLauncher.new(
@@ -3488,8 +3504,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         if line.startswith("Online: the shadNet server ") and not self.server_refused:
             self.server_refused = True
             self.alert(tr("Игра по сети"), tr(
-                "Сервер shadNet не принимает bbport, игра осталась офлайн. Для игры по сети "
-                "используйте свой сервер (страница «Онлайн»)."))
+                "Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt "
+                "или свой сервер (Мультиплеер → По сети)."))
         self.read_line()
 
     def stop_game(self):

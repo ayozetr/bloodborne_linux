@@ -4,7 +4,7 @@
 
 From run.py and the launcher of the Windows port (Supermedo/bloodborne_pc). Messages,
 bloodstains and ghosts come from the community game server (The Hunter's Dream by default);
-bells and summons go through a shadNet server (shadPS4's public one by default).
+bells and summons go through a shadNet server (Seamless Hunt's by default).
 
 `online.py overrides --user DIR` writes DIR/host_overrides.json for this launch (the game's
 server -> the community server; summon signs -> the shadNet WebAPI when it has the Bloodborne
@@ -106,9 +106,9 @@ def webapi_setting(webapi, server, community):
     return webapi or webapi_address(server)
 
 
-def server_kind(settings):
-    """'public' (shadPS4's server), 'own', 'seamlesshunt' or 'thd'; settings from before the choice
-    existed are 'own' when they name another server."""
+def stored_kind(settings):
+    """The kind of server the settings name: 'public' (shadPS4's server), 'own', 'seamlesshunt' or
+    'thd'; settings from before the choice existed are 'own' when they name another server."""
     kind = settings.get('online_server_kind')
     if kind in ('public', 'own', 'seamlesshunt', 'thd'):
         return kind
@@ -116,27 +116,34 @@ def server_kind(settings):
     return 'own' if server and server != SHADNET_SERVER else 'public'
 
 
+def server_kind(settings):
+    """The kind of server the game uses: 'own', 'seamlesshunt' or 'thd'. shadPS4's public server
+    signs this port's builds out since 2026-10-12 (upstream docs/BBSC.md), so settings that chose
+    it, or chose nothing yet, get Seamless Hunt."""
+    kind = stored_kind(settings)
+    return 'seamlesshunt' if kind == 'public' else kind
+
+
 def account(settings, kind):
     """(online ID, password) kept for one kind of server: each has its own accounts, so the
     launcher keeps one for each (online_accounts). Settings from before that know only the one of
-    the server chosen then."""
+    the server chosen then: the public server's is not Seamless Hunt's."""
     kept = (settings.get('online_accounts') or {}).get(kind)
     if isinstance(kept, dict):
         return str(kept.get('npid') or ''), str(kept.get('password') or '')
-    if kind == server_kind(settings):
+    if kind == stored_kind(settings):
         return str(settings.get('online_npid') or ''), str(settings.get('online_password') or '')
     return '', ''
 
 
 def addresses(settings):
     """(shadNet server, WebAPI, game server) for the launcher's settings. A server without a port
-    gets shadNet's 31313; shadPS4's public server ignores the WebAPI field."""
-    if server_kind(settings) == 'seamlesshunt':
+    gets shadNet's 31313; an own server without an address is Seamless Hunt (the launcher does not
+    start the game with one)."""
+    server = str(settings.get('online_server') or '').strip()
+    if server_kind(settings) == 'seamlesshunt' or not server:
         return SEAMLESSHUNT_SERVER, SEAMLESSHUNT_WEBAPI, SEAMLESSHUNT_GAME
     community = community_address(settings.get('online_community'), probe=True)
-    server = str(settings.get('online_server') or '').strip()
-    if server_kind(settings) == 'public' or not server:
-        return SHADNET_SERVER, webapi_address(SHADNET_SERVER), community
     if ':' not in server:
         server += ':31313'
     return server, webapi_setting(settings.get('online_webapi'), server, community), community
@@ -489,7 +496,7 @@ def main():
     bridge.add_argument('--user', required=True)
     sub.add_parser('check')
     a = parser.parse_args()
-    server = os.environ.get('BB_SHADNET_SERVER') or SHADNET_SERVER
+    server = os.environ.get('BB_SHADNET_SERVER') or SEAMLESSHUNT_SERVER
     community = community_address(os.environ.get('BB_COMMUNITY_SERVER'))
     webapi = webapi_setting(os.environ.get('BB_SHADNET_WEBAPI'), server, community)
     if a.command == 'bridge':

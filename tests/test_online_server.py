@@ -12,11 +12,15 @@ import online
 
 class ServerChoiceTests(unittest.TestCase):
     def test_kind_of_settings_from_before_the_choice(self):
-        self.assertEqual(online.server_kind({'online_server': online.SHADNET_SERVER}), 'public')
-        self.assertEqual(online.server_kind({'online_server': ''}), 'public')
+        self.assertEqual(online.stored_kind({'online_server': online.SHADNET_SERVER}), 'public')
+        self.assertEqual(online.stored_kind({'online_server': ''}), 'public')
         self.assertEqual(online.server_kind({'online_server': '100.64.0.7:31313'}), 'own')
-        self.assertEqual(online.server_kind({'online_server_kind': 'public',
-                                             'online_server': '100.64.0.7:31313'}), 'public')
+
+    def test_shadps4_s_public_server_is_seamless_hunt_now(self):
+        for settings in ({}, {'online_server': online.SHADNET_SERVER},
+                         {'online_server_kind': 'public', 'online_server': '100.64.0.7:31313'}):
+            self.assertEqual(online.server_kind(settings), 'seamlesshunt')
+        self.assertEqual(online.server_kind({'online_server_kind': 'thd'}), 'thd')
 
     def test_one_account_for_each_kind_of_server(self):
         settings = {'online_server_kind': 'own', 'online_npid': 'me', 'online_password': 'pw',
@@ -27,14 +31,16 @@ class ServerChoiceTests(unittest.TestCase):
         old = {'online_server': online.SHADNET_SERVER, 'online_npid': 'me', 'online_password': 'pw'}
         self.assertEqual(online.account(old, 'public'), ('me', 'pw'))
         self.assertEqual(online.account(old, 'own'), ('', ''))
+        # The public server's account is not Seamless Hunt's, now the game goes there.
+        self.assertEqual(online.account(old, 'seamlesshunt'), ('', ''))
 
     def test_public_server_ignores_the_own_server_fields(self):
         server, webapi, community = online.addresses({
             'online_server_kind': 'public', 'online_server': '100.64.0.7',
             'online_webapi': 'http://100.64.0.7:9999', 'online_community': ''})
-        self.assertEqual((server, webapi, community), (online.SHADNET_SERVER,
-                                                       'http://srv.shadps4.net:31315',
-                                                       online.COMMUNITY_SERVER))
+        self.assertEqual((server, webapi, community), (online.SEAMLESSHUNT_SERVER,
+                                                       online.SEAMLESSHUNT_WEBAPI,
+                                                       online.SEAMLESSHUNT_GAME))
 
     def test_own_server_gets_the_default_ports(self):
         settings = {'online_server_kind': 'own', 'online_server': '100.64.0.7'}
@@ -43,9 +49,9 @@ class ServerChoiceTests(unittest.TestCase):
         settings['online_webapi'] = 'http://100.64.0.7:8080'
         self.assertEqual(online.addresses(settings)[1], 'http://100.64.0.7:8080')
 
-    def test_own_server_left_empty_is_the_public_one(self):
+    def test_own_server_left_empty_is_seamless_hunt(self):
         self.assertEqual(online.addresses({'online_server_kind': 'own', 'online_server': ''})[0],
-                         online.SHADNET_SERVER)
+                         online.SEAMLESSHUNT_SERVER)
 
     def test_game_server_typed_without_scheme(self):
         self.assertEqual(online.community_address('http://example.org:20443'),
@@ -108,7 +114,7 @@ class ServerChoiceTests(unittest.TestCase):
         self.assertEqual(env['SHADPS4_BLOODBORNE_SEAMLESS_COOP'], '1')
 
     def test_random_port_and_seamless_only_with_an_own_server(self):
-        env = online.environment({'online_server_kind': 'public', 'online_p2p_port': 0,
+        env = online.environment({'online_server_kind': 'seamlesshunt', 'online_p2p_port': 0,
                                   'online_seamless': True})
         self.assertNotIn('SHADPS4_P2P_PORT', env)
         self.assertNotIn('SHADPS4_BLOODBORNE_SEAMLESS_COOP', env)

@@ -57,7 +57,7 @@ Hunters; with the base game, its DLC goes in **Game → DLC folder** ([how](docs
 
 ## Online play
 
-In the launcher's **Online** page, turn on **Play online**, choose a server and press **Test the
+In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose a server and press **Test the
 connection** (every line should be green):
 
 - **The Hunter's Dream**: sign in with Discord, or create an account with just a name. You play

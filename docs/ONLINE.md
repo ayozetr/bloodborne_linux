@@ -11,7 +11,7 @@ everyone needs the game at version 1.09 and the same pool.
 
 ## The Hunter's Dream (with bbhost's players)
 
-Choose **The Hunter's Dream (with bbhost players)** in the launcher's **Online** page.
+Choose **The Hunter's Dream (with bbhost players)** in the launcher's **Multiplayer → Online** tab.
 [bbbridge](../bbbridge/README.md) by MaskZeus starts with the game, stands in for a shadNet server
 on this computer and talks to The Hunter's Dream the way bbhost does, its relay included, so no
 router port is needed. The account is The Hunter's Dream's, kept in `user/bbbridge` (no password):
@@ -33,7 +33,7 @@ not to The Hunter's Dream's support.
 [Seamless Hunt](https://install.seamlesshunt.com) is a community server for Seamless Co-op (BBSC),
 where Windows players join with BBSC's package for the Windows port.
 
-1. In the launcher's **Online** page, turn on **Play online** and choose **Seamless Hunt**: its
+1. In the launcher's **Multiplayer → Online** tab, turn on **Play online** and choose **Seamless Hunt**: its
    shadNet server, WebAPI and game server come with it.
 2. Type a name and a password under **Account** and press **Create** (once). The server wants an
    email for each account; the launcher makes one from the name, as Seamless Hunt's own tool does.
@@ -48,7 +48,7 @@ back). Messages, ghosts and summon signs are not affected.
 Its owner creates the account ([SERVER.md](SERVER.md)), or you make it with **Create** under
 **Account** when the server lets anyone register.
 
-1. In the launcher's **Online** page, turn on **Play online**, choose **Your own server** with
+1. In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose **Your own server** with
    its address, and enter the **account name** (not the email) and the password. The password is
    kept on this computer with the launcher's settings.
 2. **Test the connection**: the game server, the shadNet server, its UDP port and its WebAPI
@@ -67,7 +67,7 @@ the guest follows the host through lamps, sees the host's world (doors, bosses, 
 items and echoes it gets, and enemies get stronger for every guest. It runs inside the game
 (`bbsc/`, loaded as `libbbsc.so`). It is new, and its own author marks much of it as untested.
 
-1. In the launcher's **Online** page, turn on **Seamless co-op (BBSC)**. **BBSC settings** has its
+1. In the launcher's **Multiplayer → Online** tab, turn on **Seamless co-op (BBSC)**. **BBSC settings** has its
    options (the same as in BBSC's Windows launcher); the defaults are BBSC's.
 2. Every player of the session needs BBSC, the same version: on Linux this port, on Windows
    BBSC's package for the Windows port (its *BBport* release). A player without it plays the
@@ -75,7 +75,7 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
 3. The server decides how much of it works:
    - **BBSC's game server** (your group's, [SERVER.md](SERVER.md#seamless-co-op-bbsc), or BBSC's
      public one): everything, summons across areas and 5 hunters included. Set it as the
-     **Game server** of the Online page.
+     **Game server** of the Online tab.
    - **The Hunter's Dream**: the session stays together (deaths, lamps, bosses), but summons are
      the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
      Its messages go straight between the players.
@@ -121,10 +121,10 @@ section. Otherwise each player has to be reachable from the Internet:
    the log says `UPNP: mapped UDP port <port>`. A router without UPnP needs a port forward by
    hand (UDP, the pinned port below, to your computer's LAN address).
 2. **Pin the port** when you open it by hand or in a firewall: **Co-op port (UDP)** in the
-   Online page, for example 3658 (0, the default, is a random port each time). The log then says
+   Online tab, for example 3658 (0, the default, is a random port each time). The log then says
    `P2P transport ready: UDP physical_port=3658`.
 3. **Open it in the firewall.** UPnP opens the port on the router only, not in this computer's
-   firewall. With ufw or firewalld on, the launcher's **Online** page says
+   firewall. With ufw or firewalld on, the launcher's **Multiplayer → Online** tab says
    so and gives the commands. For ufw:
    ```sh
    sudo ufw allow 3658/udp

@@ -101,11 +101,11 @@ camera can feel heavier: the game's own *Camera speed* setting makes up for it.
 
 ## Summons never connect
 
-Run **Test the connection** in the **Online** page. A red line for the shadNet server's UDP means
+Run **Test the connection** in **Multiplayer → Online**. A red line for the shadNet server's UDP means
 the server never learns your address, and no summon can connect: check that the server is running
 and that its log lists the UDP listener, and that no firewall blocks UDP 31314 on its side
 ([SERVER.md](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The
-Hunter's Dream or your own server.
+Hunter's Dream, Seamless Hunt or your own server.
 
 ## Other online problems
 
