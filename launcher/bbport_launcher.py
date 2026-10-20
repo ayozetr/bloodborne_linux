@@ -940,6 +940,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.releases = []  # bbport_update.releases(), the version selector's choices
         self.installing = None  # the release being (or just) installed
         self.update_state = "idle"  # idle, checking, downloading, installed
+        # Operations in a thread (their buttons are the page's): a new launcher language rebuilds
+        # the window once they, the game, a map preparation and an FSR 4.1.1 build are done.
+        self.working = set()
+        self.rebuild_waiting = False
         self.build()
         self.connect("close-request", self.on_close)
 
@@ -947,6 +951,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         """(Re)creates the window's content in the current launcher language: the sections in a
         sidebar (collapsed into a list on a narrow window, the Steam Deck's), each one's page
         beside it, and Play always in the header."""
+        # A rebuild (another launcher language) stays where it was.
+        if hasattr(self, "stack"):
+            where = (self.stack.get_visible_child_name(), self.multiplayer_stack.get_visible_child_name()
+                     if hasattr(self, "multiplayer_stack") else None, self.split.get_show_content())
+        else:
+            where = ("graphics", None, False)
         self.split = Adw.NavigationSplitView(min_sidebar_width=210, max_sidebar_width=260,
                                              sidebar_width_fraction=0.26)
         self.stack = Adw.ViewStack()
@@ -966,6 +976,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.sidebar = Gtk.ListBox(css_classes=["navigation-sidebar"])
         self.sidebar.set_header_func(self.sidebar_header)
         self.sidebar.connect("row-activated", lambda _list, row: self.show_section(row.section))
+        # The arrow keys move the selection: beside the page, the page follows it.
+        self.sidebar.connect("row-selected", lambda _list, row: row is not None and not self.split.get_collapsed()
+                             and self.show_section(row.section, reveal=False))
         sidebar = Adw.ToolbarView()
         sidebar.add_top_bar(Adw.HeaderBar(title_widget=Adw.WindowTitle(title="Bloodborne")))
         sidebar.set_content(Gtk.ScrolledWindow(child=self.sidebar,
@@ -978,6 +991,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Issue #18: an error while building a page left the window blank for good (a saved value
         # it could not read). A page that fails shows its error instead; the others are built.
         self.build_errors = []
+        # Made by the settings' page, shown on the Online tab: not a failed rebuild's old one.
+        self.netchoice_group = None
         self.section_groups = {}
 
         def built(build_page):
@@ -990,12 +1005,15 @@ class LauncherWindow(Adw.ApplicationWindow):
                 return self.build_error_page(error)
 
         # The settings' groups are shared out among sections; a failure there marks them all.
-        settings_failed = isinstance(built(self.build_settings_page), Gtk.Widget)
-        cheats_failed = not settings_failed and isinstance(built(self.build_cheats_page), Gtk.Widget)
+        # Each failure keeps its own error: the sections are placed after other pages are built.
+        def error_of(build_page):
+            return self.build_errors[-1] if isinstance(built(build_page), Gtk.Widget) else None
+        settings_failed = error_of(self.build_settings_page)
+        cheats_failed = None if settings_failed else error_of(self.build_cheats_page)
 
         def placed(section, failed):
             if failed:
-                return self.build_error_page(self.build_errors[-1])
+                return self.build_error_page(failed)
             page = Adw.PreferencesPage()
             for _rank, group in sorted(self.section_groups.get(section, []), key=lambda item: item[0]):
                 page.add(group)
@@ -1025,13 +1043,15 @@ class LauncherWindow(Adw.ApplicationWindow):
             row.set_tooltip_text(title)
             self.sidebar.append(row)
         self.stack.connect("notify::visible-child-name", lambda *_: self.on_section_changed())
-        self.show_section("graphics", reveal=False)
+        if where[1] and hasattr(self, "multiplayer_stack"):
+            self.multiplayer_stack.set_visible_child_name(where[1])
+        self.show_section(where[0] or "graphics", reveal=where[2])
         self.on_section_changed()  # already the visible page: no notify for the title
         if self.build_errors:
             # Some of the settings' rows may be missing: nothing is saved (the user's files stay
             # as they are) and the game is not started from a half-built window.
             self.launch_button.set_label(tr("Запустить"))
-            self.launch_button.set_sensitive(False)
+            self.update_launch_sensitivity()
             self.launch_button.set_tooltip_text(tr(
                 "Лаунчер не смог открыть страницу: запуск отключён, настройки не сохраняются"))
             if hasattr(self, "log_view"):
@@ -1055,14 +1075,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_button.set_label(tr("Остановить") if running else tr("Запустить"))
         self.launch_button.remove_css_class("destructive-action" if not running else "suggested-action")
         self.launch_button.add_css_class("destructive-action" if running else "suggested-action")
-        # The game and an FSR 4.1.1 build do not run together (both want the GPU, the build
-        # replaces the assets the game reads).
-        # Nor while the map's files are being made (the game would read half-made maps).
-        self.launch_button.set_sensitive(self.fsr411_build is None and self.atlas_job is None)
+        self.update_launch_sensitivity()
         if hasattr(self, "fsr411_button"):
             self.fsr411_button.set_sensitive(not running)
-        if hasattr(self, "coop_button"):
-            self.coop_button.set_sensitive(not running and self.fsr411_build is None and self.atlas_job is None)
         if hasattr(self, "atlas_maps_row"):
             self.show_atlas()
         if hasattr(self, "cache_button"):
@@ -1526,11 +1541,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.store()
         self.settings["ui_language"] = choice
         save_settings(self.settings)
-        if self.process:
-            # The log keeps streaming into the current page; rebuild on the next start.
+        if self.busy():
             set_language(choice)
+            self.rebuild_waiting = True
             self.toasts.add_toast(Adw.Toast(
-                title=tr("Применится после перезапуска лаунчера, пока игра запущена")))
+                title=tr("Язык лаунчера сменится, когда закончатся игра и текущие операции")))
             return
         set_language(choice)
         # After this handler returns: the row that emitted the signal is replaced.
@@ -1558,7 +1573,10 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def answered(_dialog, response):
             if response == "clear" and self.process is None:
-                bbport_cache.clear(self.user_dir())
+                try:
+                    bbport_cache.clear(self.user_dir())
+                except OSError as error:
+                    self.alert(tr("Очистить кэш шейдеров?"), tr("Не удалось очистить кэш: {}").format(error))
                 self.show_cache()
 
         dialog.connect("response", answered)
@@ -1721,9 +1739,36 @@ class LauncherWindow(Adw.ApplicationWindow):
             self._game_problem = game_check.problem(path)
         return self._game_problem
 
+    def busy(self):
+        return (self.process is not None or self.atlas_job is not None
+                or self.fsr411_build is not None or bool(self.working))
+
+    def work_done(self, name=None):
+        """An operation has ended: the rebuild a language change waits for, once nothing runs."""
+        self.working.discard(name)
+        if self.rebuild_waiting and not self.busy():
+            self.rebuild_waiting = False
+            GLib.idle_add(lambda: self.build() and False)
+
+    def game_found(self):
+        return bool(self.settings["game_dir"]) and (self.game_dir() / "eboot.bin").is_file()
+
+    def can_start(self):
+        """Whether a game can start now: not from a half-built window (build), not without the
+        game, and not with an FSR 4.1.1 build (both want the GPU, the build replaces the assets
+        the game reads) or the map's files being made (the game would read half-made maps)."""
+        return (not self.build_errors and self.process is None and self.game_found()
+                and self.fsr411_build is None and self.atlas_job is None)
+
+    def update_launch_sensitivity(self):
+        # Stop is always there.
+        self.launch_button.set_sensitive(self.process is not None or self.can_start())
+        if hasattr(self, "coop_button"):
+            self.coop_button.set_sensitive(self.can_start())
+
     def update_game_status(self):
         path = self.game_dir()
-        ok = bool(self.settings["game_dir"]) and (path / "eboot.bin").is_file()
+        ok = self.game_found()
         self.game_row.set_subtitle(str(path) if self.settings["game_dir"] else tr("не выбрана"))
         # The title ID of the release in the folder (CUSA00900, CUSA03173, ...), from its param.sfo.
         try:
@@ -1750,7 +1795,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             tooltip = tr("Bloodborne {}, версия 1.09").format(title_id or "")
         self.game_status.set_from_icon_name("object-select-symbolic" if ok and not problem else "dialog-warning-symbolic")
         self.game_status.set_tooltip_text(tooltip)
-        self.launch_button.set_sensitive((ok or self.process is not None) and self.atlas_job is None)
+        self.update_launch_sensitivity()
 
     def on_install_pkg(self, _button):
         """The packages, then the folder to install into; scripts/pkg_install.py does the rest."""
@@ -1775,6 +1820,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def install_pkg(self, pkgs, dest):
         self.pkg_button.set_sensitive(False)
+        self.working.add("pkg")
         self.pkg_row.set_subtitle(tr("Установка…"))
         command = [sys.executable, str(PORT_DIR / "scripts/pkg_install.py"), "--dest", dest,
                    "--extractor", pkg_extractor(), *pkgs]
@@ -1787,6 +1833,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         def finished(status, found):
             self.pkg_button.set_sensitive(True)
+            self.work_done("pkg")
             if "GAME_DIR" in found:
                 self.settings["game_dir"] = found["GAME_DIR"]
                 if "DLC_DIR" in found:
@@ -1880,14 +1927,18 @@ class LauncherWindow(Adw.ApplicationWindow):
         process.communicate_utf8_async(None, None, done)
 
     def fill_gamepads(self):
-        """The controller choices: the first connected one, the connected ones, and the saved
-        choice while it is not connected."""
-        current = self.settings.get("gamepad", "")
+        """The controller choices: the first connected one, the connected ones, and the chosen
+        one while it is not connected (on Refresh, the row's choice, saved or not)."""
+        if hasattr(self.gamepad_row, "values"):
+            current = combo_value(self.gamepad_row)
+            chosen = self.gamepad_row.names[self.gamepad_row.get_selected()]
+        else:
+            current = self.settings.get("gamepad", "")
+            chosen = self.settings.get("gamepad_name") or current
         choices = [(tr("Авто"), "", tr("Тот, которым играете"))]
         choices += [(name, guid, name) for guid, name in connected_gamepads()]
         if current and current not in [guid for _, guid, _ in choices]:
-            name = self.settings.get("gamepad_name") or current
-            choices.append((tr("{} (не подключён)").format(name), current, name))
+            choices.append((tr("{} (не подключён)").format(chosen), current, chosen))
         self.gamepad_row.set_model(Gtk.StringList.new([label for label, _, _ in choices]))
         self.gamepad_row.values = [guid for _, guid, _ in choices]
         self.gamepad_row.names = [name for _, _, name in choices]
@@ -1895,9 +1946,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.show_gamepad()
 
     def fill_displays(self):
-        """The monitor choices: the primary one, the connected ones, and the saved choice while it
-        is not connected."""
-        current = self.settings.get("display", "")
+        """The monitor choices: the primary one, the connected ones, and the chosen one while it is
+        not connected (on Refresh, the row's choice, saved or not)."""
+        current = combo_value(self.display_row) if hasattr(self.display_row, "values") else \
+            self.settings.get("display", "")
         choices = [(tr("Основной"), "")] + [(label, value) for value, label in connected_displays()]
         if current and current not in [value for _, value in choices]:
             choices.append((tr("{} (не подключён)").format(current), current))
@@ -2237,7 +2289,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.online_row.set_sensitive(False)
             self.online_row.set_subtitle(tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн"))
         page.add(play)
-        if hasattr(self, "netchoice_group"):
+        if self.netchoice_group is not None:
             page.add(self.netchoice_group)
 
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
@@ -2526,10 +2578,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         buttons = (self.thd_button, self.thd_create_button, self.thd_recover_button)
         for button in buttons:
             button.set_sensitive(False)
+        self.working.add("bridge")
 
         def done(output):
             for button in buttons:
                 button.set_sensitive(True)
+            self.work_done("bridge")
             if output.strip() != "ok":
                 self.thd_account_row.set_subtitle(
                     tr("Не удалось войти: {}").format(output.strip().removeprefix("failed: ")))
@@ -2561,6 +2615,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             return
         config, _overrides = online.write_bridge_files(self.user_dir())
         self.thd_button.set_sensitive(False)
+        self.working.add("discord")
         self.thd_account_row.set_subtitle(tr("Ожидание входа…"))
 
         def on_line(line):
@@ -2587,7 +2642,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                         GLib.idle_add(on_line, line)
             except OSError as error:
                 GLib.idle_add(on_line, f"failed: {error}")
-            GLib.idle_add(lambda: self.thd_button.set_sensitive(True) and False)
+            GLib.idle_add(lambda: self.thd_button.set_sensitive(True) or self.work_done("discord"))
         threading.Thread(target=work, daemon=True).start()
 
     def show_firewall_rows(self):
@@ -2619,6 +2674,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.test_button.set_label(tr("Проверка…"))
         kind = combo_value(self.server_kind_row)
         self.online_status_button.set_sensitive(False)
+        self.working.add("test")
 
         def show(results):
             for name, address, ok, detail in results:
@@ -2639,6 +2695,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.connection_group.add(row)
                 self.test_rows.append(row)
             self.test_button.set_sensitive(True)
+            self.work_done("test")
             self.test_button.set_label(tr("Проверить"))
             self.show_online_status()
             return False
@@ -2663,9 +2720,11 @@ class LauncherWindow(Adw.ApplicationWindow):
                                                               "спросите его владельца"),
                   "invalid name, password or email": tr("недопустимое имя или пароль")}
         self.register_button.set_sensitive(False)
+        self.working.add("register")
 
         def done(ok, detail):
             self.register_button.set_sensitive(True)
+            self.work_done("register")
             message = (tr("Учётная запись {} создана на {}").format(npid, host) if ok else
                        tr("Не удалось создать учётную запись: {}").format(errors.get(detail, detail)))
             self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(message), timeout=6))
@@ -3001,22 +3060,30 @@ class LauncherWindow(Adw.ApplicationWindow):
         language = number(self.settings.get("language") or system_game_language(),
                           system_game_language(), int, "settings.json", "language")
 
+        # Each visit refreshes: only the latest one shows.
+        self.trophy_generation = getattr(self, "trophy_generation", 0) + 1
+        generation = self.trophy_generation
+
         def show(directory, problem):
-            self.trophy_shown = (directory, problem)
-            self.trophy_editing = False
-            self.show_trophies()
+            if generation == self.trophy_generation:
+                self.trophy_shown = (directory, problem)
+                self.trophy_editing = False
+                self.show_trophies()
             return False
 
         def work():
             problem = None
             try:
-                directory = trophies.prepare(game, user, key, language)
-            except (OSError, ValueError, trophies.ET.ParseError):
-                problem = tr("Неверный ключ трофеев: названия недоступны")
                 try:
-                    directory = trophies.prepare(game, user, None, language)
-                except (OSError, ValueError):
-                    directory = None
+                    directory = trophies.prepare(game, user, key, language)
+                except (OSError, ValueError, trophies.ET.ParseError):
+                    problem = tr("Неверный ключ трофеев: названия недоступны")
+                    try:
+                        directory = trophies.prepare(game, user, None, language)
+                    except (OSError, ValueError, trophies.ET.ParseError):
+                        directory = None
+            except Exception as error:  # the list still shows, with the error, not nothing
+                directory, problem = None, str(error)
             GLib.idle_add(show, directory, problem)
         threading.Thread(target=work, daemon=True).start()
 
@@ -3031,7 +3098,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.trophy_menu.set_sensitive(directory is not None)
         rows = []
         if directory is None:
-            rows.append(Adw.ActionRow(title=problem or tr("В дампе игры нет трофеев (sce_sys/trophy)")))
+            self.trophy_group.set_description("")
+            rows.append(Adw.ActionRow(title=GLib.markup_escape_text(
+                problem or tr("В дампе игры нет трофеев (sce_sys/trophy)"))))
         else:
             listed, earned = trophies.read_list(directory), trophies.read_earned(directory)
             marked = trophies.read_marked(directory)
@@ -3089,12 +3158,15 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.alert(tr("Трофеи"), tr("Сначала закройте игру"))
             return
         directory = self.trophy_shown[0]
-        earned, marked = trophies.read_earned(directory), trophies.read_marked(directory)
-        for i, check in self.trophy_checks.items():
-            if not check.get_active() and i in marked:
-                trophies.unmark_earned(directory, i)
-        trophies.mark_earned(directory, [i for i, check in self.trophy_checks.items()
-                                         if check.get_active() and i not in earned])
+        try:
+            earned, marked = trophies.read_earned(directory), trophies.read_marked(directory)
+            for i, check in self.trophy_checks.items():
+                if not check.get_active() and i in marked:
+                    trophies.unmark_earned(directory, i)
+            trophies.mark_earned(directory, [i for i, check in self.trophy_checks.items()
+                                             if check.get_active() and i not in earned])
+        except OSError as error:
+            self.alert(tr("Трофеи"), tr("Не удалось сохранить: {}").format(error))
         self.trophy_editing = False
         self.show_trophies()
 
@@ -3146,7 +3218,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.sidebar.select_row(row)
         page = self.stack.get_page(self.stack.get_visible_child())
         self.section_title.set_title(page.get_title() if page else "Bloodborne")
-        if name == "trophies" and not self.build_errors:
+        # Not while trophies are being marked: the checks not saved yet would go.
+        if name == "trophies" and not self.build_errors and not getattr(self, "trophy_editing", False):
             self.refresh_trophies()
 
     def on_width_breakpoint(self, narrow):
@@ -3344,7 +3417,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         choices = [(tr("Не выбран"), ""), (tr("Клавиатура и мышь"), bbport_coop.KEYBOARD)]
         choices += [(name if names.count(name) == 1 else f"{name} ({Path(path).name})", path)
                     for path, name in connected]
-        saved = list(self.settings.get("coop_controllers") or [])
+        # On Refresh, the rows' choices, saved or not.
+        saved = [combo_value(row) for row in self.coop_pad_rows if hasattr(row, "values")] or \
+            list(self.settings.get("coop_controllers") or [])
         if not any(saved):
             saved = [path for path, _name in connected] + [bbport_coop.KEYBOARD]
         for player, row in enumerate(self.coop_pad_rows):
@@ -3366,7 +3441,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "" if players == 2 else tr("С тремя и четырьмя игроками — четверти экрана"))
 
     def on_coop_start(self, _button):
-        if self.process:
+        if not self.can_start():
             return
         self.store()
         players = self.settings["coop_players"]
@@ -3392,12 +3467,12 @@ class LauncherWindow(Adw.ApplicationWindow):
             env = bbport_coop.player_environment(env, player, players, controllers[player - 1],
                                                  layout, sound, folder)
             GLib.timeout_add_seconds(COOP_START_DELAY * (player - 1), self.start_coop_player,
-                                     player, env)
+                                     player, env, self.process)
 
-    def start_coop_player(self, player, env):
-        """Starts player 2-4's game while player 1's still runs; its lines go to the Journal
-        marked with the player."""
-        if not self.process:
+    def start_coop_player(self, player, env, first):
+        """Starts player 2-4's game while player 1's (`first`) still runs, not beside a game
+        started after it ended; its lines go to the Journal marked with the player."""
+        if self.process is not first:
             return False
         launcher = Gio.SubprocessLauncher.new(
             Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
@@ -3461,6 +3536,8 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def start_game(self, env=None):
         """Starts the game with the launcher's environment, or `env` (local co-op's player 1)."""
+        if not self.can_start():
+            return
         if self.online_row.get_active() and "@" in self.npid_row.get_text():
             self.alert("Bloodborne", tr("Online ID — это имя учётной записи (NPID), "
                                         "зарегистрированное на сервере, а не адрес email"))
@@ -3546,6 +3623,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_launch_button()
         self.update_game_status()
         self.append_log(tr("\n— игра завершилась (код {}) —\n").format(status))
+        self.work_done()
 
     def on_close(self, _window):
         self.store()
@@ -3696,6 +3774,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             key = ATLAS_ERRORS.get(outcome.get("error"), "Не удалось подготовить карты ({}). Подробности в журнале")
             self.alert(tr("Карта (Hunter's Atlas)"), tr(key).format(outcome.get("detail") or outcome.get("error")))
         self.update_launch_button()
+        self.work_done()
 
     def stop_atlas_job(self):
         if not self.atlas_job:
@@ -3716,7 +3795,13 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.atlas_row.set_active(False)
             self.store()
             self.show_atlas()
-            self.toasts.add_toast(Adw.Toast(title=tr("Карты удалены")))
+            # delete() goes on past what it cannot remove (a folder of another user, read-only).
+            left = [DATA_DIR / name for name in (bbport_atlas_maps.MAPS, bbport_atlas_maps.TOOLS)
+                    if (DATA_DIR / name).exists()]
+            if left:
+                self.alert(tr("Карта (Hunter's Atlas)"), tr("Не удалось удалить всё: осталась папка {}").format(left[0]))
+            else:
+                self.toasts.add_toast(Adw.Toast(title=tr("Карты удалены")))
         self.confirm(tr("Удалить карты?"),
                      tr("Карты и инструменты для них (около {} МБ) будут удалены. Их можно подготовить снова").format(
                          size >> 20), tr("Удалить"), delete, destructive=True)
@@ -3949,6 +4034,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fsr411_build = None
         self.update_fsr411_row()
         self.update_launch_button()
+        self.work_done()
         self.append_log(tr("— сборка FSR 4.1.1 завершилась (код {}) —\n").format(status))
         if status == 0:
             for index, (_label, value) in enumerate(UPSCALERS):

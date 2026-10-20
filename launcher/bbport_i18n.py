@@ -7,6 +7,10 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Не удалось сохранить: {}': "Couldn't save: {}",
+    'Не удалось очистить кэш: {}': "Couldn't clear the cache: {}",
+    'Не удалось удалить всё: осталась папка {}': "Couldn't delete everything: {} is still there",
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': "The launcher's language will change once the game and current tasks have finished",
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Your shadNet account name, not your email: create one with the Create button below or ask the server's owner. The password is saved on this computer with the launcher settings",
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'The shadNet server does not accept bbport, so the game stayed offline. Choose Seamless Hunt or your own server (Multiplayer → Online).',
     'Введите адрес своего сервера или выберите Seamless Hunt': "Enter your server's address or choose Seamless Hunt",
@@ -196,8 +200,6 @@ EN = {
     # Launcher language
     "Язык лаунчера": "Launcher language",
     "Как в системе": "System",
-    "Применится после перезапуска лаунчера, пока игра запущена":
-        "Applies after restarting the launcher while the game is running",
     # Game
     "Игра": "Game",
     "Папка игры ({})": "Game folder ({})",
@@ -861,6 +863,10 @@ EN = {
 }
 
 PT_BR = {
+    'Не удалось сохранить: {}': 'Não foi possível salvar: {}',
+    'Не удалось очистить кэш: {}': 'Não foi possível limpar o cache: {}',
+    'Не удалось удалить всё: осталась папка {}': 'Não foi possível apagar tudo: a pasta {} continua lá',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'O idioma do launcher vai mudar quando o jogo e as tarefas em andamento terminarem',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'O nome da sua conta shadNet, não o e-mail: crie uma com o botão Criar abaixo ou peça ao dono do servidor. A senha fica salva neste computador com as configurações do launcher',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'O servidor shadNet não aceita o bbport, então o jogo ficou offline. Escolha o Seamless Hunt ou seu próprio servidor (Multijogador → Online).',
     'Введите адрес своего сервера или выберите Seamless Hunt': 'Digite o endereço do seu servidor ou escolha o Seamless Hunt',
@@ -1050,8 +1056,6 @@ PT_BR = {
     # Launcher language
     "Язык лаунчера": "Idioma do launcher",
     "Как в системе": "Sistema",
-    "Применится после перезапуска лаунчера, пока игра запущена":
-        "Será aplicado após reiniciar o launcher enquanto o jogo estiver em execução",
     # Game
     "Игра": "Jogo",
     "Папка игры ({})": "Pasta do jogo ({})",
@@ -1776,6 +1780,10 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Не удалось сохранить: {}': 'No se ha podido guardar: {}',
+    'Не удалось очистить кэш: {}': 'No se ha podido vaciar la caché: {}',
+    'Не удалось удалить всё: осталась папка {}': 'No se ha podido borrar todo: sigue la carpeta {}',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'El idioma del launcher cambiará cuando terminen el juego y las tareas en curso',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'El nombre de tu cuenta de shadNet, no el correo: créala con el botón Crear de abajo o pídesela a quien gestione el servidor. La contraseña se guarda en este ordenador con los ajustes del launcher',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Elige Seamless Hunt o tu propio servidor (Multijugador → En línea).',
     'Введите адрес своего сервера или выберите Seamless Hunt': 'Escribe la dirección de tu servidor o elige Seamless Hunt',
@@ -1957,7 +1965,6 @@ ES = {
     "\n— игра завершилась (код {}) —\n": "\n— el juego ha terminado (código {}) —\n",
     "Язык лаунчера": "Idioma del launcher",
     "Как в системе": "Sistema",
-    "Применится после перезапуска лаунчера, пока игра запущена": "Se aplica al reiniciar el launcher mientras el juego está en ejecución",
     "Игра": "Juego",
     "Папка игры ({})": "Carpeta del juego ({})",
     "Папка игры": "Carpeta del juego",
@@ -2600,6 +2607,10 @@ ES = {
 
 # Italian.
 IT = {
+    'Не удалось сохранить: {}': 'Impossibile salvare: {}',
+    'Не удалось очистить кэш: {}': 'Impossibile svuotare la cache: {}',
+    'Не удалось удалить всё: осталась папка {}': 'Impossibile eliminare tutto: la cartella {} è ancora lì',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'La lingua del launcher cambierà quando il gioco e le operazioni in corso saranno terminati',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Il nome del tuo account shadNet, non l'email: crealo con il pulsante Crea qui sotto o chiedilo a chi gestisce il server. La password viene salvata su questo computer con le impostazioni del launcher",
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'Il server shadNet non accetta bbport, quindi il gioco è rimasto offline. Scegli Seamless Hunt o il tuo server (Multigiocatore → Online).',
     'Введите адрес своего сервера или выберите Seamless Hunt': "Inserisci l'indirizzo del tuo server o scegli Seamless Hunt",
@@ -2781,7 +2792,6 @@ IT = {
     "\n— игра завершилась (код {}) —\n": "\n— il gioco è terminato (codice {}) —\n",
     "Язык лаунчера": "Lingua del launcher",
     "Как в системе": "Sistema",
-    "Применится после перезапуска лаунчера, пока игра запущена": "Si applica dopo il riavvio del launcher mentre il gioco è in esecuzione",
     "Игра": "Gioco",
     "Папка игры ({})": "Cartella del gioco ({})",
     "Папка игры": "Cartella del gioco",
@@ -3424,6 +3434,10 @@ IT = {
 
 # French.
 FR = {
+    'Не удалось сохранить: {}': "Impossible d'enregistrer : {}",
+    'Не удалось очистить кэш: {}': 'Impossible de vider le cache : {}',
+    'Не удалось удалить всё: осталась папка {}': 'Impossible de tout supprimer : le dossier {} est toujours là',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'La langue du launcher changera une fois le jeu et les tâches en cours terminés',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': "Le nom de votre compte shadNet, pas votre e-mail : créez-le avec le bouton Créer ci-dessous ou demandez-le à l'administrateur du serveur. Le mot de passe est enregistré sur cet ordinateur avec les réglages du launcher",
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': "Le serveur shadNet n'accepte pas bbport, le jeu est donc resté hors ligne. Choisissez Seamless Hunt ou votre propre serveur (Multijoueur → En ligne).",
     'Введите адрес своего сервера или выберите Seamless Hunt': "Saisissez l'adresse de votre serveur ou choisissez Seamless Hunt",
@@ -3605,7 +3619,6 @@ FR = {
     "\n— игра завершилась (код {}) —\n": "\n— le jeu s'est arrêté (code {}) —\n",
     "Язык лаунчера": "Langue du lanceur",
     "Как в системе": "Système",
-    "Применится после перезапуска лаунчера, пока игра запущена": "S'applique après le redémarrage du lanceur lorsque le jeu est en cours d'exécution",
     "Игра": "Jeu",
     "Папка игры ({})": "Dossier du jeu ({})",
     "Папка игры": "Dossier du jeu",
@@ -4248,6 +4261,10 @@ FR = {
 
 # German.
 DE = {
+    'Не удалось сохранить: {}': 'Speichern fehlgeschlagen: {}',
+    'Не удалось очистить кэш: {}': 'Cache konnte nicht geleert werden: {}',
+    'Не удалось удалить всё: осталась папка {}': 'Nicht alles konnte gelöscht werden: Der Ordner {} ist noch da',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'Die Sprache des Launchers wechselt, sobald das Spiel und laufende Vorgänge beendet sind',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'Dein shadNet-Kontoname, nicht deine E-Mail: Erstelle ihn unten mit „Erstellen“ oder frag den Betreiber des Servers. Das Passwort wird mit den Launcher-Einstellungen auf diesem Computer gespeichert',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'Der shadNet-Server akzeptiert bbport nicht, das Spiel ist offline geblieben. Wähle Seamless Hunt oder deinen eigenen Server (Mehrspieler → Online).',
     'Введите адрес своего сервера или выберите Seamless Hunt': 'Gib die Adresse deines Servers ein oder wähle Seamless Hunt',
@@ -4429,7 +4446,6 @@ DE = {
     "\n— игра завершилась (код {}) —\n": "\n— das Spiel wurde beendet (Code {}) —\n",
     "Язык лаунчера": "Sprache des Launchers",
     "Как в системе": "System",
-    "Применится после перезапуска лаунчера, пока игра запущена": "Wird nach einem Neustart des Launchers übernommen, sobald das Spiel läuft",
     "Игра": "Spiel",
     "Папка игры ({})": "Spielordner ({})",
     "Папка игры": "Spielordner",
@@ -5072,6 +5088,10 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Не удалось сохранить: {}': '无法保存：{}',
+    'Не удалось очистить кэш: {}': '无法清除缓存：{}',
+    'Не удалось удалить всё: осталась папка {}': '无法全部删除：文件夹 {} 仍然存在',
+    'Язык лаунчера сменится, когда закончатся игра и текущие операции': '启动器的语言将在游戏和当前任务结束后切换',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'shadNet 账号名，不是邮箱：用下面的“创建”按钮创建，或向服务器的主人索取。密码会和启动器设置一起保存在这台电脑上',
     'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'shadNet 服务器不接受 bbport，游戏保持离线。请选择 Seamless Hunt 或你自己的服务器（多人游戏 → 联机）。',
     'Введите адрес своего сервера или выберите Seamless Hunt': '请输入你自己服务器的地址，或选择 Seamless Hunt',
@@ -5249,8 +5269,6 @@ ZH_CN = {
     # Launcher language
     "Язык лаунчера": "启动器语言",
     "Как в системе": "跟随系统",
-    "Применится после перезапуска лаунчера, пока игра запущена":
-        "游戏运行期间更改语言，需要重启启动器后才会生效",
     # Game
     "Игра": "游戏",
     "Папка игры ({})": "游戏文件夹（{}）",
