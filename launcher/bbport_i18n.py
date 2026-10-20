@@ -7,6 +7,13 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Язык игры': 'Game language',
+    'Проверка соединения': 'Connection test',
+    'Включено: игра входит на сервер при запуске': 'On: the game signs in to the server when it starts',
+    'Выключено: игра только офлайн': 'Off: the game plays offline only',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt brings everything: messages, bloodstains, ghosts, bells and summons. With players on Windows: everyone needs game version 1.09 and the same server',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Everything goes through The Hunter's Dream: bbbridge on this computer connects the game with bbhost's players",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Messages, bloodstains and ghosts come from the game server below; bells and summons go through your shadNet server. Everyone needs game version 1.09 and the same server',
     'Не удалось сохранить: {}': "Couldn't save: {}",
     'Не удалось очистить кэш: {}': "Couldn't clear the cache: {}",
     'Не удалось удалить всё: осталась папка {}': "Couldn't delete everything: {} is still there",
@@ -43,7 +50,7 @@ EN = {
     'Лаунчер скачает около 200 МБ (Python и библиотеки генератора карт) и сделает карты из ваших файлов игры; всё вместе займёт около 600 МБ в папке данных. Это займёт несколько минут; игру в это время запускать нельзя': "The launcher will download about 200 MB (Python and the map generator's libraries) and make the maps from your game files; all of it takes about 600 MB in the data folder. It takes a few minutes; the game cannot be started meanwhile",
     'Названия на языке игры': "Names in the game's language",
     'Не подготовлены. Их делают из ваших файлов игры: в первый раз скачивается около 200 МБ (около 600 МБ на диске), это занимает несколько минут': 'Not prepared. They are made from your game files: the first time about 200 MB are downloaded (about 600 MB on disk), and it takes a few minutes',
-    'Не удалось подготовить карты ({}). Подробности в журнале': "Couldn't prepare the maps ({}). Details in the Journal",
+    'Не удалось подготовить карты ({}). Подробности в журнале': "Couldn't prepare the maps ({}). Details in the log",
     'Не удалось скачать uv ({}). Проверьте подключение к интернету и попробуйте снова': "Couldn't download uv ({}). Check your internet connection and try again",
     'Не удалось установить Python ({}). Проверьте подключение к интернету и попробуйте снова': "Couldn't install Python ({}). Check your internet connection and try again",
     'Не удалось установить библиотеки генератора ({}). Проверьте подключение к интернету и попробуйте снова': "Couldn't install the generator's libraries ({}). Check your internet connection and try again",
@@ -174,10 +181,10 @@ EN = {
     "Адрес ретранслятора": "Relay address",
     "host:20444; пусто — адрес игрового сервера из настроек сети": "host:20444; empty: the game server's address from the online settings",
     "Бесшовный кооператив (BBSC)": "Seamless co-op (BBSC)",
-    "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "The session lives through deaths, lamps, areas, bosses and the Hunter's Dream; up to 5 hunters. BBSC by CLS_AMG. Every player of the session needs it",
+    "Сессия переживает смерти, фонари, смену локаций, боссов и Сон Охотника; до 5 охотников. BBSC от CLS_AMG. Он нужен всем игрокам сессии": "The session lives through deaths, lamps, areas, bosses and the Hunter's Dream; up to 5 hunters. BBSC by CLS_AMG. Everyone in the session needs it",
     "Включить BBSC": "Turn on BBSC",
     "Настройки BBSC": "BBSC settings",
-    "Применяются при запуске игры": "Applied when the game starts",
+    "Применяются при запуске игры": "Applies when the game starts",
     "Папка DLC": "DLC folder",
     "Выбрать папку DLC": "Choose the DLC folder",
     "Не использовать DLC": "Don't use DLC",
@@ -189,13 +196,13 @@ EN = {
     "Остановить": "Stop",
     "Настройки": "Settings",
     "Журнал": "Log",
-    "Не удалось запустить: {}": "Could not start: {}",
+    "Не удалось запустить: {}": "Couldn't start: {}",
     "Копировать": "Copy",
     "Экспорт журнала…": "Export log…",
     "Экспорт журнала": "Export log",
     "Журнал скопирован": "Log copied",
     "Журнал сохранён: {}": "Log saved: {}",
-    "Не удалось сохранить журнал: {}": "Could not save the log: {}",
+    "Не удалось сохранить журнал: {}": "Couldn't save the log: {}",
     "\n— игра завершилась (код {}) —\n": "\n— the game exited (code {}) —\n",
     # Launcher language
     "Язык лаунчера": "Launcher language",
@@ -209,7 +216,6 @@ EN = {
     "Папка сохранений": "Saves folder",
     "Выбрать папку сохранений": "Choose the saves folder",
     "Вернуть папку по умолчанию": "Back to the default folder",
-    "Язык системы": "System language",
     "По умолчанию: {}": "Default: {}",
     "Найдены сохранения": "Saves found",
     "Сохранений пока нет: игра создаст их здесь": "No saves yet: the game will create them here",
@@ -219,7 +225,7 @@ EN = {
     "Управление": "Controls",
     "Клавиатура": "Keyboard",
     "Геймпад": "Gamepad",
-    "Назначение кнопок; применяется при запуске игры": "Button assignments; applied when the game starts",
+    "Назначение кнопок; применяется при запуске игры": "Button assignments; they apply when the game starts",
     "Назначить": "Assign",
     "Сбросить": "Reset",
     "{} (по умолчанию)": "{} (default)",
@@ -281,7 +287,7 @@ EN = {
     "Распакуйте каждый мод в отдельную папку (с dvdroot_ps4 или сразу с chr/, parts/ и т. п.). "
     "При совпадении файлов побеждает мод ниже в списке. Применяется при запуске.":
         "Extract each mod into its own folder (with dvdroot_ps4, or chr/, parts/, ... directly). "
-        "When files collide, the mod lower in the list wins. Applied at start.",
+        "When files collide, the mod lower in the list wins. Applies when the game starts.",
     "Загружать моды": "Load mods",
     "Папка модов": "Mods folder",
     "Выбрать папку модов": "Choose the mods folder",
@@ -293,7 +299,7 @@ EN = {
     # Patches
     "Сторонние патчи": "Third-party patches",
     "XML-патчи в формате shadPS4 для версии 01.09 из папки патчей. Применяются при запуске.":
-        "shadPS4-format XML patches for version 01.09 from the patches folder. Applied at start.",
+        "shadPS4-format XML patches for version 01.09 from the patches folder. Applies when the game starts.",
     "Папка патчей": "Patches folder",
     "Выбрать папку патчей": "Choose the patches folder",
     "Открыть папку патчей": "Open the patches folder",
@@ -380,7 +386,6 @@ EN = {
     "Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн": "This build has no online module (libbbnet.so): offline play only",
     'Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email': 'The Online ID is the account name (NPID) you registered on the server, not your email address',
     'UPnP (открыть порт на роутере автоматически)': 'UPnP (open a port on the router automatically)',
-    'Выключено: игра остаётся офлайн, как раньше': 'Off: the game stays offline, as before',
     'Выключите при Tailscale или другом VPN': 'Turn it off with Tailscale or another VPN',
     'Играть онлайн': 'Play online',
     'Играть офлайн': 'Play offline',
@@ -390,12 +395,10 @@ EN = {
     'Отмена': 'Cancel',
     'Пароль': 'Password',
     'Проверить': 'Test',
-    'Проверить соединение': 'Test the connection',
     'Проверка…': 'Checking…',
     'Сервер shadNet': 'shadNet server',
     'Сервер кооператива (колокола и призывы)': 'Co-op server (bells and summons)',
     'Соединение': 'Connection',
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Messages, bloodstains and ghosts come from The Hunter's Dream; bells and summons go through a shadNet server. Online play works together with the Windows version: everyone needs game version 1.09 and the same server",
     'У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре': 'Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together',
     'Учётная запись': 'Account',
     'Учётная запись для игры онлайн указана, но «Играть онлайн» выключено': 'An online account is filled in, but “Play online” is off',
@@ -412,10 +415,10 @@ EN = {
     "Нужна библиотека для Linux": "A Linux library is needed",
     "{} — библиотека DLSS для Windows; на Linux NVIDIA её не загружает. Нужна libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}":
         "{} is the Windows DLSS library; NVIDIA's Linux driver does not load it. libnvidia-ngx-dlss.so.<version> from NVIDIA's DLSS SDK is needed: {}",
-    "Не удалось прочитать файл": "Could not read the file",
+    "Не удалось прочитать файл": "Couldn't read the file",
     "Это не библиотека DLSS": "This is not the DLSS library",
     "Нужен файл libnvidia-ngx-dlss.so.<версия> из DLSS SDK NVIDIA: {}": "libnvidia-ngx-dlss.so.<version> from NVIDIA's DLSS SDK is needed: {}",
-    "Не удалось скопировать библиотеку": "Could not copy the library",
+    "Не удалось скопировать библиотеку": "Couldn't copy the library",
     "DLSS {}: готово": "DLSS {}: ready",
     "Клавиатура и мышь": "Keyboard and mouse",
     "Камера мышью": "Mouse look",
@@ -429,7 +432,7 @@ EN = {
     "Нет или повреждён файл {}": "Missing or damaged file {}",
     # Effects
     "Эффекты игры": "Game effects",
-    "Патчи игры, применяются при запуске": "Game patches, applied at start",
+    "Патчи игры, применяются при запуске": "Game patches; they apply when the game starts",
     "Детализация моделей": "Model detail",
     "Как в игре": "As in the game",
     "Максимальная (-2)": "Highest (-2)",
@@ -475,7 +478,6 @@ EN = {
     "Полная": "Full",
     "Около 3 ГБ видеопамяти сверху": "About 3 GB more VRAM",
     # Mode
-    "Режим работы": "Mode",
     "Новая модель памяти и трансляции": "New memory and translation model",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "The new one: the GPU works with the game's memory directly, as in a PC game, and graphics commands are translated rather than emulated. The old one: the memory model of 0.3 with all the fixes. If the driver fails the startup check, the old one",
@@ -504,7 +506,7 @@ EN = {
     # Cheats page
     "Читы": "Cheats",
     "Патчи игры версии 1.09, применяются при запуске. Для обычного прохождения и игры по сети оставьте их выключенными":
-        "Game patches for version 1.09, applied at start. Leave them off for a normal play-through and online play",
+        "Game patches for version 1.09; they apply when the game starts. Leave them off for a normal play-through and online play",
     "Изменения игрового процесса": "Gameplay tweaks",
     "Бессмертие": "Never die",
     "Урон проходит, но здоровье не опускается ниже 1": "You take damage but never drop below 1 HP",
@@ -538,13 +540,11 @@ EN = {
     "Отмена": "Cancel",
     "Закрыть Steam": "Close Steam",
     "Steam не закрылся. Закройте его сами и попробуйте ещё раз": "Steam did not close. Close it yourself and try again",
-    "Не удалось добавить игру в Steam: {}": "Could not add the game to Steam: {}",
+    "Не удалось добавить игру в Steam: {}": "Couldn't add the game to Steam: {}",
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne was added to your Steam library",
     # Online page
     "Онлайн": "Online",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Messages, bloodstains and ghosts come from The Hunter's Dream; bells and summons go through a shadNet server. Online play works together with the Windows version: everyone needs game version 1.09 and the same server",
     "Играть онлайн": "Play online",
-    "Выключено: игра остаётся офлайн, как раньше": "Off: the game stays offline, as before",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Game server (messages, bloodstains, ghosts)",
     "Пятна крови на Seamless Hunt": "Bloodstains on Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -557,7 +557,6 @@ EN = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (open a port on the router automatically)",
     "Выключите при Tailscale или другом VPN": "Turn it off with Tailscale or another VPN",
-    "Проверить соединение": "Test the connection",
     "Проверить": "Test",
     "Сервер shadNet": "shadNet server",
     "Проверка…": "Checking…",
@@ -592,7 +591,7 @@ EN = {
     "Импортировать сохранения?": "Import the saves?",
     "Из {} (изменены {}). Текущие сохранения сначала копируются в {}": "From {} (changed {}). The current saves are copied to {} first",
     "Импортировать": "Import",
-    "Не удалось импортировать сохранения": "Could not import the saves",
+    "Не удалось импортировать сохранения": "Couldn't import the saves",
     "Сохранения импортированы": "Saves imported",
     # Add to Steam with Flathub's Steam
     'Steam из Flatpak запускает игры в своей песочнице, где нет ни папки игры, ни драйверов: ярлык должен запускать игру вне её (flatpak-spawn --host). Для этого Steam нужно право org.freedesktop.Flatpak, с которым он может запускать программы в вашей системе. Выдать его?':
@@ -600,7 +599,7 @@ EN = {
     'Выдать право':
         'Grant permission',
     'Не удалось выдать право Steam: {}':
-        'Could not grant Steam the permission: {}',
+        "Couldn't grant Steam the permission: {}",
     "Регион игры":
         "Game region",
     "Вариант текста у языков с региональными версиями: испанский Испании (Европа) или Латинской Америки (Америка). Также выбирает адрес игрового сервера":
@@ -644,7 +643,7 @@ EN = {
     "Перезапустить":
         "Restart",
     "Не удалось проверить: {}":
-        "Could not check: {}",
+        "Couldn't check: {}",
     "нет связи с GitHub, проверьте подключение к интернету": "no connection to GitHub, check your internet connection",
     "Установлена версия {}":
         "Version {} installed",
@@ -663,7 +662,7 @@ EN = {
     "Загрузка… {} МБ":
         "Downloading… {} MB",
     "Не удалось обновить: {}":
-        "Could not update: {}",
+        "Couldn't update: {}",
     "Сначала закройте игру":
         "Close the game first",
     "Этот проект":
@@ -754,7 +753,7 @@ EN = {
     "вход выполнен": "signed in",
     "вход не удался ({})": "sign-in failed ({})",
     "Загрузки и плавность": "Loading and smoothness",
-    "Патчи игры из bbhost, применяются при запуске": "Game patches from bbhost, applied at start",
+    "Патчи игры из bbhost, применяются при запуске": "Game patches from bbhost; they apply when the game starts",
     "Быстрая загрузка после смерти": "Quick loading after death",
     "Загрузка после смерти или перемещения у лампы идёт, пока грузится область (2–3 с), а не минимум 12 с": "A load after a death or lamp travel lasts while the area loads (2–3 s), not a 12-second minimum",
     "Без рывка каждые ~50 с": "No stutter every ~50 s",
@@ -837,7 +836,7 @@ EN = {
     'Куда установить игру': 'Where to install the game',
     'Установка…': 'Installing…',
     'Игра установлена: {}': 'Game installed: {}',
-    'Не удалось установить: подробности в журнале': 'Could not install: details in the log',
+    'Не удалось установить: подробности в журнале': "Couldn't install: details in the log",
     'Игра по сети': 'Online play',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Quitting from the menu with a controller, the menu kept within the screen, and the touchpad halves on Xbox pads',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': "A video player crash when it stops; 21:9 and 32:9 ultrawide screens: camera, HUD and its position; Quit to Desktop in the game's menus",
@@ -863,6 +862,13 @@ EN = {
 }
 
 PT_BR = {
+    'Язык игры': 'Idioma do jogo',
+    'Проверка соединения': 'Teste de conexão',
+    'Включено: игра входит на сервер при запуске': 'Ativado: o jogo entra no servidor ao iniciar',
+    'Выключено: игра только офлайн': 'Desativado: o jogo fica só offline',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'O Seamless Hunt traz tudo: mensagens, manchas de sangue, fantasmas, sinos e invocações. Com jogadores no Windows: todos precisam da versão 1.09 do jogo e do mesmo servidor',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Tudo passa pelo The Hunter's Dream: o bbbridge neste computador conecta o jogo aos jogadores do bbhost",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Mensagens, manchas de sangue e fantasmas vêm do servidor de jogo abaixo; sinos e invocações passam pelo seu servidor shadNet. Todos precisam da versão 1.09 do jogo e do mesmo servidor',
     'Не удалось сохранить: {}': 'Não foi possível salvar: {}',
     'Не удалось очистить кэш: {}': 'Não foi possível limpar o cache: {}',
     'Не удалось удалить всё: осталась папка {}': 'Não foi possível apagar tudo: a pasta {} continua lá',
@@ -1065,7 +1071,6 @@ PT_BR = {
     "Папка сохранений": "Pasta de salvamentos",
     "Выбрать папку сохранений": "Selecionar a pasta de salvamentos",
     "Вернуть папку по умолчанию": "Restaurar a pasta padrão",
-    "Язык системы": "Idioma do sistema",
     "По умолчанию: {}": "Padrão: {}",
     "Найдены сохранения": "Salvamentos encontrados",
     "Сохранений пока нет: игра создаст их здесь": "Ainda não há salvamentos: o jogo os criará aqui",
@@ -1233,7 +1238,6 @@ PT_BR = {
     "Выключены": "Desativado",
     # Developer
     "Для разработчика": "Desenvolvedor",
-    "Режим работы": "Modo",
     "Новая модель памяти и трансляции": "Novo modelo de memória e tradução",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "O novo: a GPU usa a memória do jogo diretamente, como em um jogo de PC, e os comandos gráficos são traduzidos em vez de emulados. O antigo: o modelo de memória da 0.3 com todas as correções. Se o driver falhar na verificação inicial, o antigo",
@@ -1290,9 +1294,7 @@ PT_BR = {
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne foi adicionado à sua biblioteca do Steam",
     # Online page
     "Онлайн": "Online",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Mensagens, manchas de sangue e fantasmas vêm do The Hunter's Dream; sinos e invocações passam por um servidor shadNet. O jogo online funciona junto com a versão para Windows: todos precisam da versão 1.09 do jogo e do mesmo servidor",
     "Играть онлайн": "Jogar online",
-    "Выключено: игра остаётся офлайн, как раньше": "Desligado: o jogo continua offline, como antes",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor do jogo (mensagens, manchas de sangue, fantasmas)",
     "Пятна крови на Seamless Hunt": "Manchas de sangue no Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -1305,7 +1307,6 @@ PT_BR = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Todos na sessão precisam da mesma versão do jogo (1.09) e do mesmo servidor. As trapaças mudam o jogo também para os outros jogadores: desligue-as ao jogar junto",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (abrir uma porta no roteador automaticamente)",
     "Выключите при Tailscale или другом VPN": "Desligue com Tailscale ou outra VPN",
-    "Проверить соединение": "Testar a conexão",
     "Проверить": "Testar",
     "Сервер shadNet": "Servidor shadNet",
     "Проверка…": "Verificando…",
@@ -1780,6 +1781,13 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Язык игры': 'Idioma del juego',
+    'Проверка соединения': 'Prueba de conexión',
+    'Включено: игра входит на сервер при запуске': 'Activado: el juego inicia sesión en el servidor al arrancar',
+    'Выключено: игра только офлайн': 'Desactivado: el juego solo funciona sin conexión',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt lo trae todo: mensajes, manchas de sangre, fantasmas, campanas e invocaciones. Con jugadores de Windows: todos necesitan la versión 1.09 del juego y el mismo servidor',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Todo pasa por The Hunter's Dream: bbbridge, en este ordenador, conecta el juego con los jugadores de bbhost",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Los mensajes, las manchas de sangre y los fantasmas vienen del servidor del juego de abajo; las campanas y las invocaciones pasan por tu servidor shadNet. Todos necesitan la versión 1.09 del juego y el mismo servidor',
     'Не удалось сохранить: {}': 'No se ha podido guardar: {}',
     'Не удалось очистить кэш: {}': 'No se ha podido vaciar la caché: {}',
     'Не удалось удалить всё: осталась папка {}': 'No se ha podido borrar todo: sigue la carpeta {}',
@@ -1813,7 +1821,7 @@ ES = {
     'Карты готовы': 'Mapas listos',
     'Карты и инструменты для них (около {} МБ) будут удалены. Их можно подготовить снова': 'Se borrarán los mapas y sus herramientas (unos {} MB). Puedes volver a prepararlos',
     'Карты удалены': 'Mapas borrados',
-    'Лаунчер скачает около 200 МБ (Python и библиотеки генератора карт) и сделает карты из ваших файлов игры; всё вместе займёт около 600 МБ в папке данных. Это займёт несколько минут; игру в это время запускать нельзя': 'El lanzador descargará unos 200 MB (Python y las librerías del generador de mapas) y hará los mapas a partir de tus archivos del juego; en total ocupará unos 600 MB en la carpeta de datos. Tarda unos minutos; mientras tanto no se puede iniciar el juego',
+    'Лаунчер скачает около 200 МБ (Python и библиотеки генератора карт) и сделает карты из ваших файлов игры; всё вместе займёт около 600 МБ в папке данных. Это займёт несколько минут; игру в это время запускать нельзя': 'El launcher descargará unos 200 MB (Python y las librerías del generador de mapas) y hará los mapas a partir de tus archivos del juego; en total ocupará unos 600 MB en la carpeta de datos. Tarda unos minutos; mientras tanto no se puede iniciar el juego',
     'Названия на языке игры': 'Nombres en el idioma del juego',
     'Не подготовлены. Их делают из ваших файлов игры: в первый раз скачивается около 200 МБ (около 600 МБ на диске), это занимает несколько минут': 'Sin preparar. Se hacen a partir de tus archivos del juego: la primera vez se descargan unos 200 MB (unos 600 MB en disco) y tarda unos minutos',
     'Не удалось подготовить карты ({}). Подробности в журнале': 'No se pudieron preparar los mapas ({}). Detalles en el Registro',
@@ -1856,7 +1864,7 @@ ES = {
     'Контроллеры': 'Mandos',
     'Локальный кооп': 'Coop local',
     'Не выбран': 'Ninguno',
-    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Varios juegos en este PC, uno por jugador, cada uno en su parte de la pantalla y con su mando. El jugador 1 juega con los ajustes del lanzador; los demás tienen sus propias partidas y su bbport.ini (una copia de los ajustes del jugador 1), sin juego en línea ni Discord. Las ventanas se colocan mediante X11 (XWayland en Wayland)',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Varios juegos en este PC, uno por jugador, cada uno en su parte de la pantalla y con su mando. El jugador 1 juega con los ajustes del launcher; los demás tienen sus propias partidas y su bbport.ini (una copia de los ajustes del jugador 1), sin juego en línea ni Discord. Las ventanas se colocan mediante X11 (XWayland en Wayland)',
     'Один контроллер выбран у двух игроков': 'Dos jugadores tienen el mismo mando',
     'Один над другим': 'Uno encima del otro',
     'Расположение': 'Disposición',
@@ -1973,7 +1981,6 @@ ES = {
     "Папка сохранений": "Carpeta de partidas guardadas",
     "Выбрать папку сохранений": "Elige la carpeta de partidas guardadas",
     "Вернуть папку по умолчанию": "Volver a la carpeta predeterminada",
-    "Язык системы": "Idioma del sistema",
     "По умолчанию: {}": "Predeterminado: {}",
     "Найдены сохранения": "Partidas guardadas encontradas",
     "Сохранений пока нет: игра создаст их здесь": "Aún no hay partidas guardadas: el juego las creará aquí",
@@ -2144,7 +2151,6 @@ ES = {
     "Без лишней видеопамяти": "Sin VRAM adicional",
     "Полная": "Completa",
     "Около 3 ГБ видеопамяти сверху": "Unos 3 GB más de VRAM",
-    "Режим работы": "Modo",
     "Новая модель памяти и трансляции": "Nuevo modelo de memoria y traducción",
     "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Experimental, solo GPU AMD. La GPU trabaja directamente con la memoria del juego, como en un juego de PC, y los comandos gráficos se traducen en lugar de emularse; pueden producirse errores. Desactivado: el modelo de memoria antiguo, como en la 0.3, con todas las correcciones",
     "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Solo para GPU AMD, y este equipo no tiene ninguna. Se usa el modelo de memoria antiguo, como en la 0.3, con todas las correcciones",
@@ -2199,9 +2205,7 @@ ES = {
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne se ha añadido a tu biblioteca de Steam",
     # Online page
     "Онлайн": "Online",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Los mensajes, las manchas de sangre y los fantasmas vienen de The Hunter's Dream; las campanas y las invocaciones pasan por un servidor shadNet. El juego online es compatible con la versión de Windows: todos necesitan la versión 1.09 del juego y el mismo servidor",
     "Играть онлайн": "Jugar online",
-    "Выключено: игра остаётся офлайн, как раньше": "Desactivado: el juego sigue sin conexión, como antes",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Servidor del juego (mensajes, manchas de sangre, fantasmas)",
     "Пятна крови на Seamless Hunt": "Manchas de sangre en Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -2214,7 +2218,6 @@ ES = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Todos en la sesión necesitan la misma versión del juego (1.09) y el mismo servidor. Los trucos cambian el juego también para los demás jugadores: desactívalos al jugar juntos",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (abrir un puerto en el router automáticamente)",
     "Выключите при Tailscale или другом VPN": "Desactívalo con Tailscale u otra VPN",
-    "Проверить соединение": "Probar la conexión",
     "Проверить": "Probar",
     "Сервер shadNet": "Servidor shadNet",
     "Проверка…": "Comprobando…",
@@ -2607,6 +2610,13 @@ ES = {
 
 # Italian.
 IT = {
+    'Язык игры': 'Lingua del gioco',
+    'Проверка соединения': 'Test della connessione',
+    'Включено: игра входит на сервер при запуске': "Attivo: il gioco accede al server all'avvio",
+    'Выключено: игра только офлайн': 'Disattivo: il gioco resta solo offline',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt fornisce tutto: messaggi, macchie di sangue, fantasmi, campane ed evocazioni. Con giocatori su Windows: servono la versione 1.09 del gioco e lo stesso server',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Tutto passa da The Hunter's Dream: bbbridge su questo computer collega il gioco ai giocatori di bbhost",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Messaggi, macchie di sangue e fantasmi arrivano dal server di gioco qui sotto; campane ed evocazioni passano dal tuo server shadNet. Servono la versione 1.09 del gioco e lo stesso server',
     'Не удалось сохранить: {}': 'Impossibile salvare: {}',
     'Не удалось очистить кэш: {}': 'Impossibile svuotare la cache: {}',
     'Не удалось удалить всё: осталась папка {}': 'Impossibile eliminare tutto: la cartella {} è ancora lì',
@@ -2800,7 +2810,6 @@ IT = {
     "Папка сохранений": "Cartella dei salvataggi",
     "Выбрать папку сохранений": "Scegli la cartella dei salvataggi",
     "Вернуть папку по умолчанию": "Torna alla cartella predefinita",
-    "Язык системы": "Lingua di sistema",
     "По умолчанию: {}": "Predefinito: {}",
     "Найдены сохранения": "Salvataggi trovati",
     "Сохранений пока нет: игра создаст их здесь": "Ancora nessun salvataggio: il gioco li creerà qui",
@@ -2971,7 +2980,6 @@ IT = {
     "Без лишней видеопамяти": "Nessuna VRAM extra",
     "Полная": "Completo",
     "Около 3 ГБ видеопамяти сверху": "Circa 3 GB di VRAM in più",
-    "Режим работы": "Modalità",
     "Новая модель памяти и трансляции": "Nuovo modello di memoria e traduzione",
     "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Sperimentale, solo GPU AMD. La GPU lavora direttamente con la memoria del gioco, come in un gioco per PC, e i comandi grafici vengono tradotti anziché emulati; sono possibili errori. Disattivato: il vecchio modello di memoria, come nella 0.3, con tutte le correzioni",
     "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Solo GPU AMD, e questo computer non ne ha. Viene usato il vecchio modello di memoria, come nella 0.3, con tutte le correzioni",
@@ -3026,9 +3034,7 @@ IT = {
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne è stato aggiunto alla tua libreria di Steam",
     # Online page
     "Онлайн": "Online",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Messaggi, macchie di sangue e fantasmi arrivano da The Hunter's Dream; campane ed evocazioni passano per un server shadNet. Il gioco online è compatibile con la versione per Windows: tutti devono avere la versione 1.09 del gioco e lo stesso server",
     "Играть онлайн": "Gioca online",
-    "Выключено: игра остаётся офлайн, как раньше": "Disattivato: il gioco resta offline, come prima",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Server di gioco (messaggi, macchie di sangue, fantasmi)",
     "Пятна крови на Seamless Hunt": "Macchie di sangue su Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -3041,7 +3047,6 @@ IT = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Tutti nella sessione devono avere la stessa versione del gioco (1.09) e lo stesso server. I cheat cambiano il gioco anche per gli altri giocatori: disattivali quando giocate insieme",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (apri automaticamente una porta sul router)",
     "Выключите при Tailscale или другом VPN": "Disattivalo con Tailscale o un'altra VPN",
-    "Проверить соединение": "Prova la connessione",
     "Проверить": "Prova",
     "Сервер shadNet": "Server shadNet",
     "Проверка…": "Verifica…",
@@ -3434,6 +3439,13 @@ IT = {
 
 # French.
 FR = {
+    'Язык игры': 'Langue du jeu',
+    'Проверка соединения': 'Test de connexion',
+    'Включено: игра входит на сервер при запуске': 'Activé : le jeu se connecte au serveur au démarrage',
+    'Выключено: игра только офлайн': 'Désactivé : le jeu reste hors ligne',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt fournit tout : messages, taches de sang, fantômes, cloches et invocations. Avec des joueurs sous Windows : tous ont besoin de la version 1.09 du jeu et du même serveur',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Tout passe par The Hunter's Dream : bbbridge, sur cet ordinateur, relie le jeu aux joueurs de bbhost",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Les messages, taches de sang et fantômes viennent du serveur de jeu ci-dessous ; cloches et invocations passent par votre serveur shadNet. Tous ont besoin de la version 1.09 du jeu et du même serveur',
     'Не удалось сохранить: {}': "Impossible d'enregistrer : {}",
     'Не удалось очистить кэш: {}': 'Impossible de vider le cache : {}',
     'Не удалось удалить всё: осталась папка {}': 'Impossible de tout supprimer : le dossier {} est toujours là',
@@ -3627,7 +3639,6 @@ FR = {
     "Папка сохранений": "Dossier des sauvegardes",
     "Выбрать папку сохранений": "Choisissez le dossier des sauvegardes",
     "Вернуть папку по умолчанию": "Revenir au dossier par défaut",
-    "Язык системы": "Langue du système",
     "По умолчанию: {}": "Par défaut : {}",
     "Найдены сохранения": "Sauvegardes trouvées",
     "Сохранений пока нет: игра создаст их здесь": "Aucune sauvegarde pour l'instant : le jeu les créera ici",
@@ -3798,7 +3809,6 @@ FR = {
     "Без лишней видеопамяти": "Pas de VRAM supplémentaire",
     "Полная": "Complet",
     "Около 3 ГБ видеопамяти сверху": "Environ 3 Go de VRAM en plus",
-    "Режим работы": "Mode",
     "Новая модель памяти и трансляции": "Nouveau modèle de mémoire et de traduction",
     "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Expérimental, GPU AMD uniquement. Le GPU travaille directement avec la mémoire du jeu, comme dans un jeu PC, et les commandes graphiques sont traduites plutôt qu'émulées ; des erreurs sont possibles. Désactivé : l'ancien modèle de mémoire, comme dans la 0.3, avec tous les correctifs",
     "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "GPU AMD uniquement, et cet ordinateur n'en a pas. L'ancien modèle de mémoire est utilisé, comme dans la 0.3, avec tous les correctifs",
@@ -3853,9 +3863,7 @@ FR = {
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne a été ajouté à votre bibliothèque Steam",
     # Online page
     "Онлайн": "En ligne",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Les messages, taches de sang et fantômes viennent de The Hunter's Dream ; les cloches et invocations passent par un serveur shadNet. Le jeu en ligne fonctionne avec la version Windows : tout le monde doit avoir la version 1.09 du jeu et le même serveur",
     "Играть онлайн": "Jouer en ligne",
-    "Выключено: игра остаётся офлайн, как раньше": "Désactivé : le jeu reste hors ligne, comme avant",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Serveur de jeu (messages, taches de sang, fantômes)",
     "Пятна крови на Seamless Hunt": "Taches de sang sur Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -3868,7 +3876,6 @@ FR = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Tout le monde dans la session doit avoir la même version du jeu (1.09) et le même serveur. Les triches modifient aussi le jeu des autres joueurs : désactivez-les en jouant ensemble",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (ouvrir un port sur le routeur automatiquement)",
     "Выключите при Tailscale или другом VPN": "Désactivez-le avec Tailscale ou un autre VPN",
-    "Проверить соединение": "Tester la connexion",
     "Проверить": "Tester",
     "Сервер shadNet": "Serveur shadNet",
     "Проверка…": "Vérification…",
@@ -4261,6 +4268,13 @@ FR = {
 
 # German.
 DE = {
+    'Язык игры': 'Spielsprache',
+    'Проверка соединения': 'Verbindungstest',
+    'Включено: игра входит на сервер при запуске': 'An: Das Spiel meldet sich beim Start am Server an',
+    'Выключено: игра только офлайн': 'Aus: Das Spiel bleibt offline',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt liefert alles: Nachrichten, Blutflecken, Geister, Glocken und Beschwörungen. Mit Spielern unter Windows: Alle brauchen Spielversion 1.09 und denselben Server',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "Alles läuft über The Hunter's Dream: bbbridge auf diesem Computer verbindet das Spiel mit den Spielern von bbhost",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': 'Nachrichten, Blutflecken und Geister kommen vom Spielserver unten; Glocken und Beschwörungen laufen über deinen shadNet-Server. Alle brauchen Spielversion 1.09 und denselben Server',
     'Не удалось сохранить: {}': 'Speichern fehlgeschlagen: {}',
     'Не удалось очистить кэш: {}': 'Cache konnte nicht geleert werden: {}',
     'Не удалось удалить всё: осталась папка {}': 'Nicht alles konnte gelöscht werden: Der Ordner {} ist noch da',
@@ -4454,7 +4468,6 @@ DE = {
     "Папка сохранений": "Ordner für Spielstände",
     "Выбрать папку сохранений": "Ordner für Spielstände auswählen",
     "Вернуть папку по умолчанию": "Zurück zum Standardordner",
-    "Язык системы": "Systemsprache",
     "По умолчанию: {}": "Standard: {}",
     "Найдены сохранения": "Spielstände gefunden",
     "Сохранений пока нет: игра создаст их здесь": "Noch keine Spielstände: Das Spiel legt sie hier an",
@@ -4625,7 +4638,6 @@ DE = {
     "Без лишней видеопамяти": "Kein zusätzlicher VRAM",
     "Полная": "Voll",
     "Около 3 ГБ видеопамяти сверху": "Etwa 3 GB mehr VRAM",
-    "Режим работы": "Modus",
     "Новая модель памяти и трансляции": "Neues Speicher- und Übersetzungsmodell",
     "Эксперимент, только видеокарты AMD. Видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются; возможны ошибки. Выключено — старая модель памяти, как в 0.3, со всеми исправлениями": "Experimentell, nur für AMD-GPUs. Die GPU arbeitet direkt mit dem Speicher des Spiels, wie bei einem PC-Spiel, und Grafikbefehle werden übersetzt statt emuliert; Fehler sind möglich. Aus: das alte Speichermodell wie in 0.3, mit allen Korrekturen",
     "Только для видеокарт AMD, а на этом компьютере её нет. Используется старая модель памяти, как в 0.3, со всеми исправлениями": "Nur für AMD-GPUs, und dieser Computer hat keine. Es wird das alte Speichermodell wie in 0.3 verwendet, mit allen Korrekturen",
@@ -4680,9 +4692,7 @@ DE = {
     "Bloodborne добавлен в библиотеку Steam": "Bloodborne wurde deiner Steam-Bibliothek hinzugefügt",
     # Online page
     "Онлайн": "Online",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "Nachrichten, Blutflecken und Geister kommen von The Hunter's Dream; Glocken und Beschwörungen laufen über einen shadNet-Server. Online-Spiel funktioniert zusammen mit der Windows-Version: Alle brauchen Spielversion 1.09 und denselben Server",
     "Играть онлайн": "Online spielen",
-    "Выключено: игра остаётся офлайн, как раньше": "Aus: Das Spiel bleibt offline wie bisher",
     "Игровой сервер (сообщения, пятна крови, призраки)": "Spielserver (Nachrichten, Blutflecken, Geister)",
     "Пятна крови на Seamless Hunt": "Blutflecken auf Seamless Hunt",
     "Пятна крови и видения смерти этого сервера вызывают вылет «Transaction failed»: без них игра не вылетает":
@@ -4695,7 +4705,6 @@ DE = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "Alle in einer Sitzung brauchen dieselbe Spielversion (1.09) und denselben Server. Cheats verändern das Spiel auch für die anderen Spieler: Schalte sie beim gemeinsamen Spielen aus",
     "UPnP (открыть порт на роутере автоматически)": "UPnP (Port am Router automatisch öffnen)",
     "Выключите при Tailscale или другом VPN": "Bei Tailscale oder einem anderen VPN ausschalten",
-    "Проверить соединение": "Verbindung testen",
     "Проверить": "Testen",
     "Сервер shadNet": "shadNet-Server",
     "Проверка…": "Prüfe…",
@@ -5088,6 +5097,13 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Язык игры': '游戏语言',
+    'Проверка соединения': '连接检测',
+    'Включено: игра входит на сервер при запуске': '开启：游戏启动时登录服务器',
+    'Выключено: игра только офлайн': '关闭：游戏仅离线运行',
+    'Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер': 'Seamless Hunt 提供全部内容：留言、血迹、幽灵、铃铛和召唤。可与 Windows 玩家联机：所有人都需要游戏版本 1.09 和同一个服务器',
+    "Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет игру с игроками bbhost": "一切都通过 The Hunter's Dream：本机上的 bbbridge 将游戏与 bbhost 的玩家连接起来",
+    'Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер': '留言、血迹和幽灵来自下方的游戏服务器；铃铛和召唤通过你的 shadNet 服务器。所有人都需要游戏版本 1.09 和同一个服务器',
     'Не удалось сохранить: {}': '无法保存：{}',
     'Не удалось очистить кэш: {}': '无法清除缓存：{}',
     'Не удалось удалить всё: осталась папка {}': '无法全部删除：文件夹 {} 仍然存在',
@@ -5278,7 +5294,6 @@ ZH_CN = {
     "Папка сохранений": "存档文件夹",
     "Выбрать папку сохранений": "选择存档文件夹",
     "Вернуть папку по умолчанию": "恢复默认文件夹",
-    "Язык системы": "系统语言",
     "По умолчанию: {}": "默认：{}",
     "Найдены сохранения": "已找到存档",
     "Сохранений пока нет: игра создаст их здесь": "暂无存档：游戏会在此创建",
@@ -5514,7 +5529,6 @@ ZH_CN = {
     "Полная": "完整",
     "Около 3 ГБ видеопамяти сверху": "额外占用约 3 GB 显存",
     # Mode
-    "Режим работы": "工作模式",
     "Новая модель памяти и трансляции": "新内存与指令转译模型",
     "Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми исправлениями. Если драйвер не проходит проверку при запуске — старая":
         "新模型：显卡像 PC 游戏那样直接读写游戏内存，图形指令被转译而非模拟。旧模型：0.3 版的内存模型，包含所有修复。如果驱动未通过启动检查，则使用旧模型",
@@ -5642,7 +5656,6 @@ ZH_CN = {
     "Бесшовный кооператив (экспериментально)": "无缝联机合作（实验性）",
     "В дампе игры нет трофеев (sce_sys/trophy)": "游戏转储中没有奖杯（sce_sys/trophy）",
     "Выбрать папку DLC": "选择 DLC 文件夹",
-    "Выключено: игра остаётся офлайн, как раньше": "关闭：游戏和以前一样保持离线",
     "Выключите при Tailscale или другом VPN": "使用 Tailscale 或其他 VPN 时请关闭",
     "Добавить": "添加",
     "Добавить в Steam": "添加到 Steam",
@@ -5712,7 +5725,6 @@ ZH_CN = {
     "Не готово: только отправляет призывы на сервер с BloodborneSeamlessCoop=true, гость пока не переносится к хозяину. Для проверки": "尚未完成：只会把召唤发送到设置了 BloodborneSeamlessCoop=true 的服务器，访客还不会被移到房主那里。仅供测试",
     "Применяется при запуске игры": "在游戏启动时生效",
     "Проверить": "检测",
-    "Проверить соединение": "检测连接",
     "Проверка…": "检测中…",
     "Пропускать выбор «по сети / вне сети»": "跳过「在线 / 离线」选择",
     "Публичный сервер shadPS4": "shadPS4 公共服务器",
@@ -5721,7 +5733,6 @@ ZH_CN = {
     "Сервер кооператива (колокола и призывы)": "联机合作服务器（铃铛与召唤）",
     "Скрытый трофей": "隐藏奖杯",
     "Соединение": "连接",
-    "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия игры 1.09 и тот же сервер": "留言、血迹和幻影来自 The Hunter's Dream；铃铛与召唤通过 shadNet 服务器进行。联机可与 Windows 版互通：所有人都需要游戏版本 1.09 并使用同一服务器",
     "Статус в Discord": "Discord 状态",
     "Трофеи": "奖杯",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "同一会话中的所有人必须使用相同的游戏版本（1.09）和同一服务器。作弊功能也会改变其他玩家的游戏：一起游玩时请关闭",

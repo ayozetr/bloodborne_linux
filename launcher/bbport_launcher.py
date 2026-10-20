@@ -679,9 +679,28 @@ def open_folder(window, path):
     Gtk.FileLauncher.new(Gio.File.new_for_path(str(path))).launch(window, None, None)
 
 
+def readable_choice(row):
+    """The chosen value keeps up to 16 characters beside a long subtitle (it was cut to "Seamle…");
+    a longer one still ends in "…" on a narrow window."""
+    def setup(_factory, item):
+        item.set_child(Gtk.Label(xalign=0, ellipsize=Pango.EllipsizeMode.END))
+
+    def bind(_factory, item):
+        model = row.get_model()
+        longest = max((len(model.get_string(i)) for i in range(model.get_n_items())), default=0) if model else 0
+        label = item.get_child()
+        label.set_label(item.get_item().get_string())
+        label.set_width_chars(min(longest, 16))
+    factory = Gtk.SignalListItemFactory()
+    factory.connect("setup", setup)
+    factory.connect("bind", bind)
+    row.set_factory(factory)
+    return row
+
+
 def combo_row(title, subtitle, choices, current):
     model = Gtk.StringList.new([tr(choice[0]) for choice in choices])
-    row = Adw.ComboRow(title=title, model=model)
+    row = readable_choice(Adw.ComboRow(title=title, model=model))
     values = [choice[1] for choice in choices]
     notes = [tr(choice[2]) if len(choice) > 2 else None for choice in choices]
 
@@ -1142,7 +1161,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.dlc_reset = flat_button("edit-undo-symbolic", tr("Не использовать DLC"), self.on_reset_dlc)
         self.dlc_row.add_suffix(self.dlc_reset)
         game.add(self.dlc_row)
-        self.language_row = combo_row(tr("Язык системы"), None, LANGUAGES, self.settings["language"])
+        self.language_row = combo_row(tr("Язык игры"), None, LANGUAGES, self.settings["language"])
         game.add(self.language_row)
         self.region_row = combo_row(
             tr("Регион игры"),
@@ -1166,7 +1185,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.place("setup", 20, game)
 
         # Auto: the new memory model on AMD, the 0.3 one elsewhere; or either by hand.
-        mode = Adw.PreferencesGroup(title=tr("Режим работы"))
+        mode = Adw.PreferencesGroup()
         self.memory_model_row = combo_row(tr("Модель памяти и трансляции"), tr(PC_MODEL_SUBTITLE),
                                           MEMORY_MODELS, self.settings.get("memory_model", "auto"))
         mode.add(self.memory_model_row)
@@ -1251,7 +1270,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                       active=self.ini.get("mute_unfocused", "0") == "1")
         screen.add(self.mute_row)
         # Issue #69: the window (and fullscreen) went to the monitor SDL calls primary.
-        self.display_row = Adw.ComboRow(title=tr("Монитор"))
+        self.display_row = readable_choice(Adw.ComboRow(title=tr("Монитор")))
         self.display_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
                                                 lambda _button: self.fill_displays()))
         self.fill_displays()
@@ -1267,7 +1286,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Controls: the gamepad, then the keyboard and the mouse.
         controls = Adw.PreferencesGroup(title=tr("Геймпад"))
         keys = Adw.PreferencesGroup(title=tr("Клавиатура и мышь"))
-        self.gamepad_row = Adw.ComboRow(title=tr("Контроллер"))
+        self.gamepad_row = readable_choice(Adw.ComboRow(title=tr("Контроллер")))
         # Controller names are long: the selected one is shown in full under the title.
         self.gamepad_row.connect("notify::selected", lambda *_: self.show_gamepad())
         self.gamepad_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
@@ -2269,26 +2288,29 @@ class LauncherWindow(Adw.ApplicationWindow):
     def build_online_page(self):
         s = self.settings
         page = Adw.PreferencesPage()
-        play = Adw.PreferencesGroup(description=tr(
-            "Сообщения, пятна крови и призраки приходят с The Hunter's Dream; колокола и призывы "
-            "идут через сервер shadNet. Игра по сети совместима с версией для Windows: нужны версия "
-            "игры 1.09 и тот же сервер"))
-        # Whether the account works, at a glance (the connection test signs in).
+        # Its description says where what comes from on the chosen server (show_server_kind).
+        self.play_group = play = Adw.PreferencesGroup()
+        # Whether the account works, at a glance: the connection test, which signs in; its
+        # results go just below.
         self.online_status_row = Adw.ActionRow(title=tr("Состояние"))
         self.online_status_icon = Gtk.Image()
         self.online_status_row.add_prefix(self.online_status_icon)
-        self.online_status_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
-        self.online_status_button.connect("clicked", self.on_test_connection)
-        self.online_status_row.add_suffix(self.online_status_button)
+        self.test_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
+        self.test_button.connect("clicked", self.on_test_connection)
+        self.online_status_row.add_suffix(self.test_button)
         play.add(self.online_status_row)
-        self.online_row = Adw.SwitchRow(title=tr("Играть онлайн"),
-                                        subtitle=tr("Выключено: игра остаётся офлайн, как раньше"),
-                                        active=s["online"])
+        self.online_row = Adw.SwitchRow(title=tr("Играть онлайн"), active=s["online"])
         play.add(self.online_row)
-        if not online_module():
+        if online_module():
+            self.online_row.connect("notify::active", lambda *_: self.show_online_switch())
+            self.show_online_switch()
+        else:
             self.online_row.set_sensitive(False)
             self.online_row.set_subtitle(tr("Эта сборка без модуля онлайна (libbbnet.so): игра только офлайн"))
         page.add(play)
+        self.test_group = Adw.PreferencesGroup(title=tr("Проверка соединения"), visible=False)
+        self.test_rows = []
+        page.add(self.test_group)
         if self.netchoice_group is not None:
             page.add(self.netchoice_group)
 
@@ -2301,6 +2323,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                         "без них игра не вылетает"),
             active=s["online_seamlesshunt_tombs"])
         game.add(self.tombs_row)
+        self.game_group = game
         page.add(game)
 
         coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
@@ -2439,12 +2462,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             connection.add(warning)
         self.p2p_port_row.connect("notify::value", lambda *_: self.show_firewall_rows())
         self.show_firewall_rows()
-        test = Adw.ActionRow(title=tr("Проверить соединение"))
-        self.test_button = Gtk.Button(label=tr("Проверить"), valign=Gtk.Align.CENTER)
-        self.test_button.connect("clicked", self.on_test_connection)
-        test.add_suffix(self.test_button)
-        connection.add(test)
-        self.test_rows = []
         self.connection_group = connection
         page.add(connection)
         self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
@@ -2461,6 +2478,10 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.toasts.add_toast(Adw.Toast(title=tr("Публичный сервер shadPS4 больше не принимает "
                                                      "bbport: выбран Seamless Hunt"), timeout=8))
         return page
+
+    def show_online_switch(self):
+        self.online_row.set_subtitle(tr("Включено: игра входит на сервер при запуске") if self.online_row.get_active()
+                                     else tr("Выключено: игра только офлайн"))
 
     def show_online_status(self):
         """The Online tab's first row: off, no account, an account not checked yet, or the last
@@ -2487,7 +2508,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                                      "чтобы войти").format(npid, server)
         self.online_status_icon.set_from_icon_name(icon)
         self.online_status_row.set_subtitle(GLib.markup_escape_text(text))
-        self.online_status_button.set_sensitive(online_module() and self.test_button.get_sensitive())
+        self.test_button.set_sensitive(online_module() and "test" not in self.working)
 
     def own_server_missing(self):
         return combo_value(self.server_kind_row) == "own" and not self.server_row.get_text().strip()
@@ -2550,7 +2571,22 @@ class LauncherWindow(Adw.ApplicationWindow):
         for row in self.own_server_rows:
             row.set_visible(kind == "own")
         # Seamless Hunt: its game server comes with the choice, and accounts are made from here.
-        self.community_row.set_visible(kind != "seamlesshunt")
+        # The Hunter's Dream's game server comes with it too: only an own server's is typed.
+        self.community_row.set_visible(kind == "own")
+        self.tombs_row.set_visible(kind == "seamlesshunt")
+        self.game_group.set_visible(kind in ("own", "seamlesshunt"))
+        self.play_group.set_description({
+            "seamlesshunt": tr("Seamless Hunt даёт всё: сообщения, пятна крови, призраков, колокола и "
+                               "призывы. С игроками на Windows: нужны версия игры 1.09 и тот же сервер"),
+            "thd": tr("Всё идёт через The Hunter's Dream: мост bbbridge на этом компьютере соединяет "
+                      "игру с игроками bbhost"),
+        }.get(kind, tr("Сообщения, пятна крови и призраки приходят с игрового сервера ниже; колокола "
+                       "и призывы идут через ваш сервер shadNet. Нужны версия игры 1.09 и тот же сервер")))
+        # Another server: the last test's results were for the one before.
+        for row in self.test_rows:
+            self.test_group.remove(row)
+        self.test_rows = []
+        self.test_group.set_visible(False)
         self.register_row.set_visible(kind in ("own", "seamlesshunt"))
         # The Hunter's Dream: the bridge reaches the internet, the game only the bridge on this PC.
         thd = kind == "thd"
@@ -2668,12 +2704,11 @@ class LauncherWindow(Adw.ApplicationWindow):
                         "already signed in": tr("эта учётная запись уже в сети (игра запущена?)")}
         account = (self.npid_row.get_text().strip(), self.password_row.get_text())
         for row in self.test_rows:
-            self.connection_group.remove(row)
+            self.test_group.remove(row)
         self.test_rows = []
         self.test_button.set_sensitive(False)
         self.test_button.set_label(tr("Проверка…"))
         kind = combo_value(self.server_kind_row)
-        self.online_status_button.set_sensitive(False)
         self.working.add("test")
 
         def show(results):
@@ -2692,9 +2727,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                 row = Adw.ActionRow(title=GLib.markup_escape_text(f"{names[name]}: {address}"),
                                     subtitle=GLib.markup_escape_text(status))
                 row.add_prefix(Gtk.Image(icon_name="object-select-symbolic" if ok else "dialog-warning-symbolic"))
-                self.connection_group.add(row)
+                self.test_group.add(row)
                 self.test_rows.append(row)
-            self.test_button.set_sensitive(True)
+            self.test_group.set_visible(bool(self.test_rows))
             self.work_done("test")
             self.test_button.set_label(tr("Проверить"))
             self.show_online_status()
@@ -2793,11 +2828,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.update_row.add_suffix(self.update_button)
         updates.add(self.update_row)
         # Another released version, an older one too (back to one that worked better).
-        self.version_row = Adw.ComboRow(
+        self.version_row = readable_choice(Adw.ComboRow(
             title=tr("Другая версия"),
             subtitle=tr("Например, предыдущая, если новая работает хуже. Настройки и сохранения не "
                         "затрагиваются"),
-            model=Gtk.StringList.new([tr("Список появится после проверки обновлений")]))
+            model=Gtk.StringList.new([tr("Список появится после проверки обновлений")])))
         self.version_row.add_prefix(Gtk.Image(icon_name="document-open-recent-symbolic"))
         self.version_button = Gtk.Button(label=tr("Установить"), valign=Gtk.Align.CENTER)
         self.version_button.connect("clicked", self.on_install_version)
@@ -3391,7 +3426,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                            lambda _button: self.fill_coop_controllers()))
         self.coop_pad_rows = []
         for player in range(1, bbport_coop.MAX_PLAYERS + 1):
-            row = Adw.ComboRow(title=tr("Игрок {}").format(player))
+            row = readable_choice(Adw.ComboRow(title=tr("Игрок {}").format(player)))
             pads.add(row)
             self.coop_pad_rows.append(row)
         self.fill_coop_controllers()
@@ -3665,7 +3700,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                         "200 МБ (около 600 МБ на диске), это занимает несколько минут")]
         self.atlas_maps_row.set_subtitle("\n".join(lines))
         self.atlas_prepare_button.set_label(tr("Сделать заново") if state["ready"] else tr("Подготовить"))
-        if not state["ready"]:
+        if not state["ready"] and not folder:
             self.atlas_prepare_button.add_css_class("suggested-action")
         else:
             self.atlas_prepare_button.remove_css_class("suggested-action")
