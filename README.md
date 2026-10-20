@@ -19,9 +19,12 @@ projects ([credits](docs/CREDITS.md)).
 
 ## Features
 
-- **Online play**: messages, bloodstains, ghosts, bells and summons, on
-  [The Hunter's Dream](https://thehuntersdream.com) or a server of your own, and **Seamless
-  Co-op** (experimental): co-op that lasts through deaths, lamps and areas, for up to 5 hunters.
+- **Multiplayer**: online messages, bloodstains, ghosts, bells and summons, on
+  [The Hunter's Dream](https://thehuntersdream.com) or a server of your own; **Seamless Co-op**
+  (experimental), co-op that lasts through deaths, lamps and areas, for up to 5 hunters; and
+  **local co-op** (split screen), 2 to 4 players on one PC, each with their own controller.
+- **In-game map** (Hunter's Atlas): a fullscreen map with where you are, lamps and items, and fast
+  travel to the lamps you've found.
 - **Frame rate unlocked** (up to 120 FPS) or capped at **30, 60 or 90**. Resolutions from
   **720p to 4K**, and **ultrawide** (21:9, 32:9, [how](docs/TROUBLESHOOTING.md#the-picture-is-stretched-on-an-ultrawide-screen)).
 - **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
@@ -112,8 +115,11 @@ If you need a Windows version, I recommend
 
 ## Support
 
-If this fork is useful to you and you would like to support it, you can on
-[Ko-fi](https://ko-fi.com/ayozetr). The port itself is deadinside28's work.
+This fork is built on the port deadinside28 created, but it has a lot of hours of work behind it,
+and above all hours and hours of testing things and hunting down fixes so it runs as well as it
+can. I always try to fix every report as soon as possible, because I know how much this game means
+to some people. If it's useful to you and you'd like to support it, you can on
+[Ko-fi](https://ko-fi.com/ayozetr).
 
 ## Credits
 
