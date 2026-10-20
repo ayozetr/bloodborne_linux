@@ -1019,6 +1019,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Issue #18: an error while building a page left the window blank for good (a saved value
         # it could not read). A page that fails shows its error instead; the others are built.
         self.build_errors = []
+        self.thanks = None  # in the language of this build (thanks_dialog)
+        GLib.timeout_add(1500, lambda: self.thanks_dialog() and False)
         # Made by the settings' page, shown on the Online tab: not a failed rebuild's old one.
         self.netchoice_group = None
         self.section_groups = {}
@@ -2868,7 +2870,22 @@ class LauncherWindow(Adw.ApplicationWindow):
         return page
 
     def show_thanks(self):
-        """Everyone whose work is in this fork or who helped it: their GitHub profile on a click."""
+        """Everyone whose work is in this fork or who helped it: their GitHub profile on a click.
+        The dialog is made once (thanks_dialog). With the cairo renderer it opens and closes
+        without its animation: each frame of it redraws the whole window on the CPU (some 50 ms,
+        20 frames a second), so it would stutter."""
+        dialog = self.thanks_dialog()
+        settings = Gtk.Settings.get_default()
+        if os.environ.get("GSK_RENDERER") == "cairo" and settings.get_property("gtk-enable-animations"):
+            settings.set_property("gtk-enable-animations", False)
+            dialog.animations_off = True  # back on once it has closed
+        dialog.present(self)
+
+    def thanks_dialog(self):
+        """The thanks dialog, made the first time it is needed or while the window is idle (some
+        60 rows: 40 ms), and again after a language change (build)."""
+        if getattr(self, "thanks", None) is not None:
+            return self.thanks
         page = Adw.PreferencesPage()
         for title, people in THANKS:
             group = Adw.PreferencesGroup(title=tr(title))
@@ -2880,9 +2897,19 @@ class LauncherWindow(Adw.ApplicationWindow):
                 group.add(row)
             page.add(group)
         page.set_description(tr("Без них ничего этого не было бы"))
-        dialog = Adw.PreferencesDialog(title=tr("Благодарности"))
-        dialog.add(page)
-        dialog.present(self)
+        self.thanks = Adw.PreferencesDialog(title=tr("Благодарности"))
+        self.thanks.add(page)
+        self.thanks.animations_off = False
+
+        # Back on once it is gone ("closed" comes as it starts closing, "unmap" once it is off the
+        # window), after the window has redrawn without it.
+        def gone(dialog):
+            if dialog.animations_off:
+                dialog.animations_off = False
+                GLib.timeout_add(300, lambda: Gtk.Settings.get_default().set_property(
+                    "gtk-enable-animations", True) and False)
+        self.thanks.connect("unmap", gone)
+        return self.thanks
 
     def open_uri(self, uri):
         Gtk.UriLauncher.new(uri).launch(self, None, None, None)
