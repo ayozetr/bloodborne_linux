@@ -1768,7 +1768,7 @@ ES = {
     'Не удалось удалить всё: осталась папка {}': 'No se ha podido borrar todo: sigue la carpeta {}',
     'Язык лаунчера сменится, когда закончатся игра и текущие операции': 'El idioma del launcher cambiará cuando terminen el juego y las tareas en curso',
     'Имя учётной записи shadNet, не email: создайте её кнопкой «Создать» ниже или спросите владельца сервера. Пароль хранится на этом компьютере вместе с настройками лаунчера': 'El nombre de tu cuenta de shadNet, no el correo: créala con el botón Crear de abajo o pídesela a quien gestione el servidor. La contraseña se guarda en este ordenador con los ajustes del launcher',
-    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Elige Seamless Hunt o tu propio servidor (Multijugador → En línea).',
+    'Сервер shadNet не принимает bbport, игра осталась офлайн. Выберите Seamless Hunt или свой сервер (Мультиплеер → По сети).': 'El servidor shadNet no acepta bbport, así que el juego se ha quedado sin conexión. Elige Seamless Hunt o tu propio servidor (Multijugador → Online).',
     'Введите адрес своего сервера или выберите Seamless Hunt': 'Escribe la dirección de tu servidor o elige Seamless Hunt',
     'Публичный сервер shadPS4 больше не принимает bbport: выбран Seamless Hunt': 'El servidor público de shadPS4 ya no acepta bbport: se ha elegido Seamless Hunt',
     'Игрок с клавиатурой в меню: I, J, K, L — стрелки, пробел — подтвердить, левый Shift — назад': 'El jugador con teclado, en los menús: I, J, K, L para moverse, Espacio para aceptar y Mayús izquierda para volver',
@@ -1776,13 +1776,13 @@ ES = {
     'Вход выполнен: «{}» на {}': 'Sesión iniciada: «{}» en {}',
     'Графика': 'Gráficos',
     'Дополнительно': 'Avanzado',
-    'Игра по сети выключена': 'El juego en línea está apagado',
+    'Игра по сети выключена': 'El juego online está apagado',
     'Локально': 'Local',
     'Модификации': 'Modificaciones',
     'Мультиплеер': 'Multijugador',
     'Начальная настройка': 'Configuración inicial',
     'Нет учётной записи: создайте её или введите свою ниже': 'Sin cuenta: crea una o escribe la tuya abajo',
-    'По сети': 'En línea',
+    'По сети': 'Online',
     'Состояние': 'Estado',
     'Учётная запись «{}» на {}: нажмите «Проверить», чтобы войти': 'Cuenta «{}» en {}: pulsa Probar para iniciar sesión',
     # Hunter's Atlas: preparing its maps.
@@ -1839,7 +1839,7 @@ ES = {
     'Контроллеры': 'Mandos',
     'Локальный кооп': 'Coop local',
     'Не выбран': 'Ninguno',
-    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Varios juegos en este PC, uno por jugador, cada uno en su parte de la pantalla y con su mando. El jugador 1 juega con los ajustes del launcher; los demás tienen sus propias partidas y su bbport.ini (una copia de los ajustes del jugador 1), sin juego en línea ni Discord. Las ventanas se colocan mediante X11 (XWayland en Wayland)',
+    'Несколько игр на этом ПК, по одной на игрока, каждая в своей части экрана и со своим контроллером. Игрок 1 играет с настройками лаунчера; у остальных свои сохранения и bbport.ini (копия настроек игрока 1), без онлайна и Discord. Окна размещаются через X11 (на Wayland — через XWayland)': 'Varios juegos en este PC, uno por jugador, cada uno en su parte de la pantalla y con su mando. El jugador 1 juega con los ajustes del launcher; los demás tienen sus propias partidas y su bbport.ini (una copia de los ajustes del jugador 1), sin juego online ni Discord. Las ventanas se colocan mediante X11 (XWayland en Wayland)',
     'Один контроллер выбран у двух игроков': 'Dos jugadores tienen el mismo mando',
     'Один над другим': 'Uno encima del otro',
     'Расположение': 'Disposición',
@@ -2240,9 +2240,9 @@ ES = {
     "Монитор":
         "Monitor",
     "Пропускать выбор «по сети / вне сети»":
-        "Saltar la elección «jugar en línea / sin conexión»",
+        "Saltar la elección «jugar online / sin conexión»",
     "Игра сразу открывает главное меню: в сети, если включена игра по сети, иначе вне сети (патч игры)":
-        "El juego abre el menú principal directamente: en línea si el juego en línea está activado y, si no, sin conexión (un parche del juego)",
+        "El juego abre el menú principal directamente: online si el juego online está activado y, si no, sin conexión (un parche del juego)",
     "Основной":
         "Principal",
     ", основной":
@@ -2500,7 +2500,7 @@ ES = {
     'Нашёл, при каких эффектах зависают загрузки на NVIDIA': 'Descubrió qué efectos congelan las pantallas de carga en NVIDIA',
     'Журнал, показавший, почему Steam Input не доходил до игры': 'El log que mostró por qué Steam Input no llegaba al juego',
     'Чёрный Сон Охотника после долгой игры': 'El Sueño del Cazador en negro tras sesiones largas',
-    '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '«Salir al escritorio» con el juego en línea e ideas para el launcher',
+    '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '«Salir al escritorio» con el juego online e ideas para el launcher',
     'Файл патчей shadPS4 в папке патчей': 'El archivo de parches de shadPS4 en la carpeta de parches',
     'Вылет «Transaction failed» на Seamless Hunt': 'El cierre «Transaction failed» en Seamless Hunt',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: instalar el juego desde archivos .pkg',
@@ -2541,7 +2541,7 @@ ES = {
     'Установка…': 'Instalando…',
     'Игра установлена: {}': 'Juego instalado: {}',
     'Не удалось установить: подробности в журнале': 'No se pudo instalar: detalles en el registro',
-    'Игра по сети': 'Juego en línea',
+    'Игра по сети': 'Juego online',
     'Выход из игры из меню с контроллера, меню в пределах экрана и половины тачпада на Xbox': 'Salir del juego desde el menú con el mando, el menú dentro de la pantalla y las mitades del panel táctil en mandos Xbox',
     'Вылет видеоплеера при его остановке; сверхширокие экраны 21:9 и 32:9: камера, интерфейс и его положение; пункт «Выйти на рабочий стол» в меню игры': 'Un cierre del reproductor de vídeo al detenerse; pantallas ultrapanorámicas 21:9 y 32:9: cámara, HUD y su posición; Salir al escritorio en los menús del juego',
     'Язык внутриигрового меню при запуске без окна лаунчера': 'El idioma del menú del juego al arrancar sin la ventana del launcher',

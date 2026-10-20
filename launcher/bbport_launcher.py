@@ -1228,7 +1228,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.mods_group.add(self.mods_folder_row)
         self.mod_list = FolderList(self.mods_group)
         self.refresh_mods()
-        self.place("mods", 40, self.mods_group)
+        self.place("mods", 10, self.mods_group)
 
         self.patches_group = Adw.PreferencesGroup(
             title=tr("Сторонние патчи"),
@@ -1245,7 +1245,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.patches_group.add(self.patches_folder_row)
         self.patch_list = FolderList(self.patches_group)
         self.refresh_patches()
-        self.place("mods", 50, self.patches_group)
+        self.place("mods", 20, self.patches_group)
 
         screen = Adw.PreferencesGroup(title=tr("Экран"))
         # A size written by hand in bbport.ini (5120x2160, ...) stays a choice instead of 720p.
@@ -1418,7 +1418,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         atlas.add(self.atlas_progress_row)
         self.atlas_row.connect("notify::active", lambda *_: self.show_atlas())
         self.show_atlas()
-        self.place("mods", 10, atlas)
+        self.place("mods", 30, atlas)
 
         upscaler = Adw.PreferencesGroup(
             title=tr("Апскейлер"),
@@ -1503,7 +1503,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                                 active=self.ini.get(key, "1" if default else "0") == "1")
             self.streaming_rows[key] = row
             streaming.add(row)
-        self.place("mods", 60, streaming)
+        self.place("advanced", 25, streaming)
 
         frames = Adw.PreferencesGroup(title=tr("Частота кадров"))
         self.fps_row = combo_row(tr("Режим"), tr("Какой патч частоты кадров применить к игре"),
@@ -3313,9 +3313,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         """The cheats and gameplay tweaks, in the Mods section."""
         self.cheat_rows = {}
         for rank, title, description, items in (
-                (20, tr("Читы"), tr("Патчи игры версии 1.09, применяются при запуске. Для обычного "
+                (40, tr("Читы"), tr("Патчи игры версии 1.09, применяются при запуске. Для обычного "
                                     "прохождения и игры по сети оставьте их выключенными"), CHEATS),
-                (30, tr("Изменения игрового процесса"), None, TWEAKS)):
+                (50, tr("Изменения игрового процесса"), None, TWEAKS)):
             group = Adw.PreferencesGroup(title=title, description=description)
             for key, name, subtitle in items:
                 row = Adw.SwitchRow(title=tr(name), subtitle=tr(subtitle),
