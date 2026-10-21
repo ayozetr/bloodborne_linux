@@ -3,8 +3,9 @@
 """bbport: makes bbsc/emulator/src/core/bbsc_translations.inc from the translations of BBSC's texts.
 
 Each <language>.json here maps BBSC's English text (as written in its C++ sources, "\\n" for a line
-break; "{boss}" where a text names one boss with <?npcNameId@N?>) to that language. The .inc is
-the table core/bbsc_i18n.cpp looks them up in; run this after changing a .json:
+break; "{boss}" where a text names one boss with <?npcNameId@N?>; "{n}" and "{count}" for a
+text's first and second number) to that language. The .inc is the table core/bbsc_i18n.cpp looks
+them up in; run this after changing a .json:
 
     python3 bbsc/translations/gen_translations.py
 """
@@ -15,7 +16,7 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / 'emulator/src/core/bbsc_translations.inc'
 # The column order of bbsc_i18n.cpp's Language.
 LANGUAGES = ('es', 'fr', 'de', 'it', 'pt', 'ru')
-TAGS = ('<?joinName?>', '<?hostName?>', '<?deadName?>', '<?leaveName?>', '{boss}')
+TAGS = ('<?joinName?>', '<?hostName?>', '<?deadName?>', '<?leaveName?>', '{boss}', '{n}', '{count}')
 
 
 def literal(text):

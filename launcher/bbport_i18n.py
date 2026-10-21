@@ -206,6 +206,9 @@ EN = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "A kept death still drops a bloodstain and echoes",
     "Бесплатный Зовущий колокол": "Free Beckoning Bell",
     "Колокол не тратит озарение": "The bell costs no Insight",
+    "Колокола где угодно": "Bells anywhere",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "BBSC's bells ring anywhere, the Hunter's Dream included (your role, Insight and being online still count)",
     "Пять охотников": "Five hunters",
     "Хозяин может призвать до 4 гостей": "The host may summon up to 4 guests",
     "Тексты кооператива": "Co-op texts",
@@ -1112,6 +1115,9 @@ PT_BR = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "Uma morte sem sair da sessão ainda deixa mancha de sangue e ecos",
     "Бесплатный Зовущий колокол": "Sino Chamador grátis",
     "Колокол не тратит озарение": "O sino não gasta Discernimento",
+    "Колокола где угодно": "Sinos em qualquer lugar",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "Os sinos do BBSC tocam em qualquer lugar, inclusive no Sonho do Caçador (seu papel, o Discernimento e estar online ainda contam)",
     "Пять охотников": "Cinco caçadores",
     "Хозяин может призвать до 4 гостей": "O anfitrião pode invocar até 4 convidados",
     "Тексты кооператива": "Textos do cooperativo",
@@ -2077,6 +2083,9 @@ ES = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "Una muerte sin salir de la sesión sigue dejando mancha de sangre y ecos",
     "Бесплатный Зовущий колокол": "Campana de llamada gratis",
     "Колокол не тратит озарение": "La campana no gasta Perspicacia",
+    "Колокола где угодно": "Campanas en cualquier lugar",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "Las campanas de BBSC suenan en cualquier lugar, también en el Sueño del Cazador (tu papel, la Perspicacia y estar en línea siguen contando)",
     "Пять охотников": "Cinco cazadores",
     "Хозяин может призвать до 4 гостей": "El anfitrión puede invocar hasta 4 invitados",
     "Тексты кооператива": "Textos del cooperativo",
@@ -2955,6 +2964,9 @@ IT = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "Una morte senza uscire dalla sessione lascia comunque macchia ed echi",
     "Бесплатный Зовущий колокол": "Campana del Richiamo gratis",
     "Колокол не тратит озарение": "La campana non costa Intuizione",
+    "Колокола где угодно": "Campane ovunque",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "Le campane di BBSC suonano ovunque, anche nel Sogno del Cacciatore (il tuo ruolo, l’Intuizione e l’essere online contano ancora)",
     "Пять охотников": "Cinque cacciatori",
     "Хозяин может призвать до 4 гостей": "L’host può evocare fino a 4 ospiti",
     "Тексты кооператива": "Testi del cooperativo",
@@ -3833,6 +3845,9 @@ FR = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "Une mort sans quitter la session laisse quand même tache de sang et échos",
     "Бесплатный Зовущий колокол": "Cloche d’appel gratuite",
     "Колокол не тратит озарение": "La cloche ne coûte pas de Perspicacité",
+    "Колокола где угодно": "Cloches partout",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "Les cloches de BBSC sonnent partout, Rêve du Chasseur compris (votre rôle, la Perspicacité et être en ligne comptent toujours)",
     "Пять охотников": "Cinq chasseurs",
     "Хозяин может призвать до 4 гостей": "L’hôte peut invoquer jusqu’à 4 invités",
     "Тексты кооператива": "Textes du coop",
@@ -4711,6 +4726,9 @@ DE = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "Ein Tod ohne Verlassen der Sitzung hinterlässt trotzdem Blutfleck und Echos",
     "Бесплатный Зовущий колокол": "Kostenlose Rufglocke",
     "Колокол не тратит озарение": "Die Glocke kostet keine Einsicht",
+    "Колокола где угодно": "Glocken überall",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "Die Glocken von BBSC läuten überall, auch im Traum des Jägers (deine Rolle, Einsicht und die Online-Verbindung zählen weiterhin)",
     "Пять охотников": "Fünf Jäger",
     "Хозяин может призвать до 4 гостей": "Der Gastgeber kann bis zu 4 Gäste beschwören",
     "Тексты кооператива": "Koop-Texte",
@@ -5614,6 +5632,9 @@ ZH_CN = {
     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски": "不离开会话的死亡仍会掉落血迹和回响",
     "Бесплатный Зовущий колокол": "免费召唤之铃",
     "Колокол не тратит озарение": "铃不消耗启蒙",
+    "Колокола где угодно": "随处摇铃",
+    "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и подключение к сети по-прежнему учитываются)":
+        "BBSC 的铃在任何地方都能摇响，包括猎人梦境（你的身份、启蒙和在线状态仍然有效）",
     "Пять охотников": "五名猎人",
     "Хозяин может призвать до 4 гостей": "房主最多可召唤 4 名访客",
     "Тексты кооператива": "合作文本",

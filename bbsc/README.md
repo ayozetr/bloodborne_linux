@@ -2,7 +2,7 @@
 
 [BBSC](https://github.com/Classmg22/BBSC) by CLS_AMG keeps a co-op session together through deaths,
 lamps, area changes, bosses and the Hunter's Dream, for up to five hunters who each keep their own
-character. This folder holds BBSC 0.0.1 built for this port: the port's runtime loads it into the
+character. This folder holds BBSC 0.0.2 built for this port: the port's runtime loads it into the
 game as `libbbsc.so`.
 
 ## What it does
@@ -13,6 +13,8 @@ game as `libbbsc.so`.
 - Everyone keeps their own levels, echoes and items; the host's boss kills and shortcuts can be
   shared with the guests' worlds.
 - Enemies get stronger for every guest.
+- A guest who dies watches a partner until the group comes back, sees the host's time of night,
+  and can ring the co-op bells anywhere.
 - Its own bells, with no Insight cost: the **Hunt Bell** (call others), the **Kin Bell** (join
   someone), the **Bloodlust Bell** (invade), the **Duel Bell** (PvP on or off) and the **Parting
   Blank** (end the session).

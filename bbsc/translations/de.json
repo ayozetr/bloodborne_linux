@@ -79,5 +79,9 @@
  "PvP is ON.\\nPlayers can hurt each other.": "PvP ist AN.\\nSpieler können einander verletzen.",
  "PvP is OFF.": "PvP ist AUS.",
  "PvP needs another player in your game.": "PvP braucht einen weiteren Spieler in deinem Spiel.",
- "Your own world was put back\\n(the game had closed while you were a guest).\\nRest at a lamp or reload to see it.": "Deine eigene Welt wurde wiederhergestellt\\n(das Spiel wurde geschlossen, während du Gast warst).\\nRaste an einer Laterne oder lade neu, um sie zu sehen."
+ "Your own world was put back\\n(the game had closed while you were a guest).\\nRest at a lamp or reload to see it.": "Deine eigene Welt wurde wiederhergestellt\\n(das Spiel wurde geschlossen, während du Gast warst).\\nRaste an einer Laterne oder lade neu, um sie zu sehen.",
+ "An item was added to your items.": "Ein Gegenstand wurde zu deinen Gegenständen hinzugefügt.",
+ "Watching hunter {n} of {count}.\\nTab / R1: next hunter.\\nF: free camera.": "Du beobachtest Jäger {n} von {count}.\\nTab / R1: nächster Jäger.\\nF: freie Kamera.",
+ "Watching the living hunter.\\nF: free camera.": "Du beobachtest den lebenden Jäger.\\nF: freie Kamera.",
+ "Watching hunter {n} of {count}.": "Du beobachtest Jäger {n} von {count}."
 }

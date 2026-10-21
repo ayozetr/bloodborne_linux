@@ -79,5 +79,9 @@
  "PvP is ON.\\nPlayers can hurt each other.": "PvP ВКЛЮЧЕНО.\\nИгроки могут ранить друг друга.",
  "PvP is OFF.": "PvP ВЫКЛЮЧЕНО.",
  "PvP needs another player in your game.": "Для PvP нужен ещё один игрок в вашей игре.",
- "Your own world was put back\\n(the game had closed while you were a guest).\\nRest at a lamp or reload to see it.": "Ваш собственный мир восстановлен\\n(игра закрылась, пока вы были гостем).\\nОтдохните у фонаря или перезапустите игру."
+ "Your own world was put back\\n(the game had closed while you were a guest).\\nRest at a lamp or reload to see it.": "Ваш собственный мир восстановлен\\n(игра закрылась, пока вы были гостем).\\nОтдохните у фонаря или перезапустите игру.",
+ "An item was added to your items.": "Предмет добавлен в инвентарь.",
+ "Watching hunter {n} of {count}.\\nTab / R1: next hunter.\\nF: free camera.": "Вы наблюдаете за охотником {n} из {count}.\\nTab / R1: следующий охотник.\\nF: свободная камера.",
+ "Watching the living hunter.\\nF: free camera.": "Вы наблюдаете за живым охотником.\\nF: свободная камера.",
+ "Watching hunter {n} of {count}.": "Вы наблюдаете за охотником {n} из {count}."
 }

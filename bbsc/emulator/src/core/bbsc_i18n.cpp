@@ -3,6 +3,7 @@
 
 #include "core/bbsc_i18n.h"
 
+#include <array>
 #include <cstdlib>
 #include <mutex>
 #include <unordered_map>
@@ -24,6 +25,9 @@ constexpr Translation Translations[] = {
 
 constexpr std::u16string_view BossTag = u"<?npcNameId@";
 constexpr std::u16string_view BossPlaceholder = u"{boss}";
+// A text with numbers (BBSC 0.0.2's "Watching hunter 1 of 2."): its first number is {n}, its
+// second {count}.
+constexpr std::array<std::u16string_view, 2> NumberPlaceholders{u"{n}", u"{count}"};
 
 // The PS4 system language codes of the game (BB_LANGUAGE): -1 for English and the others.
 int GameLanguage() {
@@ -84,14 +88,40 @@ const char16_t* Text(const char16_t* english) {
     const std::u16string_view view{english};
     const size_t tag = view.find(BossTag);
     const size_t tag_end = tag != std::u16string_view::npos ? view.find(u"?>", tag) : tag;
-    if (tag_end == std::u16string_view::npos) {
-        return english;
-    }
     static std::mutex mutex;
-    static std::unordered_map<std::u16string_view, std::u16string> made;
+    static std::unordered_map<std::u16string, std::u16string> made;
     std::scoped_lock lock{mutex};
-    if (const auto found = made.find(view); found != made.end()) {
+    if (const auto found = made.find(std::u16string{view}); found != made.end()) {
         return found->second.c_str();
+    }
+    if (tag_end == std::u16string_view::npos) {
+        // A text with numbers: its {n} / {count} form's translation, with the same numbers. The
+        // text may sit in a buffer that is written again, so the key is a copy of it.
+        std::u16string form;
+        std::array<std::u16string, NumberPlaceholders.size()> numbers;
+        size_t count = 0;
+        for (size_t at = 0; at < view.size();) {
+            if (view[at] >= u'0' && view[at] <= u'9' && count < numbers.size()) {
+                size_t end = at;
+                while (end < view.size() && view[end] >= u'0' && view[end] <= u'9') {
+                    ++end;
+                }
+                numbers[count] = std::u16string{view.substr(at, end - at)};
+                form += NumberPlaceholders[count++];
+                at = end;
+            } else {
+                form += view[at++];
+            }
+        }
+        const char16_t* text = count != 0 ? Lookup(form, language) : nullptr;
+        if (text == nullptr) {
+            return english;
+        }
+        std::u16string out{text};
+        for (size_t i = 0; i < count; ++i) {
+            out = Replace(out, NumberPlaceholders[i], numbers[i]);
+        }
+        return made.emplace(std::u16string{view}, std::move(out)).first->second.c_str();
     }
     const std::u16string_view boss = view.substr(tag, tag_end + 2 - tag);
     std::u16string form{view};
@@ -100,7 +130,8 @@ const char16_t* Text(const char16_t* english) {
     if (text == nullptr) {
         return english;
     }
-    return made.emplace(view, Replace(text, BossPlaceholder, boss)).first->second.c_str();
+    return made.emplace(std::u16string{view}, Replace(text, BossPlaceholder, boss))
+        .first->second.c_str();
 }
 
 std::u16string TextWith(const char16_t* english_template, std::u16string_view boss) {

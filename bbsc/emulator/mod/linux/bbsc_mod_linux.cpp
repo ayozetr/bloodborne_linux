@@ -13,7 +13,8 @@
 // questions are answered from bbport's own map of the game's memory (runtime_memory_vma_info, no
 // system call); the log goes to <user dir>/bbsc/logs/ and its warnings to the game's log; the F1 /
 // L3+R3 cinematic camera and BBSC's own Discord status are not in this build (bbport has its own
-// Discord status, and L3+R3 opens bbport's menu).
+// Discord status, and L3+R3 opens bbport's menu). Only BBSC 0.0.2's watch camera of a dead guest
+// is, with its keys read through SDL (see "Watch camera" below).
 
 #include <dlfcn.h>
 #include <sys/mman.h>
@@ -23,6 +24,7 @@
 #include <array>
 #include <atomic>
 #include <cstdarg>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -50,8 +52,11 @@ extern "C" int runtime_memory_vma_info(uintptr_t address, int* prot, int* type, 
 
 using namespace Core::Bbsc::PatchTables;
 
+// One line in this run's BBSC timeline (bloodborne_re.cpp, "Timeline").
+#define BBSC_TIMELINE(kind, ...) Core::Bloodborne::BbscTimelineEvent(kind, fmt::format(__VA_ARGS__))
+
 // Keep it equal to "version" in mod.json and to the Windows mod it plays with.
-#define BBSC_VERSION "0.0.1"
+#define BBSC_VERSION "0.0.2"
 
 namespace BbscMod {
 void LogPlain(const char* text);
@@ -159,6 +164,7 @@ void OpenLog() {
     }
     std::filesystem::create_directories(data_dir / "logs", ignored);
     KeepNewest(data_dir / "logs", ".log", 4); // with this one, 5
+    KeepNewest(data_dir / "logs", ".txt", 4); // BBSC 0.0.2's timelines (bbsc-timeline-*.txt)
     KeepNewest(data_dir / "captures" / "bloodborne-re", ".jsonl", 4);
     const std::time_t now = std::time(nullptr);
     std::tm local{};
@@ -341,11 +347,15 @@ bool NoticesPresent() {
 
 DWORD WINAPI Worker(void*) {
     OpenLog();
-    BbscMod::LogPlain("BBSC mod loaded - version " BBSC_VERSION " (bbport, Linux)");
+    BbscMod::LogPlain("BBSC mod loaded - version " BBSC_VERSION " (bbport, Linux; built " __DATE__
+                      " " __TIME__ ")");
     if (!NoticesPresent()) {
         LOG_ERROR(Mod, "LICENSE.txt / NOTICE.txt / SUPPORTERS.txt missing or changed in {} - BBSC "
                        "is off",
                   mod_dir.string());
+        BBSC_TIMELINE("START", "LICENSE.txt / NOTICE.txt / SUPPORTERS.txt missing or changed in {} "
+                               "- BBSC is off",
+                      mod_dir.string());
         return 0;
     }
     LOG_INFO(Mod, "BBSC mod in pid {}", static_cast<int>(getpid()));
@@ -362,6 +372,10 @@ DWORD WINAPI Worker(void*) {
             LOG_INFO(Mod, "Public game server ({}): vanilla summons - seamless summon patches and the "
                           "5-hunter search off (the session itself stays seamless)",
                      server);
+            BBSC_TIMELINE("START", "Public game server ({}): vanilla summons - seamless summon "
+                                   "patches and the 5-hunter search off (the session itself stays "
+                                   "seamless)",
+                          server);
         }
     }
     BuildSites();
@@ -380,6 +394,9 @@ DWORD WINAPI Worker(void*) {
                       "No Bloodborne CUSA03173 01.09 image after {} s (first unknown site: {} at "
                       "{:#x}) - not this game or not this version; nothing was changed",
                       WaitForImageMs / 1000, bad ? bad->name : "?", bad ? bad->offset : 0);
+            BBSC_TIMELINE("START", "No Bloodborne CUSA03173 01.09 image after {} s - not this game "
+                                   "or not this version; nothing was changed",
+                          WaitForImageMs / 1000);
             return 0;
         }
         Sleep(1);
@@ -402,6 +419,7 @@ DWORD WINAPI Worker(void*) {
         written = SyncSites();
     }
     LOG_INFO(Mod, "Image verified after {} ms: {} byte patch sites written", verified, written);
+    BBSC_TIMELINE("START", "Image verified after {} ms: {} byte patch sites written", verified, written);
 
     Core::Bloodborne::InstallReverseEngineeringTrace();
     BbscMod::StartRelay();
@@ -450,6 +468,29 @@ u64 EbootAddress() {
     return EbootBase;
 }
 
+// BBSC 0.0.2's safe import slot reads and writes (bbsc_http.cpp, bbsc_channel.cpp): on Windows a
+// slot page could be unreadable while the emulator linked the imports. Here the slot is only
+// touched while bbport's map says it is readable, as everything else this library reads.
+bool ReadSlotSafely(u64 address, u64* value) {
+    if (!Readable(address, sizeof(u64))) {
+        return false;
+    }
+    *value = *reinterpret_cast<const volatile u64*>(address);
+    return true;
+}
+
+bool WriteSlotSafely(u64 address, u64 value) {
+    if (!Readable(address, sizeof(u64))) {
+        return false;
+    }
+    DWORD old = 0;
+    if (!VirtualProtect(reinterpret_cast<void*>(address), 8, PAGE_READWRITE, &old)) {
+        return false;
+    }
+    *reinterpret_cast<volatile u64*>(address) = value;
+    return true;
+}
+
 // Import slots swapped for wrappers (bbsc_http.cpp, bbsc_channel.cpp): put back if anything links
 // them again (bbport links the imports once, before the game runs; kept as the Windows mod has it).
 namespace {
@@ -468,16 +509,19 @@ DWORD WINAPI SlotGuardThread(void*) {
         Sleep(5);
         std::scoped_lock lock{guarded_mutex};
         for (auto& guarded : guarded_slots) {
-            auto* slot = reinterpret_cast<volatile u64*>(EbootBase + guarded.slot_offset);
-            const u64 value = *slot;
+            const u64 slot = EbootBase + guarded.slot_offset;
+            u64 value = 0;
+            if (!ReadSlotSafely(slot, &value)) {
+                continue;
+            }
             if (value == guarded.wrapper || value == 0 ||
                 (value >= EbootBase && value < EbootBase + EbootSize)) {
                 continue;
             }
             *reinterpret_cast<void* volatile*>(guarded.original) = reinterpret_cast<void*>(value);
-            DWORD old = 0;
-            VirtualProtect(const_cast<u64*>(slot), 8, PAGE_READWRITE, &old);
-            *slot = guarded.wrapper;
+            if (!WriteSlotSafely(slot, guarded.wrapper)) {
+                continue; // the next round tries again
+            }
             if (++guarded.rewritten <= 3) {
                 LOG_INFO(Mod, "Import {} was linked again - wrapper put back ({}x)", guarded.name,
                          guarded.rewritten);
@@ -563,12 +607,165 @@ void SetHostLampPatches(bool hosting) {
              count);
 }
 
-// The cinematic camera is not in the Linux build: it stays off.
-CinematicInput TakeCinematicInput() {
-    return CinematicInput{};
+// ---- Watch camera (BBSC 0.0.2) -------------------------------------------------------------------
+// The F1 free camera is not in the Linux build: the Windows mod reads the keyboard and mouse for it
+// and hands the game a controller at rest, while here every key and button also reaches the game
+// through bbport's own pad (src/runtime_pad.c: WASD move, E / Q / F / Tab are game buttons) and
+// L3+R3 opens bbport's menu - flying the camera would move the hunter too. BBSC 0.0.2's watch
+// camera is different: it only comes on by itself while our hunter is dead in co-op (bloodborne_re.cpp,
+// CinematicForceOn after the death has played out), when the game has nothing to do with those
+// keys. So that camera is here, read through SDL like the F8 key (the game's window already uses
+// it), on the game thread, and only while the camera is on:
+//   Tab / E / left click next hunter, Shift+Tab / Q previous, F fly freely and back; the
+//   controller's R1 / L1 and right stick (left stick: closer / farther); arrow keys turn, W / S
+//   closer / farther; flying freely: WASD, Space / E up, C / Q down, Shift fast, Alt slow.
+//   F1 turns it off for the rest of that death (it is bbport's "let the mouse go" key too).
+// Mouse movement is not read: SDL's relative mouse state is bbport's own mouse look.
+namespace {
+void* WatchSdl(const char* name) {
+    return dlsym(RTLD_DEFAULT, name);
 }
-void CinematicForceOff() {}
-void CinematicForceOn() {}
+
+// SDL3 scancodes and gamepad enums (SDL_scancode.h, SDL_gamepad.h).
+enum : int {
+    ScA = 4, ScC = 6, ScD = 7, ScE = 8, ScF = 9, ScQ = 20, ScS = 22, ScW = 26, ScTab = 43,
+    ScSpace = 44, ScF1 = 58, ScRight = 79, ScLeft = 80, ScDown = 81, ScUp = 82, ScLShift = 225,
+    ScLAlt = 226, ScRShift = 229, ScRAlt = 230, ScCount = 231
+};
+constexpr int PadL1 = 9, PadR1 = 10;             // SDL_GAMEPAD_BUTTON_LEFT / RIGHT_SHOULDER
+constexpr int AxisLY = 1, AxisRX = 2, AxisRY = 3; // SDL_GAMEPAD_AXIS_*
+
+std::mutex watch_mutex;
+bool watch_on = false;       // switched on by the game (a death in co-op), off by F1 or respawn
+bool watch_watching = false; // the game says it is watching a hunter
+std::array<bool, ScCount> watch_keys_before{};
+bool watch_click_before = false;
+bool watch_l1_before = false, watch_r1_before = false;
+
+float WatchAxis(int value) {
+    const float v = static_cast<float>(value) / 32767.0f;
+    constexpr float Dead = 0.15f;
+    return std::abs(v) < Dead
+               ? 0.0f
+               : std::clamp((v - std::copysign(Dead, v)) / (1.0f - Dead), -1.0f, 1.0f);
+}
+
+// The first controller the game's runtime has open (SDL_GetGamepadFromID gives only open ones).
+void* WatchGamepad() {
+    using List = unsigned* (*)(int*);
+    using FromId = void* (*)(unsigned);
+    using Free = void (*)(void*);
+    static const auto list = reinterpret_cast<List>(WatchSdl("SDL_GetGamepads"));
+    static const auto from_id = reinterpret_cast<FromId>(WatchSdl("SDL_GetGamepadFromID"));
+    static const auto release = reinterpret_cast<Free>(WatchSdl("SDL_free"));
+    if (list == nullptr || from_id == nullptr || release == nullptr) {
+        return nullptr;
+    }
+    int count = 0;
+    unsigned* ids = list(&count);
+    void* pad = nullptr;
+    for (int i = 0; ids != nullptr && i < count && pad == nullptr; ++i) {
+        pad = from_id(ids[i]);
+    }
+    release(ids);
+    return pad;
+}
+} // namespace
+
+CinematicInput TakeCinematicInput() {
+    std::scoped_lock lock{watch_mutex};
+    CinematicInput in{};
+    if (!watch_on) {
+        return in;
+    }
+    in.enabled = true;
+    using KeyState = const bool* (*)(int*);
+    using Focus = void* (*)();
+    using MouseState = unsigned (*)(float*, float*);
+    static const auto key_state = reinterpret_cast<KeyState>(WatchSdl("SDL_GetKeyboardState"));
+    static const auto focus = reinterpret_cast<Focus>(WatchSdl("SDL_GetKeyboardFocus"));
+    static const auto mouse_state = reinterpret_cast<MouseState>(WatchSdl("SDL_GetMouseState"));
+    int count = 0;
+    const bool* keys = key_state != nullptr && focus != nullptr && focus() != nullptr
+                           ? key_state(&count)
+                           : nullptr;
+    std::array<bool, ScCount> now{};
+    for (int i = 0; keys != nullptr && i < ScCount && i < count; ++i) {
+        now[i] = keys[i];
+    }
+    const auto pressed = [&](int key) { return now[key] && !watch_keys_before[key]; };
+    if (pressed(ScF1)) {
+        watch_on = false;
+        watch_watching = false;
+        watch_keys_before = now;
+        LOG_INFO(Debug, "BBSC watch camera: off (F1)");
+        return CinematicInput{};
+    }
+    const bool shift = now[ScLShift] || now[ScRShift];
+    in.switch_target = (pressed(ScTab) ? (shift ? -1 : 1) : 0) + (pressed(ScE) ? 1 : 0) -
+                       (pressed(ScQ) ? 1 : 0);
+    in.toggle_free = pressed(ScF);
+    const bool click = keys != nullptr && mouse_state != nullptr &&
+                       (mouse_state(nullptr, nullptr) & 1u) != 0; // SDL_BUTTON_LMASK
+    in.switch_target += click && !watch_click_before ? 1 : 0;
+    watch_click_before = click;
+    in.forward = now[ScW];
+    in.back = now[ScS];
+    in.left = now[ScA];
+    in.right = now[ScD];
+    in.up = now[ScSpace] || (now[ScE] && !watch_watching);
+    in.down = now[ScC] || (now[ScQ] && !watch_watching);
+    in.fast = shift;
+    in.slow = now[ScLAlt] || now[ScRAlt];
+    in.look_up = now[ScUp];
+    in.look_down = now[ScDown];
+    in.look_left = now[ScLeft];
+    in.look_right = now[ScRight];
+    watch_keys_before = now;
+    using Button = bool (*)(void*, int);
+    using Axis = short (*)(void*, int);
+    static const auto button = reinterpret_cast<Button>(WatchSdl("SDL_GetGamepadButton"));
+    static const auto axis = reinterpret_cast<Axis>(WatchSdl("SDL_GetGamepadAxis"));
+    void* pad = button != nullptr && axis != nullptr ? WatchGamepad() : nullptr;
+    if (pad != nullptr) {
+        const bool l1 = button(pad, PadL1), r1 = button(pad, PadR1);
+        if (watch_watching) {
+            in.switch_target += (r1 && !watch_r1_before ? 1 : 0) - (l1 && !watch_l1_before ? 1 : 0);
+        }
+        watch_l1_before = l1;
+        watch_r1_before = r1;
+        in.pad_look_x = WatchAxis(axis(pad, AxisRX));
+        in.pad_look_y = -WatchAxis(axis(pad, AxisRY));
+        in.pad_move_y = -WatchAxis(axis(pad, AxisLY)); // stick up = closer
+    }
+    return in;
+}
+
+void CinematicForceOff() {
+    std::scoped_lock lock{watch_mutex};
+    watch_on = false;
+    watch_watching = false;
+}
+
+void CinematicForceOn() {
+    if (!Core::Bbsc::SwitchEnabled("SHADPS4_BBSC_CINEMATIC")) {
+        return;
+    }
+    std::scoped_lock lock{watch_mutex};
+    if (!watch_on) {
+        // Keys already held (the attack that killed us) do not count as presses.
+        watch_keys_before.fill(true);
+        watch_click_before = watch_l1_before = watch_r1_before = true;
+    }
+    watch_on = true;
+}
+
+void CinematicSetWatching(bool watching) {
+    std::scoped_lock lock{watch_mutex};
+    watch_watching = watching;
+}
+
+void CinematicPadRead(unsigned, unsigned char, unsigned char, unsigned char, unsigned char) {}
 
 } // namespace Bbsc
 } // namespace Core
