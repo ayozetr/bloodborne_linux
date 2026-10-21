@@ -3358,6 +3358,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                         directory = None
             except Exception as error:  # the list still shows, with the error, not nothing
                 directory, problem = None, str(error)
+            if directory is None and problem is None:  # which file the dump lacks (issue #22)
+                problem = tr("В дампе игры нет трофеев: не найден {}").format(
+                    trophies.missing(game) or "sce_sys/trophy")
             GLib.idle_add(show, directory, problem)
         threading.Thread(target=work, daemon=True).start()
 
@@ -3374,7 +3377,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         if directory is None:
             self.trophy_group.set_description("")
             rows.append(Adw.ActionRow(title=GLib.markup_escape_text(
-                problem or tr("В дампе игры нет трофеев (sce_sys/trophy)"))))
+                problem or tr("В дампе игры нет трофеев: не найден {}").format("sce_sys/trophy"))))
         else:
             listed, earned = trophies.read_list(directory), trophies.read_earned(directory)
             marked = trophies.read_marked(directory)

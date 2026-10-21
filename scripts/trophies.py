@@ -154,11 +154,40 @@ def read_trp(path):
     return entries
 
 
+def dump_file(game, *names):
+    """game/names..., each name matched without regard to case, or None: a dump copied through
+    Windows or extracted by some tools has SCE_SYS/TROPHY/TROPHY00.TRP, and Linux tells the cases
+    apart (issue #22)."""
+    path = Path(game)
+    for name in names:
+        if (path / name).exists():
+            path = path / name
+            continue
+        try:
+            path = next(p for p in path.iterdir() if p.name.casefold() == name.casefold())
+        except (OSError, StopIteration):
+            return None
+    return path
+
+
+TRP_PATH = ('sce_sys', 'trophy', 'trophy00.trp')
+NPBIND_PATH = ('sce_sys', 'npbind.dat')
+
+
+def missing(game):
+    """What the dump lacks for its trophies ("sce_sys/npbind.dat", ...), or None."""
+    if dump_file(game, *TRP_PATH) is None:
+        return '/'.join(TRP_PATH)
+    if np_comm_id(game) is None:
+        return '/'.join(NPBIND_PATH)
+    return None
+
+
 def np_comm_id(game):
     """The game's NP communication id (NPWR05818_00) from sce_sys/npbind.dat, or None."""
     try:
-        data = (Path(game) / 'sce_sys' / 'npbind.dat').read_bytes()
-    except OSError:
+        data = dump_file(game, *NPBIND_PATH).read_bytes()
+    except (OSError, AttributeError):
         return None
     found = re.search(rb'NPWR\d{5}_\d{2}', data)
     return found.group().decode() if found else None
@@ -393,8 +422,8 @@ def prepare(game, user, key=None, language=None):
     """Writes the trophy directory for a game (icons, trophies.tsv); returns it, or None when the
     dump has no trophies. A wrong key raises ValueError."""
     comm_id = np_comm_id(game)
-    trp = Path(game) / 'sce_sys' / 'trophy' / 'trophy00.trp'
-    if comm_id is None or not trp.is_file():
+    trp = dump_file(game, *TRP_PATH)
+    if comm_id is None or trp is None or not trp.is_file():
         return None
     directory = trophy_dir(user, comm_id)
     # The launcher asks on every visit to its Trophies page, and decrypting the names in Python

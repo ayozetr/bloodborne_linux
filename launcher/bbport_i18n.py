@@ -722,8 +722,8 @@ EN = {
         'answers; your public address: {}',
     "Поддержать проект": 'Support this project',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'The game dump has no trophies (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'The game dump has no trophies: {} not found',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Recorded when the game unlocks them, and shown in the game',
     'Ключ трофеев':
@@ -1644,8 +1644,8 @@ PT_BR = {
         'responde; seu endereço público: {}',
     "Поддержать проект": 'Apoiar este projeto',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'O dump do jogo não tem troféus (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'O dump do jogo não tem troféus: {} não encontrado',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Registrados quando o jogo os desbloqueia, e mostrados no jogo',
     'Ключ трофеев':
@@ -2481,8 +2481,8 @@ ES = {
         'responde; tu dirección pública: {}',
     "Поддержать проект": 'Apoyar este proyecto',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'El volcado del juego no tiene trofeos (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'El volcado del juego no tiene trofeos: no se encuentra {}',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Se guardan cuando el juego los desbloquea, y se muestran en el juego',
     'Ключ трофеев':
@@ -3318,8 +3318,8 @@ IT = {
         'risponde; il tuo indirizzo pubblico: {}',
     "Поддержать проект": 'Sostieni questo progetto',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'Il dump del gioco non ha trofei (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'Il dump del gioco non ha trofei: {} non trovato',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Registrati quando il gioco li sblocca, e mostrati nel gioco',
     'Ключ трофеев':
@@ -4155,8 +4155,8 @@ FR = {
         'répond ; votre adresse publique : {}',
     "Поддержать проект": 'Soutenir ce projet',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'Le dump du jeu n’a pas de trophées (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'Le dump du jeu n’a pas de trophées : {} introuvable',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Enregistrés quand le jeu les débloque, et affichés dans le jeu',
     'Ключ трофеев':
@@ -4992,8 +4992,8 @@ DE = {
         'antwortet; deine öffentliche Adresse: {}',
     "Поддержать проект": 'Dieses Projekt unterstützen',
     # Trophies page
-    'В дампе игры нет трофеев (sce_sys/trophy)':
-        'Der Spiel-Dump hat keine Trophäen (sce_sys/trophy)',
+    'В дампе игры нет трофеев: не найден {}':
+        'Der Spiel-Dump hat keine Trophäen: {} nicht gefunden',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Werden gespeichert, wenn das Spiel sie freischaltet, und im Spiel angezeigt',
     'Ключ трофеев':
@@ -5745,7 +5745,7 @@ ZH_CN = {
     "Автоматически (по контроллеру)": "自动（按手柄）",
     "Адрес WebAPI (пусто: порт 31315 сервера)": "WebAPI 地址（留空：使用服务器的 31315 端口）",
     "Адрес сервера (host:port)": "服务器地址（主机:端口）",
-    "В дампе игры нет трофеев (sce_sys/trophy)": "游戏转储中没有奖杯（sce_sys/trophy）",
+    "В дампе игры нет трофеев: не найден {}": "游戏转储中没有奖杯：找不到 {}",
     "Выключите при Tailscale или другом VPN": "使用 Tailscale 或其他 VPN 时请关闭",
     "Добавить": "添加",
     "Добавить в Steam": "添加到 Steam",

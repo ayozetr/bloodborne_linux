@@ -142,6 +142,22 @@ class TrophyFileTests(unittest.TestCase):
             self.assertEqual(trophies.read_earned(directory), {1: 1700000000})
             self.assertIsNone(trophies.prepare(Path(tmp) / 'nothing', user))
 
+    def test_a_dump_with_upper_case_names_and_what_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            game, user = self.game(tmp), Path(tmp) / 'user'
+            # Issue #22: a dump copied through Windows, SCE_SYS/TROPHY/TROPHY00.TRP.
+            (game / 'sce_sys/trophy/trophy00.trp').rename(game / 'sce_sys/trophy/TROPHY00.TRP')
+            (game / 'sce_sys/trophy').rename(game / 'sce_sys/TROPHY')
+            (game / 'sce_sys/npbind.dat').rename(game / 'sce_sys/NPBIND.DAT')
+            (game / 'sce_sys').rename(game / 'SCE_SYS')
+            self.assertIsNone(trophies.missing(game))
+            self.assertEqual(trophies.prepare(game, user, KEY, 3), user / 'trophies' / COMM_ID)
+            (game / 'SCE_SYS/NPBIND.DAT').write_bytes(b'no id')
+            self.assertEqual(trophies.missing(game), 'sce_sys/npbind.dat')
+            (game / 'SCE_SYS/TROPHY/TROPHY00.TRP').unlink()
+            self.assertEqual(trophies.missing(game), 'sce_sys/trophy/trophy00.trp')
+            self.assertIsNone(trophies.prepare(game, user, KEY, 3))
+
     def test_prepared_once_for_the_same_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             game, user = self.game(tmp), Path(tmp) / 'user'
