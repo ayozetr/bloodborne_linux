@@ -1581,6 +1581,20 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.limit_row.set_subtitle(tr("0 — без ограничения; укажите число, чтобы ограничить FPS"))
         self.limit_row.set_value(number(self.settings["fps_limit"], 0, int, "settings.json",
                                         "fps_limit"))
+        # Above about 120 FPS the game's movement timing breaks (Supermedo 51cac0e): a cap above it
+        # is marked, and says why.
+        self.limit_warning = Gtk.Image(icon_name="dialog-warning-symbolic", visible=False,
+                                       tooltip_text=tr("Выше 120 FPS движение в игре может ломаться: "
+                                                       "бег и перекаты замедляются"))
+        self.limit_row.add_prefix(self.limit_warning)
+
+        def show_limit(*_):
+            high = self.limit_row.get_value() > 120
+            self.limit_warning.set_visible(high)
+            self.limit_row.set_subtitle(self.limit_warning.get_tooltip_text() if high else
+                                        tr("0 — без ограничения; укажите число, чтобы ограничить FPS"))
+        self.limit_row.connect("notify::value", show_limit)
+        show_limit()
         frames.add(self.limit_row)
         self.place("graphics", 30, frames)
 

@@ -485,6 +485,8 @@ EN = {
     "Ограничение FPS": "FPS limit",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0: no limit; set a number to cap the frame rate",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        "Above 120 FPS the game's movement can break: running and rolling slow down",
     # Performance
     "Производительность": "Performance",
     "Двухстадийный конвейер GPU": "Two-stage GPU pipeline",
@@ -1467,6 +1469,8 @@ PT_BR = {
         "Bloodborne {}, versão 1.09",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0: sem limite; defina um número para limitar a taxa de quadros",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Acima de 120 FPS o movimento do jogo pode falhar: correr e rolar ficam mais lentos',
     "Авто":
         "Automático",
     "Включён при 8 и более потоках процессора":
@@ -2182,6 +2186,8 @@ ES = {
     "30 (как на PS4)": "30 (como en PS4)",
     "Ограничение FPS": "Límite de FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: sin límite; indica un número para limitar la tasa de fotogramas",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Por encima de 120 FPS el movimiento del juego puede fallar: correr y rodar se vuelven más lentos',
     "Производительность": "Rendimiento",
     "Двухстадийный конвейер GPU": "Pipeline de GPU en dos etapas",
     "Быстрее на 20–30%; при нестабильности выключите": "Un 20–30 % más rápido; desactívalo si hay inestabilidad",
@@ -3023,6 +3029,8 @@ IT = {
     "30 (как на PS4)": "30 (come su PS4)",
     "Ограничение FPS": "Limite di FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: nessun limite; imposta un numero per limitare la frequenza dei fotogrammi",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Sopra i 120 FPS il movimento del gioco può guastarsi: corsa e capriole rallentano',
     "Производительность": "Prestazioni",
     "Двухстадийный конвейер GPU": "Pipeline GPU a due stadi",
     "Быстрее на 20–30%; при нестабильности выключите": "Più veloce del 20–30%; disattivala se è instabile",
@@ -3864,6 +3872,8 @@ FR = {
     "30 (как на PS4)": "30 (comme sur PS4)",
     "Ограничение FPS": "Limite de FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0 : aucune limite ; indiquez un nombre pour plafonner la fréquence d'images",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Au-delà de 120 FPS, les déplacements du jeu peuvent se dérégler : la course et les roulades ralentissent',
     "Производительность": "Performances",
     "Двухстадийный конвейер GPU": "Pipeline GPU à deux étapes",
     "Быстрее на 20–30%; при нестабильности выключите": "20 à 30 % plus rapide ; désactivez en cas d'instabilité",
@@ -4705,6 +4715,8 @@ DE = {
     "30 (как на PS4)": "30 (wie auf der PS4)",
     "Ограничение FPS": "FPS-Limit",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: kein Limit; gib eine Zahl ein, um die Bildrate zu begrenzen",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Über 120 FPS kann die Bewegung im Spiel fehlerhaft werden: Laufen und Rollen werden langsamer',
     "Производительность": "Leistung",
     "Двухстадийный конвейер GPU": "Zweistufige GPU-Pipeline",
     "Быстрее на 20–30%; при нестабильности выключите": "20–30 % schneller; bei Instabilität ausschalten",
@@ -5631,6 +5643,8 @@ ZH_CN = {
     "Ограничение FPS": "帧率上限",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0 表示不限制；填写一个数字可限制帧率",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        '超过 120 FPS 时游戏的移动可能出错：奔跑和翻滚会变慢',
     # Performance
     "Производительность": "性能",
     "Двухстадийный конвейер GPU": "双阶段 GPU 管线",
