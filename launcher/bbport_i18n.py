@@ -724,6 +724,8 @@ EN = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'The game dump has no trophies: {} not found',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        "The dump's trophy file is damaged or encrypted (sce_sys/trophy/trophy00.trp): dump the game again",
     'Записываются, когда игра их открывает, и показываются в игре':
         'Recorded when the game unlocks them, and shown in the game',
     'Ключ трофеев':
@@ -1648,6 +1650,8 @@ PT_BR = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'O dump do jogo não tem troféus: {} não encontrado',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        'O arquivo de troféus do dump está danificado ou criptografado (sce_sys/trophy/trophy00.trp): faça o dump do jogo de novo',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Registrados quando o jogo os desbloqueia, e mostrados no jogo',
     'Ключ трофеев':
@@ -2487,6 +2491,8 @@ ES = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'El volcado del juego no tiene trofeos: no se encuentra {}',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        'El archivo de trofeos del volcado está dañado o cifrado (sce_sys/trophy/trophy00.trp): vuelve a volcar el juego',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Se guardan cuando el juego los desbloquea, y se muestran en el juego',
     'Ключ трофеев':
@@ -3326,6 +3332,8 @@ IT = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'Il dump del gioco non ha trofei: {} non trovato',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        'Il file dei trofei del dump è danneggiato o cifrato (sce_sys/trophy/trophy00.trp): rifai il dump del gioco',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Registrati quando il gioco li sblocca, e mostrati nel gioco',
     'Ключ трофеев':
@@ -4165,6 +4173,8 @@ FR = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'Le dump du jeu n’a pas de trophées : {} introuvable',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        'Le fichier des trophées du dump est endommagé ou chiffré (sce_sys/trophy/trophy00.trp) : refaites le dump du jeu',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Enregistrés quand le jeu les débloque, et affichés dans le jeu',
     'Ключ трофеев':
@@ -5004,6 +5014,8 @@ DE = {
     # Trophies page
     'В дампе игры нет трофеев: не найден {}':
         'Der Spiel-Dump hat keine Trophäen: {} nicht gefunden',
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        'Die Trophäendatei des Dumps ist beschädigt oder verschlüsselt (sce_sys/trophy/trophy00.trp): erstelle den Dump neu',
     'Записываются, когда игра их открывает, и показываются в игре':
         'Werden gespeichert, wenn das Spiel sie freischaltet, und im Spiel angezeigt',
     'Ключ трофеев':
@@ -5758,6 +5770,8 @@ ZH_CN = {
     "Адрес WebAPI (пусто: порт 31315 сервера)": "WebAPI 地址（留空：使用服务器的 31315 端口）",
     "Адрес сервера (host:port)": "服务器地址（主机:端口）",
     "В дампе игры нет трофеев: не найден {}": "游戏转储中没有奖杯：找不到 {}",
+    'Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): сделайте дамп заново':
+        '转储中的奖杯文件已损坏或已加密（sce_sys/trophy/trophy00.trp）：请重新转储游戏',
     "Выключите при Tailscale или другом VPN": "使用 Tailscale 或其他 VPN 时请关闭",
     "Добавить": "添加",
     "Добавить в Steam": "添加到 Steam",

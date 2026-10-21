@@ -27,6 +27,10 @@ import threading
 import time
 import xml.etree.ElementTree as ET
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from game_check import SUPPORTED_TITLES  # noqa: E402
+from prepare import sfo  # noqa: E402
+
 TRP_MAGIC = 0xDCA24D00
 NOTICE_ICON = 128  # pixels, the overlay's icon (gpu/shim/bbport_overlay.cpp)
 GRADES = {'P': 'platinum', 'G': 'gold', 'S': 'silver', 'B': 'bronze'}
@@ -139,12 +143,20 @@ def aes_cbc_decrypt(key, iv, data):
 
 # ---- The dump's files --------------------------------------------------------------------
 
+class NotTrophyFile(ValueError):
+    """trophy00.trp is not a trophy file: a dump made with a tool that left sce_sys encrypted
+    (issue #22: its npbind.dat was), or a damaged copy. Not a wrong key."""
+
+
 def read_trp(path):
     """{entry name: bytes} of a TRP file (sce_sys/trophy/trophy00.trp)."""
     data = Path(path).read_bytes()
-    magic, _version, _size, count, entry_size = struct.unpack('>IIQII', data[:24])
+    try:
+        magic, _version, _size, count, entry_size = struct.unpack('>IIQII', data[:24])
+    except struct.error:
+        magic = entry_size = 0
     if magic != TRP_MAGIC or entry_size < 48:
-        raise ValueError(f'{path}: not a trophy file')
+        raise NotTrophyFile(f'{path}: not a trophy file')
     entries = {}
     for i in range(count):
         entry = data[0x60 + i * entry_size:0x60 + (i + 1) * entry_size]
@@ -179,18 +191,30 @@ def missing(game):
     if dump_file(game, *TRP_PATH) is None:
         return '/'.join(TRP_PATH)
     if np_comm_id(game) is None:
-        return '/'.join(NPBIND_PATH)
+        npbind = '/'.join(NPBIND_PATH)
+        return npbind if dump_file(game, *NPBIND_PATH) is None else f'NPWR… in {npbind}'
     return None
 
 
 def np_comm_id(game):
-    """The game's NP communication id (NPWR05818_00) from sce_sys/npbind.dat, or None."""
+    """The game's NP communication id (NPWR05818_00) from sce_sys/npbind.dat; for Bloodborne, its
+    own when that file lacks it (issue #22: a dump whose npbind.dat holds no NPWR id); or None."""
     try:
-        data = dump_file(game, *NPBIND_PATH).read_bytes()
+        found = re.search(rb'NPWR\d{5}_\d{2}', dump_file(game, *NPBIND_PATH).read_bytes())
     except (OSError, AttributeError):
-        return None
-    found = re.search(rb'NPWR\d{5}_\d{2}', data)
-    return found.group().decode() if found else None
+        found = None
+    if found:
+        return found.group().decode()
+    return BLOODBORNE if bloodborne(game) else None
+
+
+def bloodborne(game):
+    """The dump is a Bloodborne release the port runs (its param.sfo's TITLE_ID)."""
+    try:
+        info = sfo(dump_file(game, 'sce_sys', 'param.sfo').read_bytes())
+    except (OSError, AttributeError, ValueError, IndexError):
+        return False
+    return str(info.get('TITLE_ID', '')).strip('\0') in SUPPORTED_TITLES
 
 
 def parse_key(text):

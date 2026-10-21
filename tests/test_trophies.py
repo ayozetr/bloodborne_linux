@@ -6,6 +6,7 @@ from unittest import mock
 from pathlib import Path
 
 import trophies
+from test_game_check import param_sfo
 
 KEY = bytes.fromhex('2b7e151628aed2a6abf7158809cf4f3c')
 COMM_ID = 'NPWR00001_00'
@@ -153,10 +154,28 @@ class TrophyFileTests(unittest.TestCase):
             self.assertIsNone(trophies.missing(game))
             self.assertEqual(trophies.prepare(game, user, KEY, 3), user / 'trophies' / COMM_ID)
             (game / 'SCE_SYS/NPBIND.DAT').write_bytes(b'no id')
+            self.assertEqual(trophies.missing(game), 'NPWR… in sce_sys/npbind.dat')
+            # Issue #22: Bloodborne's own id when its npbind.dat lacks it.
+            (game / 'SCE_SYS/PARAM.SFO').write_bytes(param_sfo({'TITLE_ID': 'CUSA03173'}))
+            self.assertEqual(trophies.np_comm_id(game), trophies.BLOODBORNE)
+            self.assertIsNone(trophies.missing(game))
+            (game / 'SCE_SYS/NPBIND.DAT').unlink()
+            self.assertEqual(trophies.np_comm_id(game), trophies.BLOODBORNE)
+            (game / 'SCE_SYS/PARAM.SFO').write_bytes(param_sfo({'TITLE_ID': 'CUSA12345'}))
             self.assertEqual(trophies.missing(game), 'sce_sys/npbind.dat')
             (game / 'SCE_SYS/TROPHY/TROPHY00.TRP').unlink()
             self.assertEqual(trophies.missing(game), 'sce_sys/trophy/trophy00.trp')
             self.assertIsNone(trophies.prepare(game, user, KEY, 3))
+
+    def test_an_encrypted_trophy_file_is_not_a_wrong_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            game = self.game(tmp)
+            (game / 'sce_sys/trophy/trophy00.trp').write_bytes(bytes(range(256)) * 4)
+            with self.assertRaises(trophies.NotTrophyFile):
+                trophies.prepare(game, Path(tmp) / 'user', KEY, 3)
+            (game / 'sce_sys/trophy/trophy00.trp').write_bytes(b'short')
+            with self.assertRaises(trophies.NotTrophyFile):
+                trophies.read_trp(game / 'sce_sys/trophy/trophy00.trp')
 
     def test_prepared_once_for_the_same_source(self):
         with tempfile.TemporaryDirectory() as tmp:

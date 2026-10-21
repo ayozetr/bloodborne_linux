@@ -3351,6 +3351,10 @@ class LauncherWindow(Adw.ApplicationWindow):
             try:
                 try:
                     directory = trophies.prepare(game, user, key, language)
+                except trophies.NotTrophyFile:  # the dump's file, not the key (issue #22)
+                    directory = None
+                    problem = tr("Файл трофеев дампа повреждён или зашифрован (sce_sys/trophy/trophy00.trp): "
+                                 "сделайте дамп заново")
                 except (ValueError, trophies.ET.ParseError):  # what a wrong key gives
                     problem = tr("Неверный ключ трофеев: названия недоступны")
                     try:
