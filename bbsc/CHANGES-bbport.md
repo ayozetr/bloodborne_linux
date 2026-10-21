@@ -1,8 +1,8 @@
 # bbport's changes to BBSC
 
-This folder holds [BBSC](https://github.com/Classmg22/BBSC) 0.0.1 by CLS_AMG (GPL-2.0-or-later),
-as published at commit 315f76c, with the changes below made for the Linux port of bbport. Changed
-lines in BBSC's own files are marked `bbport:` in comments.
+This folder holds [BBSC](https://github.com/Classmg22/BBSC) 0.0.2 by CLS_AMG (GPL-2.0-or-later),
+as published at commit 4f11faf (tag v0.0.2; 0.0.1 was commit 315f76c), with the changes below made
+for the Linux port of bbport. Changed lines in BBSC's own files are marked `bbport:` in comments.
 
 ## 2026-10-15
 
@@ -61,4 +61,59 @@ lines in BBSC's own files are marked `bbport:` in comments.
     instead of 15, one host that close, 3 checks in a row), and "the only one hosting on the
     server" is gone: it was a stranger whenever the real host was not on the relay;
   - the hosts that rang are forgotten when the session ends.
-  BBSC 0.0.2's timeline log is not taken.
+  BBSC 0.0.2's timeline log was not taken then (it is now, see "BBSC 0.0.2" below).
+
+## 2026-10-21: BBSC 0.0.2
+
+The rest of BBSC 0.0.2 (commit 4f11faf), merged with BBSC's own changes from 0.0.1 kept as they
+are, and bbport's changes above kept on top of them.
+
+- **Taken as published:** `CREDITS.txt`, `SUPPORTERS.txt`, `emulator/mod/mod.json` (version 0.0.2,
+  the new "Bells anywhere" option, the Discord option's text), `emulator/mod/bbsc_channel.cpp`,
+  `emulator/mod/bbsc_discord.cpp`, `emulator/mod/bbsc_mod.cpp` (both Windows only, not built
+  here), `emulator/src/core/bbsc_cinematic.{h,cpp}` (not built here), `bbsc_patch_tables.h`,
+  `bbsc_persistence.h` (the new default-on switches `SHADPS4_BBSC_AREA_LIST_CAP`,
+  `SHADPS4_BBSC_WORLD_SYNC_ALL`, `SHADPS4_BBSC_TIMELINE`, `SHADPS4_BBSC_BELLS_ANYWHERE`), the
+  shim's `np_signaling_bbsc.h` and `server/gameserver/`.
+- **Taken with bbport's changes kept:** `emulator/src/core/bloodborne_re.{h,cpp}` (the watch
+  camera of a dead guest, the kit's bells anywhere, the host's time of night for the guest, the
+  area list cap against "Panic 265", the boss, kick and drop fixes, the kit from the game's own
+  tables, the frame rate and Discord data, the timeline), `emulator/mod/bbsc_http.cpp` and
+  `emulator/mod/bbsc_relay.cpp` (the relay's write queue).
+- **The aimed placement and the host lock** (2026-10-19 and the first 2026-10-21 entry above) are
+  now BBSC's own code, under its names: `OnAimedHostPlacement`, `RelaySendAimedPlacement`,
+  `AimedPlacementType` (0x31), `own_user_id` / `placement_aimed`, and the claim told from the
+  search by URL (`/summon_messenger/request` vs `/get`). The wire format is unchanged. Gone with
+  them: bbport's own names (`OnDirectedPlacement`, `RelaySendPlacementTo`, `PlacementToType`) and
+  its reading of a `UserId` / `TargetUserId` sent as a string.
+- **The co-op kit, late** (2026-10-15) stays: 0.0.2 first looks in the game's own tables for 3
+  minutes; the search of every copy behind it keeps going after 3 minutes as before.
+- **Linux:**
+  - `emulator/mod/linux/bbsc_mod_linux.cpp`: version 0.0.2; the import slot reads and writes
+    0.0.2 calls `ReadSlotSafely` / `WriteSlotSafely` (through bbport's map of the game's memory);
+    the timeline's start lines; the timeline file goes next to the log
+    (`<user dir>/bbsc/logs/bbsc-timeline-*.txt`), and only the newest 5 are kept, as the logs.
+  - **Watch camera:** the F1 free camera stays out of the Linux build (every key, button and the
+    mouse also reach the game through bbport's pad, so flying it would move the hunter; L3+R3 is
+    bbport's menu). The watch camera of 0.0.2 only comes on by itself while our hunter is dead in
+    co-op, when those inputs do nothing in the game, so it is in: `bbsc_mod_linux.cpp` reads its
+    keys through SDL like the F8 key, on the game thread and only while it is on: Tab / E / left
+    click next hunter, Shift+Tab / Q previous, F fly freely and back; the controller's R1 / L1 and
+    sticks; arrow keys and W / S. F1 turns it off for the rest of that death. The mouse's movement
+    is not read (it is bbport's mouse look). Switches `SHADPS4_BBSC_CINEMATIC` and
+    `SHADPS4_BBSC_SPECTATE` as on Windows.
+  - `emulator/mod/bbsc_http.cpp`: 0.0.2's overrides file list (`HostOverridesFiles`) is Windows
+    only; on Linux the online module still applies the overrides, and the relay keeps its own list.
+  - `emulator/mod/bbsc_relay.cpp`: a send to a closed link fails instead of raising SIGPIPE
+    (`MSG_NOSIGNAL`), and the writer's 10 s send timeout is set as a `timeval`.
+  - `emulator/mod/linux/bbsc_win32.h`: `WSAGetLastError` and `SD_BOTH`, which the relay uses now.
+- **Translations:** the new texts ("An item was added to your items." and the watch camera's) in
+  every language. `bbsc_i18n.cpp` also translates a text with numbers through its `{n}` /
+  `{count}` form ("Watching hunter 1 of 2.").
+- **Not taken:**
+  - BBSC's Discord status (`bbsc_discord.cpp`): bbport has its own; the build and boss timer data
+    are gathered but not shown.
+  - the files of BBSC's own emulator build (`emulator/src/core/bbsc_relay_client.cpp`, the
+    emulator's network, signaling, pad and module files, `emulator/CMakeLists.txt`, the launcher's
+    `emulator_settings.h`) and the patch for BBport's Windows build (`bbport/`): bbport builds
+    none of them, and the game logic here does not need them.

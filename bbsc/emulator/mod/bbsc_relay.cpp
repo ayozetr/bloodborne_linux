@@ -24,6 +24,9 @@
 #endif
 
 #include <atomic>
+#include <condition_variable>
+#include <cstdlib>
+#include <deque>
 #include <cstring>
 #include <fstream>
 #include <mutex>
@@ -39,8 +42,9 @@
 namespace BbscMod {
 void LogPlain(const char* text);
 void OnHostPlacement(const std::string& placement, u32 sender);
-void OnDirectedPlacement(s64 target_user, const std::string& placement, u32 sender); // bbport
+void OnAimedHostPlacement(s64 target_user, const std::string& placement, u32 sender);
 bool IsPublicServerAddress(const std::string& url_or_host); // bbsc_http.cpp
+std::vector<std::wstring> HostOverridesFiles();              // bbsc_http.cpp
 u32 P2PChannelSend(const void* data, u32 size);             // bbsc_channel.cpp
 u32 P2PChannelPeerCount();
 }
@@ -49,10 +53,9 @@ namespace {
 
 constexpr u16 DefaultRelayPort = 20444;
 constexpr u8 FollowType = 0x20;
-constexpr u8 PlacementType = 0x30; // "SHAD" 0x30 + a host's placement text (bbsc_http.cpp)
-// bbport: "SHAD" 0x31 + "<target UserId>|<placement>": a host's placement for the one sign it
-// rings (BBSC's bbsc.dll of 2026-10-17; 0x30 broadcasts are ignored since, issue #17).
-constexpr u8 PlacementToType = 0x31;
+constexpr u8 PlacementType = 0x30; // "SHAD" 0x30 + a host's placement text (before the hotfix, ignored now)
+// "SHAD" 0x31 + "<target UserId>|<placement>": a host rang that sign (0.0.1 hotfix, bbsc_http.cpp)
+constexpr u8 AimedPlacementType = 0x31;
 constexpr u8 LifeType = 0x23;   // "SHAD" 0x23 + u32 player, u8 dead, u32 sequence
 constexpr u8 ScaleType = 0x24;  // "SHAD" 0x24 + 5 x u16 the host's scaling percentages
 constexpr u8 PvpType = 0x25;    // "SHAD" 0x25 + u8 kind (0 host state, 1 guest asks) + u8 on + u32
@@ -85,6 +88,17 @@ static_assert(sizeof(FollowPacket) == 0x22);
 std::mutex send_mutex;
 std::mutex dispatch_mutex; // the relay thread and the P2P channel's thread both deliver frames
 SOCKET relay = INVALID_SOCKET;
+// Frames wait here for the writer thread (2026-10-13): a public player's link dropped exactly 10 s
+// after every reconnect while hosting - the 1/s world flags filled the socket while the server
+// was stuck, and the game thread's 300 ms send timeout closed the link. Now the game thread only
+// queues; a full queue drops frames instead of the link. All under send_mutex.
+std::condition_variable send_cv;
+std::deque<std::vector<char>> send_queue;
+size_t send_queue_bytes = 0;
+constexpr size_t SendQueueLimit = 256 * 1024;
+SOCKET writing = INVALID_SOCKET; // the socket the writer is sending on right now
+u32 dropped_frames = 0;          // since this connection began
+std::string lost_reason;         // why the writer gave up on this connection
 std::atomic<int> peers{0};
 std::atomic<bool> started{false};
 u32 own_id = 0; // set once in StartRelay, never 0
@@ -92,6 +106,7 @@ std::atomic<bool> logged_old_sender{false};
 
 void Log(const std::string& text) {
     BbscMod::LogPlain(("Relay: " + text).c_str());
+    Core::Bloodborne::BbscTimelineEvent("RELAY", text); // status changes only, see the callers
 }
 
 #ifdef _WIN32
@@ -136,18 +151,7 @@ bool FindServer(std::string& host, u16& port) {
         return true;
     }
 #ifdef _WIN32
-    wchar_t exe[MAX_PATH]{};
-    GetModuleFileNameW(nullptr, exe, MAX_PATH);
-    std::wstring dir{exe};
-    dir = dir.substr(0, dir.find_last_of(L"\\/") + 1);
-    // The emulator's own rule: a "user" folder in the folder it was started in wins (portable).
-    wchar_t cwd[MAX_PATH]{};
-    GetCurrentDirectoryW(MAX_PATH, cwd);
-    std::vector<std::wstring> candidates{std::wstring(cwd) + L"\\user\\host_overrides.json",
-                                        dir + L"user\\host_overrides.json"};
-    if (const wchar_t* appdata = _wgetenv(L"APPDATA")) {
-        candidates.push_back(std::wstring(appdata) + L"\\shadPS4\\host_overrides.json");
-    }
+    for (const auto& path : BbscMod::HostOverridesFiles()) {
 #else
     // bbport: the overrides file run.sh hands the online module (SHADPS4_HTTP_HOST_OVERRIDES_JSON,
     // scripts/online.py), else the ones in the user folder.
@@ -157,8 +161,8 @@ bool FindServer(std::string& host, u16& port) {
     if (const char* given = std::getenv("SHADPS4_HTTP_HOST_OVERRIDES_JSON"); given && *given) {
         candidates.insert(candidates.begin(), given);
     }
-#endif
     for (const auto& path : candidates) {
+#endif
         host = HostFromOverrides(ReadFile(path));
         if (!host.empty()) {
             return true;
@@ -167,11 +171,14 @@ bool FindServer(std::string& host, u16& port) {
     return false;
 }
 
+int last_read_result = 0; // 0 = the server closed the link, < 0 = recv error (relay thread only)
+
 bool ReadAll(SOCKET s, void* data, int size) {
     auto* at = static_cast<char*>(data);
     while (size > 0) {
         const int got = recv(s, at, size, 0);
         if (got <= 0) {
+            last_read_result = got == 0 ? 0 : -WSAGetLastError();
             return false;
         }
         at += got;
@@ -208,19 +215,69 @@ u32 SendFrame(const void* data, u32 size) {
     if (relay == INVALID_SOCKET) {
         return BbscMod::P2PChannelSend(frame.data() + 4, wrapped);
     }
-    int left = static_cast<int>(frame.size());
-    const char* at = frame.data();
-    while (left > 0) {
-        const int sent = send(relay, at, left, 0);
-        if (sent <= 0) {
-            closesocket(relay);
-            relay = INVALID_SOCKET;
-            return BbscMod::P2PChannelSend(frame.data() + 4, wrapped);
+    if (send_queue_bytes + frame.size() > SendQueueLimit) {
+        if (dropped_frames++ == 0) {
+            Log("the server is not taking our frames (" + std::to_string(send_queue_bytes) +
+                " bytes waiting) - dropping new ones until it does");
         }
-        at += sent;
-        left -= sent;
+        return static_cast<u32>(peers.load());
     }
+    send_queue_bytes += frame.size();
+    send_queue.push_back(std::move(frame));
+    send_cv.notify_all();
     return static_cast<u32>(peers.load());
+}
+
+std::string SocketError(const char* what) {
+    return std::string(what) + " (WSA error " + std::to_string(WSAGetLastError()) + ")";
+}
+
+// Sends the queued frames, one socket at a time. A failed send shuts the socket down; the relay
+// thread sees that in recv and reconnects.
+DWORD WINAPI WriterThread(void*) {
+    for (;;) {
+        std::vector<char> frame;
+        SOCKET s = INVALID_SOCKET;
+        {
+            std::unique_lock lock{send_mutex};
+            send_cv.wait(lock, [] { return !send_queue.empty(); });
+            frame = std::move(send_queue.front());
+            send_queue.pop_front();
+            send_queue_bytes -= frame.size();
+            s = relay;
+            if (s == INVALID_SOCKET) {
+                continue;
+            }
+            writing = s;
+        }
+        std::string problem;
+        int left = static_cast<int>(frame.size());
+        const char* at = frame.data();
+        while (left > 0) {
+#ifdef _WIN32
+            const int sent = send(s, at, left, 0);
+#else
+            // bbport: a link the server closed fails the send instead of raising SIGPIPE, which
+            // would end the game's process.
+            const int sent = static_cast<int>(send(s, at, left, MSG_NOSIGNAL));
+#endif
+            if (sent <= 0) {
+                problem = SocketError("send failed");
+                break;
+            }
+            at += sent;
+            left -= sent;
+        }
+        std::scoped_lock lock{send_mutex};
+        writing = INVALID_SOCKET;
+        if (!problem.empty() && relay == s) {
+            if (lost_reason.empty()) {
+                lost_reason = problem;
+            }
+            shutdown(s, SD_BOTH);
+        }
+        send_cv.notify_all();
+    }
 }
 
 void Dispatch(const std::vector<u8>& wrapped) {
@@ -304,13 +361,12 @@ void Dispatch(const std::vector<u8>& wrapped) {
     } else if (frame[4] == PlacementType) {
         // A host looking for signs: for players not in a session yet, any host on the server.
         BbscMod::OnHostPlacement(std::string(frame.begin() + 5, frame.end()), sender);
-    } else if (frame[4] == PlacementToType) {
-        // bbport: the placement of the host that rang one sign: "<target UserId>|<placement>".
+    } else if (frame[4] == AimedPlacementType) {
         const std::string text(frame.begin() + 5, frame.end());
         const size_t bar = text.find('|');
         if (bar != std::string::npos && bar != 0) {
-            const s64 target = std::strtoll(text.substr(0, bar).c_str(), nullptr, 10);
-            BbscMod::OnDirectedPlacement(target, text.substr(bar + 1), sender);
+            BbscMod::OnAimedHostPlacement(std::atoll(text.substr(0, bar).c_str()),
+                                          text.substr(bar + 1), sender);
         }
     } else if (frame[4] == Libraries::Np::NpSignaling::kSignalingBbscWorldFlagsType) {
         if (from_our_host()) {
@@ -369,38 +425,68 @@ DWORD WINAPI RelayThread(void*) {
         }
         BOOL on = TRUE;
         setsockopt(s, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&on), sizeof(on));
-        // Frames are sent from the game thread (review 2026-10-08): a stalled server must not
-        // freeze the game in send() - after 300 ms the frame fails and the link is rebuilt.
-        const DWORD send_timeout_ms = 300;
+        setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<const char*>(&on), sizeof(on));
+        // Only the writer thread sends now (2026-10-13), so a slow server no longer stalls the
+        // game; a send stuck 10 s means the link is dead.
+#ifdef _WIN32
+        const DWORD send_timeout_ms = 10'000;
         setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&send_timeout_ms),
                    sizeof(send_timeout_ms));
+#else
+        const timeval send_timeout{10, 0}; // bbport: SO_SNDTIMEO takes a timeval here
+        setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &send_timeout, sizeof(send_timeout));
+#endif
         {
             std::scoped_lock lock{send_mutex};
             relay = s;
+            lost_reason.clear();
+            dropped_frames = 0;
         }
         last_problem.clear();
         Log("connected to " + host + ":" + std::to_string(port));
+        const u64 connected_at = GetTickCount64();
+        u64 frames_in = 0;
+        std::string reason;
         for (;;) {
             u32 size = 0;
-            if (!ReadAll(s, &size, 4) || size > 64 * 1024) {
+            if (!ReadAll(s, &size, 4)) {
+                break;
+            }
+            if (size > 64 * 1024) {
+                reason = "oversized frame from the server (" + std::to_string(size) + " bytes)";
                 break;
             }
             std::vector<u8> frame(size);
             if (size != 0 && !ReadAll(s, frame.data(), static_cast<int>(size))) {
                 break;
             }
+            ++frames_in;
             std::scoped_lock dispatch_lock{dispatch_mutex};
             Dispatch(frame);
         }
+        u32 dropped = 0;
         {
-            std::scoped_lock lock{send_mutex};
-            if (relay == s) {
-                closesocket(relay);
-                relay = INVALID_SOCKET;
+            std::unique_lock lock{send_mutex};
+            if (!lost_reason.empty()) {
+                reason = lost_reason; // the writer gave up first
             }
+            relay = INVALID_SOCKET;
+            shutdown(s, SD_BOTH); // wakes a writer still in send() on it
+            send_cv.wait(lock, [s] { return writing != s; });
+            closesocket(s);
+            send_queue.clear();
+            send_queue_bytes = 0;
+            dropped = dropped_frames;
+        }
+        if (reason.empty()) {
+            reason = last_read_result == 0
+                         ? std::string("the server closed the connection")
+                         : "read failed (WSA error " + std::to_string(-last_read_result) + ")";
         }
         peers = 0;
-        Log("connection lost - reconnecting");
+        Log("connection lost after " + std::to_string((GetTickCount64() - connected_at) / 1000) +
+            " s, " + std::to_string(frames_in) + " frames in, " + std::to_string(dropped) +
+            " dropped out: " + reason + " - reconnecting");
         Sleep(2'000);
     }
 }
@@ -433,20 +519,10 @@ void RelayDispatch(const std::vector<u8>& wrapped) {
     Dispatch(wrapped);
 }
 
-void RelaySendPlacement(const std::string& placement) {
+void RelaySendAimedPlacement(s64 target_user, const std::string& placement) {
     std::string frame = "SHAD";
-    frame.push_back(static_cast<char>(PlacementType));
-    frame += placement;
-    SendFrame(frame.data(), static_cast<u32>(frame.size()));
-}
-
-// bbport: a host's placement for the sign it rings only (the sign's owner, by its UserId).
-void RelaySendPlacementTo(s64 target_user, const std::string& placement) {
-    std::string frame = "SHAD";
-    frame.push_back(static_cast<char>(PlacementToType));
-    frame += std::to_string(target_user);
-    frame.push_back('|');
-    frame += placement;
+    frame.push_back(static_cast<char>(AimedPlacementType));
+    frame += std::to_string(target_user) + "|" + placement;
     SendFrame(frame.data(), static_cast<u32>(frame.size()));
 }
 
@@ -463,6 +539,9 @@ void StartRelay() {
 #endif
         own_id = static_cast<u32>((ticks ^ GetCurrentProcessId()) * 2654435761ull) | 1u;
         if (HANDLE thread = CreateThread(nullptr, 0, RelayThread, nullptr, 0, nullptr)) {
+            CloseHandle(thread);
+        }
+        if (HANDLE thread = CreateThread(nullptr, 0, WriterThread, nullptr, 0, nullptr)) {
             CloseHandle(thread);
         }
     }

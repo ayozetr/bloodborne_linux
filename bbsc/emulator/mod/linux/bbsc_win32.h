@@ -109,6 +109,11 @@ struct WSADATA {};
 inline int WSAStartup(unsigned short, WSADATA*) {
     return 0;
 }
+// BBSC 0.0.2's relay: the error of the last socket call, and shutdown's "both ways".
+inline int WSAGetLastError() {
+    return errno;
+}
+#define SD_BOTH SHUT_RDWR
 // shutdown first: a thread blocked in recv on the socket wakes up (close alone leaves it there).
 inline int closesocket(SOCKET s) {
     shutdown(s, SHUT_RDWR);

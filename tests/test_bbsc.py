@@ -20,7 +20,7 @@ INFO = {'settings': [
 class BbscTests(unittest.TestCase):
     def test_the_repository_mod_json(self):
         options = bbsc.options()
-        self.assertEqual(len(options), 30)
+        self.assertEqual(len(options), 31)
         self.assertNotIn('discord', [o['id'] for o in options])
         for option in options:
             self.assertIn(option['type'], ('bool', 'int', 'text'))
