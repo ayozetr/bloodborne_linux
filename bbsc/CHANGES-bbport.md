@@ -47,3 +47,18 @@ lines in BBSC's own files are marked `bbport:` in comments.
   - a guest takes only a placement sent to its own sign, and keeps it 90 s (20 s otherwise);
   - placements sent to the whole server (0x30) are ignored, as BBSC's newer builds do;
   - nothing is sent while polling for signs any more, so the "own sign out" check is gone.
+
+## 2026-10-21
+
+- **The guest locks onto the host that rang its sign** (BBSC 0.0.2, source published 2026-10-21,
+  `emulator/src/core/bloodborne_re.cpp`, BbscRangHost / TickBbscRelayHostLock). The 2026-10-19
+  placement is now the same as BBSC 0.0.2's on the wire, so Linux and Windows 0.0.2 players find
+  each other. Taken from 0.0.2 on top of it:
+  - a placement aimed at our sign notes its sender as the host that rang it (90 s);
+  - while joining or a guest, that host's packets are taken before the lock is made, so the join
+    load gets its world flags;
+  - the lock takes that host when it is on the relay; else the position lock is stricter (6 m
+    instead of 15, one host that close, 3 checks in a row), and "the only one hosting on the
+    server" is gone: it was a stranger whenever the real host was not on the relay;
+  - the hosts that rang are forgotten when the session ends.
+  BBSC 0.0.2's timeline log is not taken.

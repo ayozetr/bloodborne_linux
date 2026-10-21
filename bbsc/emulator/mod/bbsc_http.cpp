@@ -730,6 +730,9 @@ void OnDirectedPlacement(s64 target_user, const std::string& placement, u32 send
     if (state == 3 || state == 4 || state == 6) {
         return; // hosting, joining or already a guest
     }
+    // Our host by who it is: its world flags are taken before the join load, and the guest locks
+    // onto it among the other hosts on the server (bloodborne_re.cpp, BbscRangHost; BBSC 0.0.2).
+    Core::Bloodborne::NoteBbscHostRangOurSign(sender);
     if (Core::Bloodborne::SetSeamlessHostPlacementHeader(placement)) {
         placement_directed = true;
         placement_sender = sender;

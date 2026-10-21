@@ -41,6 +41,8 @@ void OnBbscProgressPacket(const std::uint32_t* flags, std::size_t count);
 void OnBbscHostBossPacket(std::int32_t boss);
 void NoteBbscRelayHost(std::uint32_t sender, std::uint32_t packed_map, float x, float y, float z);
 std::uint32_t GetBbscRelayHost();
+// BBSC 0.0.2: `sender` (a host) rang our sign - an aimed placement (relay "SHAD" 0x31) was for us.
+void NoteBbscHostRangOurSign(std::uint32_t sender);
 std::int32_t GetBbscRelaySessionState();
 void InstallSeamlessCoopPatches();
 void InstallReverseEngineeringTrace();

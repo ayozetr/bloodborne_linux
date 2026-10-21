@@ -4149,14 +4149,16 @@ u64 FindLivingPartnerCharacter() {
 // code took another host's position as "the host travelled" (a guest pulled to someone else's map
 // behind a black screen). Every frame now carries its sender and the sender's session (the host's
 // sender id; bbsc_relay.cpp), and a guest locks onto its own host's sender:
-//   - the only player on the server who is hosting, or
-//   - with several, the host whose follow packet puts it in our map within BbscRelayLockMetres of
-//     the host character in our world (FindRemoteHostCharacter).
+//   - the host that rang our sign (the aimed placement, bbsc_http.cpp; BBSC 0.0.2), or
+//   - for a host on a BBSC without it, the one host whose follow packet puts it in our map within
+//     BbscRelayLockMetres of the host character in our world (FindRemoteHostCharacter).
 // The lock is made here on the game tick (game memory is not read on the relay thread) and dropped
 // once we have not been a guest for BbscRelayUnlockMs.
 constexpr s64 BbscRelayHostFreshMs = 5'000;
 constexpr s64 BbscRelayUnlockMs = 5'000;
-constexpr float BbscRelayLockMetres = 15.0f;
+// 2026-10-19: 15 m -> 6 m and 3 checks in a row (see TickBbscRelayHostLock).
+constexpr float BbscRelayLockMetres = 6.0f;
+constexpr u32 BbscRelayLockChecks = 3;
 struct BbscRelayHostSeen {
     u32 map = 0;
     float x = 0.0f, y = 0.0f, z = 0.0f;
@@ -4170,23 +4172,37 @@ std::atomic<s32> bbsc_relay_session_state{-1}; // GetSessionState() as of the la
 // "World state when warping together"; a neighbour block's snapshot was used for up to 2 minutes).
 void ClearBbscHostWorldSnapshots();
 
-// The host whose packets a guest takes: the locked one, else the only one hosting, else 0.
+// The host that rang our sign (2026-10-18). With many hosts on a public server the position lock
+// below can only be made once our character stands in the host's world - after the join load, so
+// that load got no world flags from anyone (fruit_punch_samuai 2026-10-17, 9 hosting: "no host flags
+// for map 0x18010000" at the load, the opening cutscene played in Iosefka's clinic and the guest
+// fell off the map). The aimed placement (0.0.1 hotfix, bbsc_http.cpp) says which host rang our
+// sign; until the lock is made, that host's packets are taken - when only one host rang it lately.
+std::mutex bbsc_rang_mutex;
+std::map<u32, s64> bbsc_rang_hosts; // sender -> when it rang our sign
+constexpr s64 BbscRangHostFreshMs = 90'000;
+
+u32 BbscRangHost() {
+    std::scoped_lock lock{bbsc_rang_mutex};
+    const s64 now = SteadyNowMs();
+    std::erase_if(bbsc_rang_hosts,
+                  [now](const auto& entry) { return now - entry.second > BbscRangHostFreshMs; });
+    return bbsc_rang_hosts.size() == 1 ? bbsc_rang_hosts.begin()->first : 0;
+}
+
+// The host whose packets a guest takes: the locked one, else (while joining or a guest) the one
+// host that rang our sign, else 0.
+// 2026-10-19: no more "the only one hosting on the server" - when our host was not on the relay
+// (an emulator build before 2026-10-19), the only one hosting was a stranger, and its world flags,
+// scaling and PvP state were taken (test-logs\2026-10-19-boss-session, guest-kotori).
 u32 BbscRelayHostForPackets() {
     if (const u32 locked = bbsc_relay_locked_host.load(); locked != 0) {
         return locked;
     }
-    std::scoped_lock lock{bbsc_relay_mutex};
-    const s64 now = SteadyNowMs();
-    u32 only = 0;
-    for (const auto& [sender, seen] : bbsc_relay_hosts) {
-        if (now - seen.ms <= BbscRelayHostFreshMs) {
-            if (only != 0) {
-                return 0; // more than one host on the server: wait for the position lock
-            }
-            only = sender;
-        }
+    if (const s32 state = bbsc_relay_session_state.load(); state == 4 || state == 6) {
+        return BbscRangHost();
     }
-    return only;
+    return 0;
 }
 
 void TickBbscRelayHostLock() {
@@ -4207,6 +4223,10 @@ void TickBbscRelayHostLock() {
         if (locked != 0 && now - not_guest_since_ms >= BbscRelayUnlockMs) {
             bbsc_relay_locked_host = 0;
             ClearBbscHostWorldSnapshots();
+            {
+                std::scoped_lock lock{bbsc_rang_mutex};
+                bbsc_rang_hosts.clear(); // the next session's host rings anew
+            }
             LOG_INFO(Debug, "BBSC relay: no longer a guest (session state {}) - host {:08x} let go",
                      state, locked);
         }
@@ -4228,35 +4248,72 @@ void TickBbscRelayHostLock() {
     if (hosts.empty()) {
         return;
     }
-    if (hosts.size() == 1) {
-        bbsc_relay_locked_host = hosts[0].first;
-        LOG_INFO(Debug, "BBSC relay: our host is player {:08x} (the only one hosting)",
-                 hosts[0].first);
+    // 2026-10-19: the host that rang our sign is our host - by who it is, not where it stands. Kotori
+    // (BBport + the mod) took a stranger 14.5 m away as his host while his real host (an emulator
+    // build) was not on the relay at all: 10 hosting, "the host that rang our sign: none known".
+    const u32 rang = BbscRangHost();
+    if (rang != 0 &&
+        std::ranges::any_of(hosts, [rang](const auto& entry) { return entry.first == rang; })) {
+        bbsc_relay_locked_host = rang;
+        LOG_INFO(Debug, "BBSC relay: our host is player {:08x} (it rang our sign; {} hosting on the "
+                        "server)",
+                 rang, hosts.size());
         return;
     }
+    // Else by position, for hosts on a BBSC without the aimed placement - and only a clear match:
+    // one host within BbscRelayLockMetres of the host character in our world, nobody else that
+    // close, the same one on BbscRelayLockChecks checks in a row. Lamps put every player on the
+    // same spot, so two hosts there wait until one walks away.
+    static u32 candidate = 0;
+    static u32 candidate_checks = 0;
     const auto host = ReadCharacterTransform(FindRemoteHostCharacter());
     const u32 map = GetCurrentPackedMap();
     if (!host.has_value() || map == 0) {
+        candidate = 0;
         return;
     }
     u32 best = 0;
+    u32 close = 0;
     float best_d2 = BbscRelayLockMetres * BbscRelayLockMetres;
     for (const auto& [sender, seen] : hosts) {
         const float dx = seen.x - host->position[0];
         const float dy = seen.y - host->position[1];
         const float dz = seen.z - host->position[2];
         const float d2 = dx * dx + dy * dy + dz * dz;
-        if (seen.map == map && d2 < best_d2) {
-            best = sender;
-            best_d2 = d2;
+        if (seen.map == map && d2 < BbscRelayLockMetres * BbscRelayLockMetres) {
+            ++close;
+            if (d2 < best_d2) {
+                best = sender;
+                best_d2 = d2;
+            }
         }
     }
-    if (best != 0) {
-        bbsc_relay_locked_host = best;
-        LOG_INFO(Debug, "BBSC relay: our host is player {:08x} ({} hosting on the server, it stands "
-                        "{:.1f} m from the host in our world)",
-                 best, hosts.size(), std::sqrt(best_d2));
+    if (best == 0 || close != 1) {
+        static s64 logged_ms = 0;
+        if (close > 1 && now - logged_ms > 30'000) {
+            logged_ms = now;
+            LOG_INFO(Debug, "BBSC relay: {} hosts stand where our host stands - no host chosen yet",
+                     close);
+        }
+        candidate = 0;
+        return;
     }
+    if (best != candidate) {
+        candidate = best;
+        candidate_checks = 0;
+    }
+    if (++candidate_checks < BbscRelayLockChecks) {
+        return;
+    }
+    candidate = 0;
+    bbsc_relay_locked_host = best;
+    if (rang != 0 && rang != best) {
+        ClearBbscHostWorldSnapshots(); // taken from the host that rang our sign - not ours
+    }
+    LOG_INFO(Debug, "BBSC relay: our host is player {:08x} ({} hosting on the server, it stands "
+                    "{:.1f} m from the host in our world; the host that rang our sign: {})",
+             best, hosts.size(), std::sqrt(best_d2),
+             rang == 0 ? std::string("none known") : fmt::format("{:08x}", rang));
 }
 
 // Guest joins: teleport next to the host once, so a guest summoned from elsewhere starts beside
@@ -14424,6 +14481,11 @@ void NoteBbscRelayHost(std::uint32_t sender, std::uint32_t packed_map, float x, 
 
 std::uint32_t GetBbscRelayHost() {
     return BbscRelayHostForPackets();
+}
+
+void NoteBbscHostRangOurSign(std::uint32_t sender) {
+    std::scoped_lock lock{bbsc_rang_mutex};
+    bbsc_rang_hosts[sender] = SteadyNowMs();
 }
 
 std::int32_t GetBbscRelaySessionState() {
