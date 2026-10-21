@@ -279,6 +279,10 @@ DEFAULTS = {
     "atlas": False,
     "atlas_travel": True,
     "atlas_items": True,
+    # A copy of the saves before each game (Setup → Saves, save_import.auto_backup): off by
+    # default; how many copies stay.
+    "saves_auto_backup": False,
+    "saves_auto_backup_keep": 5,
 }
 
 # bbport.ini keys the launcher edits; the rest of the file is kept.
@@ -1014,8 +1018,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         if hasattr(self, "stack"):
             where = (self.stack.get_visible_child_name(), self.multiplayer_stack.get_visible_child_name()
                      if hasattr(self, "multiplayer_stack") else None, self.split.get_show_content())
-        else:
-            where = ("graphics", None, False)
+        else:  # the first start, or the game's folder still to be chosen: Setup
+            where = ("graphics" if self.game_found() else "setup", None, False)
         self.split = Adw.NavigationSplitView(min_sidebar_width=210, max_sidebar_width=260,
                                              sidebar_width_fraction=0.26)
         self.stack = Adw.ViewStack()
@@ -1027,6 +1031,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_button.connect("clicked", self.on_launch)
         header.pack_end(self.launch_button)
         content.add_top_bar(header)
+        # Without the game Play stays grey: the banner says why, on every page (update_game_status).
+        self.game_banner = Adw.Banner(button_label=tr("Начальная настройка"))
+        self.game_banner.connect("button-clicked", lambda _banner: self.show_section("setup"))
+        content.add_top_bar(self.game_banner)
         self.toasts = Adw.ToastOverlay()
         self.toasts.set_child(self.stack)
         content.set_content(self.toasts)
@@ -1216,8 +1224,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         # .zip and imported back (scripts/save_import.py).
         saves = Adw.PreferencesGroup(title=tr("Сохранения"))
         self.user_row = Adw.ActionRow(title=tr("Папка сохранений"))
-        _open, self.user_reset = folder_actions(self.user_row, self.on_choose_user, [
+        _open, _backups, self.user_reset = folder_actions(self.user_row, self.on_choose_user, [
             (tr("Открыть в файловом менеджере"), lambda _b: open_folder(self, self.user_dir())),
+            (tr("Открыть резервные копии"), lambda _b: open_folder(self, self.user_dir() / "savedata-backups")),
             (tr("Вернуть папку по умолчанию"), self.on_reset_user)])
         saves.add(self.user_row)
         export = Adw.ActionRow(title=tr("Экспортировать сохранения"),
@@ -1243,6 +1252,20 @@ class LauncherWindow(Adw.ApplicationWindow):
         imports.add_suffix(Gtk.MenuButton(label=tr("Импортировать"), menu_model=menu,
                                           valign=Gtk.Align.CENTER))
         saves.add(imports)
+        self.auto_backup_row = Adw.SwitchRow(
+            title=tr("Автоматические копии"),
+            subtitle=tr("Копия сохранений перед каждым запуском игры, в savedata-backups. "
+                        "Восстанавливается через «Импортировать» → «Из папки…»"),
+            active=self.settings["saves_auto_backup"])
+        saves.add(self.auto_backup_row)
+        self.auto_backup_keep_row = Adw.SpinRow.new_with_range(1, 50, 1)
+        self.auto_backup_keep_row.set_title(tr("Сколько копий хранить"))
+        self.auto_backup_keep_row.set_subtitle(tr("Самые старые удаляются"))
+        self.auto_backup_keep_row.set_value(number(self.settings["saves_auto_backup_keep"], 5, int,
+                                                   "settings.json", "saves_auto_backup_keep"))
+        self.auto_backup_row.bind_property("active", self.auto_backup_keep_row, "sensitive",
+                                           GObject.BindingFlags.SYNC_CREATE)
+        saves.add(self.auto_backup_keep_row)
         self.place("setup", 30, saves)
 
         # Auto: the new memory model on AMD, the 0.3 one elsewhere; or either by hand.
@@ -1976,6 +1999,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.game_row.set_subtitle(f"{path}\n{tooltip}")
         else:
             tooltip = tr("Bloodborne {}, версия 1.09").format(title_id or "")
+        self.game_banner.set_title(tr("Чтобы играть, выберите папку игры") if not self.settings["game_dir"]
+                                   else tr("В папке игры нет eboot.bin: выберите другую"))
+        self.game_banner.set_revealed(not ok)
         self.game_status.set_from_icon_name("object-select-symbolic" if ok and not problem else "dialog-warning-symbolic")
         self.game_status.set_tooltip_text(tooltip)
         self.update_launch_sensitivity()
@@ -2188,6 +2214,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["coop_layout"] = combo_value(self.coop_layout_row)
         s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
         s["coop_sound_first_only"] = self.coop_sound_row.get_active()
+        s["saves_auto_backup"] = self.auto_backup_row.get_active()
+        s["saves_auto_backup_keep"] = int(self.auto_backup_keep_row.get_value())
         self.save_mod_profile()
         self.save_patch_profile()
         save_settings(s)
@@ -3608,10 +3636,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         # To the end once per burst of lines, not once per line.
         if not getattr(self, "log_scroll_queued", False):
             self.log_scroll_queued = True
-            adj = self.log_scroller.get_vadjustment()
 
             def scroll():
+                # The Journal of now: a rebuild (another language) before the idle replaces it.
                 self.log_scroll_queued = False
+                adj = self.log_scroller.get_vadjustment()
                 adj.set_value(adj.get_upper())
                 return False
             GLib.idle_add(scroll)
@@ -3807,6 +3836,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             return
         self.store()
         self.clear_log()
+        self.backup_saves()
         launcher = Gio.SubprocessLauncher.new(
             Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE)
         launcher.set_environ([f"{k}={v}" for k, v in (env or self.environment()).items()])
@@ -3823,6 +3853,20 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.process.wait_async(None, self.on_exit)
         self.update_launch_button()
         self.show_section("log")
+
+    def backup_saves(self):
+        """The automatic copy of the saves (Setup → Saves) before the game opens them; a failed
+        copy is told, and the game starts anyway."""
+        if not self.settings["saves_auto_backup"]:
+            return
+        try:
+            copy = save_import.auto_backup(self.user_dir(), self.settings["saves_auto_backup_keep"],
+                                           self.settings["game_dir"] or None)
+        except (OSError, save_import.SaveImportError) as error:
+            self.toasts.add_toast(Adw.Toast(title=tr("Не удалось сделать копию сохранений: {}").format(error)))
+            return
+        if copy:
+            self.append_log(f"Launcher: saves backed up in {copy}\n")
 
     def read_line(self):
         self.stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.on_line)

@@ -157,6 +157,33 @@ class SaveImportTests(unittest.TestCase):
         into = save_import.unpack_export(archive, self.root / 'unpacked')
         self.assertTrue(save_import.is_save_folder(into))
 
+    def test_automatic_backups_keep_the_newest_and_skip_unchanged_saves(self):
+        self.assertIsNone(save_import.auto_backup(self.user, 2, self.game))  # no saves yet
+        saves = save_folder(self.user / 'savedata/1/CUSA00207/SPRJ0005', b'v1')
+        backups = self.user / 'savedata-backups'
+        import_backup = backups / '2026-01-01_000000'  # an import's copy is never pruned
+        import_backup.mkdir(parents=True)
+        made = []
+        for minute in range(4):
+            if minute:
+                (saves / 'userdata0000').write_bytes(b'v%d' % (minute + 1))
+            made.append(save_import.auto_backup(self.user, 2, self.game,
+                                                now=datetime(2026, 10, 21, 12, minute)))
+            # Nothing changed since: no second copy.
+            self.assertIsNone(save_import.auto_backup(self.user, 2, self.game,
+                                                      now=datetime(2026, 10, 21, 12, minute, 30)))
+        self.assertEqual(sorted(p.name for p in backups.iterdir()),
+                         ['2026-01-01_000000', 'auto-2026-10-21_120200', 'auto-2026-10-21_120300'])
+        newest = made[-1] / 'CUSA00207/SPRJ0005'
+        self.assertEqual((newest / 'userdata0000').read_bytes(), b'v4')
+        self.assertEqual(save_import.save_files(newest), [newest / name for name in
+                         ('backup0000', 'userdata0000', 'userdata0001', 'userdata0010')])
+        # Restored as any other folder: found under the copy, imported back.
+        (saves / 'userdata0000').write_bytes(b'broken')
+        self.assertEqual([f for f, _ in save_import.find(made[-1])], [newest])
+        save_import.import_saves(newest, self.user, self.game)
+        self.assertEqual((saves / 'userdata0000').read_bytes(), b'v4')
+
 
 if __name__ == '__main__':
     unittest.main()

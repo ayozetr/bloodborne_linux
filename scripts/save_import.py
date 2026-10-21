@@ -40,6 +40,8 @@ SYSTEM_FILE = 'userdata0010'
 MAX_SAVE_FILE = 64 << 20
 # Folders that hold no saves: game files (thousands of folders in a dump) and our own backups.
 SKIPPED = {'dvdroot_ps4', 'sce_sys', 'savedata-backups', 'shader_cache', 'mods'}
+# The launcher's automatic copies in savedata-backups (auto_backup); the others are imports'.
+AUTO_PREFIX = 'auto-'
 
 
 class SaveImportError(Exception):
@@ -194,6 +196,40 @@ def export_saves(user_dir, archive, game_dir=None):
         temp.unlink(missing_ok=True)
         raise
     return len(save_files(folder))
+
+
+def auto_backup(user_dir, keep, game_dir=None, now=None):
+    """The launcher's automatic copy before a game: the saves in use go to
+    USER_DIR/savedata-backups/auto-<date>/<id>/SPRJ0005 (imported back like any folder) and only
+    the `keep` newest automatic copies stay. Saves unchanged since the newest copy are not copied
+    again, so starting the game a few times without playing keeps the older copies. Returns the
+    new copy's folder, or None (no saves, or nothing changed)."""
+    folder = saves_in_use(user_dir, game_dir)
+    if folder is None:
+        return None
+    backups = Path(user_dir).expanduser() / 'savedata-backups'
+    copies = sorted(p for p in backups.glob(AUTO_PREFIX + '*') if p.is_dir())
+
+    def state(files):
+        return [(p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in files]
+    if copies and state(save_files(copies[-1] / folder.parent.name / SAVE_DIR)) == state(save_files(folder)):
+        return None
+    copy = backups / (AUTO_PREFIX + (now or datetime.now()).strftime('%Y-%m-%d_%H%M%S'))
+    staging = copy.with_name('.' + copy.name + '.part')
+    shutil.rmtree(staging, ignore_errors=True)
+    target = staging / folder.parent.name / SAVE_DIR
+    target.mkdir(parents=True)
+    try:
+        for path in save_files(folder):
+            shutil.copy2(path, target / path.name)
+        staging.rename(copy)
+    except OSError:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+    copies.append(copy)
+    for old in copies[:-max(1, keep)]:
+        shutil.rmtree(old, ignore_errors=True)
+    return copy
 
 
 def unpack_export(archive, into):
