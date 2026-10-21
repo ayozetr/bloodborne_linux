@@ -118,6 +118,24 @@ EN = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "The players' windows are placed through X11, and there is no X server: turn on XWayland in your session's settings or use an X11 session",
     'Звук только у игрока 1': 'Sound only for player 1',
+    'Скопировать сохранения игрока 1':
+        "Copy player 1's saves",
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        "Their characters for another player; that player's saves are first copied to their savedata-backups",
+    'Игроку {}':
+        'To player {}',
+    'Скопировать':
+        'Copy',
+    'У игрока 1 пока нет сохранений':
+        'Player 1 has no saves yet',
+    'Не удалось скопировать: {}':
+        "Couldn't copy: {}",
+    'Сохранения игрока 1 скопированы игроку {}':
+        "Player 1's saves copied to player {}",
+    '; его прежние в {}':
+        '; their previous ones are in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        "Player {}'s saves will be replaced with player 1's (theirs are first copied to savedata-backups)",
     'Как у игры (Графика → Монитор)': 'As the game (Graphics → Monitor)',
     'Играть вместе': 'Play together',
     'Игрок {}': 'Player {}',
@@ -995,6 +1013,24 @@ PT_BR = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'As janelas dos jogadores são posicionadas via X11 e não há servidor X: ative o XWayland nas configurações da sessão ou use uma sessão X11',
     'Звук только у игрока 1': 'Som só para o jogador 1',
+    'Скопировать сохранения игрока 1':
+        'Copiar os saves do jogador 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Os personagens dele para outro jogador; os saves desse jogador são copiados antes para o savedata-backups dele',
+    'Игроку {}':
+        'Para o jogador {}',
+    'Скопировать':
+        'Copiar',
+    'У игрока 1 пока нет сохранений':
+        'O jogador 1 ainda não tem saves',
+    'Не удалось скопировать: {}':
+        'Não foi possível copiar: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Saves do jogador 1 copiados para o jogador {}',
+    '; его прежние в {}':
+        '; os anteriores dele estão em {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Os saves do jogador {} serão substituídos pelos do jogador 1 (os dele são copiados antes para o savedata-backups)',
     'Как у игры (Графика → Монитор)': 'Como o jogo (Gráficos → Monitor)',
     'Играть вместе': 'Jogar juntos',
     'Игрок {}': 'Jogador {}',
@@ -1931,6 +1967,24 @@ ES = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'Las ventanas de los jugadores se colocan mediante X11 y no hay servidor X: activa XWayland en los ajustes de la sesión o usa una sesión X11',
     'Звук только у игрока 1': 'Sonido solo para el jugador 1',
+    'Скопировать сохранения игрока 1':
+        'Copiar las partidas del jugador 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Sus personajes para otro jugador; las partidas de ese jugador se copian antes en su savedata-backups',
+    'Игроку {}':
+        'Al jugador {}',
+    'Скопировать':
+        'Copiar',
+    'У игрока 1 пока нет сохранений':
+        'El jugador 1 aún no tiene partidas',
+    'Не удалось скопировать: {}':
+        'No se pudo copiar: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Partidas del jugador 1 copiadas al jugador {}',
+    '; его прежние в {}':
+        '; las anteriores están en {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Las partidas del jugador {} se sustituirán por las del jugador 1 (las suyas se copian antes en savedata-backups)',
     'Как у игры (Графика → Монитор)': 'Como el juego (Gráficos → Monitor)',
     'Играть вместе': 'Jugar juntos',
     'Игрок {}': 'Jugador {}',
@@ -2780,6 +2834,24 @@ IT = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "Le finestre dei giocatori vengono posizionate tramite X11 e non c'è un server X: attiva XWayland nelle impostazioni della sessione o usa una sessione X11",
     'Звук только у игрока 1': 'Audio solo per il giocatore 1',
+    'Скопировать сохранения игрока 1':
+        'Copia i salvataggi del giocatore 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'I suoi personaggi a un altro giocatore; i salvataggi di quel giocatore vengono prima copiati nel suo savedata-backups',
+    'Игроку {}':
+        'Al giocatore {}',
+    'Скопировать':
+        'Copia',
+    'У игрока 1 пока нет сохранений':
+        'Il giocatore 1 non ha ancora salvataggi',
+    'Не удалось скопировать: {}':
+        'Impossibile copiare: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Salvataggi del giocatore 1 copiati al giocatore {}',
+    '; его прежние в {}':
+        '; i precedenti sono in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'I salvataggi del giocatore {} saranno sostituiti da quelli del giocatore 1 (i suoi vengono prima copiati in savedata-backups)',
     'Как у игры (Графика → Монитор)': 'Come il gioco (Grafica → Monitor)',
     'Играть вместе': 'Gioca insieme',
     'Игрок {}': 'Giocatore {}',
@@ -3629,6 +3701,24 @@ FR = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "Les fenêtres des joueurs sont placées via X11 et il n'y a pas de serveur X : activez XWayland dans les réglages de la session ou utilisez une session X11",
     'Звук только у игрока 1': 'Son uniquement pour le joueur 1',
+    'Скопировать сохранения игрока 1':
+        'Copier les sauvegardes du joueur 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        "Ses personnages pour un autre joueur ; les sauvegardes de ce joueur sont d'abord copiées dans son savedata-backups",
+    'Игроку {}':
+        'Au joueur {}',
+    'Скопировать':
+        'Copier',
+    'У игрока 1 пока нет сохранений':
+        "Le joueur 1 n'a pas encore de sauvegardes",
+    'Не удалось скопировать: {}':
+        'Impossible de copier : {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Sauvegardes du joueur 1 copiées au joueur {}',
+    '; его прежние в {}':
+        ' ; les précédentes sont dans {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        "Les sauvegardes du joueur {} seront remplacées par celles du joueur 1 (les siennes sont d'abord copiées dans savedata-backups)",
     'Как у игры (Графика → Монитор)': 'Comme le jeu (Graphismes → Écran)',
     'Играть вместе': 'Jouer ensemble',
     'Игрок {}': 'Joueur {}',
@@ -4478,6 +4568,24 @@ DE = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'Die Fenster der Spieler werden über X11 platziert, und es gibt keinen X-Server: aktiviere XWayland in den Sitzungseinstellungen oder nutze eine X11-Sitzung',
     'Звук только у игрока 1': 'Ton nur für Spieler 1',
+    'Скопировать сохранения игрока 1':
+        'Spielstände von Spieler 1 kopieren',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Seine Charaktere für einen anderen Spieler; dessen Spielstände werden vorher in seine savedata-backups kopiert',
+    'Игроку {}':
+        'Zu Spieler {}',
+    'Скопировать':
+        'Kopieren',
+    'У игрока 1 пока нет сохранений':
+        'Spieler 1 hat noch keine Spielstände',
+    'Не удалось скопировать: {}':
+        'Kopieren fehlgeschlagen: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Spielstände von Spieler 1 zu Spieler {} kopiert',
+    '; его прежние в {}':
+        '; die vorherigen liegen in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Die Spielstände von Spieler {} werden durch die von Spieler 1 ersetzt (seine werden vorher in savedata-backups kopiert)',
     'Как у игры (Графика → Монитор)': 'Wie das Spiel (Grafik → Monitor)',
     'Играть вместе': 'Zusammen spielen',
     'Игрок {}': 'Spieler {}',
@@ -5352,6 +5460,24 @@ ZH_CN = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         '玩家窗口通过 X11 摆放，但没有 X 服务器：请在会话设置中启用 XWayland，或使用 X11 会话',
     'Звук только у игрока 1': '仅玩家 1 有声音',
+    'Скопировать сохранения игрока 1':
+        '复制玩家 1 的存档',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        '把其角色给另一位玩家；该玩家的存档会先复制到其 savedata-backups',
+    'Игроку {}':
+        '给玩家 {}',
+    'Скопировать':
+        '复制',
+    'У игрока 1 пока нет сохранений':
+        '玩家 1 还没有存档',
+    'Не удалось скопировать: {}':
+        '无法复制：{}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        '已将玩家 1 的存档复制给玩家 {}',
+    '; его прежние в {}':
+        '；其原有存档在 {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        '玩家 {} 的存档将被玩家 1 的存档替换（其原有存档会先复制到 savedata-backups）',
     'Как у игры (Графика → Монитор)': '与游戏相同（图形 → 显示器）',
     'Играть вместе': '一起游戏',
     'Игрок {}': '玩家 {}',

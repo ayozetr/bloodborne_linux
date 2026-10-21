@@ -3732,6 +3732,23 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fill_coop_controllers()
         page.add(pads)
 
+        # Player 1's saves for another player (each has its own): the same character to play with.
+        saves = Adw.PreferencesGroup()
+        copy = Adw.ActionRow(title=tr("Скопировать сохранения игрока 1"),
+                             subtitle=tr("Его персонажи другому игроку; сохранения того игрока сначала "
+                                         "копируются в его savedata-backups"))
+        menu = Gio.Menu()
+        actions = Gio.SimpleActionGroup()
+        for player in range(2, bbport_coop.MAX_PLAYERS + 1):
+            menu.append(tr("Игроку {}").format(player), f"coopsaves.player{player}")
+            action = Gio.SimpleAction(name=f"player{player}")
+            action.connect("activate", lambda _a, _p, player=player: self.on_coop_copy_saves(player))
+            actions.add_action(action)
+        copy.insert_action_group("coopsaves", actions)
+        copy.add_suffix(Gtk.MenuButton(label=tr("Скопировать"), menu_model=menu, valign=Gtk.Align.CENTER))
+        saves.add(copy)
+        page.add(saves)
+
         start = Adw.PreferencesGroup()
         self.coop_button = Gtk.Button(label=tr("Играть вместе"), halign=Gtk.Align.CENTER,
                                       css_classes=["suggested-action", "pill"])
@@ -3740,6 +3757,33 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(start)
         self.show_coop_players()
         return page
+
+    def on_coop_copy_saves(self, player):
+        """Player 1's saves (the launcher's) as player `player`'s, after a backup of theirs
+        (save_import.import_saves), with no game running."""
+        title = tr("Скопировать сохранения игрока 1")
+        if self.process is not None or self.coop_processes or save_import.game_running():
+            self.alert(title, tr("Сначала закройте игру"))
+            return
+        game = self.settings["game_dir"] or None
+        source = save_import.saves_in_use(self.user_dir(), game)
+        if source is None:
+            self.alert(title, tr("У игрока 1 пока нет сохранений"))
+            return
+        target = bbport_coop.data_dir(DATA_DIR, player) / "user"
+
+        def copy():
+            try:
+                _saves, backup = save_import.import_saves(source, target, game)
+            except (OSError, save_import.SaveImportError) as error:
+                self.alert(title, tr("Не удалось скопировать: {}").format(error))
+                return
+            done = tr("Сохранения игрока 1 скопированы игроку {}").format(player)
+            self.toasts.add_toast(Adw.Toast(title=done + (tr("; его прежние в {}").format(backup)
+                                                          if backup else "")))
+        self.confirm(title, tr("Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние "
+                               "сначала копируются в savedata-backups)").format(player),
+                     tr("Скопировать"), copy)
 
     def fill_coop_display(self):
         self.fill_displays(self.coop_display_row, "coop_display", tr("Как у игры (Графика → Монитор)"))
