@@ -281,6 +281,8 @@ DEFAULTS = {
     "atlas_items": True,
     # A copy of the saves before each game (Setup → Saves, save_import.auto_backup): off by
     # default; how many copies stay.
+    # Play with an account set and "Play online" off asks which (on_launch), unless told not to.
+    "ask_online_off": True,
     "saves_auto_backup": False,
     "saves_auto_backup_keep": 5,
 }
@@ -2496,6 +2498,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         play.add(self.online_row)
         if online_module():
             self.online_row.connect("notify::active", lambda *_: self.show_online_switch())
+            self.online_row.connect("notify::active", lambda row, _p: row.get_active()
+                                    and self.settings.update(ask_online_off=True))
             self.show_online_switch()
         else:
             self.online_row.set_sensitive(False)
@@ -2504,8 +2508,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.test_group = Adw.PreferencesGroup(title=tr("Проверка соединения"), visible=False)
         self.test_rows = []
         page.add(self.test_group)
-        if self.netchoice_group is not None:
-            page.add(self.netchoice_group)
 
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
         self.community_row = Adw.EntryRow(title=tr("Игровой сервер"), text=s["online_community"])
@@ -2517,7 +2519,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             active=s["online_seamlesshunt_tombs"])
         game.add(self.tombs_row)
         self.game_group = game
-        page.add(game)
 
         coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
         kinds = SERVER_KINDS + ([THD_KIND] if bridge_cli() else [])
@@ -2536,12 +2537,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         for row in (self.server_row, self.webapi_row, guide):
             coop.add(row)
         self.own_server_rows = (self.server_row, self.webapi_row, guide)
-        page.add(coop)
 
         # Seamless co-op: BBSC (bbsc/, CLS_AMG) in the game, on any server; its options are
         # mod.json's (scripts/bbsc.py), kept only where the player changed them.
         self.bbsc_row = None
         self.bbsc_option_rows = {}
+        seamless = None
         if bbsc_library() and bbsc.options():
             seamless = Adw.PreferencesGroup(
                 title=tr("Бесшовный кооператив (BBSC)"),
@@ -2572,7 +2573,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             seamless.add(options)
             self.bbsc_row.bind_property("active", options, "sensitive",
                                         GObject.BindingFlags.SYNC_CREATE)
-            page.add(seamless)
 
         # The Hunter's Dream: a Discord sign-in through bbbridge; its account is the online ID.
         self.thd_group = Adw.PreferencesGroup(
@@ -2602,7 +2602,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.thd_recover_button.connect("clicked", lambda _b: self.bridge_account("recover"))
         self.thd_code_row.add_suffix(self.thd_recover_button)
         self.thd_group.add(self.thd_code_row)
-        page.add(self.thd_group)
 
         account = Adw.PreferencesGroup(
             title=tr("Учётная запись"),
@@ -2626,7 +2625,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         account.add(self.register_row)
         self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
         self.account_group = account
-        page.add(account)
 
         connection = Adw.PreferencesGroup(
             title=tr("Соединение"),
@@ -2656,7 +2654,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.p2p_port_row.connect("notify::value", lambda *_: self.show_firewall_rows())
         self.show_firewall_rows()
         self.connection_group = connection
-        page.add(connection)
+        # In the order they are needed: which server, its address, the account on it, seamless
+        # co-op, then the connection's details and the title's choice screen.
+        for group in (coop, game, self.thd_group, account, seamless, connection, self.netchoice_group):
+            if group is not None:
+                page.add(group)
         self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
         self.show_server_kind()
         self.last_login = getattr(self, "last_login", None)
@@ -3808,9 +3810,13 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.stop_game()
             return
         npid = self.npid_row.get_text().strip()
-        if online_module() and not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog"):
+        if online_module() and not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog") \
+                and self.settings.get("ask_online_off", True):
             dialog = Adw.AlertDialog(heading="Bloodborne", body=tr(
                 "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено"))
+            # Someone who plays offline on purpose: asked again once "Play online" is turned on.
+            again = Gtk.CheckButton(label=tr("Больше не спрашивать"), halign=Gtk.Align.CENTER)
+            dialog.set_extra_child(again)
             dialog.add_response("cancel", tr("Отмена"))
             dialog.add_response("offline", tr("Играть офлайн"))
             dialog.add_response("online", tr("Играть онлайн"))
@@ -3818,6 +3824,8 @@ class LauncherWindow(Adw.ApplicationWindow):
 
             def on_response(_dialog, response):
                 if response != "cancel":
+                    if again.get_active():
+                        self.settings["ask_online_off"] = False
                     self.online_row.set_active(response == "online")
                     self.with_gamepads(self.start_game)
             dialog.connect("response", on_response)

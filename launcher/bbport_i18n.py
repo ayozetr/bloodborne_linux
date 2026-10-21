@@ -424,6 +424,7 @@ EN = {
     'У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре': 'Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together',
     'Учётная запись': 'Account',
     'Учётная запись для игры онлайн указана, но «Играть онлайн» выключено': 'An online account is filled in, but “Play online” is off',
+    'Больше не спрашивать': "Don't ask again",
     'доступен': 'reachable',
     'недоступен': 'not reachable',
     "DLSS: библиотека NVIDIA": "DLSS: NVIDIA's library",
@@ -1341,6 +1342,7 @@ PT_BR = {
     "доступен": "acessível",
     "недоступен": "inacessível",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Há uma conta online preenchida, mas “Jogar online” está desligado",
+    'Больше не спрашивать': 'Não perguntar de novo',
     "Играть офлайн": "Jogar offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "O Online ID é o nome da conta (NPID) registrado no servidor, não o seu e-mail",
     # DLSS
@@ -2260,6 +2262,7 @@ ES = {
     "доступен": "accesible",
     "недоступен": "no accesible",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Hay una cuenta online puesta, pero «Jugar online» está desactivado",
+    'Больше не спрашивать': 'No volver a preguntar',
     "Играть офлайн": "Jugar sin conexión",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "El Online ID es el nombre de cuenta (NPID) que registraste en el servidor, no tu correo",
     # DLSS
@@ -3099,6 +3102,7 @@ IT = {
     "доступен": "raggiungibile",
     "недоступен": "non raggiungibile",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "È impostato un account online, ma “Gioca online” è disattivato",
+    'Больше не спрашивать': 'Non chiedere più',
     "Играть офлайн": "Gioca offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID è il nome dell'account (NPID) registrato sul server, non il tuo indirizzo email",
     # DLSS
@@ -3938,6 +3942,7 @@ FR = {
     "доступен": "accessible",
     "недоступен": "inaccessible",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Un compte en ligne est renseigné, mais « Jouer en ligne » est désactivé",
+    'Больше не спрашивать': 'Ne plus demander',
     "Играть офлайн": "Jouer hors ligne",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID est le nom du compte (NPID) enregistré sur le serveur, pas votre adresse e-mail",
     # DLSS
@@ -4777,6 +4782,7 @@ DE = {
     "доступен": "erreichbar",
     "недоступен": "nicht erreichbar",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Ein Online-Konto ist eingetragen, aber „Online spielen“ ist aus",
+    'Больше не спрашивать': 'Nicht mehr fragen',
     "Играть офлайн": "Offline spielen",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "Die Online-ID ist der auf dem Server registrierte Kontoname (NPID), nicht deine E-Mail-Adresse",
     # DLSS
@@ -5836,6 +5842,7 @@ ZH_CN = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "同一会话中的所有人必须使用相同的游戏版本（1.09）和同一服务器。作弊功能也会改变其他玩家的游戏：一起游玩时请关闭",
     "Учётная запись": "账号",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "已填写联机账号，但「在线游玩」未开启",
+    'Больше не спрашивать': '不再询问',
     "Читы": "作弊",
     "Экспорт журнала": "导出日志",
     "Экспорт журнала…": "导出日志…",
