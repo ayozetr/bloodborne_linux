@@ -110,8 +110,12 @@ static int list_displays(void) {
     for (int i = 0; ids && i < count; ++i) {
         const char *name = SDL_GetDisplayName(ids[i]);
         const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(ids[i]);
-        printf("%s\t%dx%d\t%d\n", name && *name ? name : "?", mode ? mode->w : 0,
-               mode ? mode->h : 0, ids[i] == primary);
+        /* The mode is in points on a scaled Wayland desktop (2560x1440 at 115 % is 2226x1252):
+         * the monitor's pixels are the points times the pixel density. */
+        const float density = mode && mode->pixel_density > 0.0f ? mode->pixel_density : 1.0f;
+        printf("%s\t%dx%d\t%d\n", name && *name ? name : "?",
+               mode ? (int)SDL_lroundf(mode->w * density) : 0,
+               mode ? (int)SDL_lroundf(mode->h * density) : 0, ids[i] == primary);
     }
     SDL_free(ids);
     SDL_Quit();
