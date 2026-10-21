@@ -606,6 +606,9 @@ EN = {
     "Инвертировать камеру геймпада по горизонтали": "Invert the controller camera horizontally",
     "Инвертировать камеру геймпада по вертикали": "Invert the controller camera vertically",
     "Ровная скорость камеры по диагонали": "Even camera speed on diagonals",
+    'Мёртвая зона стиков (%)': 'Stick dead zone (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'How far a stick must move before it counts. Raise it if your character or the camera moves on its own (default 4); applies when the game starts',
     "Импорт сохранений": "Import saves",
     "Папка с сохранениями Bloodborne": "Folder with Bloodborne saves",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "This is a PS4 copy for a USB drive (sdimg_*): it is encrypted with the console's keys. Export the save unencrypted on the PS4 (Apollo Save Tool) or with Save Wizard",
@@ -1370,6 +1373,9 @@ PT_BR = {
     "Инвертировать камеру геймпада по горизонтали": "Inverter a câmera do controle na horizontal",
     "Инвертировать камеру геймпада по вертикали": "Inverter a câmera do controle na vertical",
     "Ровная скорость камеры по диагонали": "Velocidade da câmera uniforme nas diagonais",
+    'Мёртвая зона стиков (%)': 'Zona morta dos analógicos (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Quanto o analógico precisa se mover para contar. Aumente se o personagem ou a câmera se mexem sozinhos (padrão 4); aplica-se ao iniciar o jogo',
     "Импорт сохранений": "Importar saves",
     "Папка с сохранениями Bloodborne": "Pasta com saves do Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Esta é uma cópia do PS4 para pendrive (sdimg_*): ela é criptografada com as chaves do console. Exporte o save sem criptografia no PS4 (Apollo Save Tool) ou com o Save Wizard",
@@ -2296,6 +2302,9 @@ ES = {
     "Инвертировать камеру геймпада по горизонтали": "Invertir la cámara del mando en horizontal",
     "Инвертировать камеру геймпада по вертикали": "Invertir la cámara del mando en vertical",
     "Ровная скорость камеры по диагонали": "Velocidad de cámara uniforme en diagonal",
+    'Мёртвая зона стиков (%)': 'Zona muerta de los sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Cuánto hay que mover un stick para que cuente. Súbela si el personaje o la cámara se mueven solos (por defecto 4); se aplica al iniciar el juego',
     "Импорт сохранений": "Importar partidas",
     "Папка с сохранениями Bloodborne": "Carpeta con partidas de Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Es una copia de PS4 para memoria USB (sdimg_*): está cifrada con las claves de la consola. Exporta la partida sin cifrar en la PS4 (Apollo Save Tool) o con Save Wizard",
@@ -3141,6 +3150,9 @@ IT = {
     "Инвертировать камеру геймпада по горизонтали": "Invertire la telecamera del controller in orizzontale",
     "Инвертировать камеру геймпада по вертикали": "Invertire la telecamera del controller in verticale",
     "Ровная скорость камеры по диагонали": "Velocità della telecamera uniforme in diagonale",
+    'Мёртвая зона стиков (%)': 'Zona morta degli stick (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        "Quanto va spostato uno stick perché venga rilevato. Aumentala se il personaggio o la telecamera si muovono da soli (predefinito 4); si applica all'avvio del gioco",
     "Импорт сохранений": "Importa salvataggi",
     "Папка с сохранениями Bloodborne": "Cartella con i salvataggi di Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "È una copia della PS4 per chiavetta USB (sdimg_*): è cifrata con le chiavi della console. Esporta il salvataggio non cifrato sulla PS4 (Apollo Save Tool) o con Save Wizard",
@@ -3986,6 +3998,9 @@ FR = {
     "Инвертировать камеру геймпада по горизонтали": "Inverser la caméra de la manette horizontalement",
     "Инвертировать камеру геймпада по вертикали": "Inverser la caméra de la manette verticalement",
     "Ровная скорость камеры по диагонали": "Vitesse de caméra uniforme en diagonale",
+    'Мёртвая зона стиков (%)': 'Zone morte des sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        "Jusqu'où un stick doit bouger avant d'être pris en compte. Augmentez-la si le personnage ou la caméra bougent seuls (4 par défaut) ; s'applique au lancement du jeu",
     "Импорт сохранений": "Importer des sauvegardes",
     "Папка с сохранениями Bloodborne": "Dossier des sauvegardes de Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "C’est une copie PS4 pour clé USB (sdimg_*) : elle est chiffrée avec les clés de la console. Exportez la sauvegarde non chiffrée sur la PS4 (Apollo Save Tool) ou avec Save Wizard",
@@ -4831,6 +4846,9 @@ DE = {
     "Инвертировать камеру геймпада по горизонтали": "Controller-Kamera horizontal invertieren",
     "Инвертировать камеру геймпада по вертикали": "Controller-Kamera vertikal invertieren",
     "Ровная скорость камеры по диагонали": "Gleichmäßige Kameradrehung diagonal",
+    'Мёртвая зона стиков (%)': 'Totzone der Sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Wie weit ein Stick bewegt werden muss, bevor er zählt. Erhöhe sie, wenn sich Figur oder Kamera von selbst bewegen (Standard 4); gilt beim Spielstart',
     "Импорт сохранений": "Spielstände importieren",
     "Папка с сохранениями Bloodborne": "Ordner mit Bloodborne-Spielständen",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Das ist eine PS4-Kopie für einen USB-Stick (sdimg_*): Sie ist mit den Schlüsseln der Konsole verschlüsselt. Exportiere den Spielstand unverschlüsselt auf der PS4 (Apollo Save Tool) oder mit Save Wizard",
@@ -5831,6 +5849,9 @@ ZH_CN = {
     "Инвертировать камеру геймпада по горизонтали": "手柄视角水平反转",
     "Инвертировать камеру геймпада по вертикали": "手柄视角垂直反转",
     "Ровная скорость камеры по диагонали": "斜向镜头速度均匀",
+    'Мёртвая зона стиков (%)': '摇杆死区 (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        '摇杆需要推动多少才会生效。如果角色或镜头自己移动，请调高（默认 4）；在游戏启动时生效',
     "Импорт сохранений": "导入存档",
     "Папка с сохранениями Bloodborne": "Bloodborne 存档文件夹",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "这是 PS4 导出到 U 盘的副本（sdimg_*）：它用主机的密钥加密。请在 PS4 上（Apollo Save Tool）或用 Save Wizard 导出未加密的存档",

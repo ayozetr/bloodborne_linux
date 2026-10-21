@@ -117,7 +117,7 @@ behaviour when the variable is unset. In the tables:
 | `BB_ANISO` | Anisotropic filtering ratio (default 16; 0 = the game's own). |
 | `BB_DLSS` | 0 turns DLSS support off on NVIDIA. |
 | `RADV_DEBUG` / `BB_AUTO_NOHIZ` | AMD GCN 3–5 on RADV: run.sh sets `RADV_DEBUG=nohiz` unless `BB_AUTO_NOHIZ=0`. |
-| `BB_PAD_DEADZONE` / `BB_PAD_DEADZONE_OUTER` | Inner (default 5) and outer (default 127) stick dead zones. |
+| `BB_PAD_DEADZONE` / `BB_PAD_DEADZONE_OUTER` | Inner (default 5) and outer (default 127) stick dead zones, of 127 (launcher: Controls → Stick dead zone (%), the inner one). |
 | `BB_MOUSE_DEADZONE` | Minimum stick deflection used for mouse look (default 16 of 127). |
 | `BB_AUDIO_GAIN` | Master volume multiplier, up to 8 (default 1.0). |
 | `BB_SAVE_LOG` | 1 saves the log and per-frame statistics to `<data>/logs/` (for bug reports). |

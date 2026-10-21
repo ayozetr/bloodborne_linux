@@ -286,6 +286,9 @@ DEFAULTS = {
     # default; how many copies stay.
     # Play with an account set and "Play online" off asks which (on_launch), unless told not to.
     "ask_online_off": True,
+    # The sticks' inner dead zone in percent of their travel (BB_PAD_DEADZONE, of 127; the port's
+    # default 5 is 4 %).
+    "pad_deadzone": 4,
     "saves_auto_backup": False,
     "saves_auto_backup_keep": 5,
 }
@@ -630,6 +633,9 @@ def game_environment(s):
         env["BB_GAMEPAD"] = s["gamepad"]
     if s.get("display"):
         env["BB_DISPLAY"] = s["display"]
+    deadzone = number(s.get("pad_deadzone", 4), 4, int, "settings.json", "pad_deadzone")
+    if deadzone != 4:  # else the port's own default
+        env["BB_PAD_DEADZONE"] = str(round(max(0, min(deadzone, 50)) * 127 / 100))
     env["BB_SKIP_NETWORK_CHOICE"] = "1" if s.get("skip_network_choice", True) else "0"
     if s["hdr"]:
         env["BB_HDR"] = "1"
@@ -1402,6 +1408,14 @@ class LauncherWindow(Adw.ApplicationWindow):
                            ("pad_camera_diagonal", tr("Ровная скорость камеры по диагонали"))):
             self.stick_rows[key] = Adw.SwitchRow(title=title, active=self.ini.get(key) == "1")
             controls.add(self.stick_rows[key])
+        self.deadzone_row = Adw.SpinRow.new_with_range(0, 50, 1)
+        self.deadzone_row.set_title(tr("Мёртвая зона стиков (%)"))
+        self.deadzone_row.set_subtitle(tr("Насколько нужно отклонить стик, чтобы он сработал. "
+                                          "Увеличьте, если персонаж или камера двигаются сами "
+                                          "(по умолчанию 4); применяется при запуске игры"))
+        self.deadzone_row.set_value(number(self.settings["pad_deadzone"], 4, int, "settings.json",
+                                           "pad_deadzone"))
+        controls.add(self.deadzone_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
@@ -2238,6 +2252,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["coop_layout"] = combo_value(self.coop_layout_row)
         s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
         s["coop_sound_first_only"] = self.coop_sound_row.get_active()
+        s["pad_deadzone"] = int(self.deadzone_row.get_value())
         s["saves_auto_backup"] = self.auto_backup_row.get_active()
         s["saves_auto_backup_keep"] = int(self.auto_backup_keep_row.get_value())
         self.save_mod_profile()
