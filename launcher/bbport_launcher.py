@@ -121,12 +121,15 @@ EFFECTS = [
     ("effect_game_aa", "Собственное сглаживание игры", True),
     ("effect_dynamic_shadows", "Тени от динамических источников", True),
     ("effect_ssr", "Отражения SSR (не было в игре)", False),
+    # Not graphics: under Mods, in their own group (GAME_MENU_EFFECTS).
     ("skip_intro", "Пропуск заставок при запуске", False),
     ("debug_camera", "Свободная камера (Cross + L3 / Space + Z)", False),
     ("debug_menu", "Debug menu (левый touchpad / Tab; нужны шрифты)", False),
     # The menus' own entry (scripts/quit_menu.py: menu texts and a patch at start).
     ("quit_to_desktop", "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»", True),
 ]
+# The EFFECTS that change the game's menus or open its debug tools, not the picture.
+GAME_MENU_EFFECTS = ("skip_intro", "quit_to_desktop", "debug_camera", "debug_menu")
 # Cheats and gameplay tweaks (community patches for 1.09, applied at start): bbport.ini key, title,
 # subtitle. All off by default.
 CHEATS = [
@@ -1533,7 +1536,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                                  self.ini.get("model_lod", "0"))
         effects.add(self.lod_row)
         self.effect_rows = {}
-        for key, title, default in EFFECTS:
+        menus = Adw.PreferencesGroup(title=tr("Меню и отладка"),
+                                     description=tr("Патчи игры, применяются при запуске"))
+        for key, title, default in sorted(EFFECTS, key=lambda e: e[0] in GAME_MENU_EFFECTS
+                                          and GAME_MENU_EFFECTS.index(e[0]) + 1):
             row = Adw.SwitchRow(title=tr(title),
                                 active=self.ini.get(key, "1" if default else "0") == "1")
             if key == "debug_menu":
@@ -1543,7 +1549,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 row.set_subtitle(tr("В меню «Система» игра сначала сохраняется, как при «Выходе из "
                                     "игры», и потом закрывается"))
             self.effect_rows[key] = row
-            effects.add(row)
+            (menus if key in GAME_MENU_EFFECTS else effects).add(row)
         # The title's "play online / play offline": answered as the Online page's switch.
         self.skip_network_row = Adw.SwitchRow(
             title=tr("Пропускать выбор «по сети / вне сети»"),
@@ -1554,6 +1560,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.netchoice_group = Adw.PreferencesGroup()
         self.netchoice_group.add(self.skip_network_row)
         self.place("graphics", 40, effects)
+        self.place("mods", 45, menus)
 
         streaming = Adw.PreferencesGroup(title=tr("Загрузки и плавность"),
                                          description=tr("Патчи игры из bbhost, применяются при запуске"))
