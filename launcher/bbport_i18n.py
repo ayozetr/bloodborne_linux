@@ -118,6 +118,7 @@ EN = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "The players' windows are placed through X11, and there is no X server: turn on XWayland in your session's settings or use an X11 session",
     'Звук только у игрока 1': 'Sound only for player 1',
+    'Как у игры (Графика → Монитор)': 'As the game (Graphics → Monitor)',
     'Играть вместе': 'Play together',
     'Игрок {}': 'Player {}',
     'Игроки': 'Players',
@@ -994,6 +995,7 @@ PT_BR = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'As janelas dos jogadores são posicionadas via X11 e não há servidor X: ative o XWayland nas configurações da sessão ou use uma sessão X11',
     'Звук только у игрока 1': 'Som só para o jogador 1',
+    'Как у игры (Графика → Монитор)': 'Como o jogo (Gráficos → Monitor)',
     'Играть вместе': 'Jogar juntos',
     'Игрок {}': 'Jogador {}',
     'Игроки': 'Jogadores',
@@ -1929,6 +1931,7 @@ ES = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'Las ventanas de los jugadores se colocan mediante X11 y no hay servidor X: activa XWayland en los ajustes de la sesión o usa una sesión X11',
     'Звук только у игрока 1': 'Sonido solo para el jugador 1',
+    'Как у игры (Графика → Монитор)': 'Como el juego (Gráficos → Monitor)',
     'Играть вместе': 'Jugar juntos',
     'Игрок {}': 'Jugador {}',
     'Игроки': 'Jugadores',
@@ -2777,6 +2780,7 @@ IT = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "Le finestre dei giocatori vengono posizionate tramite X11 e non c'è un server X: attiva XWayland nelle impostazioni della sessione o usa una sessione X11",
     'Звук только у игрока 1': 'Audio solo per il giocatore 1',
+    'Как у игры (Графика → Монитор)': 'Come il gioco (Grafica → Monitor)',
     'Играть вместе': 'Gioca insieme',
     'Игрок {}': 'Giocatore {}',
     'Игроки': 'Giocatori',
@@ -3625,6 +3629,7 @@ FR = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         "Les fenêtres des joueurs sont placées via X11 et il n'y a pas de serveur X : activez XWayland dans les réglages de la session ou utilisez une session X11",
     'Звук только у игрока 1': 'Son uniquement pour le joueur 1',
+    'Как у игры (Графика → Монитор)': 'Comme le jeu (Graphismes → Écran)',
     'Играть вместе': 'Jouer ensemble',
     'Игрок {}': 'Joueur {}',
     'Игроки': 'Joueurs',
@@ -4473,6 +4478,7 @@ DE = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         'Die Fenster der Spieler werden über X11 platziert, und es gibt keinen X-Server: aktiviere XWayland in den Sitzungseinstellungen oder nutze eine X11-Sitzung',
     'Звук только у игрока 1': 'Ton nur für Spieler 1',
+    'Как у игры (Графика → Монитор)': 'Wie das Spiel (Grafik → Monitor)',
     'Играть вместе': 'Zusammen spielen',
     'Игрок {}': 'Spieler {}',
     'Игроки': 'Spieler',
@@ -5346,6 +5352,7 @@ ZH_CN = {
     'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
         '玩家窗口通过 X11 摆放，但没有 X 服务器：请在会话设置中启用 XWayland，或使用 X11 会话',
     'Звук только у игрока 1': '仅玩家 1 有声音',
+    'Как у игры (Графика → Монитор)': '与游戏相同（图形 → 显示器）',
     'Играть вместе': '一起游戏',
     'Игрок {}': '玩家 {}',
     'Игроки': '玩家人数',

@@ -92,6 +92,13 @@ class EnvironmentTests(unittest.TestCase):
         self.assertNotIn('BB_AUDIO', loud)
 
 
+class DisplayTests(unittest.TestCase):
+    def test_the_monitor_chosen_for_local_co_op(self):
+        env = {'BB_DISPLAY': 'ASUS'}
+        self.assertEqual(coop.player_environment(env, 1, 2, coop.KEYBOARD)['BB_DISPLAY'], 'ASUS')
+        self.assertEqual(coop.player_environment(env, 2, 2, coop.KEYBOARD, display='2')['BB_DISPLAY'], '2')
+
+
 class ProblemTests(unittest.TestCase):
     X11 = {'DISPLAY': ':0'}
 

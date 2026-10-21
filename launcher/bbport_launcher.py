@@ -278,6 +278,8 @@ DEFAULTS = {
     "coop_layout": "rows",
     "coop_controllers": [],
     "coop_sound_first_only": True,
+    # The monitor the players' windows share ("": the game's, Graphics → Monitor).
+    "coop_display": "",
     # Hunter's Atlas (its group in Settings): the in-game map, off by default; lamp travel and items.
     "atlas": False,
     "atlas_travel": True,
@@ -2192,17 +2194,18 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.gamepad_row.set_selected(self.gamepad_row.values.index(current) if current in self.gamepad_row.values else 0)
         self.show_gamepad()
 
-    def fill_displays(self):
-        """The monitor choices: the primary one, the connected ones, and the chosen one while it is
-        not connected (on Refresh, the row's choice, saved or not)."""
-        current = combo_value(self.display_row) if hasattr(self.display_row, "values") else \
-            self.settings.get("display", "")
-        choices = [(tr("Основной"), "")] + [(label, value) for value, label in connected_displays()]
+    def fill_displays(self, row=None, key="display", first=None):
+        """A monitor row's choices (Graphics → Monitor, or local co-op's): the primary one (or
+        `first`), the connected ones, and the chosen one while it is not connected (on Refresh,
+        the row's choice, saved or not)."""
+        row = row or self.display_row
+        current = combo_value(row) if hasattr(row, "values") else self.settings.get(key, "")
+        choices = [(first or tr("Основной"), "")] + [(label, value) for value, label in connected_displays()]
         if current and current not in [value for _, value in choices]:
             choices.append((tr("{} (не подключён)").format(current), current))
-        self.display_row.set_model(Gtk.StringList.new([label for label, _ in choices]))
-        self.display_row.values = [value for _, value in choices]
-        self.display_row.set_selected(self.display_row.values.index(current) if current in self.display_row.values else 0)
+        row.set_model(Gtk.StringList.new([label for label, _ in choices]))
+        row.values = [value for _, value in choices]
+        row.set_selected(row.values.index(current) if current in row.values else 0)
 
     def show_gamepad(self):
         names = getattr(self.gamepad_row, "names", None)
@@ -2252,6 +2255,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["coop_layout"] = combo_value(self.coop_layout_row)
         s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
         s["coop_sound_first_only"] = self.coop_sound_row.get_active()
+        s["coop_display"] = combo_value(self.coop_display_row)
         s["pad_deadzone"] = int(self.deadzone_row.get_value())
         s["saves_auto_backup"] = self.auto_backup_row.get_active()
         s["saves_auto_backup_keep"] = int(self.auto_backup_keep_row.get_value())
@@ -3704,6 +3708,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         group.add(self.coop_players_row)
         self.coop_layout_row = combo_row(tr("Расположение"), None, COOP_LAYOUTS, s["coop_layout"])
         group.add(self.coop_layout_row)
+        # The players' windows on another monitor than the game's alone (a TV beside the desk).
+        self.coop_display_row = readable_choice(Adw.ComboRow(title=tr("Монитор")))
+        self.coop_display_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
+                                                     lambda _button: self.fill_coop_display()))
+        self.fill_coop_display()
+        group.add(self.coop_display_row)
         self.coop_sound_row = Adw.SwitchRow(title=tr("Звук только у игрока 1"),
                                             subtitle=tr("Иначе звучат все игры сразу"),
                                             active=s["coop_sound_first_only"])
@@ -3730,6 +3740,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(start)
         self.show_coop_players()
         return page
+
+    def fill_coop_display(self):
+        self.fill_displays(self.coop_display_row, "coop_display", tr("Как у игры (Графика → Монитор)"))
 
     def fill_coop_controllers(self):
         """Each player's controller choices: none, the keyboard and mouse, the connected
@@ -3787,8 +3800,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             return
         layout = self.settings["coop_layout"]
         sound = self.settings["coop_sound_first_only"]
+        display = self.settings.get("coop_display", "")
         first = bbport_coop.player_environment(self.environment(), 1, players, controllers[0],
-                                               layout, sound)
+                                               layout, sound, display=display)
         self.start_game(first)
         if not self.process:
             return
@@ -3796,7 +3810,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             folder = bbport_coop.prepare_data_dir(DATA_DIR, player, ini_path())
             env = game_environment(bbport_coop.player_settings(self.settings, player))
             env = bbport_coop.player_environment(env, player, players, controllers[player - 1],
-                                                 layout, sound, folder)
+                                                 layout, sound, folder, display)
             GLib.timeout_add_seconds(COOP_START_DELAY * (player - 1), self.start_coop_player,
                                      player, env, self.process)
 

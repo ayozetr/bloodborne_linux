@@ -71,10 +71,13 @@ def player_settings(settings, player):
 
 
 def player_environment(env, player, players, controller, layout="rows", sound_first_only=True,
-                       folder=None):
+                       folder=None, display=""):
     """`env` (the game's environment from player_settings) with player `player`'s window part,
-    controller (a device path, or KEYBOARD) and, for players 2-4, data folder."""
+    controller (a device path, or KEYBOARD), for players 2-4 data folder and, when one is chosen
+    for local co-op, the monitor the windows share (BB_DISPLAY; else the game's)."""
     env = dict(env)
+    if display:
+        env["BB_DISPLAY"] = display
     env.update(SDL_VIDEO_DRIVER="x11", BB_PAD_BACKGROUND="1", BB_GAMEPAD_STRICT="1",
                BB_WINDOW_RECT=rect_text(layout_rects(players, layout)[player - 1]),
                BB_FULLSCREEN="0")
