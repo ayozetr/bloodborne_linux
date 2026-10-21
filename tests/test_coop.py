@@ -93,15 +93,22 @@ class EnvironmentTests(unittest.TestCase):
 
 
 class ProblemTests(unittest.TestCase):
+    X11 = {'DISPLAY': ':0'}
+
     def test_ready(self):
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD, '']), [])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD, ''], self.X11), [])
 
     def test_missing_same_and_keyboard_twice(self):
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5']), ['controller'])
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '']), ['controller'])
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '/dev/hidraw5']), ['same controller'])
-        self.assertEqual(coop.problems(3, [coop.KEYBOARD, coop.KEYBOARD, '/dev/hidraw5']),
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5'], self.X11), ['controller'])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', ''], self.X11), ['controller'])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '/dev/hidraw5'], self.X11), ['same controller'])
+        self.assertEqual(coop.problems(3, [coop.KEYBOARD, coop.KEYBOARD, '/dev/hidraw5'], self.X11),
                          ['keyboard twice'])
+
+    def test_no_x_server(self):
+        # A Wayland session without XWayland: the windows could not be placed.
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD], {'WAYLAND_DISPLAY': 'wayland-0'}),
+                         ['x11'])
 
 
 if __name__ == '__main__':

@@ -3763,6 +3763,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         problem = bbport_coop.problems(players, controllers)
         if problem:
             self.alert(tr("Локальный кооп"), {
+                "x11": tr("Окна игроков расставляются через X11, а X-сервера нет: включите XWayland "
+                          "в настройках сеанса или запустите сеанс X11"),
                 "controller": tr("Выберите контроллер для каждого игрока"),
                 "same controller": tr("Один контроллер выбран у двух игроков"),
                 "keyboard twice": tr("Клавиатура и мышь могут быть только у одного игрока"),

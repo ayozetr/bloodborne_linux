@@ -115,6 +115,8 @@ EN = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— player {}'s game exited (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choose a controller for every player',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "The players' windows are placed through X11, and there is no X server: turn on XWayland in your session's settings or use an X11 session",
     'Звук только у игрока 1': 'Sound only for player 1',
     'Играть вместе': 'Play together',
     'Игрок {}': 'Player {}',
@@ -986,6 +988,8 @@ PT_BR = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— o jogo do jogador {} foi encerrado (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Escolha um controle para cada jogador',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'As janelas dos jogadores são posicionadas via X11 e não há servidor X: ative o XWayland nas configurações da sessão ou use uma sessão X11',
     'Звук только у игрока 1': 'Som só para o jogador 1',
     'Играть вместе': 'Jogar juntos',
     'Игрок {}': 'Jogador {}',
@@ -1916,6 +1920,8 @@ ES = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— el juego del jugador {} se cerró (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Elige un mando para cada jugador',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'Las ventanas de los jugadores se colocan mediante X11 y no hay servidor X: activa XWayland en los ajustes de la sesión o usa una sesión X11',
     'Звук только у игрока 1': 'Sonido solo para el jugador 1',
     'Играть вместе': 'Jugar juntos',
     'Игрок {}': 'Jugador {}',
@@ -2759,6 +2765,8 @@ IT = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— il gioco del giocatore {} è terminato (codice {}) —\n',
     'Выберите контроллер для каждого игрока': 'Scegli un controller per ogni giocatore',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "Le finestre dei giocatori vengono posizionate tramite X11 e non c'è un server X: attiva XWayland nelle impostazioni della sessione o usa una sessione X11",
     'Звук только у игрока 1': 'Audio solo per il giocatore 1',
     'Играть вместе': 'Gioca insieme',
     'Игрок {}': 'Giocatore {}',
@@ -3602,6 +3610,8 @@ FR = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— le jeu du joueur {} s'est fermé (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choisissez une manette pour chaque joueur',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "Les fenêtres des joueurs sont placées via X11 et il n'y a pas de serveur X : activez XWayland dans les réglages de la session ou utilisez une session X11",
     'Звук только у игрока 1': 'Son uniquement pour le joueur 1',
     'Играть вместе': 'Jouer ensemble',
     'Игрок {}': 'Joueur {}',
@@ -4445,6 +4455,8 @@ DE = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— das Spiel von Spieler {} wurde beendet (Code {}) —\n',
     'Выберите контроллер для каждого игрока': 'Wähle für jeden Spieler einen Controller',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'Die Fenster der Spieler werden über X11 platziert, und es gibt keinen X-Server: aktiviere XWayland in den Sitzungseinstellungen oder nutze eine X11-Sitzung',
     'Звук только у игрока 1': 'Ton nur für Spieler 1',
     'Играть вместе': 'Zusammen spielen',
     'Игрок {}': 'Spieler {}',
@@ -5313,6 +5325,8 @@ ZH_CN = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— 玩家 {} 的游戏已退出（代码 {}）—\n',
     'Выберите контроллер для каждого игрока': '请为每位玩家选择一个控制器',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        '玩家窗口通过 X11 摆放，但没有 X 服务器：请在会话设置中启用 XWayland，或使用 X11 会话',
     'Звук только у игрока 1': '仅玩家 1 有声音',
     'Играть вместе': '一起游戏',
     'Игрок {}': '玩家 {}',

@@ -11,6 +11,7 @@ BB_GAMEPAD_STRICT, BB_KEYBOARD=0 for the controller players, BB_PAD_BACKGROUND a
 (a part of the display). The windows are placed through X11 (SDL_VIDEO_DRIVER=x11): Wayland lets no
 window place itself.
 """
+import os
 import shutil
 from pathlib import Path
 
@@ -92,11 +93,14 @@ def player_environment(env, player, players, controller, layout="rows", sound_fi
     return env
 
 
-def problems(players, controllers):
-    """What keeps local co-op from starting: "controller" (a player without one), "same
-    controller" (two players with one) or "keyboard twice"."""
+def problems(players, controllers, environ=None):
+    """What keeps local co-op from starting: "x11" (no X server: the windows are placed through
+    X11, XWayland in a Wayland session), "controller" (a player without one), "same controller"
+    (two players with one) or "keyboard twice"."""
     chosen = list(controllers[:players])
     found = []
+    if not (os.environ if environ is None else environ).get("DISPLAY"):
+        found.append("x11")
     if len(chosen) < players or not all(chosen):
         found.append("controller")
     pads = [c for c in chosen if c and c != KEYBOARD]
