@@ -956,8 +956,9 @@ THANKS = (
         _github("ZeroSTF", "Чёрный Сон Охотника после долгой игры"),
         _github("popcar2", "«Выход на рабочий стол» при игре по сети и идеи для лаунчера"),
         _github("shaneo88", "Файл патчей shadPS4 в папке патчей"),
-        _github("n3vrs0ft", "Вылет «Transaction failed» на Seamless Hunt"),
+        _github("n3vrs0ft", "Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином"),
         _github("cappp", "Вылет «Transaction failed» на Seamless Hunt"),
+        _github("simo1730", "Страница трофеев, не находившая файлы дампа"),
     )),
     ("Другие благодарности", (
         ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",

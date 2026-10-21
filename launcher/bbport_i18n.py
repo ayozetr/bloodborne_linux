@@ -809,6 +809,8 @@ EN = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': 'Quit to Desktop with online play on, and ideas for the launcher',
     'Файл патчей shadPS4 в папке патчей': "shadPS4's patch file in the patches folder",
     'Вылет «Transaction failed» на Seamless Hunt': 'The "Transaction failed" crash on Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'The "Transaction failed" crash on Seamless Hunt, and the logs that stopped a BBSC guest from following a stranger\'s world',
+    'Страница трофеев, не находившая файлы дампа': "The Trophies page not finding the dump's files",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: installing the game from .pkg files',
     # Shader cache
     'Кэш шейдеров': 'Shader cache',
@@ -1731,6 +1733,8 @@ PT_BR = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '"Sair para a área de trabalho" com o jogo online e ideias para o launcher',
     'Файл патчей shadPS4 в папке патчей': 'O arquivo de patches do shadPS4 na pasta de patches',
     'Вылет «Transaction failed» на Seamless Hunt': 'O travamento "Transaction failed" no Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'O crash "Transaction failed" no Seamless Hunt e os logs que fizeram o convidado do BBSC parar de seguir o mundo de um estranho',
+    'Страница трофеев, не находившая файлы дампа': 'A página de troféus que não encontrava os arquivos do dump',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: instalar o jogo a partir de arquivos .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache de shaders',
@@ -2568,6 +2572,8 @@ ES = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '«Salir al escritorio» con el juego online e ideas para el launcher',
     'Файл патчей shadPS4 в папке патчей': 'El archivo de parches de shadPS4 en la carpeta de parches',
     'Вылет «Transaction failed» на Seamless Hunt': 'El cierre «Transaction failed» en Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'El cierre «Transaction failed» en Seamless Hunt y los registros que hicieron que el invitado de BBSC dejara de seguir el mundo de un desconocido',
+    'Страница трофеев, не находившая файлы дампа': 'La página de trofeos que no encontraba los archivos del volcado',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: instalar el juego desde archivos .pkg',
     # Shader cache
     'Кэш шейдеров': 'Caché de shaders',
@@ -3405,6 +3411,8 @@ IT = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '"Esci al desktop" con il gioco online e idee per il launcher',
     'Файл патчей shadPS4 в папке патчей': 'Il file di patch di shadPS4 nella cartella delle patch',
     'Вылет «Transaction failed» на Seamless Hunt': 'La chiusura "Transaction failed" su Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': "Il crash «Transaction failed» su Seamless Hunt e i log che hanno fatto smettere all'ospite di BBSC di seguire il mondo di uno sconosciuto",
+    'Страница трофеев, не находившая файлы дампа': 'La pagina dei trofei che non trovava i file del dump',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: installare il gioco dai file .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache degli shader',
@@ -4242,6 +4250,8 @@ FR = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '« Quitter vers le bureau » en jeu en ligne, et des idées pour le lanceur',
     'Файл патчей shadPS4 в папке патчей': 'Le fichier de patchs de shadPS4 dans le dossier des patchs',
     'Вылет «Transaction failed» на Seamless Hunt': 'Le plantage « Transaction failed » sur Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': "Le plantage « Transaction failed » sur Seamless Hunt, et les journaux qui ont empêché l'invité de BBSC de suivre le monde d'un inconnu",
+    'Страница трофеев, не находившая файлы дампа': 'La page des trophées qui ne trouvait pas les fichiers du dump',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor : installer le jeu depuis des fichiers .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache des shaders',
@@ -5079,6 +5089,8 @@ DE = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '„Zum Desktop beenden“ beim Onlinespiel und Ideen für den Launcher',
     'Файл патчей shadPS4 в папке патчей': 'Die Patch-Datei von shadPS4 im Patch-Ordner',
     'Вылет «Transaction failed» на Seamless Hunt': 'Der Absturz „Transaction failed“ auf Seamless Hunt',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'Der Absturz „Transaction failed“ auf Seamless Hunt und die Logs, durch die ein BBSC-Gast nicht mehr der Welt eines Fremden folgt',
+    'Страница трофеев, не находившая файлы дампа': 'Die Trophäenseite, die die Dateien des Dumps nicht fand',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: das Spiel aus .pkg-Dateien installieren',
     # Shader cache
     'Кэш шейдеров': 'Shader-Cache',
@@ -5885,6 +5897,8 @@ ZH_CN = {
     '«Выход на рабочий стол» при игре по сети и идеи для лаунчера': '联机时的“退出到桌面”以及对启动器的建议',
     'Файл патчей shadPS4 в папке патчей': '补丁文件夹中的 shadPS4 补丁文件',
     'Вылет «Transaction failed» на Seamless Hunt': 'Seamless Hunt 上的“Transaction failed”崩溃',
+    'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'Seamless Hunt 上的“Transaction failed”崩溃，以及让 BBSC 访客不再跟随陌生人世界的日志',
+    'Страница трофеев, не находившая файлы дампа': '找不到转储文件的奖杯页面',
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor：从 .pkg 文件安装游戏',
     # Shader cache
     'Кэш шейдеров': '着色器缓存',

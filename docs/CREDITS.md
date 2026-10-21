@@ -95,4 +95,6 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[shauryasagar](https://github.com/shauryasagar)** and **[ZeroSTF](https://github.com/ZeroSTF)**: the Hunter's Dream going black after long sessions.
 - **[popcar2](https://github.com/popcar2)**: Quit to Desktop with online play on, and ideas for the launcher.
 - **[shaneo88](https://github.com/shaneo88)**: shadPS4's patch file in the patches folder.
-- **[n3vrs0ft](https://github.com/n3vrs0ft)** and **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
+- **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, and the logs that stopped a BBSC guest from following a stranger's world.
+- **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
+- **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
