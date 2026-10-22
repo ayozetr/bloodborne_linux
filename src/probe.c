@@ -187,6 +187,25 @@ static void fault(int sig, siginfo_t *info, void *context) {
     else
         snprintf(line, sizeof(line), "Fault (signal %d) at RIP %p, address %p\n", sig, (void *)rip, info->si_addr);
     { ssize_t written_=write(2, line, strlen(line)); (void)written_; }
+    /* A guest fault: its thread and the game's call chain (return addresses along rbp, read with
+     * process_vm_readv so a broken chain cannot fault again). */
+    if (rip - (uintptr_t)image < 0x10000000) {
+        char thread[32] = "?";
+        pthread_getname_np(pthread_self(), thread, sizeof(thread));
+        int at = snprintf(line, sizeof(line), "  thread %s; calls:", thread);
+        uintptr_t rbp = (uintptr_t)uc->uc_mcontext.gregs[REG_RBP];
+        for (int i = 0; i < 12 && rbp && at < (int)sizeof(line) - 24; ++i) {
+            uintptr_t frame[2] = {0, 0};
+            struct iovec local = {frame, sizeof(frame)}, remote = {(void *)rbp, sizeof(frame)};
+            if (process_vm_readv(getpid(), &local, 1, &remote, 1, 0) != (ssize_t)sizeof(frame)) break;
+            if (frame[1] - (uintptr_t)image >= 0x10000000) break;
+            at += snprintf(line + at, sizeof(line) - at, " +0x%lx", (unsigned long)(frame[1] - (uintptr_t)image));
+            if (frame[0] <= rbp) break;
+            rbp = frame[0];
+        }
+        snprintf(line + at, sizeof(line) - at, "\n");
+        { ssize_t written_=write(2, line, strlen(line)); (void)written_; }
+    }
     if (gpu_enabled) bbgpu_dump_guest_writes(context);
     /* Outside the image and any shared object (generated code, a freed mapping): the mapping
      * from /proc/self/maps, and the thread. */
