@@ -37,7 +37,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
   loading, black images, the upscaler, the performance line in the log).
 - **[Awakenchan](https://github.com/Awakenchan)**: video memory on 4 GB cards and crash fixes,
   fewer stutters while areas load, stick options, the controller in use, save import, the
-  version selector.
+  version selector, occlusion counters in command order, and vertex shaders with the right
+  bindings.
 - **[Classmg22](https://github.com/Classmg22)** (CLS_AMG): BBSC, Seamless Co-op.
 - **[MaskZeus](https://github.com/MaskZeus)**: bbbridge.
 - **[Wozzardman](https://github.com/Wozzardman)**: the online libraries and the co-op server.
@@ -98,3 +99,4 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, and the logs that stopped a BBSC guest from following a stranger's world.
 - **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
 - **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
+- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, and of a crash in Yahar'gul.
