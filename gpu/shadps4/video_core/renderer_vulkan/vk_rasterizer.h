@@ -672,6 +672,7 @@ private:
     std::unique_ptr<class OcclusionQueries> occlusion;
     std::unique_ptr<class GpuTimestamps> timestamps;
     std::unique_ptr<class IndirectGuard> indirect_guard; ///< stage B only (lazily)
+    std::unique_ptr<class IndirectDrawGuard> indirect_draw_guard; ///< stage B only (lazily)
     /// Submissions (prepared draws) kept alive until stage B reaches the position.
     std::deque<std::pair<u64, std::shared_ptr<const void>>> pipe_keepalive;
     std::unique_ptr<DrawPipe> draw_pipe;
