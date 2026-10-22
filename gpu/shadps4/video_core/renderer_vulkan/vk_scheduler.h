@@ -777,6 +777,15 @@ public:
 
     /// Ends current rendering scope.
     [[gnu::noinline]] void EndRendering();
+    /// bbport: ends the render pass for work that cannot run inside it (an indirect draw's check,
+    /// vk_indirect_draw_guard.h); BeginRendering with the same state then continues it, loading
+    /// its attachments instead of clearing them again.
+    void PauseRendering() {
+        if (is_rendering) {
+            EndRendering();
+            resume_rendering = true;
+        }
+    }
     /// BB_PASS_BREAK_TRACE=1 (diagnostics): who ended a render pass that began again with the same
     /// state (a break: its attachments stored and loaded again), every 5 s.
     static void TracePassBreak(void* caller);
