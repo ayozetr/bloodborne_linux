@@ -298,6 +298,18 @@ static int mapped(Segment *segments, uint64_t count, uint64_t address, uint64_t 
             address - segments[i].address <= segments[i].size - bytes) return 1;
     return 0;
 }
+/* Patches may also write past an executable segment's end up to its 4 KiB page boundary: those
+ * bytes are mapped with the segment on every host (and PS4) and unused by the game, so they hold
+ * patch code that does not fit in place (quit_menu.py). */
+static int patchable(Segment *segments, uint64_t count, uint64_t address, uint64_t bytes) {
+    if (mapped(segments, count, address, bytes)) return 1;
+    for (uint64_t i = 0; i < count; ++i) {
+        const uint64_t end = segments[i].address + segments[i].size, tail = (end + 4095) & ~(uint64_t)4095;
+        if ((segments[i].flags & 1) && address >= end && bytes <= tail - end && address - end <= tail - end - bytes)
+            return 1;
+    }
+    return 0;
+}
 /* BBPATCH2 (patches.py): the patches' image base, then byte writes at image offsets, applied
  * after relocation. A write may replace a whole base-relative pointer slot (60/90 FPS++ swap
  * function pointers): the patch holds the address at the patches' base, rebased here. */
@@ -326,7 +338,7 @@ static void apply_patches(const char *path, Segment *segments, uint64_t ns, cons
     unsigned char data[4096];
     for (uint64_t i=0;i<count;++i) {
         uint64_t offset=read64(f), length=read64(f);
-        if (!length || length>sizeof(data) || !mapped(segments,ns,offset,length) || fread(data,1,length,f)!=length)
+        if (!length || length>sizeof(data) || !patchable(segments,ns,offset,length) || fread(data,1,length,f)!=length)
             fail("bad patch entry");
         uint64_t slots[sizeof(data)/8]; size_t nslots=0;
         for (uint64_t r=0;r<nr;++r) {
@@ -334,7 +346,7 @@ static void apply_patches(const char *path, Segment *segments, uint64_t ns, cons
             uint64_t target=relocs[r].target, value;
             if (relocs[r].kind || target<offset || target+8>offset+length) fail("patch overlaps a relocation");
             memcpy(&value,data+(target-offset),8);
-            if (value<base || !mapped(segments,ns,value-base,1)) fail("patch writes a pointer outside the image");
+            if (value<base || !patchable(segments,ns,value-base,1)) fail("patch writes a pointer outside the image");
             slots[nslots++]=target;
         }
         memcpy(image+offset,data,length);
