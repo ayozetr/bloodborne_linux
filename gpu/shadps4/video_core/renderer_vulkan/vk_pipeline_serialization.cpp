@@ -16,7 +16,9 @@ namespace Serialization {
 /* You should increment versions below once corresponding serialization scheme is changed. */
 static constexpr u32 ShaderBinaryVersion = 9u; // layer page-table pairs / guarded write-through stores
 static constexpr u32 ShaderMetaVersion = 7u; // bbport: ImageResource::needs_native
-static constexpr u32 PipelineKeyVersion = 5u; // bbport: Info layout (ImageResource::needs_native)
+// bbport 6: stages no longer paired with a vertex shader built for another binding start
+// (StageSpecialization::operator==): the pipelines saved with such pairs are rebuilt.
+static constexpr u32 PipelineKeyVersion = 6u; // bbport: Info layout (ImageResource::needs_native)
 } // namespace Serialization
 
 namespace Vulkan {
