@@ -387,20 +387,37 @@ static int direct_range_allocated(uint64_t phys, uint64_t size) {
 }
 
 static ABI uint64_t direct_size(void) { return POOL_SIZE; }
+/* A reservation the game asked for and did not get (the mapping failures print their own line):
+ * a guest NULL read soon after one is the allocation's, not a bug of its own (issue #23). The
+ * first 16 only, so a game that tries again and again does not fill the log. */
+static void allocation_failed(const char *what, uint64_t size, int32_t result) {
+    static _Atomic unsigned printed;
+    if (atomic_fetch_add(&printed,1)>=16) return;
+    fprintf(stderr,"Runtime: %s of %" PRIu64 " bytes failed (0x%x), direct memory in use=%" PRIu64 "\n",
+            what, size, (unsigned)result, live_bytes);
+}
 static ABI int32_t direct_allocate(int64_t low, int64_t high, uint64_t size,
                                   uint64_t alignment, int type, int64_t *out) {
     if (!alignment) alignment = PAGE;
     if (!out || low < 0 || high < 0 || !size || size % PAGE || !valid_alignment(alignment) || type < 0 || type > 10)
         return INVALID;
     uint64_t end = (uint64_t)high < POOL_SIZE ? (uint64_t)high : POOL_SIZE;
-    if ((uint64_t)low >= end || size > end - (uint64_t)low) return NO_SPACE;
+    if ((uint64_t)low >= end || size > end - (uint64_t)low) {
+        allocation_failed("direct allocation (outside the pool)", size, NO_SPACE);
+        return NO_SPACE;
+    }
     write_lock();
-    if (pool()) { write_unlock(); return NO_MEMORY; }
+    if (pool()) { write_unlock(); allocation_failed("direct allocation (no pool)", size, NO_MEMORY); return NO_MEMORY; }
     uint64_t start = align_up((uint64_t)low, alignment);
     int slot = -1;
     for (int i=0; i<LIMIT; ++i) if (!blocks[i].used) { slot=i; break; }
     for (;;) {
-        if (slot<0 || start > end || size > end-start) { write_unlock(); return NO_SPACE; }
+        if (slot<0 || start > end || size > end-start) {
+            write_unlock();
+            allocation_failed(slot<0 ? "direct allocation (block table full)" : "direct allocation (no room)",
+                              size, NO_SPACE);
+            return NO_SPACE;
+        }
         int overlap = 0;
         for (int i=0; i<LIMIT; ++i) {
             Block b = blocks[i];
@@ -546,11 +563,12 @@ static ABI int32_t reserve_range(void **inout, uint64_t size, int flags, uint64_
     if (!inout || !size || size%PAGE || !valid_alignment(alignment)) return INVALID;
     write_lock();
     if ((flags & MAP_FIXED_FLAG) && overlaps((uintptr_t)*inout,(uintptr_t)*inout+size,0)) {
-        write_unlock(); return NO_MEMORY;
+        write_unlock(); allocation_failed("virtual range reservation (fixed, in use)", size, NO_MEMORY); return NO_MEMORY;
     }
     int32_t result=place(inout,size,0,flags,alignment,KIND_RESERVED,0,0);
     write_unlock();
     if (!result) printf("Runtime: reserved virtual range %p, size=%" PRIu64 "\n", *inout, size);
+    else allocation_failed("virtual range reservation", size, result);
     return result;
 }
 static int32_t protect_locked(uintptr_t start, uint64_t size, int prot, int type) {
@@ -675,6 +693,7 @@ void *runtime_low_map(size_t size, int prot) {
         if (p!=MAP_FAILED) break;
     }
     write_unlock();
+    if (p==MAP_FAILED) allocation_failed("low memory map (guest stack or heap)", size, NO_MEMORY);
     return p==MAP_FAILED ? NULL : p;
 }
 /* ---- GPU library interface (gpu/shim/bbgpu.cpp) ---- */
