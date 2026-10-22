@@ -115,7 +115,28 @@ EN = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— player {}'s game exited (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choose a controller for every player',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "The players' windows are placed through X11, and there is no X server: turn on XWayland in your session's settings or use an X11 session",
     'Звук только у игрока 1': 'Sound only for player 1',
+    'Скопировать сохранения игрока 1':
+        "Copy player 1's saves",
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        "Their characters for another player; that player's saves are first copied to their savedata-backups",
+    'Игроку {}':
+        'To player {}',
+    'Скопировать':
+        'Copy',
+    'У игрока 1 пока нет сохранений':
+        'Player 1 has no saves yet',
+    'Не удалось скопировать: {}':
+        "Couldn't copy: {}",
+    'Сохранения игрока 1 скопированы игроку {}':
+        "Player 1's saves copied to player {}",
+    '; его прежние в {}':
+        '; their previous ones are in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        "Player {}'s saves will be replaced with player 1's (theirs are first copied to savedata-backups)",
+    'Как у игры (Графика → Монитор)': 'As the game (Graphics → Monitor)',
     'Играть вместе': 'Play together',
     'Игрок {}': 'Player {}',
     'Игроки': 'Players',
@@ -424,6 +445,7 @@ EN = {
     'У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре': 'Everyone in a session needs the same game version (1.09) and the same server. Cheats change the game for the other players too: turn them off when you play together',
     'Учётная запись': 'Account',
     'Учётная запись для игры онлайн указана, но «Играть онлайн» выключено': 'An online account is filled in, but “Play online” is off',
+    'Больше не спрашивать': "Don't ask again",
     'доступен': 'reachable',
     'недоступен': 'not reachable',
     "DLSS: библиотека NVIDIA": "DLSS: NVIDIA's library",
@@ -454,6 +476,7 @@ EN = {
     "Нет или повреждён файл {}": "Missing or damaged file {}",
     # Effects
     "Эффекты игры": "Game effects",
+    'Меню и отладка': 'Menus and debugging',
     "Патчи игры, применяются при запуске": "Game patches; they apply when the game starts",
     "Детализация моделей": "Model detail",
     "Как в игре": "As in the game",
@@ -483,6 +506,8 @@ EN = {
     "Ограничение FPS": "FPS limit",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0: no limit; set a number to cap the frame rate",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        "Above 120 FPS the game's movement can break: running and rolling slow down",
     # Performance
     "Производительность": "Performance",
     "Двухстадийный конвейер GPU": "Two-stage GPU pipeline",
@@ -600,6 +625,9 @@ EN = {
     "Инвертировать камеру геймпада по горизонтали": "Invert the controller camera horizontally",
     "Инвертировать камеру геймпада по вертикали": "Invert the controller camera vertically",
     "Ровная скорость камеры по диагонали": "Even camera speed on diagonals",
+    'Мёртвая зона стиков (%)': 'Stick dead zone (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'How far a stick must move before it counts. Raise it if your character or the camera moves on its own (default 4); applies when the game starts',
     "Импорт сохранений": "Import saves",
     "Папка с сохранениями Bloodborne": "Folder with Bloodborne saves",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "This is a PS4 copy for a USB drive (sdimg_*): it is encrypted with the console's keys. Export the save unencrypted on the PS4 (Apollo Save Tool) or with Save Wizard",
@@ -984,7 +1012,28 @@ PT_BR = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— o jogo do jogador {} foi encerrado (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Escolha um controle para cada jogador',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'As janelas dos jogadores são posicionadas via X11 e não há servidor X: ative o XWayland nas configurações da sessão ou use uma sessão X11',
     'Звук только у игрока 1': 'Som só para o jogador 1',
+    'Скопировать сохранения игрока 1':
+        'Copiar os saves do jogador 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Os personagens dele para outro jogador; os saves desse jogador são copiados antes para o savedata-backups dele',
+    'Игроку {}':
+        'Para o jogador {}',
+    'Скопировать':
+        'Copiar',
+    'У игрока 1 пока нет сохранений':
+        'O jogador 1 ainda não tem saves',
+    'Не удалось скопировать: {}':
+        'Não foi possível copiar: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Saves do jogador 1 copiados para o jogador {}',
+    '; его прежние в {}':
+        '; os anteriores dele estão em {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Os saves do jogador {} serão substituídos pelos do jogador 1 (os dele são copiados antes para o savedata-backups)',
+    'Как у игры (Графика → Монитор)': 'Como o jogo (Gráficos → Monitor)',
     'Играть вместе': 'Jogar juntos',
     'Игрок {}': 'Jogador {}',
     'Игроки': 'Jogadores',
@@ -1234,6 +1283,7 @@ PT_BR = {
     "Ultra Performance (x3)": "Desempenho extremo (x3)",
     # Effects
     "Эффекты игры": "Efeitos do jogo",
+    'Меню и отладка': 'Menus e depuração',
     "Патчи игры, применяются при запуске": "Patches do jogo, aplicados ao iniciar",
     "Детализация моделей": "Detalhe dos modelos",
     "Как в игре": "Como no jogo",
@@ -1343,6 +1393,7 @@ PT_BR = {
     "доступен": "acessível",
     "недоступен": "inacessível",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Há uma conta online preenchida, mas “Jogar online” está desligado",
+    'Больше не спрашивать': 'Não perguntar de novo',
     "Играть офлайн": "Jogar offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "O Online ID é o nome da conta (NPID) registrado no servidor, não o seu e-mail",
     # DLSS
@@ -1362,6 +1413,9 @@ PT_BR = {
     "Инвертировать камеру геймпада по горизонтали": "Inverter a câmera do controle na horizontal",
     "Инвертировать камеру геймпада по вертикали": "Inverter a câmera do controle na vertical",
     "Ровная скорость камеры по диагонали": "Velocidade da câmera uniforme nas diagonais",
+    'Мёртвая зона стиков (%)': 'Zona morta dos analógicos (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Quanto o analógico precisa se mover para contar. Aumente se o personagem ou a câmera se mexem sozinhos (padrão 4); aplica-se ao iniciar o jogo',
     "Импорт сохранений": "Importar saves",
     "Папка с сохранениями Bloodborne": "Pasta com saves do Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Esta é uma cópia do PS4 para pendrive (sdimg_*): ela é criptografada com as chaves do console. Exporte o save sem criptografia no PS4 (Apollo Save Tool) ou com o Save Wizard",
@@ -1465,6 +1519,8 @@ PT_BR = {
         "Bloodborne {}, versão 1.09",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0: sem limite; defina um número para limitar a taxa de quadros",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Acima de 120 FPS o movimento do jogo pode falhar: correr e rolar ficam mais lentos',
     "Авто":
         "Automático",
     "Включён при 8 и более потоках процессора":
@@ -1912,7 +1968,28 @@ ES = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— el juego del jugador {} se cerró (código {}) —\n',
     'Выберите контроллер для каждого игрока': 'Elige un mando para cada jugador',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'Las ventanas de los jugadores se colocan mediante X11 y no hay servidor X: activa XWayland en los ajustes de la sesión o usa una sesión X11',
     'Звук только у игрока 1': 'Sonido solo para el jugador 1',
+    'Скопировать сохранения игрока 1':
+        'Copiar las partidas del jugador 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Sus personajes para otro jugador; las partidas de ese jugador se copian antes en su savedata-backups',
+    'Игроку {}':
+        'Al jugador {}',
+    'Скопировать':
+        'Copiar',
+    'У игрока 1 пока нет сохранений':
+        'El jugador 1 aún no tiene partidas',
+    'Не удалось скопировать: {}':
+        'No se pudo copiar: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Partidas del jugador 1 copiadas al jugador {}',
+    '; его прежние в {}':
+        '; las anteriores están en {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Las partidas del jugador {} se sustituirán por las del jugador 1 (las suyas se copian antes en savedata-backups)',
+    'Как у игры (Графика → Монитор)': 'Como el juego (Gráficos → Monitor)',
     'Играть вместе': 'Jugar juntos',
     'Игрок {}': 'Jugador {}',
     'Игроки': 'Jugadores',
@@ -2156,6 +2233,7 @@ ES = {
     "Сглаживание в разрешении вывода без модели FSR": "Antialiasing a la resolución de salida, sin modelo FSR",
     "Нет или повреждён файл {}": "Archivo {} ausente o dañado",
     "Эффекты игры": "Efectos del juego",
+    'Меню и отладка': 'Menús y depuración',
     "Патчи игры, применяются при запуске": "Parches del juego, se aplican al iniciar",
     "Детализация моделей": "Detalle de los modelos",
     "Как в игре": "Como en el juego",
@@ -2181,6 +2259,8 @@ ES = {
     "30 (как на PS4)": "30 (como en PS4)",
     "Ограничение FPS": "Límite de FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: sin límite; indica un número para limitar la tasa de fotogramas",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Por encima de 120 FPS el movimiento del juego puede fallar: correr y rodar se vuelven más lentos',
     "Производительность": "Rendimiento",
     "Двухстадийный конвейер GPU": "Pipeline de GPU en dos etapas",
     "Быстрее на 20–30%; при нестабильности выключите": "Un 20–30 % más rápido; desactívalo si hay inestabilidad",
@@ -2264,6 +2344,7 @@ ES = {
     "доступен": "accesible",
     "недоступен": "no accesible",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Hay una cuenta online puesta, pero «Jugar online» está desactivado",
+    'Больше не спрашивать': 'No volver a preguntar',
     "Играть офлайн": "Jugar sin conexión",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "El Online ID es el nombre de cuenta (NPID) que registraste en el servidor, no tu correo",
     # DLSS
@@ -2282,6 +2363,9 @@ ES = {
     "Инвертировать камеру геймпада по горизонтали": "Invertir la cámara del mando en horizontal",
     "Инвертировать камеру геймпада по вертикали": "Invertir la cámara del mando en vertical",
     "Ровная скорость камеры по диагонали": "Velocidad de cámara uniforme en diagonal",
+    'Мёртвая зона стиков (%)': 'Zona muerta de los sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Cuánto hay que mover un stick para que cuente. Súbela si el personaje o la cámara se mueven solos (por defecto 4); se aplica al iniciar el juego',
     "Импорт сохранений": "Importar partidas",
     "Папка с сохранениями Bloodborne": "Carpeta con partidas de Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Es una copia de PS4 para memoria USB (sdimg_*): está cifrada con las claves de la consola. Exporta la partida sin cifrar en la PS4 (Apollo Save Tool) o con Save Wizard",
@@ -2753,7 +2837,28 @@ IT = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— il gioco del giocatore {} è terminato (codice {}) —\n',
     'Выберите контроллер для каждого игрока': 'Scegli un controller per ogni giocatore',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "Le finestre dei giocatori vengono posizionate tramite X11 e non c'è un server X: attiva XWayland nelle impostazioni della sessione o usa una sessione X11",
     'Звук только у игрока 1': 'Audio solo per il giocatore 1',
+    'Скопировать сохранения игрока 1':
+        'Copia i salvataggi del giocatore 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'I suoi personaggi a un altro giocatore; i salvataggi di quel giocatore vengono prima copiati nel suo savedata-backups',
+    'Игроку {}':
+        'Al giocatore {}',
+    'Скопировать':
+        'Copia',
+    'У игрока 1 пока нет сохранений':
+        'Il giocatore 1 non ha ancora salvataggi',
+    'Не удалось скопировать: {}':
+        'Impossibile copiare: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Salvataggi del giocatore 1 copiati al giocatore {}',
+    '; его прежние в {}':
+        '; i precedenti sono in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'I salvataggi del giocatore {} saranno sostituiti da quelli del giocatore 1 (i suoi vengono prima copiati in savedata-backups)',
+    'Как у игры (Графика → Монитор)': 'Come il gioco (Grafica → Monitor)',
     'Играть вместе': 'Gioca insieme',
     'Игрок {}': 'Giocatore {}',
     'Игроки': 'Giocatori',
@@ -2997,6 +3102,7 @@ IT = {
     "Сглаживание в разрешении вывода без модели FSR": "Anti-aliasing alla risoluzione di uscita, senza modello FSR",
     "Нет или повреждён файл {}": "File {} mancante o danneggiato",
     "Эффекты игры": "Effetti del gioco",
+    'Меню и отладка': 'Menu e debug',
     "Патчи игры, применяются при запуске": "Patch del gioco, applicate all'avvio",
     "Детализация моделей": "Dettaglio dei modelli",
     "Как в игре": "Come nel gioco",
@@ -3022,6 +3128,8 @@ IT = {
     "30 (как на PS4)": "30 (come su PS4)",
     "Ограничение FPS": "Limite di FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: nessun limite; imposta un numero per limitare la frequenza dei fotogrammi",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Sopra i 120 FPS il movimento del gioco può guastarsi: corsa e capriole rallentano',
     "Производительность": "Prestazioni",
     "Двухстадийный конвейер GPU": "Pipeline GPU a due stadi",
     "Быстрее на 20–30%; при нестабильности выключите": "Più veloce del 20–30%; disattivala se è instabile",
@@ -3105,6 +3213,7 @@ IT = {
     "доступен": "raggiungibile",
     "недоступен": "non raggiungibile",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "È impostato un account online, ma “Gioca online” è disattivato",
+    'Больше не спрашивать': 'Non chiedere più',
     "Играть офлайн": "Gioca offline",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID è il nome dell'account (NPID) registrato sul server, non il tuo indirizzo email",
     # DLSS
@@ -3123,6 +3232,9 @@ IT = {
     "Инвертировать камеру геймпада по горизонтали": "Invertire la telecamera del controller in orizzontale",
     "Инвертировать камеру геймпада по вертикали": "Invertire la telecamera del controller in verticale",
     "Ровная скорость камеры по диагонали": "Velocità della telecamera uniforme in diagonale",
+    'Мёртвая зона стиков (%)': 'Zona morta degli stick (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        "Quanto va spostato uno stick perché venga rilevato. Aumentala se il personaggio o la telecamera si muovono da soli (predefinito 4); si applica all'avvio del gioco",
     "Импорт сохранений": "Importa salvataggi",
     "Папка с сохранениями Bloodborne": "Cartella con i salvataggi di Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "È una copia della PS4 per chiavetta USB (sdimg_*): è cifrata con le chiavi della console. Esporta il salvataggio non cifrato sulla PS4 (Apollo Save Tool) o con Save Wizard",
@@ -3594,7 +3706,28 @@ FR = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': "\n— le jeu du joueur {} s'est fermé (code {}) —\n",
     'Выберите контроллер для каждого игрока': 'Choisissez une manette pour chaque joueur',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        "Les fenêtres des joueurs sont placées via X11 et il n'y a pas de serveur X : activez XWayland dans les réglages de la session ou utilisez une session X11",
     'Звук только у игрока 1': 'Son uniquement pour le joueur 1',
+    'Скопировать сохранения игрока 1':
+        'Copier les sauvegardes du joueur 1',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        "Ses personnages pour un autre joueur ; les sauvegardes de ce joueur sont d'abord copiées dans son savedata-backups",
+    'Игроку {}':
+        'Au joueur {}',
+    'Скопировать':
+        'Copier',
+    'У игрока 1 пока нет сохранений':
+        "Le joueur 1 n'a pas encore de sauvegardes",
+    'Не удалось скопировать: {}':
+        'Impossible de copier : {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Sauvegardes du joueur 1 copiées au joueur {}',
+    '; его прежние в {}':
+        ' ; les précédentes sont dans {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        "Les sauvegardes du joueur {} seront remplacées par celles du joueur 1 (les siennes sont d'abord copiées dans savedata-backups)",
+    'Как у игры (Графика → Монитор)': 'Comme le jeu (Graphismes → Écran)',
     'Играть вместе': 'Jouer ensemble',
     'Игрок {}': 'Joueur {}',
     'Игроки': 'Joueurs',
@@ -3838,6 +3971,7 @@ FR = {
     "Сглаживание в разрешении вывода без модели FSR": "Anticrénelage à la résolution de sortie, sans modèle FSR",
     "Нет или повреждён файл {}": "Fichier {} manquant ou endommagé",
     "Эффекты игры": "Effets du jeu",
+    'Меню и отладка': 'Menus et débogage',
     "Патчи игры, применяются при запуске": "Correctifs du jeu, appliqués au démarrage",
     "Детализация моделей": "Détail des modèles",
     "Как в игре": "Comme dans le jeu",
@@ -3863,6 +3997,8 @@ FR = {
     "30 (как на PS4)": "30 (comme sur PS4)",
     "Ограничение FPS": "Limite de FPS",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0 : aucune limite ; indiquez un nombre pour plafonner la fréquence d'images",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Au-delà de 120 FPS, les déplacements du jeu peuvent se dérégler : la course et les roulades ralentissent',
     "Производительность": "Performances",
     "Двухстадийный конвейер GPU": "Pipeline GPU à deux étapes",
     "Быстрее на 20–30%; при нестабильности выключите": "20 à 30 % plus rapide ; désactivez en cas d'instabilité",
@@ -3946,6 +4082,7 @@ FR = {
     "доступен": "accessible",
     "недоступен": "inaccessible",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Un compte en ligne est renseigné, mais « Jouer en ligne » est désactivé",
+    'Больше не спрашивать': 'Ne plus demander',
     "Играть офлайн": "Jouer hors ligne",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "L'Online ID est le nom du compte (NPID) enregistré sur le serveur, pas votre adresse e-mail",
     # DLSS
@@ -3964,6 +4101,9 @@ FR = {
     "Инвертировать камеру геймпада по горизонтали": "Inverser la caméra de la manette horizontalement",
     "Инвертировать камеру геймпада по вертикали": "Inverser la caméra de la manette verticalement",
     "Ровная скорость камеры по диагонали": "Vitesse de caméra uniforme en diagonale",
+    'Мёртвая зона стиков (%)': 'Zone morte des sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        "Jusqu'où un stick doit bouger avant d'être pris en compte. Augmentez-la si le personnage ou la caméra bougent seuls (4 par défaut) ; s'applique au lancement du jeu",
     "Импорт сохранений": "Importer des sauvegardes",
     "Папка с сохранениями Bloodborne": "Dossier des sauvegardes de Bloodborne",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "C’est une copie PS4 pour clé USB (sdimg_*) : elle est chiffrée avec les clés de la console. Exportez la sauvegarde non chiffrée sur la PS4 (Apollo Save Tool) ou avec Save Wizard",
@@ -4435,7 +4575,28 @@ DE = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— das Spiel von Spieler {} wurde beendet (Code {}) —\n',
     'Выберите контроллер для каждого игрока': 'Wähle für jeden Spieler einen Controller',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        'Die Fenster der Spieler werden über X11 platziert, und es gibt keinen X-Server: aktiviere XWayland in den Sitzungseinstellungen oder nutze eine X11-Sitzung',
     'Звук только у игрока 1': 'Ton nur für Spieler 1',
+    'Скопировать сохранения игрока 1':
+        'Spielstände von Spieler 1 kopieren',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        'Seine Charaktere für einen anderen Spieler; dessen Spielstände werden vorher in seine savedata-backups kopiert',
+    'Игроку {}':
+        'Zu Spieler {}',
+    'Скопировать':
+        'Kopieren',
+    'У игрока 1 пока нет сохранений':
+        'Spieler 1 hat noch keine Spielstände',
+    'Не удалось скопировать: {}':
+        'Kopieren fehlgeschlagen: {}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        'Spielstände von Spieler 1 zu Spieler {} kopiert',
+    '; его прежние в {}':
+        '; die vorherigen liegen in {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        'Die Spielstände von Spieler {} werden durch die von Spieler 1 ersetzt (seine werden vorher in savedata-backups kopiert)',
+    'Как у игры (Графика → Монитор)': 'Wie das Spiel (Grafik → Monitor)',
     'Играть вместе': 'Zusammen spielen',
     'Игрок {}': 'Spieler {}',
     'Игроки': 'Spieler',
@@ -4679,6 +4840,7 @@ DE = {
     "Сглаживание в разрешении вывода без модели FSR": "Kantenglättung in Ausgabeauflösung, ohne FSR-Modell",
     "Нет или повреждён файл {}": "Datei {} fehlt oder ist beschädigt",
     "Эффекты игры": "Spieleffekte",
+    'Меню и отладка': 'Menüs und Debugging',
     "Патчи игры, применяются при запуске": "Spiel-Patches, werden beim Start angewendet",
     "Детализация моделей": "Modelldetails",
     "Как в игре": "Wie im Spiel",
@@ -4704,6 +4866,8 @@ DE = {
     "30 (как на PS4)": "30 (wie auf der PS4)",
     "Ограничение FPS": "FPS-Limit",
     "0 — без ограничения; укажите число, чтобы ограничить FPS": "0: kein Limit; gib eine Zahl ein, um die Bildrate zu begrenzen",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        'Über 120 FPS kann die Bewegung im Spiel fehlerhaft werden: Laufen und Rollen werden langsamer',
     "Производительность": "Leistung",
     "Двухстадийный конвейер GPU": "Zweistufige GPU-Pipeline",
     "Быстрее на 20–30%; при нестабильности выключите": "20–30 % schneller; bei Instabilität ausschalten",
@@ -4787,6 +4951,7 @@ DE = {
     "доступен": "erreichbar",
     "недоступен": "nicht erreichbar",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "Ein Online-Konto ist eingetragen, aber „Online spielen“ ist aus",
+    'Больше не спрашивать': 'Nicht mehr fragen',
     "Играть офлайн": "Offline spielen",
     "Online ID — это имя учётной записи (NPID), зарегистрированное на сервере, а не адрес email": "Die Online-ID ist der auf dem Server registrierte Kontoname (NPID), nicht deine E-Mail-Adresse",
     # DLSS
@@ -4805,6 +4970,9 @@ DE = {
     "Инвертировать камеру геймпада по горизонтали": "Controller-Kamera horizontal invertieren",
     "Инвертировать камеру геймпада по вертикали": "Controller-Kamera vertikal invertieren",
     "Ровная скорость камеры по диагонали": "Gleichmäßige Kameradrehung diagonal",
+    'Мёртвая зона стиков (%)': 'Totzone der Sticks (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        'Wie weit ein Stick bewegt werden muss, bevor er zählt. Erhöhe sie, wenn sich Figur oder Kamera von selbst bewegen (Standard 4); gilt beim Spielstart',
     "Импорт сохранений": "Spielstände importieren",
     "Папка с сохранениями Bloodborne": "Ordner mit Bloodborne-Spielständen",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "Das ist eine PS4-Kopie für einen USB-Stick (sdimg_*): Sie ist mit den Schlüsseln der Konsole verschlüsselt. Exportiere den Spielstand unverschlüsselt auf der PS4 (Apollo Save Tool) oder mit Save Wizard",
@@ -5301,7 +5469,28 @@ ZH_CN = {
     # Local co-op (its page, bbport_coop.py).
     '\n— игра игрока {} завершилась (код {}) —\n': '\n— 玩家 {} 的游戏已退出（代码 {}）—\n',
     'Выберите контроллер для каждого игрока': '请为每位玩家选择一个控制器',
+    'Окна игроков расставляются через X11, а X-сервера нет: включите XWayland в настройках сеанса или запустите сеанс X11':
+        '玩家窗口通过 X11 摆放，但没有 X 服务器：请在会话设置中启用 XWayland，或使用 X11 会话',
     'Звук только у игрока 1': '仅玩家 1 有声音',
+    'Скопировать сохранения игрока 1':
+        '复制玩家 1 的存档',
+    'Его персонажи другому игроку; сохранения того игрока сначала копируются в его savedata-backups':
+        '把其角色给另一位玩家；该玩家的存档会先复制到其 savedata-backups',
+    'Игроку {}':
+        '给玩家 {}',
+    'Скопировать':
+        '复制',
+    'У игрока 1 пока нет сохранений':
+        '玩家 1 还没有存档',
+    'Не удалось скопировать: {}':
+        '无法复制：{}',
+    'Сохранения игрока 1 скопированы игроку {}':
+        '已将玩家 1 的存档复制给玩家 {}',
+    '; его прежние в {}':
+        '；其原有存档在 {}',
+    'Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние сначала копируются в savedata-backups)':
+        '玩家 {} 的存档将被玩家 1 的存档替换（其原有存档会先复制到 savedata-backups）',
+    'Как у игры (Графика → Монитор)': '与游戏相同（图形 → 显示器）',
     'Играть вместе': '一起游戏',
     'Игрок {}': '玩家 {}',
     'Игроки': '玩家人数',
@@ -5603,6 +5792,7 @@ ZH_CN = {
     "Нет или повреждён файл {}": "文件 {} 缺失或已损坏",
     # Effects
     "Эффекты игры": "游戏效果",
+    'Меню и отладка': '菜单与调试',
     "Патчи игры, применяются при запуске": "游戏补丁，会在启动时生效",
     "Детализация моделей": "模型细节",
     "Как в игре": "游戏默认",
@@ -5630,6 +5820,8 @@ ZH_CN = {
     "Ограничение FPS": "帧率上限",
     "0 — без ограничения; укажите число, чтобы ограничить FPS":
         "0 表示不限制；填写一个数字可限制帧率",
+    'Выше 120 FPS движение в игре может ломаться: бег и перекаты замедляются':
+        '超过 120 FPS 时游戏的移动可能出错：奔跑和翻滚会变慢',
     # Performance
     "Производительность": "性能",
     "Двухстадийный конвейер GPU": "双阶段 GPU 管线",
@@ -5804,6 +5996,9 @@ ZH_CN = {
     "Инвертировать камеру геймпада по горизонтали": "手柄视角水平反转",
     "Инвертировать камеру геймпада по вертикали": "手柄视角垂直反转",
     "Ровная скорость камеры по диагонали": "斜向镜头速度均匀",
+    'Мёртвая зона стиков (%)': '摇杆死区 (%)',
+    'Насколько нужно отклонить стик, чтобы он сработал. Увеличьте, если персонаж или камера двигаются сами (по умолчанию 4); применяется при запуске игры':
+        '摇杆需要推动多少才会生效。如果角色或镜头自己移动，请调高（默认 4）；在游戏启动时生效',
     "Импорт сохранений": "导入存档",
     "Папка с сохранениями Bloodborne": "Bloodborne 存档文件夹",
     "Это копия с PS4 на флешке (sdimg_*): она зашифрована ключами консоли. Экспортируйте сохранение без шифрования на PS4 (Apollo Save Tool) или через Save Wizard": "这是 PS4 导出到 U 盘的副本（sdimg_*）：它用主机的密钥加密。请在 PS4 上（Apollo Save Tool）或用 Save Wizard 导出未加密的存档",
@@ -5850,6 +6045,7 @@ ZH_CN = {
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "同一会话中的所有人必须使用相同的游戏版本（1.09）和同一服务器。作弊功能也会改变其他玩家的游戏：一起游玩时请关闭",
     "Учётная запись": "账号",
     "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено": "已填写联机账号，但「在线游玩」未开启",
+    'Больше не спрашивать': '不再询问',
     "Читы": "作弊",
     "Экспорт журнала": "导出日志",
     "Экспорт журнала…": "导出日志…",

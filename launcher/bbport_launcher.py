@@ -121,12 +121,15 @@ EFFECTS = [
     ("effect_game_aa", "Собственное сглаживание игры", True),
     ("effect_dynamic_shadows", "Тени от динамических источников", True),
     ("effect_ssr", "Отражения SSR (не было в игре)", False),
+    # Not graphics: under Mods, in their own group (GAME_MENU_EFFECTS).
     ("skip_intro", "Пропуск заставок при запуске", False),
     ("debug_camera", "Свободная камера (Cross + L3 / Space + Z)", False),
     ("debug_menu", "Debug menu (левый touchpad / Tab; нужны шрифты)", False),
     # The menus' own entry (scripts/quit_menu.py: menu texts and a patch at start).
     ("quit_to_desktop", "Пункт «Выйти на рабочий стол» в главном меню и в меню «Система»", True),
 ]
+# The EFFECTS that change the game's menus or open its debug tools, not the picture.
+GAME_MENU_EFFECTS = ("skip_intro", "quit_to_desktop", "debug_camera", "debug_menu")
 # Cheats and gameplay tweaks (community patches for 1.09, applied at start): bbport.ini key, title,
 # subtitle. All off by default.
 CHEATS = [
@@ -275,12 +278,19 @@ DEFAULTS = {
     "coop_layout": "rows",
     "coop_controllers": [],
     "coop_sound_first_only": True,
+    # The monitor the players' windows share ("": the game's, Graphics → Monitor).
+    "coop_display": "",
     # Hunter's Atlas (its group in Settings): the in-game map, off by default; lamp travel and items.
     "atlas": False,
     "atlas_travel": True,
     "atlas_items": True,
     # A copy of the saves before each game (Setup → Saves, save_import.auto_backup): off by
     # default; how many copies stay.
+    # Play with an account set and "Play online" off asks which (on_launch), unless told not to.
+    "ask_online_off": True,
+    # The sticks' inner dead zone in percent of their travel (BB_PAD_DEADZONE, of 127; the port's
+    # default 5 is 4 %).
+    "pad_deadzone": 4,
     "saves_auto_backup": False,
     "saves_auto_backup_keep": 5,
 }
@@ -625,6 +635,9 @@ def game_environment(s):
         env["BB_GAMEPAD"] = s["gamepad"]
     if s.get("display"):
         env["BB_DISPLAY"] = s["display"]
+    deadzone = number(s.get("pad_deadzone", 4), 4, int, "settings.json", "pad_deadzone")
+    if deadzone != 4:  # else the port's own default
+        env["BB_PAD_DEADZONE"] = str(round(max(0, min(deadzone, 50)) * 127 / 100))
     env["BB_SKIP_NETWORK_CHOICE"] = "1" if s.get("skip_network_choice", True) else "0"
     if s["hdr"]:
         env["BB_HDR"] = "1"
@@ -1397,6 +1410,14 @@ class LauncherWindow(Adw.ApplicationWindow):
                            ("pad_camera_diagonal", tr("Ровная скорость камеры по диагонали"))):
             self.stick_rows[key] = Adw.SwitchRow(title=title, active=self.ini.get(key) == "1")
             controls.add(self.stick_rows[key])
+        self.deadzone_row = Adw.SpinRow.new_with_range(0, 50, 1)
+        self.deadzone_row.set_title(tr("Мёртвая зона стиков (%)"))
+        self.deadzone_row.set_subtitle(tr("Насколько нужно отклонить стик, чтобы он сработал. "
+                                          "Увеличьте, если персонаж или камера двигаются сами "
+                                          "(по умолчанию 4); применяется при запуске игры"))
+        self.deadzone_row.set_value(number(self.settings["pad_deadzone"], 4, int, "settings.json",
+                                           "pad_deadzone"))
+        controls.add(self.deadzone_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
@@ -1531,7 +1552,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                                  self.ini.get("model_lod", "0"))
         effects.add(self.lod_row)
         self.effect_rows = {}
-        for key, title, default in EFFECTS:
+        menus = Adw.PreferencesGroup(title=tr("Меню и отладка"),
+                                     description=tr("Патчи игры, применяются при запуске"))
+        for key, title, default in sorted(EFFECTS, key=lambda e: e[0] in GAME_MENU_EFFECTS
+                                          and GAME_MENU_EFFECTS.index(e[0]) + 1):
             row = Adw.SwitchRow(title=tr(title),
                                 active=self.ini.get(key, "1" if default else "0") == "1")
             if key == "debug_menu":
@@ -1541,7 +1565,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 row.set_subtitle(tr("В меню «Система» игра сначала сохраняется, как при «Выходе из "
                                     "игры», и потом закрывается"))
             self.effect_rows[key] = row
-            effects.add(row)
+            (menus if key in GAME_MENU_EFFECTS else effects).add(row)
         # The title's "play online / play offline": answered as the Online page's switch.
         self.skip_network_row = Adw.SwitchRow(
             title=tr("Пропускать выбор «по сети / вне сети»"),
@@ -1552,6 +1576,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.netchoice_group = Adw.PreferencesGroup()
         self.netchoice_group.add(self.skip_network_row)
         self.place("graphics", 40, effects)
+        self.place("mods", 45, menus)
 
         streaming = Adw.PreferencesGroup(title=tr("Загрузки и плавность"),
                                          description=tr("Патчи игры из bbhost, применяются при запуске"))
@@ -1572,6 +1597,20 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.limit_row.set_subtitle(tr("0 — без ограничения; укажите число, чтобы ограничить FPS"))
         self.limit_row.set_value(number(self.settings["fps_limit"], 0, int, "settings.json",
                                         "fps_limit"))
+        # Above about 120 FPS the game's movement timing breaks (Supermedo 51cac0e): a cap above it
+        # is marked, and says why.
+        self.limit_warning = Gtk.Image(icon_name="dialog-warning-symbolic", visible=False,
+                                       tooltip_text=tr("Выше 120 FPS движение в игре может ломаться: "
+                                                       "бег и перекаты замедляются"))
+        self.limit_row.add_prefix(self.limit_warning)
+
+        def show_limit(*_):
+            high = self.limit_row.get_value() > 120
+            self.limit_warning.set_visible(high)
+            self.limit_row.set_subtitle(self.limit_warning.get_tooltip_text() if high else
+                                        tr("0 — без ограничения; укажите число, чтобы ограничить FPS"))
+        self.limit_row.connect("notify::value", show_limit)
+        show_limit()
         frames.add(self.limit_row)
         self.place("graphics", 30, frames)
 
@@ -2155,17 +2194,18 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.gamepad_row.set_selected(self.gamepad_row.values.index(current) if current in self.gamepad_row.values else 0)
         self.show_gamepad()
 
-    def fill_displays(self):
-        """The monitor choices: the primary one, the connected ones, and the chosen one while it is
-        not connected (on Refresh, the row's choice, saved or not)."""
-        current = combo_value(self.display_row) if hasattr(self.display_row, "values") else \
-            self.settings.get("display", "")
-        choices = [(tr("Основной"), "")] + [(label, value) for value, label in connected_displays()]
+    def fill_displays(self, row=None, key="display", first=None):
+        """A monitor row's choices (Graphics → Monitor, or local co-op's): the primary one (or
+        `first`), the connected ones, and the chosen one while it is not connected (on Refresh,
+        the row's choice, saved or not)."""
+        row = row or self.display_row
+        current = combo_value(row) if hasattr(row, "values") else self.settings.get(key, "")
+        choices = [(first or tr("Основной"), "")] + [(label, value) for value, label in connected_displays()]
         if current and current not in [value for _, value in choices]:
             choices.append((tr("{} (не подключён)").format(current), current))
-        self.display_row.set_model(Gtk.StringList.new([label for label, _ in choices]))
-        self.display_row.values = [value for _, value in choices]
-        self.display_row.set_selected(self.display_row.values.index(current) if current in self.display_row.values else 0)
+        row.set_model(Gtk.StringList.new([label for label, _ in choices]))
+        row.values = [value for _, value in choices]
+        row.set_selected(row.values.index(current) if current in row.values else 0)
 
     def show_gamepad(self):
         names = getattr(self.gamepad_row, "names", None)
@@ -2215,6 +2255,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["coop_layout"] = combo_value(self.coop_layout_row)
         s["coop_controllers"] = [combo_value(row) for row in self.coop_pad_rows]
         s["coop_sound_first_only"] = self.coop_sound_row.get_active()
+        s["coop_display"] = combo_value(self.coop_display_row)
+        s["pad_deadzone"] = int(self.deadzone_row.get_value())
         s["saves_auto_backup"] = self.auto_backup_row.get_active()
         s["saves_auto_backup_keep"] = int(self.auto_backup_keep_row.get_value())
         self.save_mod_profile()
@@ -2496,6 +2538,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         play.add(self.online_row)
         if online_module():
             self.online_row.connect("notify::active", lambda *_: self.show_online_switch())
+            self.online_row.connect("notify::active", lambda row, _p: row.get_active()
+                                    and self.settings.update(ask_online_off=True))
             self.show_online_switch()
         else:
             self.online_row.set_sensitive(False)
@@ -2504,8 +2548,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.test_group = Adw.PreferencesGroup(title=tr("Проверка соединения"), visible=False)
         self.test_rows = []
         page.add(self.test_group)
-        if self.netchoice_group is not None:
-            page.add(self.netchoice_group)
 
         game = Adw.PreferencesGroup(title=tr("Игровой сервер (сообщения, пятна крови, призраки)"))
         self.community_row = Adw.EntryRow(title=tr("Игровой сервер"), text=s["online_community"])
@@ -2517,7 +2559,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             active=s["online_seamlesshunt_tombs"])
         game.add(self.tombs_row)
         self.game_group = game
-        page.add(game)
 
         coop = Adw.PreferencesGroup(title=tr("Сервер кооператива (колокола и призывы)"))
         kinds = SERVER_KINDS + ([THD_KIND] if bridge_cli() else [])
@@ -2536,12 +2577,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         for row in (self.server_row, self.webapi_row, guide):
             coop.add(row)
         self.own_server_rows = (self.server_row, self.webapi_row, guide)
-        page.add(coop)
 
         # Seamless co-op: BBSC (bbsc/, CLS_AMG) in the game, on any server; its options are
         # mod.json's (scripts/bbsc.py), kept only where the player changed them.
         self.bbsc_row = None
         self.bbsc_option_rows = {}
+        seamless = None
         if bbsc_library() and bbsc.options():
             seamless = Adw.PreferencesGroup(
                 title=tr("Бесшовный кооператив (BBSC)"),
@@ -2572,7 +2613,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             seamless.add(options)
             self.bbsc_row.bind_property("active", options, "sensitive",
                                         GObject.BindingFlags.SYNC_CREATE)
-            page.add(seamless)
 
         # The Hunter's Dream: a Discord sign-in through bbbridge; its account is the online ID.
         self.thd_group = Adw.PreferencesGroup(
@@ -2602,7 +2642,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.thd_recover_button.connect("clicked", lambda _b: self.bridge_account("recover"))
         self.thd_code_row.add_suffix(self.thd_recover_button)
         self.thd_group.add(self.thd_code_row)
-        page.add(self.thd_group)
 
         account = Adw.PreferencesGroup(
             title=tr("Учётная запись"),
@@ -2626,7 +2665,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         account.add(self.register_row)
         self.server_kind_row.connect("notify::selected", lambda *_: self.swap_account())
         self.account_group = account
-        page.add(account)
 
         connection = Adw.PreferencesGroup(
             title=tr("Соединение"),
@@ -2656,7 +2694,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.p2p_port_row.connect("notify::value", lambda *_: self.show_firewall_rows())
         self.show_firewall_rows()
         self.connection_group = connection
-        page.add(connection)
+        # In the order they are needed: which server, its address, the account on it, seamless
+        # co-op, then the connection's details and the title's choice screen.
+        for group in (coop, game, self.thd_group, account, seamless, connection, self.netchoice_group):
+            if group is not None:
+                page.add(group)
         self.server_kind_row.connect("notify::selected", lambda *_: self.show_server_kind())
         self.show_server_kind()
         self.last_login = getattr(self, "last_login", None)
@@ -3670,6 +3712,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         group.add(self.coop_players_row)
         self.coop_layout_row = combo_row(tr("Расположение"), None, COOP_LAYOUTS, s["coop_layout"])
         group.add(self.coop_layout_row)
+        # The players' windows on another monitor than the game's alone (a TV beside the desk).
+        self.coop_display_row = readable_choice(Adw.ComboRow(title=tr("Монитор")))
+        self.coop_display_row.add_suffix(flat_button("view-refresh-symbolic", tr("Обновить список"),
+                                                     lambda _button: self.fill_coop_display()))
+        self.fill_coop_display()
+        group.add(self.coop_display_row)
         self.coop_sound_row = Adw.SwitchRow(title=tr("Звук только у игрока 1"),
                                             subtitle=tr("Иначе звучат все игры сразу"),
                                             active=s["coop_sound_first_only"])
@@ -3688,6 +3736,23 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.fill_coop_controllers()
         page.add(pads)
 
+        # Player 1's saves for another player (each has its own): the same character to play with.
+        saves = Adw.PreferencesGroup()
+        copy = Adw.ActionRow(title=tr("Скопировать сохранения игрока 1"),
+                             subtitle=tr("Его персонажи другому игроку; сохранения того игрока сначала "
+                                         "копируются в его savedata-backups"))
+        menu = Gio.Menu()
+        actions = Gio.SimpleActionGroup()
+        for player in range(2, bbport_coop.MAX_PLAYERS + 1):
+            menu.append(tr("Игроку {}").format(player), f"coopsaves.player{player}")
+            action = Gio.SimpleAction(name=f"player{player}")
+            action.connect("activate", lambda _a, _p, player=player: self.on_coop_copy_saves(player))
+            actions.add_action(action)
+        copy.insert_action_group("coopsaves", actions)
+        copy.add_suffix(Gtk.MenuButton(label=tr("Скопировать"), menu_model=menu, valign=Gtk.Align.CENTER))
+        saves.add(copy)
+        page.add(saves)
+
         start = Adw.PreferencesGroup()
         self.coop_button = Gtk.Button(label=tr("Играть вместе"), halign=Gtk.Align.CENTER,
                                       css_classes=["suggested-action", "pill"])
@@ -3696,6 +3761,36 @@ class LauncherWindow(Adw.ApplicationWindow):
         page.add(start)
         self.show_coop_players()
         return page
+
+    def on_coop_copy_saves(self, player):
+        """Player 1's saves (the launcher's) as player `player`'s, after a backup of theirs
+        (save_import.import_saves), with no game running."""
+        title = tr("Скопировать сохранения игрока 1")
+        if self.process is not None or self.coop_processes or save_import.game_running():
+            self.alert(title, tr("Сначала закройте игру"))
+            return
+        game = self.settings["game_dir"] or None
+        source = save_import.saves_in_use(self.user_dir(), game)
+        if source is None:
+            self.alert(title, tr("У игрока 1 пока нет сохранений"))
+            return
+        target = bbport_coop.data_dir(DATA_DIR, player) / "user"
+
+        def copy():
+            try:
+                _saves, backup = save_import.import_saves(source, target, game)
+            except (OSError, save_import.SaveImportError) as error:
+                self.alert(title, tr("Не удалось скопировать: {}").format(error))
+                return
+            done = tr("Сохранения игрока 1 скопированы игроку {}").format(player)
+            self.toasts.add_toast(Adw.Toast(title=done + (tr("; его прежние в {}").format(backup)
+                                                          if backup else "")))
+        self.confirm(title, tr("Сохранения игрока {} заменятся сохранениями игрока 1 (его прежние "
+                               "сначала копируются в savedata-backups)").format(player),
+                     tr("Скопировать"), copy)
+
+    def fill_coop_display(self):
+        self.fill_displays(self.coop_display_row, "coop_display", tr("Как у игры (Графика → Монитор)"))
 
     def fill_coop_controllers(self):
         """Each player's controller choices: none, the keyboard and mouse, the connected
@@ -3744,6 +3839,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         problem = bbport_coop.problems(players, controllers)
         if problem:
             self.alert(tr("Локальный кооп"), {
+                "x11": tr("Окна игроков расставляются через X11, а X-сервера нет: включите XWayland "
+                          "в настройках сеанса или запустите сеанс X11"),
                 "controller": tr("Выберите контроллер для каждого игрока"),
                 "same controller": tr("Один контроллер выбран у двух игроков"),
                 "keyboard twice": tr("Клавиатура и мышь могут быть только у одного игрока"),
@@ -3751,8 +3848,9 @@ class LauncherWindow(Adw.ApplicationWindow):
             return
         layout = self.settings["coop_layout"]
         sound = self.settings["coop_sound_first_only"]
+        display = self.settings.get("coop_display", "")
         first = bbport_coop.player_environment(self.environment(), 1, players, controllers[0],
-                                               layout, sound)
+                                               layout, sound, display=display)
         self.start_game(first)
         if not self.process:
             return
@@ -3760,7 +3858,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             folder = bbport_coop.prepare_data_dir(DATA_DIR, player, ini_path())
             env = game_environment(bbport_coop.player_settings(self.settings, player))
             env = bbport_coop.player_environment(env, player, players, controllers[player - 1],
-                                                 layout, sound, folder)
+                                                 layout, sound, folder, display)
             GLib.timeout_add_seconds(COOP_START_DELAY * (player - 1), self.start_coop_player,
                                      player, env, self.process)
 
@@ -3812,9 +3910,13 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.stop_game()
             return
         npid = self.npid_row.get_text().strip()
-        if online_module() and not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog"):
+        if online_module() and not self.online_row.get_active() and npid and hasattr(Adw, "AlertDialog") \
+                and self.settings.get("ask_online_off", True):
             dialog = Adw.AlertDialog(heading="Bloodborne", body=tr(
                 "Учётная запись для игры онлайн указана, но «Играть онлайн» выключено"))
+            # Someone who plays offline on purpose: asked again once "Play online" is turned on.
+            again = Gtk.CheckButton(label=tr("Больше не спрашивать"), halign=Gtk.Align.CENTER)
+            dialog.set_extra_child(again)
             dialog.add_response("cancel", tr("Отмена"))
             dialog.add_response("offline", tr("Играть офлайн"))
             dialog.add_response("online", tr("Играть онлайн"))
@@ -3822,6 +3924,8 @@ class LauncherWindow(Adw.ApplicationWindow):
 
             def on_response(_dialog, response):
                 if response != "cancel":
+                    if again.get_active():
+                        self.settings["ask_online_off"] = False
                     self.online_row.set_active(response == "online")
                     self.with_gamepads(self.start_game)
             dialog.connect("response", on_response)

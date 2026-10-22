@@ -11,6 +11,7 @@ BB_GAMEPAD_STRICT, BB_KEYBOARD=0 for the controller players, BB_PAD_BACKGROUND a
 (a part of the display). The windows are placed through X11 (SDL_VIDEO_DRIVER=x11): Wayland lets no
 window place itself.
 """
+import os
 import shutil
 from pathlib import Path
 
@@ -70,10 +71,13 @@ def player_settings(settings, player):
 
 
 def player_environment(env, player, players, controller, layout="rows", sound_first_only=True,
-                       folder=None):
+                       folder=None, display=""):
     """`env` (the game's environment from player_settings) with player `player`'s window part,
-    controller (a device path, or KEYBOARD) and, for players 2-4, data folder."""
+    controller (a device path, or KEYBOARD), for players 2-4 data folder and, when one is chosen
+    for local co-op, the monitor the windows share (BB_DISPLAY; else the game's)."""
     env = dict(env)
+    if display:
+        env["BB_DISPLAY"] = display
     env.update(SDL_VIDEO_DRIVER="x11", BB_PAD_BACKGROUND="1", BB_GAMEPAD_STRICT="1",
                BB_WINDOW_RECT=rect_text(layout_rects(players, layout)[player - 1]),
                BB_FULLSCREEN="0")
@@ -92,11 +96,14 @@ def player_environment(env, player, players, controller, layout="rows", sound_fi
     return env
 
 
-def problems(players, controllers):
-    """What keeps local co-op from starting: "controller" (a player without one), "same
-    controller" (two players with one) or "keyboard twice"."""
+def problems(players, controllers, environ=None):
+    """What keeps local co-op from starting: "x11" (no X server: the windows are placed through
+    X11, XWayland in a Wayland session), "controller" (a player without one), "same controller"
+    (two players with one) or "keyboard twice"."""
     chosen = list(controllers[:players])
     found = []
+    if not (os.environ if environ is None else environ).get("DISPLAY"):
+        found.append("x11")
     if len(chosen) < players or not all(chosen):
         found.append("controller")
     pads = [c for c in chosen if c and c != KEYBOARD]

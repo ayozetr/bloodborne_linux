@@ -92,16 +92,30 @@ class EnvironmentTests(unittest.TestCase):
         self.assertNotIn('BB_AUDIO', loud)
 
 
+class DisplayTests(unittest.TestCase):
+    def test_the_monitor_chosen_for_local_co_op(self):
+        env = {'BB_DISPLAY': 'ASUS'}
+        self.assertEqual(coop.player_environment(env, 1, 2, coop.KEYBOARD)['BB_DISPLAY'], 'ASUS')
+        self.assertEqual(coop.player_environment(env, 2, 2, coop.KEYBOARD, display='2')['BB_DISPLAY'], '2')
+
+
 class ProblemTests(unittest.TestCase):
+    X11 = {'DISPLAY': ':0'}
+
     def test_ready(self):
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD, '']), [])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD, ''], self.X11), [])
 
     def test_missing_same_and_keyboard_twice(self):
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5']), ['controller'])
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '']), ['controller'])
-        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '/dev/hidraw5']), ['same controller'])
-        self.assertEqual(coop.problems(3, [coop.KEYBOARD, coop.KEYBOARD, '/dev/hidraw5']),
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5'], self.X11), ['controller'])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', ''], self.X11), ['controller'])
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', '/dev/hidraw5'], self.X11), ['same controller'])
+        self.assertEqual(coop.problems(3, [coop.KEYBOARD, coop.KEYBOARD, '/dev/hidraw5'], self.X11),
                          ['keyboard twice'])
+
+    def test_no_x_server(self):
+        # A Wayland session without XWayland: the windows could not be placed.
+        self.assertEqual(coop.problems(2, ['/dev/hidraw5', coop.KEYBOARD], {'WAYLAND_DISPLAY': 'wayland-0'}),
+                         ['x11'])
 
 
 if __name__ == '__main__':

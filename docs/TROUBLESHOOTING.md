@@ -64,7 +64,7 @@ stretched. `aspect_patch=0` in bbport.ini turns the wider view off.
 
 ## Quit to Desktop is missing from the menus, or shows another name
 
-**Graphics → Game effects → Quit to Desktop in the title and System menus** (also in the in-game
+**Mods → Menus and debugging → Quit to Desktop in the title and System menus** (also in the in-game
 menu; on by default) adds the entry to the title menu and to the System menu. The title entry
 closes the game at once; the System entry runs the game's own *Exit Game* first (it saves, and
 its confirmation asks to quit to the desktop), and the game closes when it is back at the intro

@@ -85,8 +85,10 @@ Several games on one PC, one per player, each in its part of the screen with its
 controller, then press **Play together**. Player 1 plays with the launcher's settings and saves;
 players 2 to 4 get their own saves and settings in `~/.local/share/bbport/coop/player<N>` (copied
 from player 1's the first time, about 400 MB each), without online play or Discord. One player can
-use the keyboard and mouse. Only player 1 has sound unless you turn that off. The windows are
-placed through X11, which works in a Wayland session too (XWayland).
+use the keyboard and mouse. Only player 1 has sound unless you turn that off. The windows can go
+to a monitor of their own (**Monitor**), and **Copy player 1's saves** gives another player the
+same characters (their own saves are backed up first). The windows are placed through X11, which
+works in a Wayland session too (XWayland).
 
 ## Building from source
 
