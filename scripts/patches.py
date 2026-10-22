@@ -344,6 +344,7 @@ def quit_to_desktop_writes(elf,others=()):
     import quit_menu
     try:
         quit_menu.check_original(lambda start,end: eboot_bytes(elf,start,end))
+        quit_menu.check_segments(eboot_segments(elf))
     except ValueError as error:
         print(f'Patches: {error}; Quit to Desktop skipped')
         return []

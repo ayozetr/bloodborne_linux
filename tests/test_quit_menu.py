@@ -63,8 +63,9 @@ def strings_of(archive):
             for _, offset, length, file_id in qm.bnd4_files(bnd)}
 
 
-GAME_TEXTS = {200: {qm.TITLE_ID: 'Opinion Box', qm.SYSTEM_ID: 'Language', 1: 'Exit Game'},
-              201: {qm.TITLE_ID: 'Send an opinion', qm.SYSTEM_ID: 'Change the language', 2: None},
+# 110005: the System menu's Language entry, kept (Quit to Desktop's is a new id).
+GAME_TEXTS = {200: {qm.TITLE_ID: 'Opinion Box', 110005: 'Language', 1: 'Exit Game'},
+              201: {qm.TITLE_ID: 'Send an opinion', 110005: 'Change the language', 2: None},
               204: {qm.DIALOG_ID: 'Change the language?', 110000: 'Exit the game?'},
               300: {5: 'untouched'}}
 
@@ -76,13 +77,31 @@ class CodeTests(unittest.TestCase):
         for (_, end), (start, _) in zip(spans, spans[1:]):
             self.assertLessEqual(end, start)
         cave = dict(writes)[qm.CAVE]
-        self.assertEqual(cave[0x60:], b'bb:t\0bb:q\0bb:p\0bb:d\0')
-        self.assertEqual(len(dict(writes)[qm.SYSTEM_ITEM]), qm.SYSTEM_CONDITION - qm.SYSTEM_ITEM)
-        self.assertEqual(len(dict(writes)[qm.SYSTEM_CONDITION]), qm.SYSTEM_REMOVE - qm.SYSTEM_CONDITION)
+        # Past the end of the code segment, within its last page.
+        self.assertGreaterEqual(qm.CAVE, qm.CODE_END)
+        self.assertLessEqual(qm.CAVE + len(cave), qm.CAVE_END)
+        self.assertTrue(cave.endswith(b'bb:t\0bb:q\0bb:p\0bb:d\0'))
+        # The Language item: a jump into the new code, then nops up to the game's own text
+        # lookup; the game's condition code (the item kept or removed) is left as it is.
+        item = dict(writes)[qm.SYSTEM_ITEM]
+        self.assertEqual(len(item), qm.SYSTEM_TEXT - qm.SYSTEM_ITEM)
+        self.assertEqual(item[0], 0xE9)
+        target = qm.SYSTEM_ITEM + 5 + struct.unpack_from('<i', item, 1)[0]
+        self.assertTrue(qm.CAVE <= target < qm.CAVE + len(cave))
+        self.assertEqual(item[5:], b'\x90' * (len(item) - 5))
+        self.assertNotIn(qm.SYSTEM_KEEP, dict(writes))
 
     def test_title_entry_slot_points_into_the_code(self):
-        slot, = struct.unpack('<Q', dict(qm.code_writes())[qm.OPINION_SLOT])
-        self.assertTrue(qm.CAVE <= slot - qm.EBOOT_BASE < qm.CAVE + 0x60)
+        writes = dict(qm.code_writes())
+        slot, = struct.unpack('<Q', writes[qm.OPINION_SLOT])
+        self.assertTrue(qm.CAVE <= slot - qm.EBOOT_BASE < qm.CAVE + len(writes[qm.CAVE]))
+
+    def test_segment_layout(self):
+        qm.check_segments([(0, qm.CODE_END), (0x50DC000, 0x56D30F4)])
+        with self.assertRaises(ValueError):  # the code segment ends elsewhere
+            qm.check_segments([(0, qm.CODE_END + 4), (0x50DC000, 0x56D30F4)])
+        with self.assertRaises(ValueError):  # another segment starts in the cave's page
+            qm.check_segments([(0, qm.CODE_END), (0x50D9800, 0x56D30F4)])
 
     def test_calls_reach_their_targets(self):
         title = dict(qm.code_writes())[qm.TITLE_CONDITION]
@@ -120,7 +139,8 @@ class PatchesTests(unittest.TestCase):
         self.assertIn('Quit to Desktop skipped', out.getvalue())
 
     def test_another_patch_of_the_same_code_wins(self):
-        with mock.patch.object(qm, 'check_original'):
+        with mock.patch.object(qm, 'check_original'), mock.patch.object(qm, 'check_segments'), \
+                mock.patch.object(patches, 'eboot_segments'):
             self.assertEqual(patches.quit_to_desktop_writes(b'', [(0x100, b'\x90')]), qm.code_writes())
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 self.assertEqual(patches.quit_to_desktop_writes(b'', [(qm.TITLE_CONDITION + 2, b'\x90')]), [])

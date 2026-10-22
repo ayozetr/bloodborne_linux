@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Quit to Desktop in the game's own menus (bbport.ini quit_to_desktop, game version 01.09).
 
-Both menus keep entries of FromSoftware's PC builds that the console game removes: "Opinion
-Box" on the title menu and "Language" in the System menu. The patches show them, as Quit to
-Desktop, and change what they do:
+The title menu keeps an entry of FromSoftware's PC builds that the console game hides, "Opinion
+Box"; the patches show it as Quit to Desktop. The System menu gets a new entry in the world, where
+the game builds its Language entry only to remove it again (outside the world Language stays, as
+in the game):
 
 - Title menu: the entry tells the port to close the game ("bb:q"). Nothing is lost there.
 - System menu (in the world): the entry runs Exit Game, so the game saves and leaves the world as
@@ -15,10 +16,11 @@ Desktop, and change what they do:
   the choice skipped online, the patch that skips it says so: patches/Bloodborne.xml).
 
 The messages go through the game's sceSystemServiceLaunchWebBrowser import, which the port
-answers itself (src/runtime_services.c). The new code lives where the Language entry's old
-handler and item code were (patches.py writes it). The script writes the entries' texts and the
-six-row menus as a mod layer under the mods (run.sh: mods.py --ui-mods): the game's menu text
-archives with those strings replaced, and the title and System menu movies.
+answers itself (src/runtime_services.c). The new code lives past the end of the code segment, in
+the rest of its last 4 KiB page (mapped with it, unused by the game; src/probe.c lets patches
+write there; patches.py writes it). The script writes the entries' texts and the six-row menus as
+a mod layer under the mods (run.sh: mods.py --ui-mods): the game's menu text archives with those
+strings added, and the title and System menu movies.
 """
 import argparse
 import hashlib
@@ -41,21 +43,23 @@ OPINION_INVOKE = 0x1B46030   # the Opinion Box callback
 OPINION_SLOT = 0x533B960     # its vtable slot
 TITLE_CONDITION = 0x1B4ABF3  # call: is the Opinion Box shown
 ONLINE_LABEL = 0x1B390A7     # call TEXT: "Play Online", the first screen after leaving the world
-SYSTEM_ITEM = 0x1BB4441      # the Language item's callback and add, up to SYSTEM_CONDITION
-SYSTEM_CONDITION = 0x1BB44C1 # in the world: keep the item; title System menu: remove it
-SYSTEM_KEEP, SYSTEM_REMOVE = 0x1BB4561, 0x1BB44D3
+SYSTEM_ITEM = 0x1BB4412      # the Language item: its texts, then the item (Exit Game's is in r13)
+SYSTEM_TEXT = 0x1BB441E      # SYSTEM_ITEM after its first two instructions
+SYSTEM_KEEP = 0x1BB4561      # after the Language item's condition: the item stays
 EXIT_DIALOG = 0x1C0CA1B      # Exit Game's confirmation text (mov esi, 0xcc; mov edx, 110000)
-CAVE = 0x1BB4BE0             # the Language item's handler, 128 bytes, unused after SYSTEM_ITEM
+CODE_END = 0x50D96DC         # end of the code segment; up to its 4 KiB page end nothing is there
+CAVE = 0x50D9700
+CAVE_END = (CODE_END + 0xFFF) & ~0xFFF
 
 # Text ids (menu.msgbnd.dcx): FMG 200 item names, 201 one-line help, 204 dialogs.
-TITLE_ID, SYSTEM_ID, DIALOG_ID = 401307, 110005, 110005
+# SYSTEM_ID is free in 200 and 201 (110005 is Language's), DIALOG_ID in 204.
+TITLE_ID, SYSTEM_ID, DIALOG_ID = 401307, 110006, 110005
 ORIGINAL = {
     TITLE_CONDITION: 'e8c8eef9ff',
     ONLINE_LABEL: 'e814fcfaff',
-    SYSTEM_ITEM: '488d05d88c7803 48898570dfffff 488d058a070000',
-    SYSTEM_CONDITION: '4584ff 750d e87556f3ff 84c0 0f858e000000',
+    SYSTEM_ITEM: '4c8db5a0dfffff bec8000000 bab5ad0100',
+    SYSTEM_KEEP: '488bbd90dfffff',
     EXIT_DIALOG: 'becc000000 bab0ad0100',
-    CAVE: '554889e5415741565348 83ec38 4989fe',
 }
 
 
@@ -67,7 +71,7 @@ class Code:
     """Machine code placed at an image offset, with rip-relative references."""
 
     def __init__(self, offset):
-        self.offset, self.data = offset, bytearray()
+        self.offset, self.data, self.messages = offset, bytearray(), []
 
     @property
     def here(self):
@@ -86,8 +90,10 @@ class Code:
         self.data += bytes.fromhex(prefix) + struct.pack('<i', target - (self.here + 7))
 
     def browser(self, message):
-        """Calls the browser import with `message` (8-byte aligned stack at the call)."""
-        self.lea('488d3d', message)
+        """Calls the browser import with message string number `message` (placed by link();
+        8-byte aligned stack at the call)."""
+        self.messages.append((len(self.data), message))
+        self.raw('488d3d00000000')  # lea rdi, [rip + string]
         self.raw('31f6')  # xor esi, esi
         self.call(BROWSER)
 
@@ -95,71 +101,75 @@ class Code:
 def code_writes():
     """(offset, bytes) writes, the vtable slot holding a patch-base address (probe.c rebases it)."""
     cave = Code(CAVE)
-    strings = {}
-    string_at = CAVE + 0x60
-    for name in ('t', 'q', 'p', 'd'):
-        strings[name] = string_at
-        string_at += 5
     # Title menu condition: tell the port the title menu is being built; always show the entry.
     title_condition = cave.here
     cave.raw('4883ec08')       # sub rsp, 8
-    cave.browser(strings['t'])
+    cave.browser(0)
     cave.raw('4883c408b001c3')  # add rsp, 8; mov al, 1; ret
     # Title menu entry: close the game, then the entry's own job as before.
     title_invoke = cave.here
     cave.raw('57564883ec08')   # push rdi; push rsi; sub rsp, 8
-    cave.browser(strings['q'])
+    cave.browser(1)
     cave.raw('4883c4085e5f')   # add rsp, 8; pop rsi; pop rdi
     cave.jmp(OPINION_INVOKE)
     # System menu entry (handler(out, context) like Exit Game's): mark the quit, then Exit Game.
     system_handler = cave.here
     cave.raw('57564883ec08')
-    cave.browser(strings['p'])
+    cave.browser(2)
     cave.raw('4883c4085e5f')
     cave.jmp(EXIT_HANDLER)
-    if cave.here > CAVE + 0x60:
-        raise ValueError('quit menu code does not fit')
-    cave.data = cave.data.ljust(0x60, b'\xcc')
-    for name in ('t', 'q', 'p', 'd'):
-        cave.data += f'bb:{name}'.encode() + b'\0'
-
-    # The Language item's callback becomes Exit Game's kind ({context, handler}); the context is
-    # the one Exit Game's item just used, still at [rbp-0x1fe0].
-    item = Code(SYSTEM_ITEM)
-    item.raw('488b8520e0ffff')  # mov rax, [rbp-0x1fe0]
-    item.raw('48898570dfffff')  # mov [rbp-0x2090], rax
-    item.lea('488d05', system_handler)
-    item.raw('48898578dfffff')  # mov [rbp-0x2088], rax
-    item.raw('488d9570dfffff')  # lea rdx, [rbp-0x2090]
-    item.raw('48899590dfffff')  # mov [rbp-0x2070], rdx
-    item.raw('31c94c89ef4c89f6')  # xor ecx, ecx; mov rdi, r13; mov rsi, r14
-    item.call(ADD_DELEGATE)
-    item.raw('4989c5')         # mov r13, rax
-    item.raw('eb' + format(SYSTEM_CONDITION - (item.here + 2), '02x'))
     # Exit Game's confirmation text: Quit to Desktop's when the port says so.
-    dialog = item.here
-    item.raw('4883ec08')
-    item.browser(strings['d'])
-    item.raw('4883c408')
-    item.raw('becc000000bab0ad0100')  # mov esi, 0xcc; mov edx, 110000
-    item.raw('85c07405')               # test eax, eax; jz +5
-    item.raw('ba' + struct.pack('<I', DIALOG_ID).hex() + 'c3')  # mov edx, DIALOG_ID; ret
+    dialog = cave.here
+    cave.raw('4883ec08')
+    cave.browser(3)
+    cave.raw('4883c408')
+    cave.raw('becc000000bab0ad0100')  # mov esi, 0xcc; mov edx, 110000
+    cave.raw('85c07405')               # test eax, eax; jz +5
+    cave.raw('ba' + struct.pack('<I', DIALOG_ID).hex() + 'c3')  # mov edx, DIALOG_ID; ret
     # The Play Online / Play Offline label: the game is back at the title screen.
-    online = item.here
-    item.raw('575652')         # push rdi; push rsi; push rdx (the text lookup's arguments)
-    item.browser(strings['t'])
-    item.raw('5a5e5f')         # pop rdx; pop rsi; pop rdi
-    item.jmp(TEXT)
-    if item.here > SYSTEM_CONDITION:
-        raise ValueError('System menu code does not fit')
-    item.data = item.data.ljust(SYSTEM_CONDITION - SYSTEM_ITEM, b'\xcc')
+    online = cave.here
+    cave.raw('575652')         # push rdi; push rsi; push rdx (the text lookup's arguments)
+    cave.browser(0)
+    cave.raw('5a5e5f')         # pop rdx; pop rsi; pop rdi
+    cave.jmp(TEXT)
+    # The System menu's Language item. Outside the world (r15b clear) the game's own, which
+    # shows when the game allows it. In the world, where the game removes it, Quit to Desktop:
+    # an item with a {context, handler} callback like Exit Game's, whose context is still at
+    # [rbp-0x1fe0].
+    system_item = cave.here
+    cave.raw('4c8db5a0dfffff')  # lea r14, [rbp-0x2060] (the two instructions replaced)
+    cave.raw('bec8000000')      # mov esi, 0xc8
+    cave.raw('4584ff')          # test r15b, r15b
+    cave.raw('7505')            # jnz quit
+    cave.jmp(SYSTEM_TEXT)       # the game's Language item
+    cave.raw('ba' + struct.pack('<I', SYSTEM_ID).hex())  # quit: mov edx, SYSTEM_ID
+    cave.raw('4c89f7')          # mov rdi, r14
+    cave.call(TEXT)
+    cave.raw('488dbde0dfffff')  # lea rdi, [rbp-0x2020]
+    cave.raw('bec9000000')      # mov esi, 0xc9
+    cave.raw('ba' + struct.pack('<I', SYSTEM_ID).hex())
+    cave.call(TEXT)
+    cave.raw('488b8520e0ffff')  # mov rax, [rbp-0x1fe0]
+    cave.raw('48898570dfffff')  # mov [rbp-0x2090], rax
+    cave.lea('488d05', system_handler)
+    cave.raw('48898578dfffff')  # mov [rbp-0x2088], rax
+    cave.raw('488d9570dfffff')  # lea rdx, [rbp-0x2090]
+    cave.raw('48899590dfffff')  # mov [rbp-0x2070], rdx
+    cave.raw('31c94c89ef4c89f6')  # xor ecx, ecx; mov rdi, r13; mov rsi, r14
+    cave.call(ADD_DELEGATE)
+    cave.raw('4989c5')          # mov r13, rax
+    cave.jmp(SYSTEM_KEEP)
+    strings = cave.here
+    for name in 'tqpd':
+        cave.data += f'bb:{name}'.encode() + b'\0'
+    for at, message in cave.messages:
+        cave.data[at + 3:at + 7] = rel32(CAVE + at, 7, strings + 5 * message)
+    if cave.here > CAVE_END:
+        raise ValueError('quit menu code does not fit')
 
-    condition = Code(SYSTEM_CONDITION)
-    condition.raw('4584ff')        # test r15b, r15b (in the world)
-    condition.raw('0f85' + rel32(SYSTEM_CONDITION + 3, 6, SYSTEM_KEEP).hex())
-    condition.raw('eb' + format(SYSTEM_REMOVE - (condition.here + 2), '02x'))
-    condition.data = condition.data.ljust(SYSTEM_REMOVE - SYSTEM_CONDITION, b'\x90')
-
+    item = Code(SYSTEM_ITEM)
+    item.jmp(system_item)
+    item.raw('90' * (SYSTEM_TEXT - item.here))
     title = Code(TITLE_CONDITION)
     title.call(title_condition)
     exit_dialog = Code(EXIT_DIALOG)
@@ -167,9 +177,16 @@ def code_writes():
     exit_dialog.raw('0f1f440000')
     online_label = Code(ONLINE_LABEL)
     online_label.call(online)
-    return [(c.offset, bytes(c.data)) for c in (cave, item, condition, title, exit_dialog,
-                                                online_label)] + \
+    return [(c.offset, bytes(c.data)) for c in (cave, item, title, exit_dialog, online_label)] + \
            [(OPINION_SLOT, struct.pack('<Q', EBOOT_BASE + title_invoke))]
+
+
+def check_segments(segments):
+    """segments: [(start, end)] of the eboot's PT_LOADs. Raises unless the code segment ends at
+    CODE_END and nothing else lies in the rest of its page."""
+    if not any(end == CODE_END for _, end in segments) or \
+            any(start < CAVE_END and end > CODE_END for start, end in segments if end != CODE_END):
+        raise ValueError('Quit to Desktop: unexpected code segment layout')
 
 
 def check_original(image_bytes):
