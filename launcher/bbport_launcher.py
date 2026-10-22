@@ -712,9 +712,10 @@ def open_folder(window, path):
 
 def readable_choice(row):
     """The chosen value keeps up to 16 characters beside a long subtitle (it was cut to "Seamle…");
-    a longer one still ends in "…" on a narrow window."""
-    def setup(_factory, item):
-        item.set_child(Gtk.Label(xalign=0, ellipsize=Pango.EllipsizeMode.END))
+    a longer one still ends in "…" on a narrow window. It sits against the arrow, however short
+    (left-aligned, "60" stood apart from it); the list keeps its own left-aligned items."""
+    def setup(_factory, item, xalign):
+        item.set_child(Gtk.Label(xalign=xalign, ellipsize=Pango.EllipsizeMode.END))
 
     def bind(_factory, item):
         model = row.get_model()
@@ -722,10 +723,17 @@ def readable_choice(row):
         label = item.get_child()
         label.set_label(item.get_item().get_string())
         label.set_width_chars(min(longest, 16))
+
+    def bind_list(_factory, item):
+        item.get_child().set_label(item.get_item().get_string())
     factory = Gtk.SignalListItemFactory()
-    factory.connect("setup", setup)
+    factory.connect("setup", setup, 1)
     factory.connect("bind", bind)
     row.set_factory(factory)
+    list_factory = Gtk.SignalListItemFactory()
+    list_factory.connect("setup", setup, 0)
+    list_factory.connect("bind", bind_list)
+    row.set_list_factory(list_factory)
     return row
 
 
