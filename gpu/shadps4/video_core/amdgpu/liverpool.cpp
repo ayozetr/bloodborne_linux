@@ -569,6 +569,50 @@ void RunZpassDone(Vulkan::Rasterizer& rasterizer, const u8* data) {
     rasterizer.OcclusionEvent(event.address, event.pairs);
 }
 
+// bbport: the stand-in occlusion counts (occlusion queries not translated) in stream order. The
+// game starts every query with a DMA_DATA that zeroes its block, a WAIT_REG_MEM for the zero,
+// then the counter dump, and reads the query as done once every counter has bit 63. With the
+// draw pipe the DMA runs later, on the recording thread, but the counts were written at decode:
+// the zeroing landed after them and the query never finished. The game makes new ones in place
+// of the queries it still waits for, and once it can make no more it reads a null handle (guest
+// +0x2169edc, issue #23). Found by Awaken (LanternEngine 0.9.35).
+// BB_ZPASS_IN_ORDER=0: written at decode, as before.
+struct ZpassDump {
+    VAddr address;
+    u64 value;
+    u32 pairs;
+};
+
+bool ZpassInOrder() {
+    static const bool enabled = [] {
+        const char* env = std::getenv("BB_ZPASS_IN_ORDER");
+        return !env || env[0] != '0';
+    }();
+    return enabled;
+}
+
+void RunZpassDump(Vulkan::Rasterizer& rasterizer, const u8* data) {
+    ZpassDump dump;
+    std::memcpy(&dump, data, sizeof(dump));
+    u64* results = reinterpret_cast<u64*>(dump.address);
+    const u64 size = u64(dump.pairs) * 2 * sizeof(u64);
+    bool waited = false;
+    for (u32 i = 0; i < dump.pairs; ++i, results += 2) {
+        const VAddr address = reinterpret_cast<VAddr>(results);
+        // As a WRITE_DATA (RunWriteData): after the DMA before it, wherever that DMA wrote.
+        if (rasterizer.WriteDataOnGpu(address, &dump.value, sizeof(dump.value))) {
+            continue;
+        }
+        if (!waited) {
+            rasterizer.WaitHostCopiesFor(dump.address, size);
+            rasterizer.WaitDeferredSignals();
+            waited = true;
+        }
+        StoreLabel(results, dump.value, sizeof(dump.value));
+        rasterizer.NoteCommandWrite(address, &dump.value, sizeof(dump.value), true);
+    }
+}
+
 // bbport: COPY_DATA from memory or GDS, or of a value into GDS, on the recording thread in stream
 // order, as DMA_DATA (RunDmaData).
 struct CopyDataTask {
@@ -1916,6 +1960,18 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
                         }
                         static constexpr u64 OcclusionCounterValidMask = 0x8000000000000000ULL;
                         static constexpr u64 OcclusionCounterStep = 0x2FFFFFFULL;
+                        if (rasterizer && ZpassInOrder()) {
+                            const ZpassDump dump{event->Address<VAddr>(),
+                                                 pixel_counter | OcclusionCounterValidMask,
+                                                 u32(num_counter_pairs)};
+                            if (rasterizer->RunInOrder(&RunZpassDump, &dump, sizeof(dump),
+                                                       BbToggle::PipelinedMemoryWrites, false)) {
+                                rasterizer->NotePendingGpuWrite(
+                                    dump.address, u64(dump.pairs) * 2 * sizeof(u64));
+                            }
+                            pixel_counter += OcclusionCounterStep;
+                            break;
+                        }
                         u64* results = event->Address<u64*>();
                         for (s32 i = 0; i < num_counter_pairs; ++i, results += 2) {
                             *results = pixel_counter | OcclusionCounterValidMask;
