@@ -982,6 +982,7 @@ THANKS = (
         _github("cappp", "Вылет «Transaction failed» на Seamless Hunt"),
         _github("simo1730", "Страница трофеев, не находившая файлы дампа"),
         _github("Nahnahchi", "Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле"),
+        _github("thomasgarafano1", "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления"),
     )),
     ("Другие благодарности", (
         ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",

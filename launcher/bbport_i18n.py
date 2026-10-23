@@ -842,6 +842,7 @@ EN = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'The "Transaction failed" crash on Seamless Hunt, and the logs that stopped a BBSC guest from following a stranger\'s world',
     'Страница трофеев, не находившая файлы дампа': "The Trophies page not finding the dump's files",
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Logs and tests of a GPU freeze in a boss fight on NVIDIA, and of a crash in Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: installing the game from .pkg files',
     # Shader cache
     'Кэш шейдеров': 'Shader cache',
@@ -1797,6 +1798,7 @@ PT_BR = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'O crash "Transaction failed" no Seamless Hunt e os logs que fizeram o convidado do BBSC parar de seguir o mundo de um estranho',
     'Страница трофеев, не находившая файлы дампа': 'A página de troféus que não encontrava os arquivos do dump',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Logs e testes de um congelamento da GPU numa luta contra chefe na NVIDIA e de um crash em Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "O Hunter's Atlas que não preparava o mapa com um dump GOTY, e o teste da correção",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: instalar o jogo a partir de arquivos .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache de shaders',
@@ -2667,6 +2669,7 @@ ES = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'El cierre «Transaction failed» en Seamless Hunt y los registros que hicieron que el invitado de BBSC dejara de seguir el mundo de un desconocido',
     'Страница трофеев, не находившая файлы дампа': 'La página de trofeos que no encontraba los archivos del volcado',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Registros y pruebas de un cuelgue de la GPU en una pelea contra un jefe en NVIDIA y de un cierre en Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas, que no preparaba el mapa con un volcado GOTY, y la prueba del arreglo",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: instalar el juego desde archivos .pkg',
     # Shader cache
     'Кэш шейдеров': 'Caché de shaders',
@@ -3537,6 +3540,7 @@ IT = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': "Il crash «Transaction failed» su Seamless Hunt e i log che hanno fatto smettere all'ospite di BBSC di seguire il mondo di uno sconosciuto",
     'Страница трофеев, не находившая файлы дампа': 'La pagina dei trofei che non trovava i file del dump',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Log e test di un blocco della GPU in una battaglia con un boss su NVIDIA e di un crash a Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas che non preparava la mappa con un dump GOTY, e il test della correzione",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: installare il gioco dai file .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache degli shader',
@@ -4407,6 +4411,7 @@ FR = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': "Le plantage « Transaction failed » sur Seamless Hunt, et les journaux qui ont empêché l'invité de BBSC de suivre le monde d'un inconnu",
     'Страница трофеев, не находившая файлы дампа': 'La page des trophées qui ne trouvait pas les fichiers du dump',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Journaux et tests d'un gel du GPU pendant un combat de boss sur NVIDIA, et d'un plantage à Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas qui ne préparait pas la carte avec un dump GOTY, et le test du correctif",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor : installer le jeu depuis des fichiers .pkg',
     # Shader cache
     'Кэш шейдеров': 'Cache des shaders',
@@ -5277,6 +5282,7 @@ DE = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'Der Absturz „Transaction failed“ auf Seamless Hunt und die Logs, durch die ein BBSC-Gast nicht mehr der Welt eines Fremden folgt',
     'Страница трофеев, не находившая файлы дампа': 'Die Trophäenseite, die die Dateien des Dumps nicht fand',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "Logs und Tests eines GPU-Hängers in einem Bosskampf auf NVIDIA und eines Absturzes in Yahar'gul",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas, der die Karte mit einem GOTY-Dump nicht vorbereitete, und der Test der Korrektur",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor: das Spiel aus .pkg-Dateien installieren',
     # Shader cache
     'Кэш шейдеров': 'Shader-Cache',
@@ -6116,6 +6122,7 @@ ZH_CN = {
     'Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином': 'Seamless Hunt 上的“Transaction failed”崩溃，以及让 BBSC 访客不再跟随陌生人世界的日志',
     'Страница трофеев, не находившая файлы дампа': '找不到转储文件的奖杯页面',
     'Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле': "NVIDIA 上首领战中 GPU 卡死以及 Yahar'gul 崩溃的日志与测试",
+    "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления": "Hunter's Atlas 无法用年度版转储准备地图，以及对修复的测试",
     'ps4-pkg-extractor: установка игры из файлов .pkg': 'ps4-pkg-extractor：从 .pkg 文件安装游戏',
     # Shader cache
     'Кэш шейдеров': '着色器缓存',

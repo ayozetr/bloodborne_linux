@@ -1,0 +1,2 @@
+# GitHub's language bar: this C++ table of game texts (its <?name?> placeholders) is not PHP.
+bbsc/emulator/src/core/bbsc_messages.inc linguist-language=C++
