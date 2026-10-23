@@ -205,7 +205,7 @@ Add-ons: `BB_DLC_DIR=/path/to/dlc` (the launcher's *Setup → DLC folder*) holds
 the game, one folder each named by its entitlement label (`SPEXPANSIONDLC03/sce_sys/...`).
 Their data ships with the 1.09 update, so a folder with only `sce_sys` is enough. `run.sh` links
 it as `user/addcont/<title id>`, where the runtime finds add-ons (see **DLC** below); a real
-folder already there is kept. The GOTY edition (CUSA03173) needs none.
+folder already there is kept. The European Game of the Year edition (CUSA03173) needs none.
 
 **Resolution and preset changes:** for outputs other than 1080p (720p on the Steam Deck,
 1440p, 4K) the whole game renders at the preset's resolution, set by a patch at start — the
