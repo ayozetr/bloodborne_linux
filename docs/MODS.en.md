@@ -114,4 +114,4 @@ the launcher.
 
 From a terminal: `BB_PATCHES_DIR=/path BB_PATCHES_CONFIG=/path/patches.json bash run.sh`.
 
-This guide is based on bbport's [MODS.md](MODS.md) (Russian), by deadinside28.
+This guide is based on bbport's [MODS.md](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/MODS.md) (Russian), by deadinside28.

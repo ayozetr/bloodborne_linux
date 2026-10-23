@@ -1104,7 +1104,7 @@ bool IsDrawOpcode(PM4ItOpcode op) {
 }
 
 // bbport BB_CP_SHADOW=1: the translator's own decoder (gpu/cp, step 2 of
-// docs/TRANSLATOR_ARCHITECTURE.ru.md) decodes every top-level graphics buffer as well, from the
+// docs/TRANSLATOR_ARCHITECTURE.md) decodes every top-level graphics buffer as well, from the
 // same state. Once this decoder is done with the buffer both register files must be equal (the
 // compute program's SH range aside: this one keeps it per queue); the first differences are
 // printed and the shadow takes this state again. Off with the PM4 self-test (its packets are not

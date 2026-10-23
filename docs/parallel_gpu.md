@@ -268,10 +268,10 @@ copies queued in the recording stream, i.e. until the recording thread has recor
 command before them, plus ~4% for the copy threads (`BbCopy::WaitAsync`). The recording thread
 itself works ~40% (the rest is its spin); it is not the limit.
 
-### Texture binding on a helper thread (opt-in: `BB_TEXTURE_HELPER=1`, toggle 1 << 22)
+### Texture binding on a helper thread (opt-in: `BB_TEXTURE_HELPER=1`, toggle 1 << 34)
 
 `bb:TexBind` binds a draw's textures while the GPU thread binds its buffers and resolves its
-vertex/index buffers (split into Resolve/Emit, toggle 1 << 23); the GPU thread joins before
+vertex/index buffers (split into Resolve/Emit, toggle 1 << 35); the GPU thread joins before
 `BeginRendering`. The helper takes only the memoized path (FindImage memo valid, image clean,
 no scene-target proxy, no upscaler redirect, no storage images, no mip arrays, no storage
 buffers in the pipeline); anything else is bound after the join. The GPU thread joins before
@@ -291,7 +291,7 @@ not pay on this CPU; the helper stays opt-in for other CPUs.
 
 | change | A/B | kept |
 |---|---|---|
-| FindView memo in the image description cache (1 << 21) + write prefetch in record chunks (1 << 20) | 81.5 vs 80.8 FPS | yes |
+| FindView memo in the image description cache (1 << 33) + write prefetch in record chunks (1 << 32) | 81.5 vs 80.8 FPS | yes |
 | format check by table instead of `magic_enum::enum_contains` (a linear scan per texture per draw); hot `Image` fields (flags, binding, tracking range, backing, ticks) moved in front of `ImageInfo` | within noise | yes (no downside) |
 | host copy queue: small copies in a lock-free MPMC queue, run by the idle recording thread, the rest by the GPU thread at the wait | blocked 9.5% → 4.8%, but 86.5 vs 87.2 FPS: the copying moved onto the GPU thread | no |
 | no barrier tracking for read-only stream buffer ranges | 85.9 vs 87.4 FPS, both phase orders (cause not found) | no |

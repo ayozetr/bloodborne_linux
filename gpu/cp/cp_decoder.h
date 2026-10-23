@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// bbport cp: the translator's own PM4 decoder (step 2 of docs/TRANSLATOR_ARCHITECTURE.ru.md).
+// bbport cp: the translator's own PM4 decoder (step 2 of docs/TRANSLATOR_ARCHITECTURE.md).
 //
 // A graphics command buffer is a stream of packets. The decoder walks it in stream order, applies
 // the register packets to its register file (the command processor's state: SET_*_REG, the

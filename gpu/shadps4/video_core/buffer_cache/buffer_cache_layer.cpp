@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // bbport BB_LAYER_MEMORY: the BufferCache side of the layer's memory module
-// (gpu/layer/bblayer_gpu_memory.h, docs/MEMORY_MODULE_PLAN.ru.md). The game's memory is bound in
+// (gpu/layer/bblayer_gpu_memory.h, docs/MEMORY_MODULE_PLAN.md). The game's memory is bound in
 // place through its chunk buffers; blocks of known data (what loaders wrote) get VRAM copies in
 // mirrors: one buffer per run of such blocks, runs that meet merged into a new mirror. No sparse
 // binding: a move is a copy plus the module's bookkeeping, and bindings pick the source.

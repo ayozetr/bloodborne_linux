@@ -62,3 +62,12 @@ lines in BBSC's own files are marked `bbport:` in comments.
     server" is gone: it was a stranger whenever the real host was not on the relay;
   - the hosts that rang are forgotten when the session ends.
   BBSC 0.0.2's timeline log is not taken.
+
+## 2026-10-23
+
+- **Documentation.** `README.md`, `server/README.md` (in place of `server/README.txt`) and
+  `server/gameserver/README.md` describe BBSC as this port builds, runs and hosts it.
+- **Windows host package removed.** The `.cmd` scripts and `server/tools/*.ps1` set up BBSC's
+  Windows server package; this port hosts with `tools/shadnet-server`, `tools/bbsc-server` and
+  `docs/SERVER.md`.
+- **SUPPORTERS.txt** keeps its heading and list, without the donation links.

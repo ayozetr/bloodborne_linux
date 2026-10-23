@@ -2290,7 +2290,7 @@ namespace {
 // bbport: BB_RES_STATS=1 (diagnostics) — what the bound shaders read their resource descriptors
 // from: user data registers (state the API call set) or tables in memory (SRT walker), by kind,
 // per draw and dispatch; printed every 5 s. Measures the step "descriptors read by the GPU"
-// (docs/EMULATION_REMOVAL_PLAN.ru.md).
+// (upstream bbport's docs/EMULATION_REMOVAL_PLAN.ru.md).
 struct ResStats {
     u64 calls = 0, stages = 0, walker_stages = 0, readconst_stages = 0, dma_stages = 0;
     u64 flat_dwords = 0;

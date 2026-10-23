@@ -10,7 +10,7 @@
 // that meet are merged into a new mirror), so a range all in VRAM is one buffer range too.
 //
 // Independent of the shadPS4 code: plain Vulkan handles, guest addresses, physical addresses of
-// direct memory. See docs/MEMORY_MODULE_PLAN.ru.md.
+// direct memory. See docs/MEMORY_MODULE_PLAN.md.
 #pragma once
 
 #include <atomic>

@@ -59,8 +59,8 @@ CONFIG_FILE = CONFIG_DIR / "settings.json"
 # The Journal shows the last MAX_LOG_LINES lines; Copy and Export take the whole session.
 MAX_LOG_LINES = 5000
 # The memory model (run.sh: BB_PC_MODEL): "auto" leaves it to the GPU (the new one on AMD, the
-# 0.3 one elsewhere), or either by hand. The new one goes through the layer's memory module on
-# every GPU (no sparse binding of the game's memory; BB_LAYER_MEMORY=0: AMD's sparse arena).
+# 0.3 one elsewhere), or either by hand. The new one keeps the game's memory in AMD's sparse arena,
+# and goes through the layer's memory module on every other GPU (BB_LAYER_MEMORY=1/0 by hand).
 PC_MODEL_SUBTITLE = ("Новая: видеокарта работает с памятью игры напрямую, как в игре для ПК, а команды "
                      "графики переводятся, а не эмулируются. Старая — модель памяти 0.3 со всеми "
                      "исправлениями. Если драйвер не проходит проверку при запуске — старая")

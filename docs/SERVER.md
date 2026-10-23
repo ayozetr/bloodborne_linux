@@ -1,14 +1,14 @@
 # Hosting your own co-op server
 
 Bells and summons go through a shadNet server. shadPS4's public one (`srv.shadps4.net`) no longer
-accepts bbport builds, and the public pool for bbport is now The Hunter's Dream's, through
-bbbridge (the launcher's **Multiplayer → Online** tab; [README](../README.md#online-play)). A group of friends
+accepts bbport builds, and the public pools for bbport are Seamless Hunt (the default) and The
+Hunter's Dream's, through bbbridge (the launcher's **Multiplayer → Online** tab; [README](../README.md#online-play)). A group of friends
 can also run their own server:
 [shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) by Wozzardman, the shadNet server with
 that UDP port working and a summon service of its own.
 
-Messages, bloodstains and ghosts still come from The Hunter's Dream, whichever shadNet server you
-use. Windows players of [Supermedo's port](https://github.com/Supermedo/bloodborne_pc) can join
+With your own shadNet server, messages, bloodstains and ghosts come from the **Game server** field
+of the Online tab: The Hunter's Dream by default, or BBSC's game server ([below](#seamless-co-op-bbsc)). Windows players of [Supermedo's port](https://github.com/Supermedo/bloodborne_pc) can join
 the same server.
 
 Tested with two players, one on this Linux port and one on Supermedo's Windows port, over
@@ -187,7 +187,7 @@ place of The Hunter's Dream for messages, bloodstains and the server list.
 | 3478 | UDP | The relay BBSC players fall back to when they cannot reach each other directly |
 
 Each player then sets **Game server** to `http://100.x.y.z:20443` in the launcher's
-**Multiplayer → Online** tab, keeps the same shadNet server and account, and turns on **Seamless co-op (BBSC)**.
+**Multiplayer → Online** tab, keeps the same shadNet server and account, and turns on BBSC in the **Seamless co-op (BBSC)** group.
 BBSC finds its relay at the game server's address (or `BBSC_RELAY`, the relay address in BBSC's
 settings).
 

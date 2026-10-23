@@ -6,8 +6,6 @@ THIS PROJECT IS NOT RELATED TO SHADPS4. ALL QUESTIONS RELATED TO THIS PROJECT SH
 > This is the README of the original project (deadinside28/bloodborne_pc), kept for its
 > technical details. The fork's own README is [README.md](README.md).
 
-**English** · [Русский](BBPORT.ru.md)
-
 bbport is the counterpart of Wine + DXVK for a single game: *Bloodborne* for PlayStation 4
 (CUSA03173, game version 1.09) on an x86-64 Linux PC. The game's original executable runs
 directly on the PC:
@@ -17,12 +15,12 @@ directly on the PC:
 - **as in DXVK**, the game's graphics are translated to Vulkan — by a renderer derived from
   [shadPS4](https://github.com/shadps4-emu/shadPS4) and heavily extended for this game, including
   temporal upscaling with AMD FSR 3.1, FSR 4 and FSR 4.1.1;
-- memory and the GPU's work are moving to the PC model: the launcher has an experimental
-  *New memory and translation model* mode; without it the game runs on the old
-  memory model, as in 0.3.
+- memory and the GPU's work are moving to the PC model: the *New memory and translation model* is
+  used by default on AMD GPUs; other GPUs keep the old memory model, as in 0.3 (launcher →
+  *Advanced → Memory and translation model*).
 
-One step remains to the full Wine + DXVK model: make the new mode the default and remove the old
-memory model (see below).
+One step remains to the full Wine + DXVK model: make the new mode the default on every GPU and
+remove the old memory model (see below).
 
 > **No game files are included.** You need your own dump of Bloodborne with update 1.09: any retail
 > release (CUSA00900 in the US, CUSA03173 for the European Game of the Year edition, ...), as they
@@ -39,11 +37,12 @@ Mesa/RADV) has been tested thoroughly.
 - **Native execution.** The eboot is converted offline into a flat memory image; PS4 libc and
   libSceFios2 are linked into it as native code. No CPU emulation and no per-instruction
   translation: the game code runs at full speed.
-- **Two modes** (launcher → *Advanced → Memory and translation model*):
-  - **Switch off (the default) — as in 0.3.** The old memory model: VRAM copies of the game's
+- **Three modes** (launcher → *Advanced → Memory and translation model*): *Auto* (the default:
+  new on AMD, old on others), *New* and *Old (as in 0.3)*.
+  - **Old (as in 0.3).** The old memory model: VRAM copies of the game's
     memory, writes tracked through page protection. With every fix made since 0.3 (motion
     vectors and the upscaler, flicker with DoF on, a damaged shader cache).
-  - **New memory and translation model — experimental.** The game's memory lives
+  - **New memory and translation model.** The game's memory lives
     in system RAM and the GPU reads it where it is, as a PC game's buffers; data it reads often
     is kept in VRAM and given back when unused (textures after 20 s, buffers after 60 s). The
     layer's memory module tracks CPU writes to mirrored blocks to keep those copies coherent;
@@ -60,10 +59,10 @@ Mesa/RADV) has been tested thoroughly.
     being checked; not tested on Intel. Without the launcher: `BB_PC_MODEL=1`; to choose the memory
     path: `BB_GUEST_MEMORY=host|dmabuf`; the memory module: `BB_LAYER_MEMORY=1/0`.
 
-  [0.5-pre4 changes](docs/CHANGES_0.5-pre4.md): no stutter of the memory module (NVIDIA) while areas
+  [0.5-pre4 changes](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/CHANGES_0.5-pre4.md): no stutter of the memory module (NVIDIA) while areas
   stream in, shader compilation in the background, VRAM on 4–6 GB cards, damaged game extractions
-  reported, the settings menu as in 0.3. [0.5-pre3](docs/CHANGES_0.5-pre3.md): the memory module on
-  NVIDIA — VRAM copies, one VRAM budget with the texture cache, watched blocks. [0.5-pre2](docs/CHANGES_0.5-pre2.md): the memory
+  reported, the settings menu as in 0.3. [0.5-pre3](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/CHANGES_0.5-pre3.md): the memory module on
+  NVIDIA — VRAM copies, one VRAM budget with the texture cache, watched blocks. [0.5-pre2](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/CHANGES_0.5-pre2.md): the memory
   module, native GPU copy shader, portable GPU completion labels, and shader-cache migration.
 
   Unused textures are freed in both modes, so VRAM no longer grows with every area visited.
@@ -103,11 +102,11 @@ Mesa/RADV) has been tested thoroughly.
 | | shadPS4 | bbport |
 |---|---|---|
 | Scope | General PS4 emulator, many games | One game: Bloodborne v1.09 |
-| Loading | Its own ELF loader and kernel emulation at run time | The eboot is converted offline (`scripts/`) into an image with PS4 libc/Fios2 linked in; a C loader maps it and jumps into the game (loader and runtime: ~5k lines) |
-| Memory | The GPU's view of PS4 memory is kept in VRAM copies, synchronized through page-protection write tracking | By default the same model (as in 0.3); in the *New memory and translation model* mode: the game's memory in system RAM, used by the GPU in place, frequently read data in VRAM, freed when unused |
-| Command processor | Emulated: memory writes, DMA and fences are done by the CPU while decoding | By default the same; in the new mode translated into Vulkan commands that the GPU runs in stream order, fences written after the work has really finished |
+| Loading | Its own ELF loader and kernel emulation at run time | The eboot is converted offline (`scripts/`) into an image with PS4 libc/Fios2 linked in; a C loader maps it and jumps into the game (loader and runtime: ~8k lines) |
+| Memory | The GPU's view of PS4 memory is kept in VRAM copies, synchronized through page-protection write tracking | On AMD by default the *New memory and translation model*: the game's memory in system RAM, used by the GPU in place, frequently read data in VRAM, freed when unused; on other GPUs the same model as in 0.3 |
+| Command processor | Emulated: memory writes, DMA and fences are done by the CPU while decoding | With the old model the same; with the new one translated into Vulkan commands that the GPU runs in stream order, fences written after the work has really finished |
 | System libraries | Broad HLE of the PS4 OS | A small runtime (`src/runtime_*.c`) that implements exactly what Bloodborne calls: memory, threads, sync, files, audio (incl. ATRAC9), pad, saves, AppContent |
-| GPU | shadPS4 video core and shader recompiler | The same core (vendored, GPL) with ~200 marked changes (`bbport:`) plus new modules: two-stage draw pipeline, render-state and texture-set memoization, render-scale proxies, motion vectors, FSR 3.1/4/4.1.1, frame capture and GPU profiler |
+| GPU | shadPS4 video core and shader recompiler | The same core (vendored, GPL) with ~500 marked changes (`bbport:`) plus new modules: two-stage draw pipeline, render-state and texture-set memoization, render-scale proxies, motion vectors, FSR 3.1/4/4.1.1, frame capture and GPU profiler |
 | GPU thread | One thread processes the whole command stream (the bottleneck in Bloodborne) | Decode and draw recording run on separate threads; the work scales with the hardware threads (Steam Deck included) |
 | Upscaling | — | Temporal (FSR 3.1, FSR 4, FSR 4.1.1) with the game's own motion vectors and jitter |
 | Game patches | Patch files applied by the emulator | The same community patches, compiled at start (`scripts/patches.py`); render resolution, effects and FPS from the launcher |
@@ -133,10 +132,13 @@ the graphics side.
   bindings: a PS4 texture has to be converted from the PS4 tiling into a Vulkan image before the
   draw runs, so the CPU must know its descriptor beforehand — translation, not emulation. The
   descriptor tables (the constant engine's dumps) are read only by the translator, so the CPU
-  performs them. The game's occlusion queries (~60 a frame) are
-  Vulkan occlusion queries; predication, `COPY_DATA` and `COND_EXEC` are translated too (check:
-  `BB_PM4_SELFTEST=1`). Details:
-  [docs/EMULATION_REMOVAL_PLAN.ru.md](docs/EMULATION_REMOVAL_PLAN.ru.md), "Шаг 4" (Russian).
+  performs them. The game's occlusion queries (~60 a frame) can be
+  Vulkan occlusion queries (`BB_OCCLUSION_QUERIES=1`, opt-in; by default a fixed "everything
+  visible" sequence written in command-stream order, `BB_ZPASS_IN_ORDER=0` turns the ordering off);
+  predication, `COPY_DATA` and `COND_EXEC` are translated too (check:
+  `BB_PM4_SELFTEST=1`). Details: upstream bbport's
+  [EMULATION_REMOVAL_PLAN.ru.md](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/EMULATION_REMOVAL_PLAN.ru.md),
+  step 4 (in Russian).
 
 "Port" here means a build for this one game, not a rewrite of its source code, which the project
 neither has nor includes.
@@ -144,7 +146,8 @@ neither has nor includes.
 ## Requirements
 
 - Linux x86-64, a Vulkan 1.3 GPU. Tested: AMD RX 7800 XT with Mesa 26 (RADV).
-  The *New memory and translation model* mode is not tested on NVIDIA yet.
+  On NVIDIA the new memory model is still being measured with testers, so *Auto* keeps the 0.3
+  model there.
   FSR 4 / 4.1.1 require shader Float16, Int8/Int16, integer dot products, linear compute
   derivatives and extended storage image formats; FSR 4.1.1 additionally requires
   `VK_VALVE_shader_mixed_float_dot_product`. Unsupported choices fall back to FSR 3.1
@@ -164,12 +167,12 @@ neither has nor includes.
 ## Build and run
 
 ```bash
-git clone --recursive https://github.com/deadinside28/bloodborne_pc.git bbport && cd bbport
+git clone --recursive https://github.com/ayozetr/bloodborne_linux.git && cd bloodborne_linux
 bash build.sh                        # builds out/bb-probe and out/gpu/libbbgpu.so
 BB_GAME_DIR=/path/to/CUSA03173 bash run.sh
 ```
 
-or the launcher (pick the game folder, settings, *Start*):
+or the launcher (pick the game folder, settings, *Play*):
 
 ```bash
 bash launcher/bb-launcher.sh         # launcher/install-desktop.sh adds it to the app menu
@@ -193,8 +196,8 @@ mouse camera* (`mouse_camera=direct`) the mouse turns the camera itself, 1:1, wi
 zone or turn curve (the game's 1.09 code is hooked while the window holds the mouse; locked on, the
 mouse moves the stick again so a flick switches targets). *Graphics → Display → Field of view* (`fov`, 30-90 degrees, the game's
 43) scales every camera of the game's camera table, as a layer under the mods (`scripts/fov.py`; a mod's own
-`gameparam.parambnd.dcx` wins). There is no PSN: the *Play online / offline* screen is skipped and the game opens
-its main menu offline (a game patch; the launcher's *Multiplayer → Online → Skip the “play online / offline” choice*,
+`gameparam.parambnd.dcx` wins). The *Play online / offline* screen is skipped: the game opens its main menu online when online
+play is on, offline otherwise (a game patch; the launcher's *Multiplayer → Online → Skip the “play online / offline” choice*,
 `BB_SKIP_NETWORK_CHOICE=0` shows it). With several monitors, *Graphics → Display → Monitor* in the launcher
 (`BB_DISPLAY=<number or part of the name>`) picks the one for the game.
 
@@ -227,7 +230,7 @@ wrapper folder, or the game folders such as `chr/` directly; file name case does
 with enable switches and load order. A sibling `CUSA03173-mods/` overlay also works.
 The original game is preserved; later mods override conflicting files.
 **Third-party patches:** shadPS4-format XML patch files in the data directory's `patches/`,
-switched on and off in the launcher. See [mods and patches](docs/MODS.md).
+switched on and off in the launcher. See [mods and patches](docs/MODS.en.md).
 **DLC:** put your add-on dumps in `user/addcont/<title id>/<entitlement label>/` (shadPS4's
 layout, e.g. `user/addcont/CUSA03173/SPEXPANSIONDLC03` for The Old Hunters): each folder there is
 reported to the game as an installed add-on.
@@ -236,29 +239,31 @@ reported to the game as an installed add-on.
 **Game language:** the PS4 system language, *Setup → Game language* in the launcher; by default it
 follows the desktop's locale (Japanese, English, French, Spanish, German, Italian or Russian,
 English for the rest). `run.sh` takes it as `BB_LANGUAGE` (PS4 code: 0 Japanese, 1 English,
-2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; without it, the desktop's locale as above).
+2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian; without it, English: following the desktop's
+locale is the launcher's job).
 **Game region:** *Setup → Game region* in the launcher, `BB_REGION=eu|na` for `run.sh`: the regional text
 of a language, such as Spanish from Spain (`eu`) or Latin American Spanish (`na`). It sets the
 game's `USER_DEFINED_PARAM_1` (13 Europe, 2 the Americas) for the launch; by default the dump's
 `param.sfo` decides.
 
 **Free camera and game debug menu** (v1.09): enable the corresponding switches in the
-launcher or in-game menu and restart. Free camera uses Lance McDonald's
+launcher (*Mods → Menus and debugging*) or in the in-game menu and restart. Free camera uses Lance McDonald's
 [GoldHEN patch](https://github.com/GoldHEN/GoldHEN_Patch_Repository/blob/main/patches/xml/Bloodborne-Orbis.xml):
 hold Cross and press L3 to cycle modes (keyboard: hold Space and press Z). It needs no fonts
 and conflicts with *Enemy Control*.
-For the game debug menu, install `DbgFont14h.ccm` and `DbgFont14h.tpf` from
-[Debug Menu and XML Patch](https://www.nexusmods.com/bloodborne/mods/253) into the game's
-`dvdroot_ps4/font/` first. Startup rejects missing or empty font files instead of launching
-the unsafe patch. Open it with the left touchpad / Tab (with the debug menu on, the left half
+For the game debug menu, install the `adhoc` folder of
+[Debug Menu and XML Patch](https://www.nexusmods.com/bloodborne/mods/253)
+(`adhoc/font/DbgFont14h.ccm` and `.tpf`) into the game's `dvdroot_ps4/`, or as a mod, first.
+Without them (or with empty files) the debug menu patch is left out at start and the log says
+why. Open it with the left touchpad / Tab (with the debug menu on, the left half
 no longer opens the gestures); Backspace is the right touchpad.
 Touch coordinates are forwarded from SDL gamepads; Back/Select emulates a left click on
 pads without a touch surface, Back + d-pad left / right a click on that half (while Back is bound
 to the touchpad only, the default). The port's settings menu remains Insert / L3+R3.
 
-GPU occlusion queries still use synthetic pixel counters (`PixelPipeStatDump`), and
-`IT_SET_PREDICATION` is unimplemented. Free camera allows visual investigation; it does
-not implement GPU occlusion culling.
+By default GPU occlusion queries return synthetic "visible" counters (`BB_OCCLUSION_QUERIES=1`
+counts real samples). Free camera allows visual investigation; it does not change occlusion
+culling.
 
 **Upscaler assets** (not included; FSR 3.1 needs none):
 
@@ -287,7 +292,9 @@ umu-launcher when installed. On NixOS umu-launcher comes from `nix-shell` (downl
 time, ~1.7 GB); the AppImage runs the recording on the system itself, through the user's systemd
 (`systemd-run --user`), since the system's `/nix` is out of its sight. Recording on the Steam Deck is not verified yet; if the DLL does not
 enable FSR 4.1 there, build on a PC and copy the `fsr4_411` folder. The same from the command
-line: the launcher's (and the AppImage's) `--build-fsr411 <DLL>`.
+line: the launcher's (and the AppImage's) `--build-fsr411 <DLL>`. From source, `tools/fsr4cap/build_assets.sh` takes its tools from
+the system (MinGW GCC for the capture program run under Proton, CMake, Ninja, Python 3,
+SPIRV-Tools, Git) or from Nix; the AppImage has them prebuilt.
 
 **DLSS (NVIDIA GeForce RTX).** NVIDIA's DLSS SDK is not included: check out
 [github.com/NVIDIA/DLSS](https://github.com/NVIDIA/DLSS) (`include/` and `lib/Linux_x86_64` are
@@ -312,9 +319,6 @@ newer `libnvidia-ngx-dlss.so.<version>` (from the SDK's `lib/Linux_x86_64/rel`) 
 launcher: *Graphics → Upscaler → DLSS: NVIDIA's library → Choose a file…*, as the FSR 4.1.1 DLL; it is
 copied to `<user>/dlss/`, which the game prefers. A game's `nvngx_dlss.dll` is the Windows
 library: NVIDIA's Linux driver does not load it.
-
-From source the script takes its tools from the system (MinGW GCC, CMake, Ninja, Python 3,
-SPIRV-Tools, Git) or from Nix; the AppImage has them prebuilt.
 
 **FP8 on RDNA4.** When vkd3d-proton offers FP8 cooperative matrices (RDNA4), the DLL runs
 another variant of its passes: other shaders and weights, other dispatch sizes. The build records
@@ -369,8 +373,8 @@ When running from source, install MangoHud separately. A diagnostic launch with
 `VK_LOADER_LAYERS_DISABLE=~implicit~` also disables MangoHud.
 
 Useful variables: `BB_FRAME_STATS=1` (frame statistics, including a `Memory:` line: VRAM, GTT,
-RSS, images and guest blocks in VRAM), `BB_PC_MODEL=1` (the new memory and translation model,
-0, the old model as in 0.3, is the default), `BB_ANISO=N` (anisotropic filtering of scene textures; 16 by
+RSS, images and guest blocks in VRAM), `BB_PC_MODEL=1/0` (the new memory and translation
+model / the old one as in 0.3; unset: new on AMD, old elsewhere), `BB_ANISO=N` (anisotropic filtering of scene textures; 16 by
 default, 0 = the game's own),
 `BB_GC_IDLE_SECONDS=N` / `BB_VRAM_IDLE_SECONDS=N` (how long unused textures / buffers stay in VRAM;
 20 / 60), `BB_BREADCRUMBS=0` (no GPU breadcrumbs; with them a GPU hang names the draw or dispatch
@@ -387,8 +391,8 @@ with `BB_PRESENT_DUMP_COUNT=N` (dump N consecutive presented frames),
 `BB_FSR411_VARIANT=int8|fp8|fp8emu` (FSR 4.1.1 variant; by default FP8 where the GPU has FP8
 matrices), `BB_READBACKS=0|1|2` (reads of GPU-written memory by the game: 1 by default, 2
 precise and slow, 0 off).
-More in [docs/](docs); recent changes: [docs/CHANGES_0.4.md](docs/CHANGES_0.4.md) (in Russian),
-[docs/CHANGES_2026-10-06.md](docs/CHANGES_2026-10-06.md).
+More in [docs/](docs); what changed in each release: the
+[releases page](https://github.com/ayozetr/bloodborne_linux/releases).
 
 **Online play (shadNet).** A separate module, `out/gpu/libbbnet.so` (`gpu/bbnet`: shadPS4's network
 and PSN libraries from shadp2p, a shadPS4 fork, with the shadNet client), built when protobuf,
@@ -411,15 +415,15 @@ build without it plays offline only.
 | `patches/` | Community patches for Bloodborne |
 | `tools/` | Developer tools: scripted runs, A/B toggles, FSR benchmark helpers, FSR 4 shader rewrites, `fsr4cap` (FSR 4.1.1 recording/extraction) |
 | `tests/` | Loader, runtime, patch and renderer tests |
-| `docs/` | Design notes and measurements ([upscaler](docs/upscaler.md), [parallel GPU](docs/parallel_gpu.md), [motion vectors](docs/motion_vectors.md), [roadmap](docs/ROADMAP.md)) |
+| `docs/` | Design notes and measurements ([upscaler](docs/upscaler.md), [parallel GPU](docs/parallel_gpu.md), [motion vectors](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/motion_vectors.md), [roadmap](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/ROADMAP.md)) |
 
 Tests: `bash build.sh --test`, `python3 -m unittest discover -s tests`, and
 `ninja -C out/gpu motion-history-test ui-composition-test scene-resolution-test motion-shader-test settings-test`.
 
 ## Roadmap
 
-- The new memory and translation model on by default once it is stable and tested on NVIDIA;
-  the old model is removed after that.
+- The new memory and translation model on by default on NVIDIA and Intel too (it already is on
+  AMD) once tested there; the old model is removed after that.
 - Textures as objects created at load time (less guessing by address, uploads outside the
   frame).
 - Shaders translated ahead of time, at install, not during play.

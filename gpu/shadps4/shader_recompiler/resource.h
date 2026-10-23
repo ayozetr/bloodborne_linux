@@ -108,7 +108,7 @@ using BufferResourceList = boost::container::static_vector<BufferResource, NUM_B
 
 /// bbport BB_LAYER_MEMORY: a guest buffer of 64 MiB or more (a shader given nearly all memory as
 /// one buffer) is reached through the page table, not as one bound range: the game's memory is
-/// in several buffers (its chunks, VRAM mirrors). docs/MEMORY_MODULE_PLAN.ru.md.
+/// in several buffers (its chunks, VRAM mirrors). docs/MEMORY_MODULE_PLAN.md.
 constexpr u64 PagedBufferMinSize = u64{64} << 20;
 inline bool IsPagedBuffer(bool enabled, const AmdGpu::Buffer& sharp) {
     return enabled && sharp.base_address != 0 && u64(sharp.GetSize()) >= PagedBufferMinSize;
