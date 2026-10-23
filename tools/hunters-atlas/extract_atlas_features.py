@@ -13,7 +13,11 @@ import struct
 import zlib
 from pathlib import Path
 
+import supported_game
+
 SCHEMA = 1
+# bbport: written into the features file as a format marker, which the game checks
+# (gpu/shim/bbport_map_features.cpp); the executable itself is checked by supported_game.
 SUPPORTED_EBOOT = 'd65f0b4f01d59166aed16f8604196d8b7dd805abbf0758b356e8f1354c9429f9'
 AREA_BOSSES = {
     'm22_00_00_00': [12201800], 'm23_00_00_00': [12301800],
@@ -377,7 +381,7 @@ def extract(game, maps):
     game, maps = Path(game).resolve(), Path(maps).resolve()
     if not (game / 'dvdroot_ps4').is_dir():
         game = game / 'Image0'
-    if sha(game / 'eboot.bin') != SUPPORTED_EBOOT:
+    if not supported_game.supported(game):
         raise ValueError('Unsupported executable for Atlas features')
     if game == maps or game in maps.parents or maps in game.parents:
         raise ValueError('Feature output must be outside game files')

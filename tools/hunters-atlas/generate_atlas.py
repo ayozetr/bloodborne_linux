@@ -2,7 +2,7 @@
 import argparse,hashlib,json,math,os,platform,shutil,struct,sys,time,traceback,uuid
 from pathlib import Path
 import pipeline_context as ctx
-SUPPORTED_EBOOT='d65f0b4f01d59166aed16f8604196d8b7dd805abbf0758b356e8f1354c9429f9'
+import supported_game
 VERSION='1.0.0'
 def sha(path):
     h=hashlib.sha256()
@@ -101,7 +101,7 @@ def main():
     if stage.exists() and any(stage.iterdir()):raise ValueError('Staging directory must be empty; choose a new directory.')
     if (output/'maps/generated-assets.json').exists() and not args.replace:raise ValueError('Generated assets already exist. Use --replace to repair/regenerate with a staged backup.')
     protected={p.relative_to(game).as_posix():sha(p) for p in [game/'eboot.bin',game/'sce_sys/param.sfo']}
-    if protected['eboot.bin']!=SUPPORTED_EBOOT:raise ValueError('Unsupported executable fingerprint. This generator supports only the tested Bloodborne 1.09 executable; no game files were changed.')
+    if not supported_game.supported(game):raise ValueError('Unsupported executable fingerprint. This generator supports only the tested Bloodborne 1.09 executable; no game files were changed.')
     sfo=read_sfo(game/'sce_sys/param.sfo');emit('preflight',generator_version=VERSION,game_version=sfo.get('APP_VER'),title_id=sfo.get('TITLE_ID'),game_eboot_sha256=protected['eboot.bin'])
     emit_progress('collision',0,16,0,30,'Reading collision maps (0/16)')
     output.mkdir(parents=True,exist_ok=True);ctx.configure(game,stage)
