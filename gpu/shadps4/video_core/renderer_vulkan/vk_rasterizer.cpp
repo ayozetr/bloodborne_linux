@@ -2584,6 +2584,27 @@ void Rasterizer::EmitVertexBuffers() {
     });
 }
 
+// bbport: draws whose prepared vertex inputs were stale (ResolveVertexBuffers), counted and
+// reported every 5 s at most.
+static void NoteStaleVertexInputs() {
+    static std::atomic<u64> stale{0}, reported{0};
+    static std::atomic<s64> last_report{0};
+    const u64 count = stale.fetch_add(1, std::memory_order_relaxed) + 1;
+    const s64 now = std::chrono::steady_clock::now().time_since_epoch().count();
+    s64 last = last_report.load(std::memory_order_relaxed);
+    if (count != 1 && now - last < 5'000'000'000) {
+        return;
+    }
+    if (!last_report.compare_exchange_strong(last, now, std::memory_order_relaxed) ||
+        reported.exchange(count, std::memory_order_relaxed) == count) {
+        return;
+    }
+    std::printf("Vertex inputs: %llu draws in all read again from their own V#s (the prepared "
+                "ones were stale)\n",
+                (unsigned long long)count);
+    std::fflush(stdout);
+}
+
 void Rasterizer::ResolveVertexBuffers(const GraphicsPipeline* pipeline,
                                       const PreparedDraw* prepared) {
     BB_SECTION(ResolveVertexBuffers);
@@ -2608,21 +2629,31 @@ void Rasterizer::ResolveVertexBuffers(const GraphicsPipeline* pipeline,
                 !BbToggle::Disabled(BbToggle::PreparedResources)
             ? &prepared->vertex
             : nullptr;
+    // bbport: the V#s this draw's packet carries are the truth. A worker that read the tables
+    // before the game rewrote them has stale addresses or strides, and vertex fetch reads the
+    // wrong data: stretched polygons across the screen (issue #25). Such a draw reads its inputs
+    // again from the packet's V#s, as without a worker. Found by Awaken (LanternEngine 0.9.34).
+    const bool stale = ready && packet_vsharps.size() == ready->count &&
+                       std::memcmp(ready->buffers, packet_vsharps.data(),
+                                   ready->count * sizeof(AmdGpu::Buffer)) != 0;
+    if (ready && BbCeStats::Enabled() && packet_vsharps.size() == ready->count) {
+        static u64 compared = 0, differed = 0;
+        ++compared;
+        differed += stale;
+        if ((compared & 0xFFFF) == 0) {
+            std::printf("CE stats: prepared V#s differed from the packet's in %llu of %llu "
+                        "draws\n",
+                        (unsigned long long)differed, (unsigned long long)compared);
+        }
+    }
+    if (stale) {
+        NoteStaleVertexInputs();
+        ready = nullptr;
+    }
     if (ready) {
         attributes.assign(ready->attributes, ready->attributes + ready->count);
         bindings.assign(ready->bindings, ready->bindings + ready->count);
         guest_buffers.assign(ready->buffers, ready->buffers + ready->count);
-        if (BbCeStats::Enabled() && packet_vsharps.size() == ready->count) {
-            static u64 compared = 0, differed = 0;
-            ++compared;
-            differed += std::memcmp(ready->buffers, packet_vsharps.data(),
-                                    ready->count * sizeof(AmdGpu::Buffer)) != 0;
-            if ((compared & 0xFFFF) == 0) {
-                std::printf("CE stats: prepared V#s differed from the packet's in %llu of %llu "
-                            "draws\n",
-                            (unsigned long long)differed, (unsigned long long)compared);
-            }
-        }
     } else {
         pipeline->GetVertexInputs(attributes, bindings, divisors, guest_buffers,
                                   regs.vgt_instance_step_rate_0, regs.vgt_instance_step_rate_1,
