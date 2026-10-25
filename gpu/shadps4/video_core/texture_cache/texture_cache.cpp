@@ -691,6 +691,11 @@ ImageId TextureCache::FindImage(ImageDesc& desc, bool exact_fmt) {
         if (cached.view_mip >= 0 || cached.view_slice >= 0 || !cached.image_id) {
             return false;
         }
+        // bbport: once registrations changed the cached image may have been deleted; its slot is
+        // not read then. From Mrsuss60's Windows port.
+        if (!slot_images.is_allocated(cached.image_id)) {
+            return false;
+        }
         const Image& image = slot_images[cached.image_id];
         return True(image.flags & ImageFlagBits::Registered) &&
                image.info.guest_address == info.guest_address &&

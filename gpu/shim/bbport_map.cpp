@@ -56,6 +56,9 @@ ImFont* title_font=nullptr;
 std::atomic<bool> open{false};
 int keyboard=0,chord=1,selected=-1,preview_area=-1;
 float cx=0,cz=0,zoom=3.0f,padx=0,pady=0;
+// MapUiScale() the zoom was set for: Draw rescales it when the window size changes, so the map keeps
+// what it covers (Hunter's Atlas 3.0).
+float zoom_ui_scale=0;
 std::atomic<float> pointer_x{0},pointer_y{0};
 std::atomic<int> cycle_request{0};
 std::atomic<bool> confirm_request{false},back_request{false};
@@ -232,13 +235,14 @@ void Fit() {
     const auto& a=areas[selected];cx=(a.bounds[0]+a.bounds[2])*0.5f;cz=(a.bounds[1]+a.bounds[3])*0.5f;
     const auto size=ImGui::GetIO().DisplaySize;
     const auto canvas=BbAtlasStyle::Layout(size.x,size.y).Canvas();
-    zoom=std::clamp(std::min(canvas.w/(a.bounds[2]-a.bounds[0]),canvas.h/(a.bounds[3]-a.bounds[1])),0.15f,25.0f);
+    zoom=std::clamp(std::min(canvas.w/(a.bounds[2]-a.bounds[0]),canvas.h/(a.bounds[3]-a.bounds[1])),0.15f*MapUiScale(),25.0f*MapUiScale());
+    zoom_ui_scale=MapUiScale();
     follow=false;
 }
 void Recenter() {
     preview_active=false;preview_area=-1;selected_destination=-1;cursor_u=cursor_v=.5f;
     const int current=CurrentArea();
-    selected=current;follow=true;zoom=9.0f*MapUiScale();
+    selected=current;follow=true;zoom=9.0f*MapUiScale();zoom_ui_scale=MapUiScale();
     if(selected>=0){cx=location.x;cz=location.z;Load(areas[selected]);}
 }
 void SetOpen(bool value) {
@@ -489,6 +493,9 @@ ImFont* TitleFont(){return title_font&&!BbAtlasText::NeedsPortFont()?title_font:
 void Draw() {
     std::lock_guard<std::recursive_mutex> map_guard(map_mutex);
     if(!open)return;
+    const float current_ui_scale=MapUiScale();
+    if(zoom_ui_scale>0)zoom*=current_ui_scale/zoom_ui_scale;
+    zoom_ui_scale=current_ui_scale;
     runtime_map_location(&location);
     BbMapFeatures::Refresh(location.valid!=0);
     const bool cancel_dialog=back_request.exchange(false);

@@ -111,7 +111,9 @@ static auto UserPaths = [] {
     std::unordered_map<PathType, fs::path> paths;
 
     const auto create_path = [&](PathType shad_path, const fs::path& new_path) {
-        std::filesystem::create_directory(new_path);
+        // bbport: with its parents (a home without ~/.local/share ended the process here). From
+        // Awaken's LanternEngine.
+        std::filesystem::create_directories(new_path);
         paths.insert_or_assign(shad_path, new_path);
     };
 
