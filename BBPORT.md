@@ -439,8 +439,9 @@ Tests: `bash build.sh --test`, `python3 -m unittest discover -s tests`, and
 
 ## Credits and licenses
 
-bbport is licensed under the **GNU GPL v2 or later** ([LICENSE](LICENSE)) — it contains code
-from shadPS4 (GPL-2.0-or-later). Third-party components keep their licenses:
+This fork is licensed under the **GNU GPL v3 or later** ([LICENSE](LICENSE)). bbport, which it is
+built on, is GPL-2.0-or-later and contains code from shadPS4 (GPL-2.0-or-later); the fork also
+includes code from Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine), GPL-3.0-or-later. Third-party components keep their licenses:
 [shadPS4](https://github.com/shadps4-emu/shadPS4) video core and shader recompiler (GPL-2.0+),
 [sirit](https://github.com/shadps4-emu/sirit), [half](https://half.sourceforge.net/),
 [FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) by FireBurn (MIT; FSR 3.1 on Vulkan and the

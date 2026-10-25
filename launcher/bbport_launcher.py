@@ -54,6 +54,7 @@ import trophies  # noqa: E402
 # Packaged (AppImage): generated files, saves and bbport.ini live in BB_DATA_DIR.
 PACKAGED = bool(os.environ.get("BB_PREBUILT"))
 DATA_DIR = Path(os.environ.get("BB_DATA_DIR", PORT_DIR))
+LANTERN_ENGINE_URL = "https://github.com/Awakenchan/LanternEngine"
 CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "bbport-launcher"
 CONFIG_FILE = CONFIG_DIR / "settings.json"
 # The Journal shows the last MAX_LOG_LINES lines; Copy and Export take the whole session.
@@ -964,7 +965,9 @@ THANKS = (
         _github("Awakenchan", "Видеопамять на картах с 4 ГБ и вылеты: флипы, swapchain, дескрипторы и ошибки "
                               "страниц; меньше рывков при загрузке зон, смена стиков и инверсия "
                               "камеры, геймпад, которым играют, импорт сохранений, выбор версии; счётчики "
-                              "окклюзии в порядке команд и вершинные шейдеры с правильными привязками"),
+                              "окклюзии в порядке команд и вершинные шейдеры с правильными привязками; зависания "
+                              "при выделении памяти и подготовке отрисовок, буферы индексов непрямых "
+                              "отрисовок и запросы ZPASS по порядку"),
         _github("AwesomeObserver", "Большие группы команд записи и swapchain после изменений экрана"),
     )),
     ("Помощь и тесты", (
@@ -980,11 +983,19 @@ THANKS = (
         _github("ZeroSTF", "Чёрный Сон Охотника после долгой игры"),
         _github("popcar2", "«Выход на рабочий стол» при игре по сети и идеи для лаунчера"),
         _github("shaneo88", "Файл патчей shadPS4 в папке патчей"),
-        _github("n3vrs0ft", "Вылет «Transaction failed» на Seamless Hunt и журналы, по которым гость BBSC перестал следовать за чужим хозяином"),
+        _github("n3vrs0ft", "Вылет «Transaction failed» на Seamless Hunt, журналы, по которым гость "
+                             "BBSC перестал следовать за чужим хозяином, и проверки BBSC 0.0.2 с "
+                             "игроком на Windows"),
         _github("cappp", "Вылет «Transaction failed» на Seamless Hunt"),
         _github("simo1730", "Страница трофеев, не находившая файлы дампа"),
-        _github("Nahnahchi", "Журналы и проверки зависания GPU в битве с боссом на NVIDIA и вылета в Яхар’гуле"),
+        _github("Nahnahchi", "Журналы и проверки: зависание GPU в битве с боссом на NVIDIA, вылет "
+                              "в Яхар’гуле, растянутые модели и вылет на Steam Deck"),
         _github("thomasgarafano1", "Hunter's Atlas, не готовивший карту с дампом GOTY, и проверка исправления"),
+        _github("TacticalBill", "Отметка трофеев, уже полученных на PS4"),
+        _github("holydingus", "Предметы BBSC, которые не выдавались новому персонажу"),
+        _github("OPGZ2", "Пустое окно лаунчера при запуске"),
+        _github("kuday248", "Настройки из меню игры, которые лаунчер перезаписывал"),
+        _github("BlazinKarp", "Оверлей Steam в игре"),
     )),
     ("Другие благодарности", (
         ("Dommo, goomab", "Иконки кнопок Xbox и Switch (Nexus Mods)",
@@ -3070,7 +3081,10 @@ class LauncherWindow(Adw.ApplicationWindow):
                  bbport_update.UPSTREAM_URL, "github-symbolic"),
                 (tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,
                  bbport_update.WINDOWS_URL, "github-symbolic"),
-                (tr("Лицензия"), tr("GNU GPL v2 или новее · Файлы игры не входят."),
+                # Its NOTICE asks for this attribution, as written, in the about screen.
+                ("Lantern Engine by Awaken", LANTERN_ENGINE_URL, LANTERN_ENGINE_URL,
+                 "github-symbolic"),
+                (tr("Лицензия"), tr("GNU GPL v3 или новее · Файлы игры не входят."),
                  bbport_update.LICENSE_URL, "application-certificate-symbolic")):
             row = Adw.ActionRow(title=title, subtitle=subtitle, activatable=True)
             row.add_prefix(themed_icon(icon))

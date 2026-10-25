@@ -43,4 +43,5 @@ SHA-256: `<sha256sum of the AppImage>`
 
 **Full changes:** https://github.com/ayozetr/bloodborne_linux/compare/<previous tag>...<tag>
 **Credits and licenses:** https://github.com/ayozetr/bloodborne_linux#credits
+Includes Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine).
 ```

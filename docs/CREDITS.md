@@ -9,7 +9,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 |---|---|
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [BBPORT.md](../BBPORT.md). |
 | [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
-| [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Video memory on 4 GB cards, crash fixes, fewer stutters while areas load, stick options, save import and the version selector. |
+| [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): video memory on 4 GB cards, crash and freeze fixes, fewer stutters while areas load, stick options, save import and the version selector. |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler, and the online code. |
 | [Wozzardman/shadp2p](https://github.com/Wozzardman/shadp2p) | The network and PSN libraries for online play. |
 | [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([SERVER.md](SERVER.md)). |
@@ -37,8 +37,9 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
   loading, black images, the upscaler, the performance line in the log).
 - **[Awakenchan](https://github.com/Awakenchan)**: video memory on 4 GB cards and crash fixes,
   fewer stutters while areas load, stick options, the controller in use, save import, the
-  version selector, occlusion counters in command order, and vertex shaders with the right
-  bindings.
+  version selector, occlusion counters in command order, vertex shaders with the right
+  bindings, freezes in memory allocation and draw preparation, index buffers of indirect draws,
+  and ZPASS queries in order.
 - **[Classmg22](https://github.com/Classmg22)** (CLS_AMG): BBSC, Seamless Co-op.
 - **[MaskZeus](https://github.com/MaskZeus)**: bbbridge.
 - **[Wozzardman](https://github.com/Wozzardman)**: the online libraries and the co-op server.
@@ -96,8 +97,13 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[shauryasagar](https://github.com/shauryasagar)** and **[ZeroSTF](https://github.com/ZeroSTF)**: the Hunter's Dream going black after long sessions.
 - **[popcar2](https://github.com/popcar2)**: Quit to Desktop with online play on, and ideas for the launcher.
 - **[shaneo88](https://github.com/shaneo88)**: shadPS4's patch file in the patches folder.
-- **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, and the logs that stopped a BBSC guest from following a stranger's world.
+- **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.
 - **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
 - **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
-- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, and of a crash in Yahar'gul.
+- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models and a crash on the Steam Deck.
 - **[thomasgarafano1](https://github.com/thomasgarafano1)**: Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix.
+- **[TacticalBill](https://github.com/TacticalBill)**: marking trophies already earned on the PS4.
+- **[holydingus](https://github.com/holydingus)**: BBSC's items not given to a new character.
+- **[OPGZ2](https://github.com/OPGZ2)**: the launcher's blank window at start.
+- **[kuday248](https://github.com/kuday248)**: settings from the in-game menu that the launcher overwrote.
+- **[BlazinKarp](https://github.com/BlazinKarp)**: the Steam overlay in the game.

@@ -69,5 +69,5 @@ starting with `Atlas debug:`).
 
 ## Licenses
 
-Atlas's scripts are GPL-2.0-or-later, like the port. soulstruct (by Grimrukh) is GPL-3.0-or-later
+Atlas's scripts are GPL-2.0-or-later (the port as a whole is GPL-3.0-or-later). soulstruct (by Grimrukh) is GPL-3.0-or-later
 and runs as a separate program with this generator; it is installed by the player, not shipped.

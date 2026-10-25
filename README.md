@@ -2,7 +2,7 @@
 
 [![Total Download Count](https://img.shields.io/github/downloads/ayozetr/bloodborne_linux/total.svg?color=2ea44f)](https://github.com/ayozetr/bloodborne_linux/releases/latest)
 [![Latest Release](https://img.shields.io/github/v/release/ayozetr/bloodborne_linux.svg?color=8a2be2)](https://github.com/ayozetr/bloodborne_linux/releases/latest)
-[![License: GPL-2.0](https://img.shields.io/github/license/ayozetr/bloodborne_linux.svg?color=d73a49)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/github/license/ayozetr/bloodborne_linux.svg?color=d73a49)](LICENSE)
 [![Platform: Linux | Steam Deck](https://img.shields.io/badge/platform-Linux%20%7C%20Steam%20Deck-blue.svg)](#features)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B.svg?logo=ko-fi&logoColor=white)](https://ko-fi.com/ayozetr)
 
@@ -129,10 +129,13 @@ to some people. If it's useful to you and you'd like to support it, you can on
 
 Built on [bbport](https://github.com/deadinside28/bloodborne_pc) by deadinside28, with
 [shadPS4](https://github.com/shadps4-emu/shadPS4)'s renderer, and with work from many people and
-projects: everyone is in [docs/CREDITS.md](docs/CREDITS.md). Components and their licenses:
+projects: everyone is in [docs/CREDITS.md](docs/CREDITS.md). It includes code from
+Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine). Components and their licenses:
 [BBPORT.md](BBPORT.md#credits-and-licenses).
 
 ## License
 
-GNU GPL v2 or later ([LICENSE](LICENSE)). Third-party components keep their own licenses. NVIDIA
+GNU GPL v3 or later ([LICENSE](LICENSE)). Files taken from other projects keep their own notices:
+most are GPL-2.0-or-later (bbport, shadPS4), which allows them to be distributed under
+GPL-3.0-or-later. Third-party components keep their own licenses. NVIDIA
 and DLSS are trademarks of NVIDIA Corporation.
