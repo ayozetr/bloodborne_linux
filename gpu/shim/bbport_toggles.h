@@ -13,6 +13,10 @@ extern "C" std::uint64_t runtime_disabled_optimizations;
 extern "C" std::uint64_t runtime_experiment_bits;
 /// Recovery point for speculative guest memory reads on this thread (runtime_memory.c).
 extern "C" __thread sigjmp_buf* runtime_fault_recover;
+/// This thread reads guest memory only ahead of the GPU thread (draw preparation): a fault
+/// under a recovery point jumps to it instead of being handled. Handling a read fault waits for
+/// the GPU command thread, which may wait for a lock this thread holds (programs_mutex).
+inline thread_local bool bb_fault_recovers_only = false;
 
 namespace BbToggle {
 enum : std::uint64_t {

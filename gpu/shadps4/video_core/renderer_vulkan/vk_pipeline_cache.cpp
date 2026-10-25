@@ -1198,8 +1198,12 @@ PipelineCache::Result PipelineCache::GetProgram(PipelineSelection& sel, HwStage 
         // pointers in the registers; ahead of the GPU thread that memory may already be
         // reused. A fault returns here (runtime_fault_recover) and the draw is left to the GPU
         // thread. A jump out of the specialization leaks its partial allocations (rare).
+        // The worker's own recovery point for the whole draw (DrawPreparation::WorkerLoop) comes
+        // back after this one: jumping there would leave programs_mutex locked.
+        sigjmp_buf* const outer_recover = runtime_fault_recover;
         sigjmp_buf recover;
         if (sigsetjmp(recover, 0)) {
+            runtime_fault_recover = outer_recover;
             worker.failed = true;
             return {};
         }
@@ -1212,7 +1216,7 @@ PipelineCache::Result PipelineCache::GetProgram(PipelineSelection& sel, HwStage 
             info.RefreshFlatBuf();
             spec.emplace(info, runtime_info, profile, binding);
         } catch (const std::exception& e) {
-            runtime_fault_recover = nullptr;
+            runtime_fault_recover = outer_recover;
             static std::atomic<u32> logged{0};
             if (logged.fetch_add(1, std::memory_order_relaxed) < 8) {
                 LOG_WARNING(Render_Vulkan, "Draw preparation ahead of the GPU thread stopped: {}",
@@ -1221,7 +1225,7 @@ PipelineCache::Result PipelineCache::GetProgram(PipelineSelection& sel, HwStage 
             worker.failed = true;
             return {};
         }
-        runtime_fault_recover = nullptr;
+        runtime_fault_recover = outer_recover;
         const auto it = std::ranges::find(program->modules, *spec, &Program::Module::spec);
         if (it == program->modules.end()) {
             worker.failed = true;
