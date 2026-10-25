@@ -3205,6 +3205,10 @@ void BufferCache::QueuePromotions(u64 submitted) {
             !VramEligible(block)) {
             continue;
         }
+        // Uploaded whole at the next packet (ProcessPromoteFills): only the ranges later bindings
+        // name were, and a reused slot kept another block's bytes for the rest, read by shaders
+        // through the page table and by vertex fetch past a binding (as EnsureResident clears).
+        promote_fills.push_back(block);
         memory_tracker->UnmarkRegionAsGpuModified(address, block_size);
         gpu_modified_ranges.Subtract(address, block_size);
         const auto [memory, offset] = AllocateResidency(block_size);
@@ -3275,6 +3279,23 @@ void BufferCache::Maintain() {
     ProcessDemotions();
     ProcessPendingAssets();
     ProcessLateWrites();
+    ProcessPromoteFills();
+}
+
+void BufferCache::ProcessPromoteFills() {
+    if (promote_fills.empty()) {
+        return;
+    }
+    // Recorded after the submission that took the binds: uploaded into the new VRAM copy from the
+    // game's memory (all of it marked CPU-modified by QueuePromotions).
+    for (const u64 block : promote_fills) {
+        if (!resident_ranges.Contains(block) || in_place_blocks.Contains(block)) {
+            continue;
+        }
+        SynchronizeMemory(GetArena(block, block), block << block_shift, static_cast<u32>(block_size),
+                          false, false);
+    }
+    promote_fills.clear();
 }
 
 void BufferCache::ProcessPendingUnmaps() {

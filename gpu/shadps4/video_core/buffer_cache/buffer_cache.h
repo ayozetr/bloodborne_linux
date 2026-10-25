@@ -299,6 +299,12 @@ private:
     u64 demotions_scanned_tick = ~0ULL;
     void ProcessPendingAssets();
     void ProcessLateWrites();
+    /// bbport: blocks QueuePromotions gave a VRAM copy, uploaded whole at the next packet. Their
+    /// slot may hold another block's bytes, and vertex buffers are bound without a size and
+    /// shaders read through the page table (EnsureResident clears reused slots for the same
+    /// reason). From Awaken's LanternEngine.
+    std::vector<u64> promote_fills;
+    void ProcessPromoteFills();
     /// BB_FRAME_STATS: GPU-written bindings over 64 KiB, reported every 5 s (where they are bound,
     /// which images lie over them).
     void NoteLargeGpuWrite(VAddr addr, u64 size);
