@@ -91,6 +91,14 @@ log says `Window: X11 (Xwayland), so Steam Input reaches the game`). On older re
 `SDL_VIDEO_DRIVER=x11 %command% --play` in the shortcut's launch options (keep `--play` after
 `%command%`), or turn Steam Input off for the shortcut: the game reads the controller itself.
 
+## The Steam overlay does not open in the game
+
+Steam's overlay (Shift+Tab, its FPS counter, F12 screenshots) is off by default: turn on **Steam
+overlay** under **Add to Steam** in the launcher, then start the game from Steam. The log then says
+`Steam overlay: …/ubuntu12_64/gameoverlayrenderer.so`, and on a Wayland desktop also
+`Window: X11 (Xwayland), so Steam's overlay shows on it`: Steam draws its overlay only on X11
+windows. If it says the library was not found, the game was not started by Steam.
+
 ## The camera turns much faster on diagonals
 
 With the right stick pushed all the way, the game switches to its fast turn (about twice the

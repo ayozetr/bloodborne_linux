@@ -248,6 +248,7 @@ DEFAULTS = {
     "vk_validation": False,
     "extra_env": "",
     "discord": True,
+    "steam_overlay": False,
     # The PS4's trophy key (shadPS4's TrophyKey): the trophies' names (scripts/trophies.py).
     "trophy_key": "",
     # Co-op (Multiplayer, Online tab): off by default; Seamless Hunt's server and The Hunter's Dream.
@@ -675,6 +676,7 @@ def game_environment(s):
     if s["vk_validation"]:
         env["BB_VK_VALIDATION"] = "1"
     env["BB_DISCORD"] = "1" if s.get("discord", True) else "0"
+    env["BB_STEAM_OVERLAY"] = "1" if s.get("steam_overlay") else "0"
     if s.get("trophy_key", "").strip():
         env["BB_TROPHY_KEY"] = s["trophy_key"].strip()
     if s.get("online") and online_module():
@@ -1237,6 +1239,14 @@ class LauncherWindow(Adw.ApplicationWindow):
         steam.add_prefix(themed_icon("steam-symbolic"))
         steam.add_suffix(steam_button)
         game.add(steam)
+        self.steam_overlay_row = Adw.SwitchRow(
+            title=tr("Оверлей Steam"),
+            subtitle=tr("Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam"),
+            active=self.settings.get("steam_overlay", False))
+        # Saved at once: Steam starts the game with --play, which reads the saved settings, often
+        # while this window is still open.
+        self.steam_overlay_row.connect("notify::active", lambda *_: self.store())
+        game.add(self.steam_overlay_row)
         self.discord_row = Adw.SwitchRow(title=tr("Статус в Discord"),
                                          subtitle=tr("«Играет в Bloodborne» в профиле Discord, онлайн или офлайн"),
                                          active=self.settings.get("discord", True))
@@ -2256,6 +2266,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["extra_env"] = self.extra_row.get_text().strip()
         s["mods_enabled"] = self.mods_enabled_row.get_active()
         s["discord"] = self.discord_row.get_active()
+        s["steam_overlay"] = self.steam_overlay_row.get_active()
         s["trophy_key"] = self.trophy_key_row.get_text().strip()
         s["online"] = self.online_row.get_active()
         s.update(self.online_settings())

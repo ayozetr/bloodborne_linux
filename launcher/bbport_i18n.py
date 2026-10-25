@@ -612,6 +612,8 @@ EN = {
     # DLSS
     # Discord
     "Статус в Discord": "Discord status",
+    "Оверлей Steam": "Steam overlay",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "The Steam button, Steam's FPS counter and screenshots when the game is started from Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Playing Bloodborne” on your Discord profile, online or offline",
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Applies when the game starts",
@@ -1401,6 +1403,8 @@ PT_BR = {
     # DLSS
     # Discord
     "Статус в Discord": "Status no Discord",
+    "Оверлей Steam": "Overlay da Steam",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "O botão Steam, o contador de FPS e as capturas da Steam quando o jogo é iniciado pela Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Jogando Bloodborne” no seu perfil do Discord, online ou offline",
     # Button prompts (scripts/menu_prompts.py)
     "Клавиатура": "Teclado",
@@ -2354,6 +2358,8 @@ ES = {
     # DLSS
     # Discord
     "Статус в Discord": "Estado en Discord",
+    "Оверлей Steam": "Overlay de Steam",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "El botón de Steam, su contador de FPS y sus capturas cuando el juego se inicia desde Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "«Jugando a Bloodborne» en tu perfil de Discord, online o sin conexión",
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Se aplica al iniciar el juego",
@@ -3225,6 +3231,8 @@ IT = {
     # DLSS
     # Discord
     "Статус в Discord": "Stato su Discord",
+    "Оверлей Steam": "Overlay di Steam",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Il pulsante Steam, il contatore FPS e gli screenshot di Steam quando il gioco viene avviato da Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Sta giocando a Bloodborne” sul tuo profilo Discord, online o offline",
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Si applica all'avvio del gioco",
@@ -4096,6 +4104,8 @@ FR = {
     # DLSS
     # Discord
     "Статус в Discord": "Statut Discord",
+    "Оверлей Steam": "Overlay Steam",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Le bouton Steam, le compteur d'IPS et les captures de Steam quand le jeu est lancé depuis Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "« Joue à Bloodborne » sur votre profil Discord, en ligne ou hors ligne",
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "S'applique au lancement du jeu",
@@ -4967,6 +4977,8 @@ DE = {
     # DLSS
     # Discord
     "Статус в Discord": "Discord-Status",
+    "Оверлей Steam": "Steam-Overlay",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Die Steam-Taste, Steams FPS-Anzeige und Screenshots, wenn das Spiel über Steam gestartet wird",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "„Spielt Bloodborne“ in deinem Discord-Profil, online oder offline",
     # Button prompts (scripts/menu_prompts.py)
     "Применяется при запуске игры": "Wird beim Spielstart übernommen",
@@ -6053,6 +6065,8 @@ ZH_CN = {
     "Скрытый трофей": "隐藏奖杯",
     "Соединение": "连接",
     "Статус в Discord": "Discord 状态",
+    "Оверлей Steam": "Steam 叠加界面",
+    "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "从 Steam 启动游戏时，可使用 Steam 按钮、Steam 的帧率计数器和截图",
     "Трофеи": "奖杯",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "同一会话中的所有人必须使用相同的游戏版本（1.09）和同一服务器。作弊功能也会改变其他玩家的游戏：一起游玩时请关闭",
     "Учётная запись": "账号",

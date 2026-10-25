@@ -363,9 +363,47 @@ if [[ ${BB_DISCORD:-1} != 0 ]]; then
     [[ ${BB_ONLINE:-0} == 1 ]] && presence+=(--online)
     "$PYTHON" scripts/discord_presence.py "${presence[@]}" </dev/null &
 fi
+# Steam's overlay (launcher: Steam overlay, BB_STEAM_OVERLAY=1) when Steam started the game: its
+# 64-bit library, and nothing else Steam preloads, goes to the game alone. The AppImage's sharun
+# clears LD_PRELOAD in every program of the package (host libraries break the bundled ones), so the
+# value is read from the nearest process above that still has it.
+steam_overlay=
+if [[ ${BB_STEAM_OVERLAY:-0} == 1 && -n ${SteamGameId:-} ]]; then
+    pid=$$
+    while [[ -z $steam_overlay && $pid -gt 1 ]]; do
+        preload=
+        while IFS= read -r -d '' variable; do
+            [[ $variable == LD_PRELOAD=* || $variable == BB_HOST_LD_PRELOAD=* ]] && preload+=" ${variable#*=}"
+        done 2>/dev/null < "/proc/$pid/environ" || true
+        for library in ${preload//:/ }; do
+            [[ $library == */ubuntu12_64/gameoverlayrenderer.so && -f $library ]] && steam_overlay=$library
+        done
+        { stat=$(< "/proc/$pid/stat"); } 2>/dev/null || break
+        stat=${stat##*) }
+        read -r _ pid _ <<< "$stat"
+    done
+    if [[ -n $steam_overlay ]]; then
+        echo "Steam overlay: $steam_overlay"
+        # Steam draws its overlay only on windows it can see: on a Wayland desktop, X11 ones (as
+        # Steam Input above).
+        if [[ -z ${SDL_VIDEO_DRIVER:-} && -n ${WAYLAND_DISPLAY:-} && -n ${DISPLAY:-} ]]; then
+            echo "Window: X11 (Xwayland), so Steam's overlay shows on it"
+            export SDL_VIDEO_DRIVER=x11
+        fi
+    else
+        echo "Steam overlay: Steam's 64-bit gameoverlayrenderer.so not found among the processes above" >&2
+    fi
+fi
+# Only in the game's own process: the helpers above have started already.
+steam_overlay_env() {
+    if [[ -n $steam_overlay ]]; then
+        export SHARUN_ALLOW_LD_PRELOAD=1 LD_PRELOAD=$steam_overlay
+        unset DISABLE_VK_LAYER_VALVE_steam_overlay_1
+    fi
+}
 probe_args=("$out/boot-linked.bin" --content-profile "$out/content.bin" --patches "$out/patches.bin" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
 if [[ -n ${mod_game:-} ]]; then
-    "$probe" "${probe_args[@]}" &
+    (steam_overlay_env; exec "$probe" "${probe_args[@]}") &
     mod_pid=$!
     trap 'kill -TERM "$mod_pid" 2>/dev/null || true' TERM INT
     mod_status=0
@@ -374,4 +412,5 @@ if [[ -n ${mod_game:-} ]]; then
     if kill -0 "$mod_pid" 2>/dev/null; then wait "$mod_pid" || mod_status=$?; fi
     exit "$mod_status"
 fi
+steam_overlay_env
 exec "$probe" "${probe_args[@]}"

@@ -52,7 +52,7 @@ The environment is built in this order. A later step wins.
 2. **The launcher's own settings** (`game_environment()`, `launcher/bbport_launcher.py:612-688`).
    - Some are always written: `BB_GAME_DIR`, `BB_MODS_*`, `BB_PROMPTS`, `BB_GESTURES_NO_MOTION`,
      `BB_PATCHES_*`, `BB_LANGUAGE`, `BB_REGION`, `BB_MENU_LANGUAGE`, `BB_FULLSCREEN`,
-     `BB_PRESENT_MODE`, `BB_SKIP_NETWORK_CHOICE`, `BB_FPS` and `BB_DISCORD`. For these, a shell value
+     `BB_PRESENT_MODE`, `BB_SKIP_NETWORK_CHOICE`, `BB_FPS`, `BB_DISCORD` and `BB_STEAM_OVERLAY`. For these, a shell value
      is replaced.
    - Others are written only when the setting is on or not empty: `BB_HDR`, `BB_FPS_LIMIT`,
      `BB_DRAW_PIPE`, `BB_READBACKS`, `BB_PREUPLOAD`, `BB_PC_MODEL`, `BB_GPU_PROFILE`,
@@ -284,6 +284,7 @@ behaviour when the variable is unset. In the tables:
 | `BB_PAD_DEADZONE_OUTER` | 1–127 (default 127) | Outer stick dead zone: travel up to this value maps to full deflection (helps pads that never reach full). | `src/runtime_pad.c:26`, `src/runtime_pad.c:115` |
 | `BB_PROMPTS` | playstation \| xbox \| switch \| keyboard (default playstation) | **Launcher:** Controls → Gamepad → "Button prompts" (Automatic follows the controller). Button prompts of the game's menus, made from the game's files at start. | `run.sh:136`, `scripts/menu_prompts.py:57`, `launcher/bbport_launcher.py:624` |
 | `BB_STEAM_INPUT_X11` | 0 = keep Wayland (default on) | Launched from Steam with Steam Input on a Wayland desktop, the game window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`): Steam sends its virtual controller's input only to a focused window it can see, and it sees only X11 windows (issue #12). Not when `SDL_VIDEO_DRIVER` is set. | `run.sh` |
+| `BB_STEAM_OVERLAY` | 1 = on (default 0) | **Launcher:** Setup → Game → "Steam overlay", under "Add to Steam" (saved as soon as it changes). Started from Steam, the game gets Steam's 64-bit `gameoverlayrenderer.so` in `LD_PRELOAD`, read from the nearest process above that still has it (the AppImage's sharun clears `LD_PRELOAD` in every program it runs), and nothing else Steam preloads. On a Wayland desktop the window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`), since Steam draws its overlay only on X11 windows; not when `SDL_VIDEO_DRIVER` is set (issue #28). | `run.sh:370`, `launcher/bbport_launcher.py:679`, `launcher/bbport_launcher.py:1242` |
 
 ## Audio
 
