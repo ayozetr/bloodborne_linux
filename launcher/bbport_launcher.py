@@ -2395,9 +2395,22 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def add_to_steam(self, steam, configs, restart):
         # Packaged: the AppImage itself; from a checkout: the launcher script.
-        target = os.environ.get("APPIMAGE") or str(PORT_DIR / "launcher" / "bb-launcher.sh")
-        exe, start_dir, options = bbport_steam.shortcut_command(target, str(PORT_DIR), "--play", steam)
-        icon = str(PORT_DIR / "launcher" / "bloodborne.png")
+        appimage = os.environ.get("APPIMAGE")
+        target = appimage or str(PORT_DIR / "launcher" / "bb-launcher.sh")
+        icon = PORT_DIR / "launcher" / "bloodborne.png"
+        start_dir = str(PORT_DIR)
+        if appimage:
+            # PORT_DIR is the AppImage's mount, gone once it closes: the shortcut starts in the
+            # AppImage's folder, with a copy of the icon in the data folder.
+            start_dir = str(Path(appimage).parent)
+            try:
+                kept = DATA_DIR / "bloodborne.png"
+                kept.write_bytes(icon.read_bytes())
+                icon = kept
+            except OSError:
+                pass
+        exe, start_dir, options = bbport_steam.shortcut_command(target, start_dir, "--play", steam)
+        icon = str(icon)
         try:
             for config in configs:
                 bbport_steam.add_shortcut(config / "shortcuts.vdf", "Bloodborne", exe,
