@@ -1893,7 +1893,7 @@ void Rasterizer::DrawIndirectRecord(const GraphicsPipeline* pipeline, bool is_in
 
     BindVertexBuffers(pipeline);
     if (is_indexed) {
-        BindIndexBuffer();
+        BindIndexBuffer(0, true);
     }
 
     const auto [buffer, base] =
@@ -2777,8 +2777,8 @@ void Rasterizer::ResolveVertexBuffers(const GraphicsPipeline* pipeline,
     v.num_buffers = static_cast<u32>(guest_buffers.size());
 }
 
-void Rasterizer::BindIndexBuffer(u32 index_offset) {
-    ResolveIndexBuffer(index_offset);
+void Rasterizer::BindIndexBuffer(u32 index_offset, bool indirect) {
+    ResolveIndexBuffer(index_offset, indirect);
     EmitIndexBuffer();
 }
 
@@ -2789,7 +2789,7 @@ void Rasterizer::EmitIndexBuffer() {
     });
 }
 
-void Rasterizer::ResolveIndexBuffer(u32 index_offset) {
+void Rasterizer::ResolveIndexBuffer(u32 index_offset, bool indirect) {
     BB_SECTION(ResolveIndexBuffer);
     const auto& regs = Regs();
 
@@ -2801,7 +2801,18 @@ void Rasterizer::ResolveIndexBuffer(u32 index_offset) {
         regs.index_base_address.Address<VAddr>() + index_offset * index_size;
 
     // Bind index buffer.
-    const u32 index_buffer_size = regs.num_indices * index_size;
+    u32 index_count = regs.num_indices;
+    if (indirect) {
+        // bbport: an indirect draw's index count is in GPU memory, and NUM_INDICES may be another
+        // draw's (smaller) count: indices past it were left stale. The buffer's own size
+        // (VGT_DMA_MAX_SIZE) bounds what the draw can read, so the larger of the two is synced;
+        // not past 4M indices (a stale or garbage register) or memory that is not mapped.
+        const u32 capacity = regs.max_index_size <= (4u << 20) ? regs.max_index_size : 0u;
+        if (capacity > index_count && IsMapped(index_address, u64(capacity) * index_size)) {
+            index_count = capacity;
+        }
+    }
+    const u32 index_buffer_size = index_count * index_size;
     const auto [buffer, offset] =
         buffer_cache.ObtainBuffer(index_address, index_buffer_size, false);
     needs_barrier |= runtime.IsBufferAccessed(buffer, offset, index_buffer_size);
