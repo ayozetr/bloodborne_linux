@@ -255,7 +255,14 @@ struct Info : InfoPersistent {
 
     void AddBindings(Backend::Bindings& bnd) const {
         bnd.buffer += buffers.size();
-        bnd.unified += buffers.size() + images.size() + samplers.size();
+        // bbport: an image with a binding per mip level (MipStorageFallbackMode::DynamicIndex)
+        // takes as many as the SPIR-V emitter and the pipeline layout give it, not one, or the
+        // next stage's bindings start inside it. From Awaken's LanternEngine.
+        u32 image_bindings = 0;
+        for (const auto& image : images) {
+            image_bindings += image.NumBindings(*this);
+        }
+        bnd.unified += buffers.size() + image_bindings + samplers.size();
         bnd.user_data += ud_mask.NumRegs();
     }
 

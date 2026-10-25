@@ -18,6 +18,7 @@
 
 #include <limits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include <boost/container/small_vector.hpp>
 
@@ -352,11 +353,13 @@ static void DeduplicateSccs(std::vector<PhiScc>& sccs) {
 
     std::vector<SccGroup*> worklist;
     worklist.reserve(scc_groups.size());
-    for (auto it = scc_groups.begin(); it != scc_groups.end(); ++it) {
-        auto& group = it->second;
-        if (group.sccs.size() > 1) {
+    // bbport: in the SCCs' order, not the hash table's: the structure hashes include block
+    // addresses, so the table's order changed from run to run and so did the SPIR-V (upstream
+    // shadPS4 #5364, via Awaken's LanternEngine).
+    for (const auto& scc : sccs) {
+        auto& group = scc_groups.at(scc.hash);
+        if (group.sccs.size() > 1 && !std::exchange(group.queued, true)) {
             worklist.push_back(&group);
-            group.queued = true;
         }
     }
 

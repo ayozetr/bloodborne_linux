@@ -18,7 +18,8 @@ static constexpr u32 ShaderBinaryVersion = 9u; // layer page-table pairs / guard
 static constexpr u32 ShaderMetaVersion = 7u; // bbport: ImageResource::needs_native
 // bbport 6: stages no longer paired with a vertex shader built for another binding start
 // (StageSpecialization::operator==): the pipelines saved with such pairs are rebuilt.
-static constexpr u32 PipelineKeyVersion = 6u; // bbport: Info layout (ImageResource::needs_native)
+// bbport 7: images with a binding per mip level count all of them (Info::AddBindings).
+static constexpr u32 PipelineKeyVersion = 7u; // bbport: Info layout (ImageResource::needs_native)
 } // namespace Serialization
 
 namespace Vulkan {
