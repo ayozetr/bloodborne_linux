@@ -293,6 +293,8 @@ DEFAULTS = {
     # The sticks' inner dead zone in percent of their travel (BB_PAD_DEADZONE, of 127; the port's
     # default 5 is 4 %).
     "pad_deadzone": 4,
+    "pad_lightbar": False,
+    "pad_lightbar_colour": "#b00000",
     "saves_auto_backup": False,
     "saves_auto_backup_keep": 5,
 }
@@ -643,6 +645,8 @@ def game_environment(s):
     deadzone = number(s.get("pad_deadzone", 4), 4, int, "settings.json", "pad_deadzone")
     if deadzone != 4:  # else the port's own default
         env["BB_PAD_DEADZONE"] = str(round(max(0, min(deadzone, 50)) * 127 / 100))
+    if s.get("pad_lightbar") and re.fullmatch(r"#[0-9a-fA-F]{6}", s.get("pad_lightbar_colour", "")):
+        env["BB_PAD_LIGHTBAR"] = s["pad_lightbar_colour"][1:]
     env["BB_SKIP_NETWORK_CHOICE"] = "1" if s.get("skip_network_choice", True) else "0"
     if s["hdr"]:
         env["BB_HDR"] = "1"
@@ -1453,6 +1457,24 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.deadzone_row.set_value(number(self.settings["pad_deadzone"], 4, int, "settings.json",
                                            "pad_deadzone"))
         controls.add(self.deadzone_row)
+        # The light bar of a DualShock 4 or DualSense (runtime_pad.c: BB_PAD_LIGHTBAR).
+        self.lightbar_row = Adw.ActionRow(
+            title=tr("Цвет световой полосы геймпада"),
+            subtitle=tr("DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры"))
+        colour = Gdk.RGBA()
+        if not colour.parse(self.settings.get("pad_lightbar_colour") or ""):
+            colour.parse(DEFAULTS["pad_lightbar_colour"])
+        self.lightbar_colour = Gtk.ColorDialogButton(dialog=Gtk.ColorDialog(with_alpha=False),
+                                                     rgba=colour, valign=Gtk.Align.CENTER)
+        self.lightbar_switch = Gtk.Switch(active=bool(self.settings.get("pad_lightbar")),
+                                          valign=Gtk.Align.CENTER)
+        self.lightbar_colour.set_sensitive(self.lightbar_switch.get_active())
+        self.lightbar_switch.connect("notify::active", lambda switch, _p:
+                                     self.lightbar_colour.set_sensitive(switch.get_active()))
+        self.lightbar_row.add_suffix(self.lightbar_colour)
+        self.lightbar_row.add_suffix(self.lightbar_switch)
+        self.lightbar_row.set_activatable_widget(self.lightbar_switch)
+        controls.add(self.lightbar_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
@@ -2293,6 +2315,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["coop_sound_first_only"] = self.coop_sound_row.get_active()
         s["coop_display"] = combo_value(self.coop_display_row)
         s["pad_deadzone"] = int(self.deadzone_row.get_value())
+        s["pad_lightbar"] = self.lightbar_switch.get_active()
+        rgba = self.lightbar_colour.get_rgba()
+        s["pad_lightbar_colour"] = "#{:02x}{:02x}{:02x}".format(
+            *(round(max(0.0, min(c, 1.0)) * 255) for c in (rgba.red, rgba.green, rgba.blue)))
         s["saves_auto_backup"] = self.auto_backup_row.get_active()
         s["saves_auto_backup_keep"] = int(self.auto_backup_keep_row.get_value())
         self.save_mod_profile()

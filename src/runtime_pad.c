@@ -292,6 +292,23 @@ static int pad_in_use(int slot) {
     }
     return 0;
 }
+/* BB_PAD_LIGHTBAR=RRGGBB (launcher: Controls, "Controller light bar colour"): every pad with a
+ * light bar (DualShock 4, DualSense) shows that colour; unset, SDL's own (the player's colour). */
+static void set_lightbar(SDL_Gamepad *pad) {
+    static int read, on; static Uint8 rgb[3];
+    if (!read) {
+        read=1;
+        const char *v=getenv("BB_PAD_LIGHTBAR");
+        if (v && *v=='#') ++v;
+        if (v && strlen(v)==6 && strspn(v,"0123456789abcdefABCDEF")==6) {
+            const unsigned long c=strtoul(v,NULL,16);
+            rgb[0]=(Uint8)(c>>16); rgb[1]=(Uint8)(c>>8); rgb[2]=(Uint8)c; on=1;
+        }
+    }
+    if (on && pad)
+        printf("Runtime: light bar #%02x%02x%02x on %s%s\n",rgb[0],rgb[1],rgb[2],SDL_GetGamepadName(pad),
+               SDL_SetGamepadLED(pad,rgb[0],rgb[1],rgb[2]) ? "" : " (it has none, or SDL cannot set it)");
+}
 static void follow_active_pad(uint64_t now) {
     static uint64_t last;
     if (now-last<200000) return;
@@ -311,6 +328,7 @@ static void follow_active_pad(uint64_t now) {
         }
         if (slot<0 && free_slot>=0 && (other_pads[free_slot].pad=SDL_OpenGamepad(ids[i]))) {
             other_pads[free_slot].id=ids[i];
+            set_lightbar(other_pads[free_slot].pad);
             for (int a=0;a<SDL_GAMEPAD_AXIS_COUNT;++a)
                 other_pads[free_slot].rest[a]=SDL_GetGamepadAxis(other_pads[free_slot].pad,(SDL_GamepadAxis)a);
             slot=free_slot; /* rests now: not taken over in this check */
@@ -351,6 +369,7 @@ static SDL_Gamepad *current_gamepad(void) {
             on_preferred=want && gamepad && is_preferred(ids[pick],want);
             if (gamepad) {
                 ++connected_count;
+                set_lightbar(gamepad);
                 const char *path=SDL_GetGamepadPath(gamepad);
                 printf("Runtime: gamepad connected: %s%s (%s)\n",SDL_GetGamepadName(gamepad),
                        !want ? "" : on_preferred ? " (the chosen one)" : " (the chosen one is not connected)",

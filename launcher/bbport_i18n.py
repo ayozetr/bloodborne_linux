@@ -616,6 +616,8 @@ EN = {
     # Discord
     "Статус в Discord": "Discord status",
     "Оверлей Steam": "Steam overlay",
+    'Цвет световой полосы геймпада': 'Controller light bar colour',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': "DualShock 4 and DualSense; off: the player's colour. Applied when the game starts",
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "The Steam button, Steam's FPS counter and screenshots when the game is started from Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Playing Bloodborne” on your Discord profile, online or offline",
     # Button prompts (scripts/menu_prompts.py)
@@ -1415,6 +1417,8 @@ PT_BR = {
     # Discord
     "Статус в Discord": "Status no Discord",
     "Оверлей Steam": "Overlay da Steam",
+    'Цвет световой полосы геймпада': 'Cor da barra de luz do controle',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': 'DualShock 4 e DualSense; desligado: a cor do jogador. Aplicado ao iniciar o jogo',
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "O botão Steam, o contador de FPS e as capturas da Steam quando o jogo é iniciado pela Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Jogando Bloodborne” no seu perfil do Discord, online ou offline",
     # Button prompts (scripts/menu_prompts.py)
@@ -2378,6 +2382,8 @@ ES = {
     # Discord
     "Статус в Discord": "Estado en Discord",
     "Оверлей Steam": "Overlay de Steam",
+    'Цвет световой полосы геймпада': 'Color de la barra de luz del mando',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': 'DualShock 4 y DualSense; desactivado: el color del jugador. Se aplica al iniciar el juego',
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "El botón de Steam, su contador de FPS y sus capturas cuando el juego se inicia desde Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "«Jugando a Bloodborne» en tu perfil de Discord, online o sin conexión",
     # Button prompts (scripts/menu_prompts.py)
@@ -3259,6 +3265,8 @@ IT = {
     # Discord
     "Статус в Discord": "Stato su Discord",
     "Оверлей Steam": "Overlay di Steam",
+    'Цвет световой полосы геймпада': 'Colore della barra luminosa del controller',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': "DualShock 4 e DualSense; disattivato: il colore del giocatore. Applicato all'avvio del gioco",
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Il pulsante Steam, il contatore FPS e gli screenshot di Steam quando il gioco viene avviato da Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "“Sta giocando a Bloodborne” sul tuo profilo Discord, online o offline",
     # Button prompts (scripts/menu_prompts.py)
@@ -4140,6 +4148,8 @@ FR = {
     # Discord
     "Статус в Discord": "Statut Discord",
     "Оверлей Steam": "Overlay Steam",
+    'Цвет световой полосы геймпада': 'Couleur de la barre lumineuse de la manette',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': 'DualShock 4 et DualSense ; désactivé : la couleur du joueur. Appliqué au lancement du jeu',
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Le bouton Steam, le compteur d'IPS et les captures de Steam quand le jeu est lancé depuis Steam",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "« Joue à Bloodborne » sur votre profil Discord, en ligne ou hors ligne",
     # Button prompts (scripts/menu_prompts.py)
@@ -5021,6 +5031,8 @@ DE = {
     # Discord
     "Статус в Discord": "Discord-Status",
     "Оверлей Steam": "Steam-Overlay",
+    'Цвет световой полосы геймпада': 'Farbe der Lichtleiste des Controllers',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': 'DualShock 4 und DualSense; aus: die Farbe des Spielers. Wird beim Spielstart übernommen',
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "Die Steam-Taste, Steams FPS-Anzeige und Screenshots, wenn das Spiel über Steam gestartet wird",
     "«Играет в Bloodborne» в профиле Discord, онлайн или офлайн": "„Spielt Bloodborne“ in deinem Discord-Profil, online oder offline",
     # Button prompts (scripts/menu_prompts.py)
@@ -6117,6 +6129,8 @@ ZH_CN = {
     "Соединение": "连接",
     "Статус в Discord": "Discord 状态",
     "Оверлей Steam": "Steam 叠加界面",
+    'Цвет световой полосы геймпада': '手柄光条颜色',
+    'DualShock 4 и DualSense; выключено — цвет игрока. Применяется при запуске игры': 'DualShock 4 和 DualSense；关闭时为玩家颜色。启动游戏时生效',
     "Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam": "从 Steam 启动游戏时，可使用 Steam 按钮、Steam 的帧率计数器和截图",
     "Трофеи": "奖杯",
     "У всех в сессии должны быть одна версия игры (1.09) и один сервер. Читы меняют игру и для других игроков: выключайте их при совместной игре": "同一会话中的所有人必须使用相同的游戏版本（1.09）和同一服务器。作弊功能也会改变其他玩家的游戏：一起游玩时请关闭",
