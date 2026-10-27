@@ -808,6 +808,13 @@ void TemporalUpscaler::RecordTaa(vk::CommandBuffer cmdbuf, vk::ImageView color,
                   (BbToggle::Disabled(BbToggle::TaaVariance) ? 4u << 8 : 0u) |
                   (BbToggle::Disabled(BbToggle::TaaFilter) ? 8u << 8 : 0u) |
                   (BbToggle::Disabled(BbToggle::TaaKeepNearerHistory) ? 16u << 8 : 0u);
+    // BB_TAA_RESPONSIVE=1 (off by default, for comparisons): history weights 0.88/0.75 instead of
+    // 0.98/0.85, against ghosting trails. From Mrsuss60's Windows port (466e8e7d).
+    static const bool taa_responsive = [] {
+        const char* env = std::getenv("BB_TAA_RESPONSIVE");
+        return env && env[0] == '1';
+    }();
+    params.pad |= taa_responsive ? 32u << 8 : 0u;
     cmdbuf.bindPipeline(vk::PipelineBindPoint::eCompute, *taa_pipeline);
     if (params.pad & 0xffu) {
         static u32 diagnostic_frames = 0;

@@ -55,9 +55,22 @@ bool SceneTargets::Blittable(vk::Format format) const {
     const auto required = vk::FormatFeatureFlagBits::eBlitSrc | vk::FormatFeatureFlagBits::eBlitDst;
     return (features & required) == required;
 }
+// bbport BB_DEPTH_MIN_FILTER=1 (off by default, for comparisons): depth-only targets are
+// resampled by the shader, which keeps the nearest of each 2x2 when it downscales instead of a
+// blit's single sample. From Mrsuss60's Windows port (466e8e7d).
+static bool DepthMinFilter() {
+    static const bool on = [] {
+        const char* env = std::getenv("BB_DEPTH_MIN_FILTER");
+        return env && env[0] == '1';
+    }();
+    return on;
+}
 bool SceneTargets::ShaderResampled(const VideoCore::Image& image) const {
     const auto format = image.backing->image.image_ci.format;
-    if (!image.info.props.is_depth || (Blittable(format) && !force_stencil_bits)) return false;
+    if (!image.info.props.is_depth) return false;
+    const bool min_filter =
+        DepthMinFilter() && !(image.aspect_mask & vk::ImageAspectFlagBits::eStencil);
+    if (Blittable(format) && !force_stencil_bits && !min_filter) return false;
     const auto features = Features(format);
     const auto required = vk::FormatFeatureFlagBits::eSampledImage |
                           vk::FormatFeatureFlagBits::eDepthStencilAttachment;
@@ -178,7 +191,8 @@ void SceneTargets::Copy(Entry& e, VideoCore::Image& original, bool to_native) {
         const auto& proxy = e.image.image_ci.extent;
         Resample(src, dst, original,
                  to_native ? vk::Extent2D{original.info.size.width, original.info.size.height}
-                           : vk::Extent2D{proxy.width, proxy.height});
+                           : vk::Extent2D{proxy.width, proxy.height},
+                 !to_native);
         // (Depth proxies are single-level: Eligible.)
         if (to_native) e.state.Resolved(); else e.state.CopiedToProxy();
         copying = false;
@@ -219,7 +233,7 @@ void SceneTargets::Copy(Entry& e, VideoCore::Image& original, bool to_native) {
     copying = false;
 }
 void SceneTargets::Resample(vk::Image src, vk::Image dst, const VideoCore::Image& original,
-                            vk::Extent2D dst_size) {
+                            vk::Extent2D dst_size, bool downscale) {
     const auto device = instance.GetDevice();
     const auto format = original.backing->image.image_ci.format;
     const bool stencil = bool(original.aspect_mask & vk::ImageAspectFlagBits::eStencil);
@@ -246,6 +260,8 @@ void SceneTargets::Resample(vk::Image src, vk::Image dst, const VideoCore::Image
     });
     const auto pipeline = ResamplePipeline(format, stencil);
     const auto layout = *resample_layout;
+    // Depth-only: the shader's min-filter flag (BB_DEPTH_MIN_FILTER), 0 = nearest as before.
+    const u32 min_filter = downscale && !stencil && DepthMinFilter() ? 1u : 0u;
     scheduler.RecordCrumb({.name = "scene resample"}, [=](vk::CommandBuffer cmd) {
         const vk::RenderingAttachmentInfo attachment{
             .imageView = target_view,
@@ -292,6 +308,8 @@ void SceneTargets::Resample(vk::Image src, vk::Image dst, const VideoCore::Image
                 cmd.draw(3, 1, 0, 0);
             }
         } else {
+            cmd.pushConstants(layout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(min_filter),
+                              &min_filter);
             cmd.draw(3, 1, 0, 0);
         }
         cmd.endRendering();

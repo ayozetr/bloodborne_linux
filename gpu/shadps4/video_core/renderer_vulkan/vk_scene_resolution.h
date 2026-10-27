@@ -87,7 +87,7 @@ private:
     bool Blittable(vk::Format) const;
     bool ShaderResampled(const VideoCore::Image&) const;
     void Resample(vk::Image src, vk::Image dst, const VideoCore::Image& original,
-                  vk::Extent2D dst_size);
+                  vk::Extent2D dst_size, bool downscale = false);
     vk::Pipeline ResamplePipeline(vk::Format, bool stencil);
     void CreateResampleResources();
     void Transition(Entry&, vk::ImageAspectFlags, vk::ImageLayout,

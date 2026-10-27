@@ -201,7 +201,9 @@ void main() {
                 }
                 diagnostic_history = clipped;
                 // Reliable history suppresses subpixel shimmer even on distant geometry.
-                float weight = mix(0.98, 0.85, moving) * coverage;
+                // BB_TAA_RESPONSIVE=1 (variant 32): less history, fewer trails, more shimmer.
+                float weight = (variant & 32u) != 0u ? mix(0.88, 0.75, moving) * coverage
+                                                     : mix(0.98, 0.85, moving) * coverage;
                 history_weight = weight;
                 // Tonemapped blending: a few very bright HDR samples otherwise dominate.
                 result = (variant & 1u) != 0u

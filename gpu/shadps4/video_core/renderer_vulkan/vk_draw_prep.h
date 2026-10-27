@@ -16,6 +16,7 @@
 #include <array>
 #include <atomic>
 #include <condition_variable>
+#include <cstdlib>
 #include <cstring>
 #include <deque>
 #include <memory>
@@ -27,8 +28,31 @@
 #include "common/types.h"
 #include "video_core/amdgpu/regs.h"
 #include "video_core/renderer_vulkan/vk_pipeline_cache.h"
+#include <xxhash.h>
 
 namespace Vulkan {
+
+/// bbport: the identity of a draw's vertex streams for object motion (the previous frame's
+/// positions are matched by it). BB_STABLE_MOTION_HASH=1 (off by default, for comparisons)
+/// leaves the buffers' addresses out, so streams the game rewrites into a ring buffer at a new
+/// address each frame keep one identity. From Mrsuss60's Windows port (466e8e7d).
+inline u64 MotionBuffersHash(const AmdGpu::Buffer* buffers, size_t count) {
+    if (count == 0) {
+        return 0;
+    }
+    static const bool stable = [] {
+        const char* env = std::getenv("BB_STABLE_MOTION_HASH");
+        return env && env[0] == '1';
+    }();
+    if (!stable) {
+        return XXH3_64bits(buffers, count * sizeof(AmdGpu::Buffer));
+    }
+    std::vector<AmdGpu::Buffer> copy(buffers, buffers + count);
+    for (auto& buffer : copy) {
+        buffer.base_address = 0;
+    }
+    return XXH3_64bits(copy.data(), count * sizeof(AmdGpu::Buffer));
+}
 
 struct PreparedStage {
     const Program* program;
