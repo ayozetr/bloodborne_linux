@@ -253,13 +253,25 @@ struct Info : InfoPersistent {
         }
     }
 
+    /// bbport: binding numbers the images take: one each, or one per mip level for an image
+    /// with a binding per level (DynamicIndex; its T# is read only then).
+    u32 ImageBindingCount() const {
+        u32 count = 0;
+        for (const auto& image : images) {
+            count += image.mip_fallback_mode == MipStorageFallbackMode::DynamicIndex
+                         ? image.NumBindings(*this)
+                         : 1u;
+        }
+        return count;
+    }
+
     void AddBindings(Backend::Bindings& bnd) const {
         bnd.buffer += buffers.size();
-        // bbport: one per image, as the rasterizer advances when it binds the next stage
-        // (BindResources); an image with a binding per mip level (DynamicIndex) gets more in the
-        // pipeline layout. Counting those here alone moved the next stage's shader away from
-        // where its descriptors are written, so both stay as they were.
-        bnd.unified += buffers.size() + images.size() + samplers.size();
+        // bbport: an image with a binding per mip level (DynamicIndex) takes as many binding
+        // numbers as the SPIR-V emitter and the pipeline layout give it, not one; the rasterizer
+        // advances the same way when it binds the next stage (BindResources). A stage whose
+        // start moves gets a new permutation: StageSpecialization compares the start.
+        bnd.unified += buffers.size() + ImageBindingCount() + samplers.size();
         bnd.user_data += ud_mask.NumRegs();
     }
 

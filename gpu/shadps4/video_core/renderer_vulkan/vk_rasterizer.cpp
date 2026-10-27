@@ -2506,7 +2506,11 @@ bool Rasterizer::BindResources(const Pipeline* pipeline) {
                                        set_write_index + num_buffers};
             ++task.count;
             binding.buffer += num_buffers;
-            binding.unified += num_descriptors;
+            // bbport: binding numbers as the pipeline layout and the shaders count them (an image
+            // with a binding per mip level takes one per level); the descriptor writes stay one
+            // per resource (set_write_index).
+            binding.unified += num_buffers + stage->ImageBindingCount() +
+                               static_cast<u32>(stage->samplers.size());
             set_write_index += num_descriptors;
             uses_dma |= stage->uses_dma;
         }
