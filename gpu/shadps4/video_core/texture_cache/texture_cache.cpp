@@ -1433,9 +1433,19 @@ void TextureCache::GarbageCollectImages() {
             const char* env = std::getenv("BB_GC_TILE_BACK");
             return !env || env[0] != '0';
         }();
-        const bool old_tiled =
-            tiled && download && aggresive && image.lru_touched_tick < minute_tick;
-        if (!old_tiled && ((tiled && download) || (download && !pressured))) {
+        // bbport: GPU-written linear images follow the tiled ones' rule (#30): only past the
+        // critical mark, unused for a minute. Downloaded and freed under mere pressure, they came
+        // back black once loaded again (the player's armour, effects), on 8 GB cards under
+        // pressure all session. BB_GC_KEEP_GPU_WRITTEN=0: downloaded under pressure, as before.
+        static const bool keep_gpu_written = [] {
+            const char* env = std::getenv("BB_GC_KEEP_GPU_WRITTEN");
+            return !env || env[0] != '0';
+        }();
+        const bool old_written = download && aggresive && image.lru_touched_tick < minute_tick;
+        const bool old_tiled = tiled && old_written;
+        const bool keep_written =
+            download && (keep_gpu_written ? !old_written : (tiled || !pressured));
+        if (!old_tiled && keep_written) {
             lru_cache.Touch(image.lru_id, gc_tick);
             BbStats::gc_kept_images.fetch_add(1, std::memory_order_relaxed);
             return false;
