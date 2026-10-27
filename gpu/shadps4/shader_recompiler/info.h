@@ -255,14 +255,11 @@ struct Info : InfoPersistent {
 
     void AddBindings(Backend::Bindings& bnd) const {
         bnd.buffer += buffers.size();
-        // bbport: an image with a binding per mip level (MipStorageFallbackMode::DynamicIndex)
-        // takes as many as the SPIR-V emitter and the pipeline layout give it, not one, or the
-        // next stage's bindings start inside it. From Awaken's LanternEngine.
-        u32 image_bindings = 0;
-        for (const auto& image : images) {
-            image_bindings += image.NumBindings(*this);
-        }
-        bnd.unified += buffers.size() + image_bindings + samplers.size();
+        // bbport: one per image, as the rasterizer advances when it binds the next stage
+        // (BindResources); an image with a binding per mip level (DynamicIndex) gets more in the
+        // pipeline layout. Counting those here alone moved the next stage's shader away from
+        // where its descriptors are written, so both stay as they were.
+        bnd.unified += buffers.size() + images.size() + samplers.size();
         bnd.user_data += ud_mask.NumRegs();
     }
 
