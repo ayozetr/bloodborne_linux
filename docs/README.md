@@ -3,7 +3,7 @@
 ## For players
 
 The same documents, with a few pages written for players, make up the
-[players' guide](https://ayozetr.github.io/bloodborne_linux/) (built from this folder: `mkdocs.yml`).
+[players' guide](https://ayozetr.github.io/bloodborne_linux/) (built from this folder: `mkdocs.yml`; published with `tools/publish_guide.sh`).
 
 - [getting-started.md](getting-started.md): what you need, the first launch, saves and updates.
 - [steam-deck.md](steam-deck.md): Add to Steam, the Steam Deck's Game Mode, Steam Input and the overlay.

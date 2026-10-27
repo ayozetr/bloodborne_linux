@@ -1,4 +1,4 @@
-# The players' guide on GitHub Pages (.github/workflows/guide.yml): built from docs/ with
+# The players' guide on GitHub Pages (tools/publish_guide.sh, to the gh-pages branch): built from docs/ with
 # MkDocs Material, so the guide and the repository's documents never disagree.
 site_name: Bloodborne for Linux
 site_description: How to install, play online and fix problems with the Linux port of Bloodborne.
