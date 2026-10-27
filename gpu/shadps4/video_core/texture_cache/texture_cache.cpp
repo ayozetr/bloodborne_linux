@@ -1420,6 +1420,16 @@ void TextureCache::GarbageCollectImages() {
             return true;
         }
         auto& image = slot_images[image_id];
+        // bbport: "maybe touched by the CPU" is only a suspicion, settled by a hash when the image
+        // is used again (RefreshImage). The collector took it as dirty and dropped what the GPU had
+        // written undownloaded, so the image came back with the game's old bytes: black effects
+        // drawn by compute shaders (#30). The hash is checked here first, as the refresh does.
+        if (True(image.flags & ImageFlagBits::GpuModified) &&
+            True(image.flags & ImageFlagBits::MaybeCpuDirty) &&
+            False(image.flags & (ImageFlagBits::CpuDirty | ImageFlagBits::GpuDirty)) &&
+            image.hash == MaybeDirtyHash(image)) {
+            image.flags &= ~ImageFlagBits::MaybeCpuDirty;
+        }
         const bool download = image.SafeToDownload();
         const bool tiled = image.info.IsTiled();
         // bbport: images that cannot go now (GPU-written: their contents exist only here, and
