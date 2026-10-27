@@ -12,7 +12,7 @@ The launcher checks the game folder before starting. What it says, and what to d
 | bbport needs the 1.09 update merged into the game folder | Copy everything from the dumped 1.09 update into the game folder, replacing files (`eboot.bin` and `sce_sys` too). |
 | param.sfo is from 1.09 but eboot.bin is not | Copy `eboot.bin` from the dumped 1.09 update over the old one. |
 | This eboot.bin has the 60 fps patch by Lance McDonald applied | Use a clean `eboot.bin` from the 1.09 update. bbport has its own 60 FPS. |
-| This is not a retail release of Bloodborne | Alpha tests and other games do not run. See [COMPATIBILITY.md](COMPATIBILITY.md). |
+| This is not a retail release of Bloodborne | Alpha tests and other games do not run. See [supported releases](COMPATIBILITY.md). |
 | eboot.bin could not be read as a decrypted PS4 executable | Dump the game and the update again. |
 | The game files are damaged | The extraction tool broke compressed files (LibOrbisPkg PkgTool on .NET 6 or newer); the game would hang while loading. Extract the game and the update again with a fixed tool. |
 
@@ -112,9 +112,9 @@ camera can feel heavier: the game's own *Camera speed* setting makes up for it.
 Press **Test** in the **Status** row of **Multiplayer → Online**. An error mark on the shadNet server's UDP line means
 the server never learns your address, and no summon can connect: check that the server is running
 and that its log lists the UDP listener, and that no firewall blocks UDP 31314 on its side
-([SERVER.md](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The
+([hosting your own server](SERVER.md)). shadPS4's public server does not accept bbport builds at all: use The
 Hunter's Dream, Seamless Hunt or your own server.
 
 ## Other online problems
 
-See [ONLINE.md](ONLINE.md): the account, the bells, the ports and the log lines of a summon.
+See [Online play and co-op](ONLINE.md): the account, the bells, the ports and the log lines of a summon.

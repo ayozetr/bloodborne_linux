@@ -17,6 +17,9 @@ projects ([credits](docs/CREDITS.md)).
 > 1.09, from a retail release ([which ones](docs/COMPATIBILITY.md)). This project is not
 > affiliated with Sony Interactive Entertainment or FromSoftware.
 
+**[The players' guide](https://ayozetr.github.io/bloodborne_linux/)**: installing, playing online and
+seamless co-op, the Steam Deck, and what to do when something goes wrong.
+
 ## Features
 
 - **Multiplayer**: online messages, bloodstains, ghosts, bells and summons, on

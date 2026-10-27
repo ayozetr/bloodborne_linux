@@ -1,18 +1,18 @@
 # Credits
 
 Everyone whose work is in this fork, and every project it took something from. Everyone listed
-under *People* and *Help and testing* also appears in the launcher's **About** section. Components and their licenses: [BBPORT.md](../BBPORT.md#credits-and-licenses).
+under *People* and *Help and testing* also appears in the launcher's **About** section. Components and their licenses: [bbport's notes](../BBPORT.md#credits-and-licenses).
 
 ## Projects
 
 | Project | What this fork takes from it |
 |---|---|
-| [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [BBPORT.md](../BBPORT.md). |
+| [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [here](../BBPORT.md). |
 | [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
 | [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): video memory on 4 GB cards, crash and freeze fixes, fewer stutters while areas load, stick options, save import and the version selector. |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler, and the online code. |
 | [Wozzardman/shadp2p](https://github.com/Wozzardman/shadp2p) | The network and PSN libraries for online play. |
-| [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([SERVER.md](SERVER.md)). |
+| [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([hosting your own server](SERVER.md)). |
 | [MaskZeus/bbbridge](https://github.com/MaskZeus/bbbridge) | Co-op on The Hunter's Dream's pool ([bbbridge/](../bbbridge/)). |
 | [Classmg22/BBSC](https://github.com/Classmg22/BBSC) | Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon ([bbsc/](../bbsc/)). |
 | [fhody125-web/NoDreamForHunter](https://github.com/fhody125-web/NoDreamForHunter) | The base of BBSC's game server. |

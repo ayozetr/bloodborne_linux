@@ -9,6 +9,21 @@ everyone needs the game at version 1.09 and the same pool.
 > right after the login ("This shadNet server doesn't accept your shadPS4 build" in the log), and
 > the launcher says so. The pools for bbport are Seamless Hunt (the default), The Hunter's Dream's and a server of your own.
 
+## Seamless Hunt
+
+[Seamless Hunt](https://install.seamlesshunt.com) is a community server for Seamless Co-op (BBSC),
+where Windows players join with BBSC's package for the Windows port.
+
+1. In the launcher's **Multiplayer → Online** tab, turn on **Play online** and choose **Seamless Hunt**: its
+   shadNet server, WebAPI and game server come with it.
+2. Type a name and a password under **Account** and press **Create** (once). The server wants an
+   email for each account; the launcher makes one from the name, as Seamless Hunt's own tool does.
+3. Turn on BBSC in the **Seamless co-op (BBSC)** group and press **Test** in the **Status** row.
+
+Its bloodstains and death visions crash the game with "Transaction failed", on Windows too: they
+are off by default, as in Seamless Hunt's package (**Bloodstains on Seamless Hunt** brings them
+back). Messages, ghosts and summon signs are not affected.
+
 ## The Hunter's Dream (with bbhost's players)
 
 Choose **The Hunter's Dream (with bbhost players)** in the launcher's **Multiplayer → Online** tab.
@@ -28,24 +43,9 @@ show you.
 do not support bbport: report problems here ([issues](https://github.com/ayozetr/bloodborne_linux/issues)),
 not to The Hunter's Dream's support.
 
-## Seamless Hunt
-
-[Seamless Hunt](https://install.seamlesshunt.com) is a community server for Seamless Co-op (BBSC),
-where Windows players join with BBSC's package for the Windows port.
-
-1. In the launcher's **Multiplayer → Online** tab, turn on **Play online** and choose **Seamless Hunt**: its
-   shadNet server, WebAPI and game server come with it.
-2. Type a name and a password under **Account** and press **Create** (once). The server wants an
-   email for each account; the launcher makes one from the name, as Seamless Hunt's own tool does.
-3. Turn on BBSC in the **Seamless co-op (BBSC)** group and press **Test** in the **Status** row.
-
-Its bloodstains and death visions crash the game with "Transaction failed", on Windows too: they
-are off by default, as in Seamless Hunt's package (**Bloodstains on Seamless Hunt** brings them
-back). Messages, ghosts and summon signs are not affected.
-
 ## Your own server
 
-Its owner creates the account ([SERVER.md](SERVER.md)), or you make it with **Create** under
+Its owner creates the account ([hosting your own server](SERVER.md)), or you make it with **Create** under
 **Account** when the server lets anyone register.
 
 1. In the launcher's **Multiplayer → Online** tab, turn on **Play online**, choose **Your own server** with
@@ -74,7 +74,7 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
    normal game.
 3. The server decides how much of it works:
    - **BBSC's game server** (Seamless Hunt's, which comes with it, or your group's,
-     [SERVER.md](SERVER.md#seamless-co-op-bbsc)): everything, summons across areas and 5 hunters included. Set it as the
+     [hosted with it](SERVER.md#seamless-co-op-bbsc)): everything, summons across areas and 5 hunters included. Set it as the
      **Game server** of the Online tab.
    - **The Hunter's Dream**: the session stays together (deaths, lamps, bosses), but summons are
      the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
@@ -114,7 +114,7 @@ the game's log has its warnings (`BBSC:` lines). Not in the Linux build: BBSC's 
 ## Ports
 
 Co-op traffic is UDP, straight between the players' computers. With your own server on
-Tailscale ([SERVER.md](SERVER.md)) it goes through Tailscale: turn **UPnP** off and skip this
+Tailscale ([hosting your own server](SERVER.md)) it goes through Tailscale: turn **UPnP** off and skip this
 section. Otherwise each player has to be reachable from the Internet:
 
 1. **The router.** With **UPnP** on (the default), the game opens its port on the router itself:

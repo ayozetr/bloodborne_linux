@@ -44,3 +44,6 @@ navigation-map*/
 atlas-tools/
 # Hunter's Atlas's own art (shipped; the launcher converts it for the game)
 !tools/hunters-atlas/art/*.png
+
+# The players' guide, built by mkdocs (mkdocs.yml)
+_site/

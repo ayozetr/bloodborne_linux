@@ -1,0 +1,71 @@
+# The players' guide on GitHub Pages (.github/workflows/guide.yml): built from docs/ with
+# MkDocs Material, so the guide and the repository's documents never disagree.
+site_name: Bloodborne for Linux
+site_description: How to install, play online and fix problems with the Linux port of Bloodborne.
+site_url: https://ayozetr.github.io/bloodborne_linux/
+repo_url: https://github.com/ayozetr/bloodborne_linux
+repo_name: ayozetr/bloodborne_linux
+edit_uri: edit/main/docs/
+copyright: GPL-3.0-or-later. Bloodborne is by FromSoftware and Sony Interactive Entertainment; this project is not affiliated with either. No game files are included.
+
+docs_dir: docs
+# Not MkDocs' default site/: that folder holds the theme and the hook.
+site_dir: _site
+exclude_docs: |
+  README.md
+  RELEASE_TEMPLATE.md
+
+theme:
+  name: material
+  custom_dir: site/overrides
+  font: false
+  palette:
+    scheme: slate
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+hooks:
+  - site/repo_links.py
+
+extra_css:
+  - stylesheets/hunters-dream.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Steam and the Steam Deck: steam-deck.md
+  - Playing online:
+      - Online play and co-op: ONLINE.md
+      - Your own server: SERVER.md
+  - Help:
+      - Troubleshooting: TROUBLESHOOTING.md
+      - Getting a log: logs.md
+      - FAQ: faq.md
+      - Supported releases: COMPATIBILITY.md
+  - Mods: MODS.en.md
+  - Credits: CREDITS.md
+  - For developers:
+      - Environment variables: ENVIRONMENT.md
+      - Debugging a crash: DEBUGGING.md
+      - GPU commands in parallel: parallel_gpu.md
+      - Upscaling and frame generation: upscaler.md
+      - The translator: TRANSLATOR_ARCHITECTURE.md
+      - The memory module: MEMORY_MODULE_PLAN.md

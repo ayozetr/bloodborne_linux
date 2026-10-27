@@ -3106,6 +3106,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         for title, subtitle, url, icon in (
                 (tr("Этот проект"), bbport_update.REPOSITORY_URL, bbport_update.REPOSITORY_URL,
                  "github-symbolic"),
+                (tr("Руководство для игроков"), bbport_update.GUIDE_URL, bbport_update.GUIDE_URL,
+                 "help-browser-symbolic"),
                 (tr("Основано на bbport от deadinside28"), bbport_update.UPSTREAM_URL,
                  bbport_update.UPSTREAM_URL, "github-symbolic"),
                 (tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,

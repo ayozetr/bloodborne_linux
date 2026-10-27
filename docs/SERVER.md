@@ -203,4 +203,4 @@ settings).
   the server; `tailscale ping <player>` from each side. Everyone needs the game at version 1.09
   and the same co-op mode.
 
-See also [ONLINE.md](ONLINE.md) for the bells, passwords and log lines of a summon.
+See also [Online play and co-op](ONLINE.md) for the bells, passwords and log lines of a summon.

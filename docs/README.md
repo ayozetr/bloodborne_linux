@@ -2,6 +2,13 @@
 
 ## For players
 
+The same documents, with a few pages written for players, make up the
+[players' guide](https://ayozetr.github.io/bloodborne_linux/) (built from this folder: `mkdocs.yml`).
+
+- [getting-started.md](getting-started.md): what you need, the first launch, saves and updates.
+- [steam-deck.md](steam-deck.md): Add to Steam, the Steam Deck's Game Mode, Steam Input and the overlay.
+- [logs.md](logs.md): getting a log, also from Game Mode, and sending it.
+- [faq.md](faq.md): the questions players ask most.
 - [COMPATIBILITY.md](COMPATIBILITY.md): which releases of Bloodborne run, and which have been
   checked.
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md): common problems and what to do.

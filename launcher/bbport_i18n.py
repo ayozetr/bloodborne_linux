@@ -716,6 +716,7 @@ EN = {
         "Couldn't update: {}",
     "Сначала закройте игру":
         "Close the game first",
+    'Руководство для игроков': "Players' guide",
     "Этот проект":
         "This project",
     "Основано на bbport от deadinside28":
@@ -1635,6 +1636,7 @@ PT_BR = {
         "Não foi possível atualizar: {}",
     "Сначала закройте игру":
         "Feche o jogo primeiro",
+    'Руководство для игроков': 'Guia para jogadores',
     "Этот проект":
         "Este projeto",
     "Основано на bbport от deadinside28":
@@ -2518,6 +2520,7 @@ ES = {
         "No se pudo actualizar: {}",
     "Сначала закройте игру":
         "Cierra el juego primero",
+    'Руководство для игроков': 'Guía para jugadores',
     "Этот проект":
         "Este proyecto",
     "Основано на bbport от deadinside28":
@@ -3401,6 +3404,7 @@ IT = {
         "Impossibile aggiornare: {}",
     "Сначала закройте игру":
         "Chiudi prima il gioco",
+    'Руководство для игроков': 'Guida per i giocatori',
     "Этот проект":
         "Questo progetto",
     "Основано на bbport от deadinside28":
@@ -4284,6 +4288,7 @@ FR = {
         "Mise à jour impossible : {}",
     "Сначала закройте игру":
         "Fermez d'abord le jeu",
+    'Руководство для игроков': 'Guide des joueurs',
     "Этот проект":
         "Ce projet",
     "Основано на bbport от deadinside28":
@@ -5167,6 +5172,7 @@ DE = {
         "Aktualisierung fehlgeschlagen: {}",
     "Сначала закройте игру":
         "Schließe zuerst das Spiel",
+    'Руководство для игроков': 'Anleitung für Spieler',
     "Этот проект":
         "Dieses Projekt",
     "Основано на bbport от deadinside28":
@@ -6021,6 +6027,7 @@ ZH_CN = {
         "无法更新：{}",
     "Сначала закройте игру":
         "请先关闭游戏",
+    'Руководство для игроков': '玩家指南',
     "Этот проект":
         "本项目",
     "Основано на bbport от deadinside28":
