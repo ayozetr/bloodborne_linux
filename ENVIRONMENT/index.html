@@ -2014,13 +2014,13 @@ behaviour when the variable is unset. In the tables:</p>
 <td><code>BB_GC_IDLE_SECONDS</code></td>
 <td>seconds, clamped 1-63 (20)</td>
 <td>Texture collector: below the pressure mark an image is evicted once unused for this long (the textures of an area left behind).</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1343</code>, <code>1367-1371</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1345</code>, <code>1367-1371</code></td>
 </tr>
 <tr>
 <td><code>BB_GC_PRESSURE_IDLE_SECONDS</code></td>
 <td>seconds, clamped 0-63 (5)</td>
 <td>Texture collector: under VRAM pressure an image is evicted once unused for this long (over the critical mark for 1 s first, then by submissions).</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1372-1381</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1379-1388</code></td>
 </tr>
 <tr>
 <td><code>BB_GC_PRESSURE_PERCENT</code></td>
@@ -2029,10 +2029,16 @@ behaviour when the variable is unset. In the tables:</p>
 <td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:62-76</code></td>
 </tr>
 <tr>
+<td><code>BB_GC_KEEP_GPU_WRITTEN</code></td>
+<td>0 = off; else on (on)</td>
+<td>Texture collector: images the GPU wrote stay in VRAM until past the critical mark and unused for a minute, linear ones like tiled ones (issue #30). 0: linear ones are downloaded and freed under mere pressure, as before.</td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1453</code></td>
+</tr>
+<tr>
 <td><code>BB_GC_TILE_BACK</code></td>
 <td>0 = off; else on (on)</td>
 <td>Texture collector: past the critical mark, a GPU-written tiled image unused for a minute is tiled back into the game's memory before it is freed (issues #13, #14). 0 = dropped unwritten as before, which left the Hunter's Dream black. Multisampled images are always dropped.</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1422-1441</code>, <code>201-250</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1435-1470</code>, <code>201-250</code></td>
 </tr>
 <tr>
 <td><code>BB_GPU_COMMAND_WRITES</code></td>
@@ -2248,7 +2254,7 @@ behaviour when the variable is unset. In the tables:</p>
 <td><code>BB_READBACK_LINEAR</code></td>
 <td>1/y/t or 0 (off)</td>
 <td>shadPS4's readback of linear (untiled or narrow) images to guest memory.</td>
-<td><code>gpu/shim/core/emulator_settings.h:66</code>, <code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:784</code></td>
+<td><code>gpu/shim/core/emulator_settings.h:66</code>, <code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:786</code></td>
 </tr>
 <tr>
 <td><code>BB_READBACK_QUEUE</code></td>
@@ -3422,13 +3428,13 @@ behaviour when the variable is unset. In the tables:</p>
 <td><code>BB_IMAGE_SYNC_LOG</code></td>
 <td>set (any value) = on (off)</td>
 <td>Logs image refreshes from memory the GPU wrote, and the images refreshed most per 5 s with their flags.</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:324</code>, <code>910-921</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:326</code>, <code>910-921</code></td>
 </tr>
 <tr>
 <td><code>BB_IMAGE_WATCH</code></td>
 <td>guest address (hex with 0x) (unset = off)</td>
 <td>Prints how the image at that guest address is used (first 300 events).</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:306</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:308</code></td>
 </tr>
 <tr>
 <td><code>BB_LABEL_TRAP</code></td>
@@ -3879,7 +3885,7 @@ behaviour when the variable is unset. In the tables:</p>
 <td><code>BB_GC_BUDGET_MB</code></td>
 <td>MiB (unset = 0 = driver budget, integrated GPUs only)</td>
 <td>Texture collector: applies the integrated-GPU rule (marks at 70/85/95 % of the budget) with this fixed budget on any GPU. For tests on a desktop.</td>
-<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1322-1333</code></td>
+<td><code>gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1324-1335</code></td>
 </tr>
 <tr>
 <td><code>BB_GPU_DATA_CHECK</code></td>
