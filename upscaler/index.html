@@ -1,0 +1,1699 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="How to install, play online and fix problems with the Linux port of Bloodborne.">
+      
+      
+      
+        <link rel="canonical" href="https://ayozetr.github.io/bloodborne_linux/upscaler/">
+      
+      
+        <link rel="prev" href="../parallel_gpu/">
+      
+      
+        <link rel="next" href="../TRANSLATOR_ARCHITECTURE/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Upscaling and frame generation - Bloodborne for Linux</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/hunters-dream.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <meta name="darkreader-lock">
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#temporal-upscaling-and-frame-generation-frame-analysis-and-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Bloodborne for Linux" class="md-header__button md-logo" aria-label="Bloodborne for Linux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bloodborne for Linux
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Upscaling and frame generation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ayozetr/bloodborne_linux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ayozetr/bloodborne_linux
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Bloodborne for Linux" class="md-nav__button md-logo" aria-label="Bloodborne for Linux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Bloodborne for Linux
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ayozetr/bloodborne_linux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ayozetr/bloodborne_linux
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-deck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam and the Steam Deck
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playing online
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playing online
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ONLINE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Online play and co-op
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SERVER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your own server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Help
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Help
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TROUBLESHOOTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPATIBILITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MODS.en/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CREDITS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Credits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For developers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For developers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ENVIRONMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEBUGGING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging a crash
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parallel_gpu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GPU commands in parallel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upscaling and frame generation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upscaling and frame generation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#native-taa-and-missing-fsr-4-assets-2026-10-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native TAA and missing FSR 4 assets (2026-10-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#startup-patch-is-the-default-again-for-outputs-other-than-1080p-2026-10-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup patch is the default again for outputs other than 1080p (2026-10-02)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-resolution-changes-2026-10-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live resolution changes (2026-10-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bloodbornes-frame-1920x1080-hunters-dream-nightmare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bloodborne's frame (1920x1080, Hunter's Dream / Nightmare)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scene-constants-864-bytes-bound-by-most-passes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scene constants (864 bytes, bound by most passes)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-4-did-not-work-at-1440p2160p-output-flicker-and-shimmer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4 did not work at 1440p/2160p output (flicker and shimmer)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-faster-fsr-4-the-post-pass-29-08-ms-at-4k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: Faster FSR 4 — the post pass (2.9 → 0.8 ms at 4K)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2026-10-01: Faster FSR 4 — the post pass (2.9 → 0.8 ms at 4K)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-else-was-checked-same-setup-4k-balanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What else was checked (same setup, 4K Balanced)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-4-flicker-at-the-left-edge-at-1080p-output-a-race-in-model-pass-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4 flicker at the left edge at 1080p output — a race in model pass 11
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-411-what-is-inside-and-how-to-run-it-in-vulkan-investigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4.1.1 — what is inside and how to run it in Vulkan (investigation)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-411-in-the-port-upscalerfsr411" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4.1.1 in the port (upscaler=fsr411)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TRANSLATOR_ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The translator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_MODULE_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The memory module
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#native-taa-and-missing-fsr-4-assets-2026-10-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native TAA and missing FSR 4 assets (2026-10-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#startup-patch-is-the-default-again-for-outputs-other-than-1080p-2026-10-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup patch is the default again for outputs other than 1080p (2026-10-02)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-resolution-changes-2026-10-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live resolution changes (2026-10-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bloodbornes-frame-1920x1080-hunters-dream-nightmare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bloodborne's frame (1920x1080, Hunter's Dream / Nightmare)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scene-constants-864-bytes-bound-by-most-passes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scene constants (864 bytes, bound by most passes)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-4-did-not-work-at-1440p2160p-output-flicker-and-shimmer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4 did not work at 1440p/2160p output (flicker and shimmer)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-faster-fsr-4-the-post-pass-29-08-ms-at-4k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: Faster FSR 4 — the post pass (2.9 → 0.8 ms at 4K)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2026-10-01: Faster FSR 4 — the post pass (2.9 → 0.8 ms at 4K)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-else-was-checked-same-setup-4k-balanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What else was checked (same setup, 4K Balanced)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-4-flicker-at-the-left-edge-at-1080p-output-a-race-in-model-pass-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4 flicker at the left edge at 1080p output — a race in model pass 11
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-411-what-is-inside-and-how-to-run-it-in-vulkan-investigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4.1.1 — what is inside and how to run it in Vulkan (investigation)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-10-01-fsr-411-in-the-port-upscalerfsr411" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-10-01: FSR 4.1.1 in the port (upscaler=fsr411)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="temporal-upscaling-and-frame-generation-frame-analysis-and-plan">Temporal upscaling and frame generation — frame analysis and plan<a class="headerlink" href="#temporal-upscaling-and-frame-generation-frame-analysis-and-plan" title="Permanent link">&para;</a></h1>
+<h2 id="native-taa-and-missing-fsr-4-assets-2026-10-01">Native TAA and missing FSR 4 assets (2026-10-01)<a class="headerlink" href="#native-taa-and-missing-fsr-4-assets-2026-10-01" title="Permanent link">&para;</a></h2>
+<p><code>upscaler=taa</code> / <code>BB_UPSCALER=taa</code> is a separate native-resolution temporal AA
+mode, available live in the launcher and overlay. It uses the existing jitter and
+camera/object motion vectors, reprojection, depth rejection and 3×3 neighborhood
+clipping in one compute pass with two ping-pong RGBA16F histories. History stores
+depth in alpha; the scene's original alpha is preserved by the HDR merge. HUD is
+composed afterwards and never enters history. Output changes and AA/provider
+changes reset history. TAA uses Native AA dimensions while preserving the saved
+FSR preset, and does not allocate an FSR context or execute an FSR model/RCAS.
+It still adds GPU work compared with disabling temporal AA; native 4K raster cost
+also remains. The explicit <code>BB_RENDER_RES</code> compatibility path must be unset.</p>
+<p>FSR Native AA is not a fast pass-through: it renders at the output resolution and
+also executes the temporal reconstruction (including the model for FSR 4) and
+optional sharpening. It can therefore be slower than no AA at the same output.</p>
+<p>FSR 4.1.1 assets have separate 1080p/2160p tiers and standard/Ultra models:
+<code>t1080_m0</code>, <code>t1080_m1</code>, <code>t2160_m0</code>, <code>t2160_m1</code>. Outputs above 1080p need the 2160
+tier, irrespective of the preset. A missing <code>t2160_m0/spd.spv</code> means missing
+assets, not a GPU feature failure. These assets are not bundled: build the full
+set with <code>tools/fsr4cap/build_assets.sh</code> and put it in <code>BB_FSR411_DIR</code> or the
+packaged data directory's <code>fsr4_411</code>. Fatal asset failures now select FSR 3.1 in
+the live settings, so the menu shows the active provider, retains the error, and
+allows retrying FSR 4 after changing the output/installing assets.</p>
+<p><code>taa-shader-test</code> checks real SPIR-V output for accumulation, clipping, depth
+disocclusion, invalid history and out-of-frame motion on Vulkan (Lavapipe works).
+<code>out/taa-appimage-build.log</code> records these checks, settings round trips and 64
+Python tests. <code>out/taa-live-validation.log</code> and <code>out/taa-appimage-validation.log</code>
+check TAA at 1080p/720p/1440p/4K, TAA ↔ FSR 3, and a missing 2160-tier FSR 4.1.1
+model in one gameplay process, including output captures and camera movement.
+<code>out/taa-launcher-validation.log</code> checks actual GTK controls and saved settings.
+TAA has not yet been tested on the tester's GTX 1060.</p>
+<h2 id="startup-patch-is-the-default-again-for-outputs-other-than-1080p-2026-10-02">Startup patch is the default again for outputs other than 1080p (2026-10-02)<a class="headerlink" href="#startup-patch-is-the-default-again-for-outputs-other-than-1080p-2026-10-02" title="Permanent link">&para;</a></h2>
+<p>The live path below made the Steam Deck and a GTX 1060 + 4-core Haswell drop to 7–8 FPS
+(release 0.1 AppImage: 40–50 FPS on the Deck). With guest allocations at 1920×1080 the game's
+post-processing stays at 1080p even for 720p output, guest compute passes resolve scene proxies
+back to 1080p every frame (RX 7800 XT, 720p FSR 3 Performance on 4 cores: 826 vs 576
+draws/frame, 185 vs 210 FPS), and on GPUs without shader stencil export every depth/stencil
+copy took nine draws.</p>
+<ul>
+<li><code>run.sh</code> again patches the game's render size for outputs other than 1080p (as in 0.1) and
+  marks it with <code>BB_AUTO_RENDER_RES=1</code>, so an in-game restart recomputes it. Preset and output
+  changes then need a restart (the menu offers it). <code>BB_LIVE_RES=1</code> selects the live path.
+  1080p output and TAA keep the live path.</li>
+<li>Depth/stencil scene proxies need <code>VK_EXT_shader_stencil_export</code> again; without it these
+  targets stay native (as in 0.1). <code>BB_SCENE_STENCIL_BITS=1</code> still forces the portable
+  resampler for tests.</li>
+</ul>
+<h2 id="live-resolution-changes-2026-10-01">Live resolution changes (2026-10-01)<a class="headerlink" href="#live-resolution-changes-2026-10-01" title="Permanent link">&para;</a></h2>
+<p>The in-game output selector now resizes 720p/1080p/1440p/2160p host targets at a
+display-pass boundary. Presets use <code>output / scale</code>, including raster sizes above
+1080p (4K Quality: 2560×1440; Native AA: 3840×2160). Guest allocations stay at
+1920×1080; <code>run.sh</code> no longer inserts a resolution patch for normal output choices.
+The explicit <code>BB_RENDER_RES</code> compatibility override is retained.</p>
+<p><code>SceneTargets</code> resolves and retires old proxies before changing size. FSR resources
+and history are rebuilt for the new input/output, with completion waits for both
+FSR 3 and FSR 4. The 1080p path keeps HDR reconstruction before game post;
+other outputs reconstruct tonemapped scene proxies at the first Scaleform pass,
+then draw HUD/menu geometry into the output-size target. The display buffer is
+resized too. Movie shader identification prevents a native-size fullscreen post
+pass from being mistaken for UI.</p>
+<p>Guest compute passes retain their native dispatch sizes and can resolve proxies
+back to 1080p. This change does not scale every post-processing pass; performance
+and intermediate detail can differ from the old startup-patched render sizes.</p>
+<p>Verification: <code>out/dev/live-resolution-summary.log</code> switches output, preset and FSR
+off/on in one PID. <code>BB_PRESENT_DUMP_TRIGGER</code> captures the completed host display
+buffer (including HUD) into <code>BB_DUMP_DIR</code>. Captures confirm actual 720p/1440p/2160p
+buffers. <code>scene-resolution-test</code> covers color/depth/stencil round trips through
+proxies both smaller and larger than the guest allocation. <code>BB_PRESET_FILE</code> accepts
+<code>preset [output-index [upscaler-index]]</code> for scripted menu-equivalent changes.</p>
+<p>Frame analyzer: <code>BB_CAPTURE_TRIGGER=&lt;file&gt; BB_CAPTURE_DIR=&lt;dir&gt;</code>; creating the file records
+the next frame (boundary: the pass writing a display buffer) — passes, targets, shaders,
+sampled textures, and the first 1 KiB of bound constants for small passes and first draws.</p>
+<h2 id="bloodbornes-frame-1920x1080-hunters-dream-nightmare">Bloodborne's frame (1920x1080, Hunter's Dream / Nightmare)<a class="headerlink" href="#bloodbornes-frame-1920x1080-hunters-dream-nightmare" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Passes</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>first pass of a frame</td>
+<td>copy of the previous UI target into the display buffer (sRGB)</td>
+</tr>
+<tr>
+<td>shadow</td>
+<td>4096x4096 D32 depth</td>
+</tr>
+<tr>
+<td>G-buffer</td>
+<td>6 targets 1920x1080 (RGBA8 x3, sRGB albedo, B10G11R11, RGBA16F) + D32S8 depth</td>
+</tr>
+<tr>
+<td>lighting</td>
+<td>light volumes into two B10G11R11 targets</td>
+</tr>
+<tr>
+<td>scene color</td>
+<td>RGBA16F 1920x1080, also forward/transparent draws and effects</td>
+</tr>
+<tr>
+<td>volumetric fog</td>
+<td>compute, reads linear depth (R32F 1920x1080) and composites into scene color</td>
+</tr>
+<tr>
+<td>half-res effects</td>
+<td>RGBA8 960x540 with half-res depth</td>
+</tr>
+<tr>
+<td>post</td>
+<td>combine/bloom pyramid in RGBA16F / B10G11R11</td>
+</tr>
+<tr>
+<td>tonemap</td>
+<td>into RGBA8 1920x1080 (the UI target)</td>
+</tr>
+<tr>
+<td>game AA</td>
+<td>ping-pong RGBA8 1920x1080 after tonemap (to be skipped when upscaling)</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>stencil-masked draws over the same RGBA8 target</td>
+</tr>
+</tbody>
+</table>
+<p>There is no velocity buffer, also with the camera moving: motion vectors are computed.</p>
+<h2 id="scene-constants-864-bytes-bound-by-most-passes">Scene constants (864 bytes, bound by most passes)<a class="headerlink" href="#scene-constants-864-bytes-bound-by-most-passes" title="Permanent link">&para;</a></h2>
+<p>Signature: <code>[0]=3000 (far) [1]=1/3000 [4]=1920 [5]=1080 [6]=1/1920 [7]=1/1080</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Floats</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8–19</td>
+<td>view matrix, 3x4 rows (rotation + translation); the only block that changes with the camera</td>
+</tr>
+<tr>
+<td>36–51</td>
+<td>inverse projection (0.700285 = 1/1.42799, 0.39391 = 1/2.53865)</td>
+</tr>
+<tr>
+<td>52, 57, 62, 63</td>
+<td>projection (rows 52–67), D3D depth 0..1: x 1.42799, y 2.53865, z 1.00002 / -0.0500679 (near 0.05, far 3000)</td>
+</tr>
+<tr>
+<td>112–175</td>
+<td>shadow cascade matrices</td>
+</tr>
+<tr>
+<td>180–191</td>
+<td>inverse view (camera to world), 3x4 (176–179: 2, 8, 15, 0)</td>
+</tr>
+</tbody>
+</table>
+<p>The previous frame's matrices are not there; the port keeps them itself.</p>
+<h2 id="plan">Plan<a class="headerlink" href="#plan" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Find the scene constants every frame (signature), keep the previous view/projection.</li>
+<li>Camera motion vectors: compute pass from depth and current/previous matrices into an
+   RG16F target; debug view to check them. Object motion later (vertex shader replay with the
+   previous frame's constants through the recompiler).</li>
+<li>Jitter: sub-pixel offset of clip-space positions in the scene passes (recompiler).</li>
+<li>Upscaler at the scene color stage (before post and UI): FSR 3.1 first (open, native Vulkan,
+   also frame generation), then DLSS (native on Linux), XeSS/XeFG and OptiScaler through a
+   loader for their Windows DLLs.</li>
+</ol>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Camera motion vectors: verified by reprojecting the previous frame (<code>BB_DEBUG_MOTION=1</code>,
+  toggles 1&lt;&lt;22 reprojected frame, 1&lt;&lt;23 error map): static geometry matches.</li>
+<li>FSR 3.1 (<code>BB_UPSCALER=fsr3</code>, FireBurn/FSR-Vulkan submodule): scene color before the
+  post-processing combine (compute shader 9a9cf8a9), 1:1, RGB written back (the game keeps data
+  in the alpha). Toggle 1&lt;&lt;24 switches it off at run time.</li>
+<li>Jitter: viewport offset of scene geometry (drawn with the scene depth, not full-screen
+  quads), Halton(2,3) 8 phases; sign checked by sharpness (correct 255, flipped 208, off 271 —
+  1:1 jitter trades high-frequency aliasing for a slightly softer image). Toggle 1&lt;&lt;25 off.</li>
+<li>Frame-to-frame difference while standing still: ~33% lower with FSR.</li>
+<li>Missing: motion of animated objects (characters, cloth, foliage), reactive/transparency
+  masks for particles and fog, render-resolution scaling, frame generation.</li>
+</ul>
+<h2 id="2026-10-01-fsr-4-did-not-work-at-1440p2160p-output-flicker-and-shimmer">2026-10-01: FSR 4 did not work at 1440p/2160p output (flicker and shimmer)<a class="headerlink" href="#2026-10-01-fsr-4-did-not-work-at-1440p2160p-output-flicker-and-shimmer" title="Permanent link">&para;</a></h2>
+<p>Video <code>video_2026-10-01_03-58-59.mp4</code> (3840x2160 output, FSR 4 Performance): flicker and shimmer
+on all objects. Cause: the upscaler did not run at all in this mode, while jitter stayed
+enabled. The screen showed a stretched scene frame, each frame shifted by its own Halton phase.</p>
+<ol>
+<li>The UI pass was identified by the exact <code>BB_RENDER_RES</code> target size (1916x1078), but the game
+   allocates targets with an aligned height (1916x1080; the scene constants also say 1916x1080).
+   <code>RunScaled</code> was never called (the log had no <code>UI: native composition</code>). Alignment up to
+   8 pixels is now accepted (<code>RenderTarget</code>), and the scene size for FSR comes from the scene
+   constants (<code>CameraMotion::RenderSize</code>, <code>SceneSize</code>).</li>
+<li>After that FSR 4 failed with <code>external image registration failed (-1000069000)</code>: <code>RunScaled</code>
+   created new image views every frame, and the FSR 4 registry holds eight. It now uses the same
+   <code>CachedView</code> as the Native AA path.</li>
+</ol>
+<p>Dump check (<code>BB_DUMP_TRIGGER=&lt;file&gt; BB_DUMP_DIR=&lt;dir&gt;</code>, <code>BB_DUMP_FRAMES</code>, default 8:
+FSR input, motion vectors and output, raw): with a static camera the PSNR of adjacent output frames
+is ~45 dB against ~28 dB for the jittered input; no trails when turning the camera or walking. FPS in
+this mode is ~107 instead of ~220; before, FSR 4 simply did not run.</p>
+<p>Remaining: sprites (4 indices each) drawn into scene color with scene depth (glows, small lights)
+are still not shifted by jitter (the rule "≤ 6 indices = full-screen pass").</p>
+<h2 id="2026-10-01-faster-fsr-4-the-post-pass-29-08-ms-at-4k">2026-10-01: Faster FSR 4 — the post pass (2.9 → 0.8 ms at 4K)<a class="headerlink" href="#2026-10-01-faster-fsr-4-the-post-pass-29-08-ms-at-4k" title="Permanent link">&para;</a></h2>
+<p>Measurements: <code>BB_FSR4_PROFILE=1</code> (time of each FSR 4 pass, a provider patch in the submodule,
+see <code>gpu/patches/fsr-vulkan</code>), the out-of-game benchmark <code>out/gpu/fsr4-bench</code> (<code>ninja -C out/gpu
+fsr4-bench</code>; <code>--stats</code> prints registers and instructions from RADV). 4K Balanced (2260x1272 → 3840x2160),
+RX 7800 XT: all of FSR 4 takes 5.8 ms, of which <strong>post is 2.5–2.9 ms</strong> (not the neural network: the last layers,
+2x2 pixel shuffle and blending with history), the 12 model passes 2.4 ms, pre 0.55.</p>
+<p>Cause: each thread computes a 2x2 block of output pixels and writes them one by one into three images
+(recurrent state, history, output), so each wave store instruction writes every other
+pixel. Removing any one of the three stores made the pass 1.3–4 times faster with the same code.</p>
+<p>Fix: <code>tools/fsr4_optimize.sh</code> decompiles post (spirv-cross), <code>tools/fsr4_post_lds.pl</code>
+gathers the workgroup's 16x16 block in shared memory and writes contiguous rows, and glslang
+compiles it back into <code>fsr4_shaders/opt/</code>; <code>vk_fsr4.cpp</code> loads it from there (<code>BB_FSR4_OPT=0</code> selects the
+original). Two subtleties, found by comparing outputs:
+- spirv-cross translates the signed int8 unpack (<code>OpBitcast</code> to <code>i8vec4</code>) as <code>unpack8(uint)</code>
+  (unsigned); without a fix the result is completely different (PSNR 17 dB);
+- values in shared memory must stay float: the compiler turns a half from shared memory
+  into a 16-bit store, which rounds differently to unorm8.</p>
+<p><code>tools/fsr4_verify.sh</code> compares the original and the optimized post for all presets at
+1080p/1440p/4K output on pseudo-random inputs: 1440p and 4K are bit-identical; post at 4K 2.1–3.5 →
+0.81–0.87 ms, 1440p 1.2–1.5 → 0.36–0.38 ms, 1080p 0.37–0.69 → 0.20–0.22 ms. In game (4K
+Balanced): FSR 4 5.8 → 4.0 ms, GPU frame 13.1 → ~11.6 ms; beyond that FPS is CPU-bound (the
+GPU command thread waits for guest memory copies, "host copies" ~20%).</p>
+<p>Found along the way: <strong>the original FSR 4 at the 1080 tier (1920x1080 output) is nondeterministic</strong>: from
+run to run on identical inputs a strip at the left edge changes (columns 0–132), so there is
+a race or a read of uninitialized memory somewhere in the model/provider. At 1080p output this
+can cause flicker at the left edge of the frame. Not investigated.</p>
+<p>The reactive mask is no longer computed with FSR 4 (FSR 4 does not accept it).</p>
+<h3 id="what-else-was-checked-same-setup-4k-balanced">What else was checked (same setup, 4K Balanced)<a class="headerlink" href="#what-else-was-checked-same-setup-4k-balanced" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>A/B in one process</strong> (<code>ab.sh</code>, bit 24 turns FSR off, UI copy without upscaling): 86.5 FPS with
+  FSR 4 against 87.7 without it. After the post optimization the frame is CPU-bound (GPU command thread,
+  waiting for guest memory copies), not GPU-bound. Async compute for FSR (overlapping it with the start
+  of the next frame) would gain no more than this ~1%; postponed until the CPU side is faster. It also
+  requires reordering the UI and present commands of frame N after the work of frame N+1.</li>
+<li><strong>WMMA (<code>VK_KHR_cooperative_matrix</code>, supported by RADV on RDNA3)</strong>: a prototype of model pass 1
+  (16-channel residual block: 3x3 16→16, 1x1 16→32 ReLU, 1x1 32→16): 0.85 ms in the first
+  version, 0.49 ms with a word layout in shared memory, against 0.30 ms for the original dot4.
+  The arithmetic on WMMA would take ~0.1 ms, but with 16 channels the tile layout, epilogues through shared
+  memory and occupancy (6 waves/SIMD, limited by LDS) eat the gain. The ceiling is about 1 ms for
+  all 12 passes with careful manual rework of each; not started.</li>
+<li><code>RADV_PERFTEST=cswave32</code> (wave32 for compute): FSR 4 is slower, 4.2 → 5.4 ms.</li>
+<li>The pre pass (0.54 ms) is not limited by stores (0.50 ms without stores).</li>
+</ul>
+<h2 id="2026-10-01-fsr-4-flicker-at-the-left-edge-at-1080p-output-a-race-in-model-pass-11">2026-10-01: FSR 4 flicker at the left edge at 1080p output — a race in model pass 11<a class="headerlink" href="#2026-10-01-fsr-4-flicker-at-the-left-edge-at-1080p-output-a-race-in-model-pass-11" title="Permanent link">&para;</a></h2>
+<p>The 1080-tier nondeterminism (see above) is a bug in the v07 model shader, pass 11 (decoder,
+1/4 → 1/2 resolution). Each thread is one pixel of the 1/4-resolution input and writes a 2x2 block of the
+1/2-resolution output. The dispatch rounds the width up to 64 threads, and threads beyond the input width do not
+exit: at the 1080 tier (input 480 wide) threads 480..511 write output pixels
+960..1023, which are the first pixels of the next row (a row of any tensor is 15360 bytes), and
+race with their real writers. At 4K output the width 960 is divisible by 64, so there is no bug.</p>
+<p><code>tools/fsr4_pass11_guard.pl</code> adds an early exit for out-of-bounds threads (the size comes from
+the pass's own neighbor check); <code>tools/fsr4_optimize.sh</code> builds it into <code>fsr4_shaders/opt</code>
+for all presets together with post; <code>vk_fsr4.cpp</code> and the benchmark load any pass from <code>opt/</code>.
+<code>tools/fsr4_verify.sh</code>: 1440p/4K are bit-identical to the original (the guard does not trigger there); 1080p gives
+the same result from run to run, and after the first frame it differs from the original only in
+the former strip at the left edge.</p>
+<p>Found in the process: spirv-cross translates all signed int8 unpacks (<code>OpBitcast</code> to <code>v4char</code>)
+as unsigned <code>unpack8(uint)</code>; pass 11 has nine different forms of them. The fix is shared by the
+scripts: <code>tools/Fsr4SpirvCrossFixes.pm</code> (all <code>unpack8</code> go through a signed helper).</p>
+<h2 id="2026-10-01-fsr-411-what-is-inside-and-how-to-run-it-in-vulkan-investigation">2026-10-01: FSR 4.1.1 — what is inside and how to run it in Vulkan (investigation)<a class="headerlink" href="#2026-10-01-fsr-411-what-is-inside-and-how-to-run-it-in-vulkan-investigation" title="Permanent link">&para;</a></h2>
+<p>Source: <code>amd_fidelityfx_upscaler_dx12.dll</code> 4.1.1.2740 from OptiScaler (<code>FSR4_LATEST</code>).
+- The DLL contains the provider <code>ffxProvider_FSR4_Int8</code> / <code>Fsr4Int8UpscalerModel</code> (version "FSR4-i8 4.1.1").
+  1028 DXIL containers (25.7 MB): model passes <code>fsr4_model_v07_fp8_no_scale_pass1..12</code> (+ <code>_post</code>),
+  270 <code>prepass</code> variants, 144 <code>postpass</code>, <code>fsr_rcas_pass</code> and the FSR 3.1/2 fallback. There is no compressed data.
+- Despite "fp8" in the name, the model passes are plain DXIL with <code>dot4AddPacked</code> (int8 dot4), without
+  AMD extensions (WMMA). The architecture is the same v07 (12 passes), but weights and biases are not baked into
+  the shader; they are read from <code>InitializerBuffer</code> (t18, typed buffer), tensor sizes from the cbuffer
+  <code>CsTensorSizes</code>, scratch is <code>u11</code>. Each pass has 9 variants: the grid is baked in (1080 / 4K /
+  8K tiers: 480x270, 960x540, 1920x1080 for pass 5) and, apparently, the presets.
+- <code>amdxcffx64.dll</code> (loader 2.3.0.2913, loaded by Proton) has the same FP8 FSR 4 passes and ML
+  frame generation (<code>mlfi_*</code>), with no separate INT8 model. <code>FSR4_INT8</code> 4.0.2 is <code>v07_i8</code>, that is,
+  what the port already uses.
+- dxil-spirv (HansKristian-Work/dxil-spirv, built from source) translates the passes into
+  correct SPIR-V: <code>dxil-spirv &lt;pass&gt; --enable-shader-i8-dot --ssbo-uav --use-reflection-names</code>.</p>
+<p>What is missing for an own 4.1.1 provider: the container mapping (preset, tier, pass),
+the contents of <code>InitializerBuffer</code>, the <code>CsTensorSizes</code> values, the prepass/postpass permutations, constants and
+dispatch sizes. The most reliable way is not to reverse the provider's x86 code but to record one frame:
+a small FFX API (DX12, MinGW) test program under Wine/Proton with vkd3d-proton, explicit selection of
+the "FSR4-i8" provider through a version override, and a Vulkan layer that writes the pipelines (SPIR-V from
+dxil-spirv), buffer contents and dispatch sizes. Then replay with an own provider
+through the same benchmark (<code>fsr4-bench</code>), checked against the recorded output.</p>
+<h2 id="2026-10-01-fsr-411-in-the-port-upscalerfsr411">2026-10-01: FSR 4.1.1 in the port (upscaler=fsr411)<a class="headerlink" href="#2026-10-01-fsr-411-in-the-port-upscalerfsr411" title="Permanent link">&para;</a></h2>
+<p>The AMD 4.1.1 (INT8) model runs natively in Vulkan and matches the DLL bit for bit.</p>
+<p><strong>How it was obtained.</strong> <code>tools/fsr4cap/fsr4cap.exe</code> (C, MinGW) calls the FidelityFX API 2.3 from
+<code>amd_fidelityfx_loader_dx12.dll</code> with an explicit version 4.1.1 and, by replacing D3D12 method tables,
+records everything the DLL does under vkd3d-proton: pipelines (DXIL), root signatures,
+descriptors, uploads, constants, dispatches. (Since then fsr4cap.exe loads AMD's upscaler DLL directly,
+which exports the API itself; the loader is only needed for a DLL that does not.) A frame is 29 dispatches: auto-exposure SPD, prepass,
+pass0_post, model passes 1..12 (each followed by <code>_post</code>, which clears the tensor border), postpass, RCAS.
+- There are two models: m0 (Native..Performance) and m1 (Ultra Performance, ratio 3.0); weights are 128 KB
+  (<code>InitializerBuffer</code>). Tiers: t1080 (output up to 1920x1080), t2160 (larger, incl. 2560x1080).
+- Tensors are computed from the output aligned to 8; the <code>CsTensorSizes</code> table (17 sizes), the group
+  counts and the constants (MLSR as in v07, but width/height are not aligned and <code>inv_scale = 1 / scale</code>;
+  SPD; RCAS) are checked by <code>extract.py</code> on 20 recordings.
+- dxil-spirv translates DXIL the same way as vkd3d-proton: <code>--mixed-float-dot-product</code>
+  (<code>VK_VALVE_shader_mixed_float_dot_product</code>, half dot2 with float accumulation); without it
+  PSNR is 40 dB instead of an exact match. <code>--class-bindings</code> (a patch) lays out SRV/UAV/
+  CBV/sampler registers at bindings +0/+32/+64/+96; the runtime binds resources by name.
+- <code>fsr411/fsr411.cpp</code> is an independent Vulkan core (the game and <code>fsr4-bench --fsr411</code>).
+- <code>verify.sh</code>: DLL and replay on identical inputs, 8 frames, bit-identical for
+  1080p (both models), 1440p, 2560x1080, 4K (both models). 1600x900 differs only at the right
+  edge, where the DLL itself is nondeterministic (a race in its shaders when the tensor width is not a multiple of 64).</p>
+<p><strong>Speedup.</strong> postpass is rewritten to use workgroup memory at the SPIR-V assembly level
+(<code>postpass_lds.py</code>; going through GLSL is inexact: <code>DenormPreserve</code> and the exact placement of
+<code>RelaxedPrecision</code> are lost, and something else changes the result too): 2.18 → 0.95 ms at 4K, bit-identical to the DLL.
+All of FSR 4.1.1: 1.09 ms at 1080p (1280x720), 4.2 ms at 4K Balanced. In game (4K Balanced)
+the upscaler takes 4.12 ms against 4.32 ms for the accelerated v07.</p>
+<p><strong>Building the assets</strong> (by the user, from their own DLLs; the repository contains nothing from AMD):</p>
+<pre><code>bash tools/fsr4cap/build_assets.sh &lt;amd_fidelityfx_upscaler_dx12.dll 4.1.x&gt; [&lt;amd_fidelityfx_loader_dx12.dll 2.3.x&gt;]
+</code></pre>
+<p>Needs nix-shell (or MinGW, cmake, ninja, python3, SPIRV-Tools, git), network access for dxil-spirv, and
+Proton (PROTONPATH, or GE-Proton 10+ / Proton-CachyOS / Proton Experimental; umu-run or Steam's runtime).
+In the AppImage the tools are prebuilt (<code>BB_FSR4CAP_TOOLS</code>). The DLLs are available, for example, from OptiScaler
+(<code>FSR4_LATEST/</code>) and in games with FSR 3.1/4. A build from scratch produces the same files; <code>VERIFY=1</code> at the end
+compares against the DLL.</p>
+<p><strong>Correction to the A/B above ("the frame is CPU-bound").</strong> Those measurements ran while 12 hung shadPS4
+processes each occupied a core. On an idle system: "host copies" 1.6%, waiting for the GPU ~41%; the frame
+is GPU-bound, so async compute for FSR makes sense again.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../parallel_gpu/" class="md-footer__link md-footer__link--prev" aria-label="Previous: GPU commands in parallel">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                GPU commands in parallel
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../TRANSLATOR_ARCHITECTURE/" class="md-footer__link md-footer__link--next" aria-label="Next: The translator">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                The translator
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      GPL-3.0-or-later. Bloodborne is by FromSoftware and Sony Interactive Entertainment; this project is not affiliated with either. No game files are included.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

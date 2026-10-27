@@ -1,0 +1,1536 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="How to install, play online and fix problems with the Linux port of Bloodborne.">
+      
+      
+      
+        <link rel="canonical" href="https://ayozetr.github.io/bloodborne_linux/SERVER/">
+      
+      
+        <link rel="prev" href="../ONLINE/">
+      
+      
+        <link rel="next" href="../TROUBLESHOOTING/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Your own server - Bloodborne for Linux</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/hunters-dream.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <meta name="darkreader-lock">
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hosting-your-own-co-op-server" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Bloodborne for Linux" class="md-header__button md-logo" aria-label="Bloodborne for Linux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bloodborne for Linux
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Your own server
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ayozetr/bloodborne_linux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ayozetr/bloodborne_linux
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Bloodborne for Linux" class="md-nav__button md-logo" aria-label="Bloodborne for Linux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Bloodborne for Linux
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ayozetr/bloodborne_linux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ayozetr/bloodborne_linux
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-deck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam and the Steam Deck
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playing online
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playing online
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ONLINE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Online play and co-op
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your own server
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your own server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-fits-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it fits together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-tailscale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tailscale
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-docker-any-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With Docker (any Linux)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#without-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-firewall-on-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A firewall on the server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Accounts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-each-players-launcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Each player's launcher
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#seamless-co-op-bbsc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seamless co-op (BBSC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Help
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Help
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TROUBLESHOOTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPATIBILITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MODS.en/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CREDITS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Credits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For developers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    For developers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ENVIRONMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEBUGGING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Debugging a crash
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parallel_gpu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GPU commands in parallel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upscaler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upscaling and frame generation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TRANSLATOR_ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The translator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_MODULE_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The memory module
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-fits-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it fits together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-tailscale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tailscale
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-docker-any-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With Docker (any Linux)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#without-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-firewall-on-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A firewall on the server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Accounts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-each-players-launcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Each player's launcher
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#seamless-co-op-bbsc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seamless co-op (BBSC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="hosting-your-own-co-op-server">Hosting your own co-op server<a class="headerlink" href="#hosting-your-own-co-op-server" title="Permanent link">&para;</a></h1>
+<p>Bells and summons go through a shadNet server. shadPS4's public one (<code>srv.shadps4.net</code>) no longer
+accepts bbport builds, and the public pools for bbport are Seamless Hunt (the default) and The
+Hunter's Dream's, through bbbridge (the launcher's <strong>Multiplayer → Online</strong> tab; <a href="https://github.com/ayozetr/bloodborne_linux/blob/main/README.md#online-play">README</a>). A group of friends
+can also run their own server:
+<a href="https://github.com/Wozzardman/shadnet-p2p">shadnet-p2p</a> by Wozzardman, the shadNet server with
+that UDP port working and a summon service of its own.</p>
+<p>With your own shadNet server, messages, bloodstains and ghosts come from the <strong>Game server</strong> field
+of the Online tab: The Hunter's Dream by default, or BBSC's game server (<a href="#seamless-co-op-bbsc">below</a>). Windows players of <a href="https://github.com/Supermedo/bloodborne_pc">Supermedo's port</a> can join
+the same server.</p>
+<p>Tested with two players, one on this Linux port and one on Supermedo's Windows port, over
+Tailscale, with the server below on a home server (Ubuntu 26.04): summons, a boss fight together
+and summoning again after the helper died.</p>
+<h2 id="how-it-fits-together">How it fits together<a class="headerlink" href="#how-it-fits-together" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>One always-on computer runs the server:</strong> a VPS, a home server, or one of the players' PCs
+  (then it has to be on while you play).</li>
+<li><strong>Everyone joins one <a href="https://tailscale.com">Tailscale</a> network</strong> (a <em>tailnet</em>): the server and
+  every player. Tailscale gives each computer an address starting with <code>100.</code> and encrypts the
+  traffic between them. This matters: shadNet's login on TCP 31313 is not encrypted, so it should
+  not be open to the Internet. And the games then reach each other over Tailscale too, so nobody
+  has to open ports on their router.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Port</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP</td>
+<td>31313</td>
+<td>Login and matchmaking</td>
+</tr>
+<tr>
+<td>UDP</td>
+<td>31314</td>
+<td>Each player's address, for the other player of a summon</td>
+</tr>
+<tr>
+<td>TCP</td>
+<td>31315</td>
+<td>WebAPI and the summon service</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-tailscale">1. Tailscale<a class="headerlink" href="#1-tailscale" title="Permanent link">&para;</a></h2>
+<p>On the server and on every player's computer, install Tailscale
+(<a href="https://tailscale.com/download">download</a>; on Linux <code>curl -fsSL https://tailscale.com/install.sh | sh</code>)
+and sign in:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tailscale<span class="w"> </span>up
+</code></pre></div>
+<p>The server's owner invites the players from the
+<a href="https://login.tailscale.com/admin/users">admin console</a> (<strong>Users → Invite external users</strong>),
+and each player accepts the invitation and signs in on the computer they play on. Then, on the
+server:</p>
+<div class="highlight"><pre><span></span><code>tailscale<span class="w"> </span>ip<span class="w"> </span>-4<span class="w">    </span><span class="c1"># the server's address, 100.x.y.z: the players need it</span>
+tailscale<span class="w"> </span>status<span class="w">   </span><span class="c1"># every player's computer should be listed</span>
+</code></pre></div>
+<h2 id="2-the-server">2. The server<a class="headerlink" href="#2-the-server" title="Permanent link">&para;</a></h2>
+<h3 id="with-docker-any-linux">With Docker (any Linux)<a class="headerlink" href="#with-docker-any-linux" title="Permanent link">&para;</a></h3>
+<p>This repository has a Docker image for it: <a href="https://github.com/ayozetr/bloodborne_linux/tree/main/tools/shadnet-server">tools/shadnet-server</a>. It
+builds shadnet-p2p on Debian 13, because shadnet-p2p needs Qt 6.8 or newer and some
+distributions are older (Ubuntu 24.04 has Qt 6.4). It runs on any Linux with Docker, Ubuntu 24.04
+included.</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>shadnet-server<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>shadnet-server
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>Dockerfile<span class="w"> </span>entrypoint.sh<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span>curl<span class="w"> </span>-fsSLO<span class="w"> </span><span class="s2">"https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/shadnet-server/</span><span class="nv">$f</span><span class="s2">"</span>
+<span class="k">done</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bbport-shadnet<span class="w"> </span>.
+</code></pre></div>
+<p>Then start it, with the server's Tailscale address and a signup code of your own (letters,
+digits, <code>-</code> and <code>_</code>; the players never need it, only you, to create their accounts):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>shadnet<span class="w"> </span>--restart<span class="w"> </span>unless-stopped<span class="w"> </span>--network<span class="w"> </span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>shadnet-data:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SHADNET_HOST</span><span class="o">=</span><span class="m">100</span>.x.y.z<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SHADNET_REGISTRATION_KEY</span><span class="o">=</span>a-long-code-of-your-own<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bbport-shadnet
+docker<span class="w"> </span>logs<span class="w"> </span>shadnet
+</code></pre></div>
+<p>The log should end with the three listeners on the Tailscale address:</p>
+<div class="highlight"><pre><span></span><code>Unsecured TCP listener on: 100.x.y.z:31313. No encryption, use it only on trusted networks
+STUN UDP listener on: 100.x.y.z:31314
+WebApiServer listening on: 100.x.y.z:31315
+</code></pre></div>
+<p><code>SHADNET_HOST</code> keeps the server off the computer's other networks. After a reboot, it waits until
+Tailscale is up. The configuration (<code>shadnet.cfg</code>) and the accounts (<code>db/shadnet.db</code>) live in the
+<code>shadnet-data</code> volume. To stop or update the server:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>stop<span class="w"> </span>shadnet<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>rm<span class="w"> </span>shadnet<span class="w">    </span><span class="c1"># the volume, with the accounts, stays</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bbport-shadnet<span class="w"> </span>.<span class="w">            </span><span class="c1"># after downloading a newer Dockerfile</span>
+</code></pre></div>
+<p>Then run the same <code>docker run</code> again.</p>
+<h3 id="without-docker">Without Docker<a class="headerlink" href="#without-docker" title="Permanent link">&para;</a></h3>
+<p>Follow <a href="https://github.com/Wozzardman/shadnet-p2p#readme">shadnet-p2p's README</a>. It needs Qt 6.8
+or newer: Arch Linux and its derivatives, Debian 13, Ubuntu 26.04, Fedora 41 or newer. On Debian
+and Ubuntu, install <code>qt6-websockets-dev</code> along with the packages it lists, or CMake does not find
+Qt's HTTP server module (checked on Debian 13 and Ubuntu 26.04). In <code>build/shadnet.cfg</code>, set <code>Host</code> to the server's Tailscale address (or
+<code>0.0.0.0</code>), <code>Matching2Enabled=true</code> and <code>RegistrationSecretKey</code> to your signup code.</p>
+<h3 id="a-firewall-on-the-server">A firewall on the server<a class="headerlink" href="#a-firewall-on-the-server" title="Permanent link">&para;</a></h3>
+<p>With ufw, let the tailnet in:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="k">in</span><span class="w"> </span>on<span class="w"> </span>tailscale0
+</code></pre></div>
+<h2 id="3-accounts">3. Accounts<a class="headerlink" href="#3-accounts" title="Permanent link">&para;</a></h2>
+<p>One account per player, created on the server with the signup code. The name is 3 to 16
+letters, digits, <code>-</code> or <code>_</code>:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>shadnet<span class="w"> </span>shadnet-sample<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span><span class="m">31313</span><span class="w"> </span>register<span class="w"> </span>&lt;name&gt;<span class="w"> </span>&lt;password&gt;<span class="w"> </span>&lt;email&gt;<span class="w"> </span>&lt;signup<span class="w"> </span>code&gt;
+</code></pre></div>
+<p><code>127.0.0.1</code> works only when the server listens on every address (<code>SHADNET_HOST</code> unset or
+<code>0.0.0.0</code>). With <code>SHADNET_HOST</code> set, use that address instead. The tool answers
+<code>Account created successfully.</code>, or <code>FAILED: Unauthorized</code> when the code is wrong. Give each player
+their own name and password.</p>
+<p>To back up the accounts, stop the server and copy the volume's <code>db/shadnet.db</code>.</p>
+<h2 id="4-each-players-launcher">4. Each player's launcher<a class="headerlink" href="#4-each-players-launcher" title="Permanent link">&para;</a></h2>
+<p>In <strong>Multiplayer → Online</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Play online</td>
+<td>On</td>
+</tr>
+<tr>
+<td>shadNet server</td>
+<td><strong>Your own server</strong></td>
+</tr>
+<tr>
+<td>Server address</td>
+<td><code>100.x.y.z</code> (the port, 31313, is added)</td>
+</tr>
+<tr>
+<td>WebAPI address</td>
+<td>Empty (the server's port 31315)</td>
+</tr>
+<tr>
+<td>Online ID / Password</td>
+<td>The player's own account</td>
+</tr>
+<tr>
+<td>UPnP</td>
+<td>Off (Tailscale needs no router ports)</td>
+</tr>
+</tbody>
+</table>
+<p>Then press <strong>Test</strong> in the <strong>Status</strong> row. Every line should get a check mark, the shadNet server's UDP among them: it
+shows the address the server sees for you, a <code>100.</code> one through Tailscale. An error mark on the UDP line
+means summons cannot connect: check that the server is running and that its log lists the UDP listener.</p>
+<p>Summons go through the server's own summon service: the log of a game says
+<code>Co-op: summon signs through http://100.x.y.z:31315</code>.</p>
+<p>Windows players set the same server, WebAPI and account in the Windows port's launcher.</p>
+<h2 id="seamless-co-op-bbsc">Seamless co-op (BBSC)<a class="headerlink" href="#seamless-co-op-bbsc" title="Permanent link">&para;</a></h2>
+<p>For <a href="../ONLINE/#seamless-co-op-bbsc">BBSC</a> with everything on (summons across areas, 5 hunters),
+the group also runs BBSC's game server next to shadNet. It is in this repository,
+<code>bbsc/server/gameserver/bbsc_gameserver.py</code> (Python 3, nothing to install), and it takes the
+place of The Hunter's Dream for messages, bloodstains and the server list.</p>
+<ol>
+<li>Turn on shadNet's seamless mode: run the shadNet container again with
+   <code>-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1</code> (it is kept in its <code>shadnet.cfg</code>).</li>
+<li>Build and start the game server on the same computer, with the same Tailscale address:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bbsc-server<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>bbsc-server
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>Dockerfile<span class="w"> </span>entrypoint.sh<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span>curl<span class="w"> </span>-fsSLO<span class="w"> </span><span class="s2">"https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/bbsc-server/</span><span class="nv">$f</span><span class="s2">"</span>
+<span class="k">done</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bbport-bbsc-server<span class="w"> </span>.
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>bbsc-server<span class="w"> </span>--restart<span class="w"> </span>unless-stopped<span class="w"> </span>--network<span class="w"> </span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bbsc-data:/data<span class="w"> </span>-e<span class="w"> </span><span class="nv">BBSC_HOST</span><span class="o">=</span><span class="m">100</span>.x.y.z<span class="w"> </span>bbport-bbsc-server
+docker<span class="w"> </span>logs<span class="w"> </span>bbsc-server
+</code></pre></div>
+<p><code>BBSC_SHADNET</code> is the shadNet server's address when it is on another computer. Messages,
+   bloodstains and its logs live in the <code>bbsc-data</code> volume. Without Docker:
+   <code>python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20443</td>
+<td>TCP</td>
+<td>The game server (messages, bloodstains, ghosts)</td>
+</tr>
+<tr>
+<td>20444</td>
+<td>TCP</td>
+<td>BBSC's relay (warps, world sync, scaling)</td>
+</tr>
+<tr>
+<td>18671</td>
+<td>TCP</td>
+<td>Its bbhost-compatible service (<code>BBSC_BBHOST=0</code>, <code>--no-bbhost</code>, turns it off)</td>
+</tr>
+<tr>
+<td>3478</td>
+<td>UDP</td>
+<td>The relay BBSC players fall back to when they cannot reach each other directly</td>
+</tr>
+</tbody>
+</table>
+<p>Each player then sets <strong>Game server</strong> to <code>http://100.x.y.z:20443</code> in the launcher's
+<strong>Multiplayer → Online</strong> tab, keeps the same shadNet server and account, and turns on BBSC in the <strong>Seamless co-op (BBSC)</strong> group.
+BBSC finds its relay at the game server's address (or <code>BBSC_RELAY</code>, the relay address in BBSC's
+settings).</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>The log shows <code>127.0.0.1</code> or another address in the listeners:</strong> check <code>SHADNET_HOST</code>, or
+  <code>Host</code> in the <code>shadnet.cfg</code> beside the server's executable.</li>
+<li><strong><code>Waiting for 100.x.y.z</code> in the log:</strong> Tailscale is not up on the server, or the address is
+  wrong (<code>tailscale ip -4</code>).</li>
+<li><strong>The game says it is not signed in to PlayStation Network:</strong> a wrong name or password (code 8 in
+  the log), or two players using one account.</li>
+<li><strong>The test passes but summons fail:</strong> every player's computer must be in the tailnet, not only
+  the server; <code>tailscale ping &lt;player&gt;</code> from each side. Everyone needs the game at version 1.09
+  and the same co-op mode.</li>
+</ul>
+<p>See also <a href="../ONLINE/">Online play and co-op</a> for the bells, passwords and log lines of a summon.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../ONLINE/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Online play and co-op">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Online play and co-op
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../TROUBLESHOOTING/" class="md-footer__link md-footer__link--next" aria-label="Next: Troubleshooting">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Troubleshooting
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      GPL-3.0-or-later. Bloodborne is by FromSoftware and Sony Interactive Entertainment; this project is not affiliated with either. No game files are included.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
