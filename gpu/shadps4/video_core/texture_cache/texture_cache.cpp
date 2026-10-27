@@ -119,23 +119,38 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     if (False(image.flags & ImageFlagBits::GpuModified)) {
         return;
     }
-    const u32 download_size = image.info.pitch * image.info.size.height * image.info.size.depth *
-                              image.info.resources.layers * (image.info.num_bits / 8);
+    // bbport: every mip level, at its offset in the game's layout (#30). Only level 0 was copied:
+    // an image freed by the collector and loaded again later came back with the game's old bytes
+    // in its smaller levels, black where those were drawn (effects, models seen from afar).
+    const u32 levels = std::max(image.info.resources.levels, 1u);
+    const u32 level0_size = image.info.pitch * image.info.size.height * image.info.size.depth *
+                            image.info.resources.layers * (image.info.num_bits / 8);
+    const u32 download_size =
+        levels > 1 ? static_cast<u32>(image.info.guest_size) : level0_size;
     ASSERT(download_size <= image.info.guest_size);
-    vk::BufferImageCopy image_copy = {
-        .bufferOffset = 0,
-        .bufferRowLength = image.info.pitch,
-        .bufferImageHeight = image.info.size.height,
-        .imageSubresource =
-            {
-                .aspectMask = image.info.props.is_depth ? vk::ImageAspectFlagBits::eDepth
-                                                        : vk::ImageAspectFlagBits::eColor,
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = image.info.resources.layers,
-            },
-        .imageOffset = {0, 0, 0},
-        .imageExtent = {image.info.size.width, image.info.size.height, image.info.size.depth},
+    const auto make_copies = [&](u64 base) {
+        boost::container::small_vector<vk::BufferImageCopy, 14> copies;
+        for (u32 mip = 0; mip < levels; ++mip) {
+            const auto& mip_info = image.info.mips_layout[mip];
+            copies.push_back(vk::BufferImageCopy{
+                .bufferOffset = base + (levels > 1 ? mip_info.offset : 0),
+                .bufferRowLength = levels > 1 ? mip_info.pitch : image.info.pitch,
+                .bufferImageHeight = levels > 1 ? mip_info.height : image.info.size.height,
+                .imageSubresource =
+                    {
+                        .aspectMask = image.info.props.is_depth ? vk::ImageAspectFlagBits::eDepth
+                                                                : vk::ImageAspectFlagBits::eColor,
+                        .mipLevel = mip,
+                        .baseArrayLayer = 0,
+                        .layerCount = image.info.resources.layers,
+                    },
+                .imageOffset = {0, 0, 0},
+                .imageExtent = {std::max(image.info.size.width >> mip, 1u),
+                                std::max(image.info.size.height >> mip, 1u),
+                                std::max(image.info.size.depth >> mip, 1u)},
+            });
+        }
+        return copies;
     };
     // bbport BB_GUEST_IN_PLACE: the GPU copies the image into the game's memory itself, in stream
     // order: before the fences that follow, no wait here and no CPU copy afterwards.
@@ -146,30 +161,17 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     if (GuestInPlace() && image.info.guest_address != 0) {
         const auto [arena, offset] =
             buffer_cache.ObtainBuffer(image.info.guest_address, download_size, true);
-        image_copy.bufferOffset = offset;
-        runtime.DownloadImage(&image, arena, std::span{&image_copy, 1});
+        const auto copies = make_copies(offset);
+        runtime.DownloadImage(&image, arena, std::span{copies.data(), copies.size()});
         if (buffer_cache.IsInPlace(image.info.guest_address, download_size)) {
             return;
         }
     }
     const auto download =
         runtime.GetStagingPool().Request(download_size, MemoryType::HostCached, 16, !sync);
-    const vk::BufferImageCopy image_download = {
-        .bufferOffset = download.offset,
-        .bufferRowLength = image.info.pitch,
-        .bufferImageHeight = image.info.size.height,
-        .imageSubresource =
-            {
-                .aspectMask = image.info.props.is_depth ? vk::ImageAspectFlagBits::eDepth
-                                                        : vk::ImageAspectFlagBits::eColor,
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = image.info.resources.layers,
-            },
-        .imageOffset = {0, 0, 0},
-        .imageExtent = {image.info.size.width, image.info.size.height, image.info.size.depth},
-    };
-    runtime.DownloadImage(&image, download.buffer, std::span{&image_download, 1});
+    const auto download_copies = make_copies(download.offset);
+    runtime.DownloadImage(&image, download.buffer,
+                          std::span{download_copies.data(), download_copies.size()});
     if (sync) {
         scheduler.Finish();
         download.Invalidate();
