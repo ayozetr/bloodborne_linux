@@ -195,6 +195,9 @@ public:
     boost::container::static_vector<u64, 16> mip_hashes{};
     u64 lru_id{};
     u64 hash{};
+    /// bbport: the game's memory under the image when the GPU began writing it (since its last
+    /// upload; 0: not taken yet). A tiled write-back checks it (TextureCache::WriteBackTiledImage).
+    u64 gpu_base_hash{};
 
 private:
     static Common::IncrementalIdProvider<u64> global_image_uid;

@@ -366,6 +366,8 @@ private:
 
     /// bbport: a GPU-written tiled image back into the game's memory (the collector).
     void WriteBackTiledImage(ImageId image_id);
+    /// bbport: takes Image::gpu_base_hash at the GPU's first write since the image's upload.
+    void NoteGpuBase(Image& image);
 
     /// Thread function for copying downloaded images out to CPU memory.
     void DownloadedImagesThread(const std::stop_token& token);
