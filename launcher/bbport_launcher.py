@@ -317,6 +317,7 @@ INI_DEFAULTS = {
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
     "mouse_camera": "direct",
+    "keyboard_layout": "bbport",
     "pad_swap_sticks": "0",
     "pad_invert_look_x": "0",
     "pad_invert_look_y": "0",
@@ -833,6 +834,27 @@ CONTROLS = [
     ("look_left", "Камера влево", "Left", None),
     ("look_right", "Камера вправо", "Right", None),
     ("walk", "Шаг (удерживать с движением)", "Left Alt", None),
+    ("sprint", "Бег (удерживать: Круг)", "", None),
+    ("dodge", "Уклонение (короткое нажатие Круга; с бегом — прыжок)", "", None),
+]
+# keyboard_layout=0.6 (runtime_pad.c bind_defaults): bbport 0.6's keys, Dark Souls III's on PC
+# (issue #33). Circle has no key of its own there: sprint and dodge make it, Escape goes back in
+# the game's menus.
+KEY_DEFAULTS_06 = {
+    "cross": "F, Return", "circle": "", "square": "Tab, R", "triangle": "Q",
+    "l1": "E, Mouse X2", "r1": "Mouse Left", "l2": "Mouse Right",
+    "r2": "Left Shift+Mouse Left, Mouse X1", "l3": "Left Ctrl", "r3": "C, Mouse Middle",
+    "options": "Escape", "touchpad": "G", "touchpad_right": "Backspace",
+    "up": "3, Up, Wheel Up", "down": "4, Down, Wheel Down", "left": "1, Left", "right": "2, Right",
+    "move_up": "W", "move_down": "S", "move_left": "A", "move_right": "D",
+    "look_up": "I", "look_down": "K", "look_left": "J", "look_right": "L",
+    "walk": "Left Alt", "sprint": "Left Shift", "dodge": "Space",
+}
+KEYBOARD_LAYOUTS = [
+    ("Этого порта", "bbport", "Пробел — Крест, левый Shift — Круг"),
+    ("bbport 0.6 (как в Dark Souls III на ПК)", "0.6",
+     "Пробел — уклонение, Shift — бег, Shift + Пробел — прыжок, F — действие, Escape — меню "
+     "и назад в меню игры"),
 ]
 
 
@@ -1494,6 +1516,12 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.lightbar_row.add_suffix(self.lightbar_switch)
         self.lightbar_row.set_activatable_widget(self.lightbar_switch)
         controls.add(self.lightbar_row)
+        # The keyboard's layout (runtime_pad.c keyboard_layout): its keys are the defaults below.
+        self.keyboard_layout_row = combo_row(tr("Раскладка клавиатуры"),
+                                             tr("Назначенные вами клавиши сохраняются"),
+                                             KEYBOARD_LAYOUTS,
+                                             self.ini.get("keyboard_layout", "bbport"))
+        keys.add(self.keyboard_layout_row)
         # Bindings: "Assign" waits for a key or button (bb-gpu-capabilities --read-input).
         self.control_rows = {}
         for kind, title, icon in (("key", tr("Клавиатура и мышь"), "input-keyboard-symbolic"),
@@ -1514,6 +1542,7 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.control_rows[(kind, name)] = (row, default)
                 self.show_control(kind, name)
             (keys if kind == "key" else controls).add(expander)
+        self.keyboard_layout_row.connect("notify::selected", lambda *_: self.on_keyboard_layout())
         # Mouse look (runtime_pad.c): a click in the game takes the mouse, F1 lets it go.
         self.mouse_look_row = Adw.SwitchRow(
             title=tr("Камера мышью"),
@@ -2197,8 +2226,16 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.store()
         self.choose_folder(tr("Папка игры (с eboot.bin)"), self.game_dir(), chosen)
 
+    def on_keyboard_layout(self):
+        for name, _label, key_default, _pad in CONTROLS:
+            if ("key", name) in self.control_rows:
+                self.show_control("key", name)
+        self.store()
+
     def show_control(self, kind, name):
         row, default = self.control_rows[(kind, name)]
+        if kind == "key" and combo_value(self.keyboard_layout_row) == "0.6":
+            default = KEY_DEFAULTS_06.get(name, default)
         value = self.ini.get(f"{kind}.{name}")
         if value is None:
             row.set_subtitle(tr("{} (по умолчанию)").format(default) if default else tr("не назначено"))
@@ -2378,6 +2415,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "mouse_sensitivity": f"{self.mouse_sensitivity_row.get_value():.2f}",
             "mouse_invert_y": "1" if self.mouse_invert_row.get_active() else "0",
             "mouse_camera": "direct" if self.mouse_camera_row.get_active() else "stick",
+            "keyboard_layout": combo_value(self.keyboard_layout_row),
             **{key: "1" if row.get_active() else "0" for key, row in self.stick_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},

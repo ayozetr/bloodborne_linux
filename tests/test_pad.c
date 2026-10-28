@@ -12,6 +12,8 @@ uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t
 void bbgpu_mouse_take(double *dx, double *dy, int *up, int *down) { *dx=*dy=0; *up=*down=0; }
 int bbgpu_mouse_captured(void) { return 0; }
 void bbgpu_mouse_look_enable(int enabled) { (void)enabled; }
+static int menu_open;
+int bbgpu_pointer_wanted(void) { return menu_open; }
 void bbgpu_filter_pad(uint32_t *buttons, const uint8_t *sticks) { (void)buttons; (void)sticks; }
 static int camera_direct=-1;
 static float camera_sensitivity;
@@ -348,5 +350,54 @@ int main(void) {
         m.right_x=200; m.right_y=56; camera_diagonal(&m); assert(m.right_x==200 && m.right_y==56); /* 80% */
         pad_camera_diagonal=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, walk key, round gate, Back + d-pad touchpad halves, stick options, camera diagonals, pad in use");
+    /* keyboard_layout=0.6 (issue #33): bbport 0.6's keys, Shift chords, dodge and sprint as
+     * Circle, Escape back in a game menu. */
+    {
+        layout_06=1; bind_defaults();
+        memset(wheel_pending,0,sizeof wheel_pending); memset(wheel_phase,0,sizeof wheel_phase);
+        bool k[SDL_SCANCODE_COUNT]={0};
+        PadData m;
+        const uint32_t shift_left=SDL_BUTTON_LMASK;
+        #define KB_READ() do { memset(&m,0,sizeof m); m.left_x=m.left_y=m.right_x=m.right_y=128; \
+                               m.timestamp=now_us(); apply_keyboard(&m,k); } while (0)
+        k[SDL_SCANCODE_F]=true; KB_READ(); assert(m.buttons==BTN_CROSS); k[SDL_SCANCODE_F]=false;
+        k[SDL_SCANCODE_E]=true; KB_READ(); assert(m.buttons==BTN_L1); k[SDL_SCANCODE_E]=false;
+        k[SDL_SCANCODE_I]=true; KB_READ(); assert(m.right_y<128 && m.buttons==0); k[SDL_SCANCODE_I]=false;
+        k[SDL_SCANCODE_3]=true; KB_READ(); assert(m.buttons==BTN_UP); k[SDL_SCANCODE_3]=false;
+        /* Mouse Left is R1; with Shift held it is R2 alone (the chord), and Shift is the run. */
+        mouse_buttons=shift_left; KB_READ(); assert(m.buttons==BTN_R1);
+        k[SDL_SCANCODE_LSHIFT]=true; KB_READ();
+        assert((m.buttons & (BTN_R1|BTN_R2))==BTN_R2 && m.r2==255 && (m.buttons & BTN_CIRCLE));
+        mouse_buttons=0; KB_READ(); assert(m.buttons==BTN_CIRCLE);               /* sprint: held */
+        k[SDL_SCANCODE_LSHIFT]=false; KB_READ(); assert(m.buttons==0);
+        /* Dodge: a short Circle press however long Space is held. */
+        k[SDL_SCANCODE_SPACE]=true; KB_READ(); assert(m.buttons==BTN_CIRCLE);
+        usleep(150000); KB_READ(); assert(m.buttons==0);
+        k[SDL_SCANCODE_SPACE]=false; KB_READ(); assert(m.buttons==0);
+        /* The jump, Space while sprinting: Circle let go, pressed, let go, held again. */
+        k[SDL_SCANCODE_LSHIFT]=true; KB_READ(); assert(m.buttons==BTN_CIRCLE);
+        k[SDL_SCANCODE_SPACE]=true; KB_READ(); assert(m.buttons==0);
+        usleep(100000); KB_READ(); assert(m.buttons==BTN_CIRCLE);                /* 70..140 ms */
+        usleep(60000); KB_READ(); assert(m.buttons==0);                          /* 140..210 ms */
+        usleep(100000); KB_READ(); assert(m.buttons==BTN_CIRCLE);                /* the run again */
+        k[SDL_SCANCODE_SPACE]=k[SDL_SCANCODE_LSHIFT]=false; KB_READ(); assert(m.buttons==0);
+        /* Escape: Options, and Circle (back) while a game menu is open; a press that opened the
+         * menu stays Options until it is let go. Space and Shift do nothing in a menu. */
+        k[SDL_SCANCODE_ESCAPE]=true; KB_READ(); assert(m.buttons==BTN_OPTIONS);
+        menu_open=1; KB_READ(); assert(m.buttons==BTN_OPTIONS);
+        k[SDL_SCANCODE_ESCAPE]=false; KB_READ(); assert(m.buttons==0);
+        k[SDL_SCANCODE_ESCAPE]=true; KB_READ(); assert(m.buttons==BTN_CIRCLE);
+        k[SDL_SCANCODE_ESCAPE]=false;
+        k[SDL_SCANCODE_SPACE]=k[SDL_SCANCODE_LSHIFT]=true; KB_READ(); assert(m.buttons==0);
+        k[SDL_SCANCODE_SPACE]=k[SDL_SCANCODE_LSHIFT]=false; menu_open=0;
+        /* This fork's layout: Return is Options in a menu too, Space is Cross. */
+        layout_06=0; bind_defaults();
+        menu_open=1; k[SDL_SCANCODE_RETURN]=true; KB_READ(); assert(m.buttons==BTN_OPTIONS);
+        k[SDL_SCANCODE_RETURN]=false; menu_open=0;
+        k[SDL_SCANCODE_SPACE]=true; KB_READ(); assert(m.buttons==BTN_CROSS); k[SDL_SCANCODE_SPACE]=false;
+        #undef KB_READ
+        uint64_t later=now_us()+200000; int x, y; key_move(0,0,later,&x,&y);
+        load_bindings();
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, keyboard movement, walk key, round gate, Back + d-pad touchpad halves, stick options, camera diagonals, pad in use, bbport 0.6's keyboard layout");
 }

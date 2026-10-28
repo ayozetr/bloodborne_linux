@@ -33,7 +33,7 @@ seamless co-op, the Steam Deck, and what to do when something goes wrong.
 - **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
 - **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
   game**, and **keyboard and mouse**, with a direct 1:1 mouse camera, keys you can rebind
-  and the mouse as a pointer in the game's menus.
+  (or bbport 0.6's Dark Souls III-style layout) and the mouse as a pointer in the game's menus.
 - **Quit to Desktop** from the game's title and System menus (it saves first).
 - **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
 - **Trophies and the platinum**, with a notice in the game like on the PS4.

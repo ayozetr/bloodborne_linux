@@ -54,6 +54,15 @@ DEFAULT_KEYS = {
     'right': 'L', 'move_up': 'W', 'move_down': 'S', 'move_left': 'A', 'move_right': 'D',
     'look_up': 'Up', 'look_down': 'Down', 'look_left': 'Left', 'look_right': 'Right',
 }
+# keyboard_layout=0.6's (bbport 0.6's keys; the launcher's KEY_DEFAULTS_06). Circle has no key of
+# its own there: the way back in a game menu is Escape (Options' key), drawn for it.
+DEFAULT_KEYS_06 = {
+    'cross': 'F', 'circle': '', 'square': 'Tab', 'triangle': 'Q', 'l1': 'E', 'r1': 'Mouse Left',
+    'r2': 'Left Shift+Mouse Left', 'l2': 'Mouse Right', 'l3': 'Left Ctrl', 'r3': 'C',
+    'options': 'Escape', 'touchpad': 'G', 'touchpad_right': 'Backspace', 'up': '3', 'down': '4',
+    'left': '1', 'right': '2', 'move_up': 'W', 'move_down': 'S', 'move_left': 'A',
+    'move_right': 'D', 'look_up': 'I', 'look_down': 'K', 'look_left': 'J', 'look_right': 'L',
+}
 PROMPTS = ('playstation', 'xbox', 'switch', 'keyboard')
 # DejaVu Sans Bold: next to the scripts in packaged builds (packaging/appimage-sharun.sh), else
 # the system's; Pillow's own font otherwise (it lacks the arrows).
@@ -68,6 +77,8 @@ KEY_LABELS = {
     'keypad enter': 'Enter', 'backspace': '⌫', 'tab': 'Tab', 'escape': 'Esc', 'up': '↑',
     'down': '↓', 'left': '←', 'right': '→', 'capslock': 'Caps', 'delete': 'Del',
     'insert': 'Ins', 'home': 'Home', 'end': 'End', 'pageup': 'PgUp', 'pagedown': 'PgDn',
+    'mouse left': 'LMB', 'mouse right': 'RMB', 'mouse middle': 'MMB', 'mouse x1': 'M4',
+    'mouse x2': 'M5', 'wheel up': 'Wh↑', 'wheel down': 'Wh↓',
 }
 
 
@@ -86,17 +97,20 @@ def prompts_for(pad_type):
 
 
 def key_bindings(config):
-    """input -> its first key (SDL name; '' unbound), from bbport.ini over the defaults."""
-    keys = dict(DEFAULT_KEYS)
+    """input -> its first key (SDL name; '' unbound), from bbport.ini over its layout's defaults."""
     try:
         lines = Path(config).read_text().splitlines() if config else []
     except OSError:
         lines = []
+    layout_06 = any(line.strip().startswith('keyboard_layout=0.6') for line in lines)
+    keys = dict(DEFAULT_KEYS_06 if layout_06 else DEFAULT_KEYS)
     for line in lines:
         name, _, value = line.partition('=')
         name = name.strip()
         if name.startswith('key.') and name[4:] in keys:
             keys[name[4:]] = value.split(',')[0].strip()
+    if layout_06 and not keys['circle']:
+        keys['circle'] = keys['options']
     return keys
 
 
@@ -131,6 +145,11 @@ def swap_atlas_glyphs(strip):
 def key_label(key):
     if not key:
         return '–'
+    # A chord ("Left Shift+Mouse Left"): Shift as its arrow before the key.
+    modifier, plus, rest = key.rpartition('+')
+    if plus and modifier and rest:
+        prefix = '⇧' if 'shift' in modifier.casefold() else key_label(modifier) + '+'
+        return prefix + key_label(rest.strip())
     label = KEY_LABELS.get(key.casefold())
     if label:
         return label

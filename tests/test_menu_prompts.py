@@ -127,6 +127,20 @@ class PromptTests(unittest.TestCase):
                         'Right': 'RIGHT'}.get(key, key)
             self.assertIn(f'{{IN_{name.upper()},SDL_SCANCODE_{scancode}}}', source)
 
+    def test_layout_06_prompts(self):
+        """keyboard_layout=0.6: its keys, Circle drawn as Escape (the way back), Shift chords."""
+        config = self.root / 'bbport.ini'
+        config.write_text('keyboard_layout=0.6\nkey.square=X\n')
+        keys = menu_prompts.key_bindings(config)
+        self.assertEqual((keys['cross'], keys['circle'], keys['square'], keys['options']),
+                         ('F', 'Escape', 'X', 'Escape'))
+        self.assertEqual([menu_prompts.key_label(k) for k in (keys['r2'], keys['r1'], 'Keypad +')],
+                         ['⇧LMB', 'LMB', 'Num+'])
+        launcher = (ROOT / 'launcher' / 'bbport_launcher.py').read_text()
+        for name, key in menu_prompts.DEFAULT_KEYS_06.items():
+            if key:
+                self.assertIn(f'"{name}": "{key}', launcher)
+
     def test_prompts_follow_the_controller_type(self):
         cases = {'xbox360': 'xbox', 'xboxone': 'xbox', 'ps4': 'playstation', 'ps5': 'playstation',
                  'switchpro': 'switch', 'joyconpair': 'switch', '': 'xbox', None: 'keyboard'}

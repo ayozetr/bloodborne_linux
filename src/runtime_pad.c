@@ -9,6 +9,15 @@
  *   Mouse (once the game window is clicked; F1 or leaving the window releases it): look (the
  *   right stick), Left R1, Right L2, Middle R3, side buttons R2 (X1) and L1 (X2), wheel the
  *   d-pad's up/down (quick items).
+ * keyboard_layout=0.6 (bbport.ini, issue #33): bbport 0.6's layout instead, Dark Souls III's on PC:
+ *   WASD left stick, IJKL right stick, Space the dodge (a short Circle press: never a run), Left
+ *   Shift the run (Circle held), Shift + Space the jump, F and Enter Cross, Q Triangle, E L1, Tab
+ *   and R Square, C R3, Left Ctrl L3, Escape Options (Circle, the way back, while a game menu is
+ *   open), G left touchpad, Backspace right touchpad, the d-pad on 1 (left), 2 (right), 3 (up),
+ *   4 (down) and the arrow keys. Mouse: Left R1, Shift + Left R2, Right L2, Middle R3, X1 R2, X2
+ *   L1, the wheel the d-pad's up/down.
+ * A key binding may be a chord, "Left Shift+Mouse Left": while its modifier is held, the second
+ * key's plain bindings do not count (Shift + Left is R2, not R2 and R1).
  *
  * Stick neutral: SDL exposes no way to read a pad's calibration and some clones report a
  * biased neutral (a Switch-style pad was seen returning both sticks at a constant ~ +/-16380).
@@ -415,12 +424,12 @@ enum {
     IN_CROSS, IN_CIRCLE, IN_SQUARE, IN_TRIANGLE, IN_L1, IN_R1, IN_L2, IN_R2, IN_L3, IN_R3,
     IN_OPTIONS, IN_TOUCHPAD, IN_TOUCHPAD_RIGHT, IN_UP, IN_DOWN, IN_LEFT, IN_RIGHT,
     IN_MOVE_UP, IN_MOVE_DOWN, IN_MOVE_LEFT, IN_MOVE_RIGHT, IN_LOOK_UP, IN_LOOK_DOWN, IN_LOOK_LEFT,
-    IN_LOOK_RIGHT, IN_WALK, IN_COUNT
+    IN_LOOK_RIGHT, IN_WALK, IN_SPRINT, IN_DODGE, IN_COUNT
 };
 static const char *const input_names[IN_COUNT]={
     "cross","circle","square","triangle","l1","r1","l2","r2","l3","r3","options","touchpad",
     "touchpad_right","up","down","left","right","move_up","move_down","move_left","move_right",
-    "look_up","look_down","look_left","look_right","walk",
+    "look_up","look_down","look_left","look_right","walk","sprint","dodge",
 };
 static const uint32_t input_buttons[IN_COUNT]={
     BTN_CROSS,BTN_CIRCLE,BTN_SQUARE,BTN_TRIANGLE,BTN_L1,BTN_R1,BTN_L2,BTN_R2,BTN_L3,BTN_R3,
@@ -437,11 +446,15 @@ static const struct { const char *name; int code; } mouse_keys[]={
     {"Mouse X2",MOUSE_KEY+SDL_BUTTON_X2}, {"Wheel Up",MOUSE_WHEEL_UP}, {"Wheel Down",MOUSE_WHEEL_DOWN},
 };
 enum { PAD_LEFT_TRIGGER=SDL_GAMEPAD_BUTTON_COUNT, PAD_RIGHT_TRIGGER }; /* triggers as buttons */
-typedef struct { int key_count, pad_count; int keys[MAX_BIND]; int pad[MAX_BIND]; } Binding;
+/* keys[i] needs mods[i] held too when mods[i] is not -1 (a chord: "Left Shift+Mouse Left"). */
+typedef struct { int key_count, pad_count; int keys[MAX_BIND]; int mods[MAX_BIND]; int pad[MAX_BIND]; } Binding;
 static Binding bindings[IN_COUNT];
 static int bindings_ready;
+/* keyboard_layout=0.6 in bbport.ini: bbport 0.6's keys (the header comment). */
+static int layout_06;
 
 static void bind_defaults(void) {
+    enum { NONE=-1, SHIFT=SDL_SCANCODE_LSHIFT };
     static const struct { int input; int key; } keys[]={
         {IN_CROSS,SDL_SCANCODE_SPACE}, {IN_CIRCLE,SDL_SCANCODE_LSHIFT}, {IN_SQUARE,SDL_SCANCODE_E},
         {IN_TRIANGLE,SDL_SCANCODE_Q}, {IN_L1,SDL_SCANCODE_1}, {IN_R1,SDL_SCANCODE_3},
@@ -457,6 +470,29 @@ static void bind_defaults(void) {
         {IN_R3,MOUSE_KEY+SDL_BUTTON_MIDDLE}, {IN_R2,MOUSE_KEY+SDL_BUTTON_X1}, {IN_L1,MOUSE_KEY+SDL_BUTTON_X2},
         {IN_UP,MOUSE_WHEEL_UP}, {IN_DOWN,MOUSE_WHEEL_DOWN},
     };
+    /* bbport 0.6's (deadinside28/bloodborne_pc, src/runtime_pad.c). */
+    static const struct { int input; int key; int mod; } keys_06[]={
+        {IN_DODGE,SDL_SCANCODE_SPACE,NONE}, {IN_SPRINT,SHIFT,NONE}, {IN_CROSS,SDL_SCANCODE_F,NONE},
+        {IN_CROSS,SDL_SCANCODE_RETURN,NONE}, {IN_TRIANGLE,SDL_SCANCODE_Q,NONE},
+        {IN_L1,SDL_SCANCODE_E,NONE}, {IN_SQUARE,SDL_SCANCODE_TAB,NONE}, {IN_SQUARE,SDL_SCANCODE_R,NONE},
+        {IN_R3,SDL_SCANCODE_C,NONE}, {IN_L3,SDL_SCANCODE_LCTRL,NONE},
+        {IN_OPTIONS,SDL_SCANCODE_ESCAPE,NONE}, {IN_TOUCHPAD,SDL_SCANCODE_G,NONE},
+        {IN_TOUCHPAD_RIGHT,SDL_SCANCODE_BACKSPACE,NONE},
+        {IN_LEFT,SDL_SCANCODE_1,NONE}, {IN_RIGHT,SDL_SCANCODE_2,NONE}, {IN_UP,SDL_SCANCODE_3,NONE},
+        {IN_DOWN,SDL_SCANCODE_4,NONE},
+        {IN_UP,SDL_SCANCODE_UP,NONE}, {IN_DOWN,SDL_SCANCODE_DOWN,NONE}, {IN_LEFT,SDL_SCANCODE_LEFT,NONE},
+        {IN_RIGHT,SDL_SCANCODE_RIGHT,NONE},
+        {IN_MOVE_UP,SDL_SCANCODE_W,NONE}, {IN_MOVE_DOWN,SDL_SCANCODE_S,NONE},
+        {IN_MOVE_LEFT,SDL_SCANCODE_A,NONE}, {IN_MOVE_RIGHT,SDL_SCANCODE_D,NONE},
+        {IN_LOOK_UP,SDL_SCANCODE_I,NONE}, {IN_LOOK_DOWN,SDL_SCANCODE_K,NONE},
+        {IN_LOOK_LEFT,SDL_SCANCODE_J,NONE}, {IN_LOOK_RIGHT,SDL_SCANCODE_L,NONE},
+        {IN_WALK,SDL_SCANCODE_LALT,NONE}, /* this fork's walk: Left Alt is free in 0.6's layout */
+        {IN_R1,MOUSE_KEY+SDL_BUTTON_LEFT,NONE}, {IN_R2,MOUSE_KEY+SDL_BUTTON_LEFT,SHIFT},
+        {IN_L2,MOUSE_KEY+SDL_BUTTON_RIGHT,NONE},
+        {IN_R3,MOUSE_KEY+SDL_BUTTON_MIDDLE,NONE}, {IN_R2,MOUSE_KEY+SDL_BUTTON_X1,NONE},
+        {IN_L1,MOUSE_KEY+SDL_BUTTON_X2,NONE},
+        {IN_UP,MOUSE_WHEEL_UP,NONE}, {IN_DOWN,MOUSE_WHEEL_DOWN,NONE},
+    };
     static const struct { int input, button; } pads[]={
         {IN_CROSS,SDL_GAMEPAD_BUTTON_SOUTH}, {IN_CIRCLE,SDL_GAMEPAD_BUTTON_EAST},
         {IN_SQUARE,SDL_GAMEPAD_BUTTON_WEST}, {IN_TRIANGLE,SDL_GAMEPAD_BUTTON_NORTH},
@@ -469,8 +505,16 @@ static void bind_defaults(void) {
         {IN_LEFT,SDL_GAMEPAD_BUTTON_DPAD_LEFT}, {IN_RIGHT,SDL_GAMEPAD_BUTTON_DPAD_RIGHT},
     };
     memset(bindings,0,sizeof bindings);
-    for (size_t i=0;i<sizeof(keys)/sizeof(*keys);++i) {
-        Binding *b=&bindings[keys[i].input]; b->keys[b->key_count++]=keys[i].key;
+    if (layout_06) {
+        for (size_t i=0;i<sizeof(keys_06)/sizeof(*keys_06);++i) {
+            Binding *b=&bindings[keys_06[i].input];
+            b->mods[b->key_count]=keys_06[i].mod; b->keys[b->key_count++]=keys_06[i].key;
+        }
+    } else {
+        for (size_t i=0;i<sizeof(keys)/sizeof(*keys);++i) {
+            Binding *b=&bindings[keys[i].input];
+            b->mods[b->key_count]=NONE; b->keys[b->key_count++]=keys[i].key;
+        }
     }
     for (size_t i=0;i<sizeof(pads)/sizeof(*pads);++i) {
         Binding *b=&bindings[pads[i].input]; b->pad[b->pad_count++]=pads[i].button;
@@ -512,6 +556,16 @@ static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
 static int pad_camera_diagonal;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
+    /* The layout first: the key.<input> lines replace its defaults. */
+    layout_06=0;
+    const char *config=getenv("BB_CONFIG");
+    FILE *lf=config ? fopen(config,"r") : NULL;
+    if (lf) {
+        char text[512];
+        while (fgets(text,sizeof text,lf))
+            if (!strncmp(text,"keyboard_layout=",16)) layout_06=!strncmp(text+16,"0.6",3);
+        fclose(lf);
+    }
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=1;
     stick_socd_last=1; stick_circular=0; pad_round_gate=1;
@@ -558,9 +612,18 @@ static void load_bindings(void) {
             for (char *end=name+strlen(name); end>name && end[-1]==' ';) *--end=0;
             if (!*name) continue;
             if (keyboard) {
+                /* A chord: "<modifier>+<key>" ("Keypad +" is one key: nothing after its '+'). */
+                int mod=-1;
+                char *plus=strrchr(name,'+');
+                if (plus && plus>name && plus[1]) {
+                    *plus=0;
+                    mod=key_from_name(name);
+                    if (mod<0) *plus='+'; else name=plus+1;
+                    while (*name==' ') ++name;
+                }
                 const int s=key_from_name(name);
                 if (s<0) printf("Runtime: controls: unknown key \"%s\" for %s\n",name,line+4);
-                else if (b->key_count<MAX_BIND) b->keys[b->key_count++]=s;
+                else if (b->key_count<MAX_BIND) { b->mods[b->key_count]=mod; b->keys[b->key_count++]=s; }
             } else {
                 const int button=pad_button_from_name(name);
                 if (button<0) printf("Runtime: controls: unknown gamepad button \"%s\" for %s\n",name,line+4);
@@ -590,10 +653,23 @@ static int mouse_key_down(int code) {
     if (code==MOUSE_WHEEL_DOWN) return wheel_phase[1]==1;
     return (mouse_buttons & SDL_BUTTON_MASK(code-MOUSE_KEY))!=0;
 }
+static int code_down(const bool *k, int code) {
+    return code>=MOUSE_KEY ? mouse_key_down(code) : k && k[code];
+}
+/* Whether a chord on `code` (any input's) has its modifier held: the plain bindings of the key
+ * then wait (Shift + Left is R2 alone). */
+static int chord_held(const bool *k, int code) {
+    for (int input=0;input<IN_COUNT;++input)
+        for (int i=0;i<bindings[input].key_count;++i)
+            if (bindings[input].keys[i]==code && bindings[input].mods[i]>=0 &&
+                code_down(k,bindings[input].mods[i])) return 1;
+    return 0;
+}
 static int key_down(const bool *k, int input) {
     for (int i=0;i<bindings[input].key_count;++i) {
-        const int code=bindings[input].keys[i];
-        if (code>=MOUSE_KEY ? mouse_key_down(code) : k && k[code]) return 1;
+        const int code=bindings[input].keys[i], mod=bindings[input].mods[i];
+        if (!code_down(k,code)) continue;
+        if (mod>=0 ? code_down(k,mod) : !chord_held(k,code)) return 1;
     }
     return 0;
 }
@@ -710,9 +786,55 @@ static int key_move(int move_x, int move_y, uint64_t now, int *out_x, int *out_y
     last_y=*out_y=(int)(y<-127 ? -127 : y>127 ? 127 : y);
     return 1;
 }
+/* Circle from the sprint and dodge keys (bound in keyboard_layout=0.6). Dodge is a short press
+ * whatever the key does: held, it would be the run (the game tells a tap from a hold by the
+ * time). Sprint holds Circle: the run. Dodge while sprint is held is the jump: Circle let go,
+ * pressed, let go, then held again (the run goes on), as Space twice while running; one press of
+ * it only stopped the run. BB_JUMP_GAP_MS (70) is each pause, BB_JUMP_TAP_MS (70) the press
+ * between them. While a game menu is open they do nothing. From bbport 0.6. */
+#define DODGE_PULSE_US 90000u
+static uint64_t dodge_pulse_until, jump_start_us;
+static uint32_t jump_gap_us, jump_tap_us;
+static int dodge_was_down;
+static uint32_t env_ms_us(const char *name, uint32_t fallback_ms) {
+    const char *env=getenv(name);
+    const long v=env && *env ? atol(env) : -1;
+    return (uint32_t)(v>=0 && v<=1000 ? v : (long)fallback_ms)*1000u;
+}
+static int keyboard_circle(const bool *k, uint64_t now, int menu) {
+    if (!jump_gap_us) {
+        jump_gap_us=env_ms_us("BB_JUMP_GAP_MS",70);
+        jump_tap_us=env_ms_us("BB_JUMP_TAP_MS",70);
+    }
+    const int dodge=key_down(k,IN_DODGE), sprint=key_down(k,IN_SPRINT);
+    if (menu) { dodge_was_down=dodge; dodge_pulse_until=jump_start_us=0; return 0; }
+    const int jumping=jump_start_us && now<jump_start_us+2u*jump_gap_us+jump_tap_us;
+    if (dodge && !dodge_was_down && !jumping) {
+        if (sprint) { jump_start_us=now; dodge_pulse_until=0; }
+        else { dodge_pulse_until=now+DODGE_PULSE_US; jump_start_us=0; }
+    }
+    dodge_was_down=dodge;
+    if (jump_start_us && now<jump_start_us+2u*jump_gap_us+jump_tap_us) {
+        const uint64_t t=now-jump_start_us;
+        return t>=jump_gap_us && t<jump_gap_us+jump_tap_us; /* low, the press, low */
+    }
+    return sprint || now<dodge_pulse_until;
+}
 static void apply_keyboard(PadData *d, const bool *k) {
-    for (int i=IN_CROSS;i<=IN_RIGHT;++i)
-        if (i!=IN_TOUCHPAD && i!=IN_TOUCHPAD_RIGHT && key_down(k,i)) d->buttons|=input_buttons[i];
+    const uint64_t now=now_us();
+    const int menu=bbgpu_pointer_wanted()!=0;
+    /* keyboard_layout=0.6: the way back in a game menu is Escape (Options' key); it opens the menu
+     * at other times. A press that began outside a menu is Options for as long as it is held: the
+     * menu it opens must not take the same press for its way back. */
+    static int options_latched;
+    if (!key_down(k,IN_OPTIONS)) options_latched=0;
+    else if (!menu) options_latched=1;
+    const int options_back=layout_06 && menu && !options_latched;
+    for (int i=IN_CROSS;i<=IN_RIGHT;++i) {
+        if (i==IN_TOUCHPAD || i==IN_TOUCHPAD_RIGHT || !key_down(k,i)) continue;
+        d->buttons|=(i==IN_OPTIONS && options_back) ? BTN_CIRCLE : input_buttons[i];
+    }
+    if (keyboard_circle(k,now,menu)) d->buttons|=BTN_CIRCLE;
     if (key_down(k,IN_TOUCHPAD)) touch_click(d,0);
     if (key_down(k,IN_TOUCHPAD_RIGHT)) touch_click(d,1);
     if (key_down(k,IN_L2)) d->l2=255;
@@ -721,7 +843,7 @@ static void apply_keyboard(PadData *d, const bool *k) {
     const int up=key_down(k,IN_MOVE_UP), down=key_down(k,IN_MOVE_DOWN);
     const int move_x=key_direction(0,left,right), move_y=key_direction(1,up,down);
     int stick_x, stick_y;
-    if (key_move(move_x,move_y,now_us(),&stick_x,&stick_y)) {
+    if (key_move(move_x,move_y,now,&stick_x,&stick_y)) {
         /* Walk: the keys only ever ran (full deflection). 48 of 127 is under the game's run
          * threshold, as on a stick pushed part way; a diagonal keeps its shape. From HatsyRei's
          * walk key in Mrsuss60's port. */
