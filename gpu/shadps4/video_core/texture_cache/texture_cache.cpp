@@ -200,9 +200,31 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
 
 /// bbport: a GPU-written tiled image back into the game's memory, tiled as the game laid it out,
 /// synchronously (the collector frees it next). DownloadImageMemory copies linear images only.
+void TextureCache::NoteGpuBase(Image& image) {
+    if (image.gpu_base_hash == 0 && image.info.guest_address != 0 && WriteTracking()) {
+        image.gpu_base_hash = MaybeDirtyHash(image) | 1;
+    }
+}
+
 void TextureCache::WriteBackTiledImage(ImageId image_id) {
     Image& image = slot_images[image_id];
     const u64 size = image.info.guest_size;
+    // bbport: only over the game's memory as it was when the GPU began writing the image. Write
+    // tracking misses some changes there (the game's heap reusing the memory of an area left
+    // behind): written back over them, the image broke the heap, and the game crashed in its
+    // allocator (0x2085xxx; "memory block seems to be improper or freed already": #25, #32).
+    // Changed, the image is dropped instead, as BB_GC_TILE_BACK=0 does.
+    if (image.gpu_base_hash != 0 && (MaybeDirtyHash(image) | 1) != image.gpu_base_hash) {
+        static std::atomic<u32> told{0};
+        if (told.fetch_add(1, std::memory_order_relaxed) < 20) {
+            std::printf("Texture cache: tiled image %#llx (%ux%u, %llu bytes) not written back: "
+                        "the game's memory there changed since the GPU wrote it\n",
+                        static_cast<unsigned long long>(image.info.guest_address),
+                        image.info.size.width, image.info.size.height,
+                        static_cast<unsigned long long>(size));
+        }
+        return;
+    }
     // TileImage moves the copies' offsets: a fresh set for each call.
     const auto make_copies = [&] {
         boost::container::small_vector<vk::BufferImageCopy, 14> copies;
@@ -865,6 +887,9 @@ ImageView& TextureCache::FindTexture(ImageId image_id, const ImageDesc& desc, Vi
     if (refresh) {
         UpdateImage(image_id);
     }
+    if (desc.type == BindingType::Storage) {
+        NoteGpuBase(image);
+    }
     if (memo && !BbToggle::Disabled(BbToggle::TextureViewMemo)) {
         if (memo->image_id == image_id && memo->backing == image.backing && memo->view_id) {
             return slot_image_views[memo->view_id];
@@ -893,6 +918,7 @@ ImageView& TextureCache::FindRenderTarget(ImageId image_id, const ImageDesc& des
     }
     image.usage.render_target = 1u;
     UpdateImage(image_id);
+    NoteGpuBase(image);
 
     // Register meta data for this color buffer
     if (desc.info.meta_info.cmask_addr) {
@@ -917,6 +943,7 @@ ImageView& TextureCache::FindDepthTarget(ImageId image_id, const ImageDesc& desc
     image.gpu_write_tick = scheduler.CurrentTick();
     image.usage.depth_target = 1u;
     UpdateImage(image_id);
+    NoteGpuBase(image);
 
     // Register meta data for this depth buffer
     if (desc.info.meta_info.htile_addr) {
@@ -976,6 +1003,7 @@ void TextureCache::RefreshImage(Image& image) {
         }
         image.hash = hash;
     }
+    image.gpu_base_hash = 0; // uploaded again: taken anew at the GPU's next write
 
     const u32 num_layers = image.info.resources.layers;
     const u32 num_mips = image.info.resources.levels;
