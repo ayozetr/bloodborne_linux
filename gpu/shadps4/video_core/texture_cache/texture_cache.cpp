@@ -198,31 +198,41 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     }
 }
 
-/// bbport: a GPU-written tiled image back into the game's memory, tiled as the game laid it out,
-/// synchronously (the collector frees it next). DownloadImageMemory copies linear images only.
 void TextureCache::NoteGpuBase(Image& image) {
-    if (image.gpu_base_hash == 0 && image.info.guest_address != 0 && WriteTracking()) {
+    if (image.gpu_base_hash == 0 && image.info.guest_address != 0) {
         image.gpu_base_hash = MaybeDirtyHash(image) | 1;
     }
 }
 
+/// bbport: whether the game's memory under a GPU-written image changed since the GPU began
+/// writing it. The collector writes such an image back before freeing it only over unchanged
+/// memory: neither model sees every change there (the game's heap reusing the memory of an area
+/// left behind; write tracking misses it, and the PC model tracks none). Written back over it,
+/// the image broke the heap, and the game crashed in its allocator (0x2085xxx; "memory block
+/// seems to be improper or freed already": #25, #32, #35). Changed, the image is dropped
+/// instead, as BB_GC_TILE_BACK=0 does.
+bool TextureCache::GuestMemoryReused(const Image& image) {
+    if (image.gpu_base_hash == 0 || (MaybeDirtyHash(image) | 1) == image.gpu_base_hash) {
+        return false;
+    }
+    static std::atomic<u32> told{0};
+    if (told.fetch_add(1, std::memory_order_relaxed) < 20) {
+        std::printf("Texture cache: image %#llx (%ux%u, %llu bytes%s) not written back: the "
+                    "game's memory there changed since the GPU wrote it\n",
+                    static_cast<unsigned long long>(image.info.guest_address),
+                    image.info.size.width, image.info.size.height,
+                    static_cast<unsigned long long>(image.info.guest_size),
+                    image.info.IsTiled() ? ", tiled" : "");
+    }
+    return true;
+}
+
+/// bbport: a GPU-written tiled image back into the game's memory, tiled as the game laid it out,
+/// synchronously (the collector frees it next). DownloadImageMemory copies linear images only.
 void TextureCache::WriteBackTiledImage(ImageId image_id) {
     Image& image = slot_images[image_id];
     const u64 size = image.info.guest_size;
-    // bbport: only over the game's memory as it was when the GPU began writing the image. Write
-    // tracking misses some changes there (the game's heap reusing the memory of an area left
-    // behind): written back over them, the image broke the heap, and the game crashed in its
-    // allocator (0x2085xxx; "memory block seems to be improper or freed already": #25, #32).
-    // Changed, the image is dropped instead, as BB_GC_TILE_BACK=0 does.
-    if (image.gpu_base_hash != 0 && (MaybeDirtyHash(image) | 1) != image.gpu_base_hash) {
-        static std::atomic<u32> told{0};
-        if (told.fetch_add(1, std::memory_order_relaxed) < 20) {
-            std::printf("Texture cache: tiled image %#llx (%ux%u, %llu bytes) not written back: "
-                        "the game's memory there changed since the GPU wrote it\n",
-                        static_cast<unsigned long long>(image.info.guest_address),
-                        image.info.size.width, image.info.size.height,
-                        static_cast<unsigned long long>(size));
-        }
+    if (GuestMemoryReused(image)) {
         return;
     }
     // TileImage moves the copies' offsets: a fresh set for each call.
@@ -1496,6 +1506,8 @@ void TextureCache::GarbageCollectImages() {
         } else if (old_tiled) {
             WriteBackTiledImage(image_id);
             ++gc_downloads;
+        } else if (download && GuestMemoryReused(image)) {
+            ++gc_dropped;
         } else if (download) {
             // bbport: synchronously, while the image still protects its pages. A deferred
             // write-back landed after FreeImage had unprotected them, over whatever the game

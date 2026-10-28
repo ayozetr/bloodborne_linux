@@ -368,6 +368,8 @@ private:
     void WriteBackTiledImage(ImageId image_id);
     /// bbport: takes Image::gpu_base_hash at the GPU's first write since the image's upload.
     void NoteGpuBase(Image& image);
+    /// bbport: the game's memory under the image changed since Image::gpu_base_hash was taken.
+    static bool GuestMemoryReused(const Image& image);
 
     /// Thread function for copying downloaded images out to CPU memory.
     void DownloadedImagesThread(const std::stop_token& token);
