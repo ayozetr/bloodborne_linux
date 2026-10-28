@@ -49,6 +49,23 @@ void bbgpu_mouse_look_enable(int enabled);
 /* mouse_camera=direct in bbport.ini: the mouse turns the camera itself (gpu/shim/bloodborne_cam.h)
  * at this sensitivity (1: 900 counts per radian) instead of moving the right stick. */
 void bbgpu_mouse_camera_configure(int direct, float sensitivity);
+/* A module's look at the window's events first (an SDL_Event and the SDL_Window, on the window
+ * thread): nonzero takes the event (the port and the game do not see it). Up to 4. */
+typedef int (*BbGpuEventFilter)(const void *sdl_event, void *sdl_window);
+void bbgpu_add_event_filter(BbGpuEventFilter filter);
+/* A module's menu pointer: nonzero while the game shows a menu the mouse points into. The window
+ * then lets the mouse go and shows the cursor, and takes the mouse back after (as it had it).
+ * Up to 4; pointer_wanted: any of them says so. */
+typedef int (*BbGpuPointerQuery)(void);
+void bbgpu_add_pointer_query(BbGpuPointerQuery query);
+int bbgpu_pointer_wanted(void);
+/* A module's changes to the pad state the game reads (runtime_pad.c, after the host's input and
+ * the scripted one): the buttons (PS4 bits); the sticks (lx ly rx ry) as they are. Up to 4. */
+typedef void (*BbGpuPadFilter)(uint32_t *buttons, const uint8_t *sticks);
+void bbgpu_add_pad_filter(BbGpuPadFilter filter);
+void bbgpu_filter_pad(uint32_t *buttons, const uint8_t *sticks);
+/* The shown frame's width / height (the display buffer's; the window letterboxes it). */
+float bbgpu_frame_aspect(void);
 /* Patches the loaded image before the game runs (image still writable): libGnm entry hooks. */
 void bbgpu_patch_image(unsigned char *image, uint64_t size);
 /* Number of symbols registered by the vendored libraries (diagnostics). */

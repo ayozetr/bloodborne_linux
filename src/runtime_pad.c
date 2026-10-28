@@ -1072,6 +1072,9 @@ static void sample(PadData *d) {
     if (injected.buttons & BTN_R2) d->r2=255;
     uint8_t *axes[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
     for (int i=0;i<4;++i) if (injected.stick[i]>=0) *axes[i]=(uint8_t)injected.stick[i];
+    /* Game modules (a menu pointer's presses). */
+    const uint8_t sticks[4]={d->left_x,d->left_y,d->right_x,d->right_y};
+    bbgpu_filter_pad(&d->buttons,sticks);
     camera_diagonal(d);
     touch_ids(d);
 }

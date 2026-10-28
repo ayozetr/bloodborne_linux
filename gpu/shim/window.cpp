@@ -1,4 +1,6 @@
 // bbport: SDL3 window for the Vulkan swapchain (X11 or Wayland).
+#include <array>
+#include <atomic>
 #include <charconv>
 #include <cstdio>
 #include <cstdlib>
@@ -6,9 +8,67 @@
 #include <SDL3/SDL.h>
 #include "common/assert.h"
 #include "common/logging/log.h"
+#include "../bbgpu.h"
 #include "sdl_window.h"
 #include "bbport_overlay.h"
 #include "bloodborne_cam.h"
+
+// Game modules' parts of the window and the pad (bbgpu_add_*: the menu pointer), from bbport 0.6.
+namespace {
+std::array<std::atomic<BbGpuEventFilter>, 4> event_filters{};
+std::array<std::atomic<BbGpuPointerQuery>, 4> pointer_queries{};
+std::array<std::atomic<BbGpuPadFilter>, 4> pad_filters{};
+
+template <typename T>
+void AddTo(std::array<std::atomic<T>, 4>& slots, T value) {
+    for (auto& slot : slots) {
+        T expected = nullptr;
+        if (slot.compare_exchange_strong(expected, value)) {
+            return;
+        }
+    }
+}
+
+bool FilteredByModule(const SDL_Event* event, SDL_Window* window) {
+    for (const auto& slot : event_filters) {
+        const BbGpuEventFilter filter = slot.load(std::memory_order_acquire);
+        if (filter && filter(event, window)) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
+
+extern "C" void bbgpu_add_event_filter(BbGpuEventFilter filter) {
+    AddTo(event_filters, filter);
+}
+
+extern "C" void bbgpu_add_pointer_query(BbGpuPointerQuery query) {
+    AddTo(pointer_queries, query);
+}
+
+extern "C" int bbgpu_pointer_wanted(void) {
+    for (const auto& slot : pointer_queries) {
+        const BbGpuPointerQuery query = slot.load(std::memory_order_acquire);
+        if (query && query()) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern "C" void bbgpu_add_pad_filter(BbGpuPadFilter filter) {
+    AddTo(pad_filters, filter);
+}
+
+extern "C" void bbgpu_filter_pad(uint32_t* buttons, const uint8_t* sticks) {
+    for (const auto& slot : pad_filters) {
+        if (const BbGpuPadFilter filter = slot.load(std::memory_order_acquire)) {
+            filter(buttons, sticks);
+        }
+    }
+}
 
 namespace Frontend {
 
@@ -246,8 +306,13 @@ bool WindowSDL::PollEvents() {
     if (!text_active) {
         BbOverlay::UpdateTextInput(window);
     }
+    // A game module's menu wants the mouse as a pointer (bbgpu_add_pointer_query).
+    const bool pointer = bbgpu_pointer_wanted() != 0;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        if (FilteredByModule(&event, window)) {
+            continue;
+        }
         if (event.type == SDL_EVENT_MOUSE_MOTION) {
             last_mouse_motion_ms = SDL_GetTicks();
             if (mouse_captured.load(std::memory_order_relaxed)) {
@@ -285,13 +350,15 @@ bool WindowSDL::PollEvents() {
         // window let it go.
         if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && !mouse_captured.load(std::memory_order_relaxed) &&
             mouse_look.load(std::memory_order_relaxed) && !BbOverlay::MenuOpen() &&
-            !BbOverlay::ReleasesMouse()) { // Hunter's Atlas: its map and tile use the pointer
+            !BbOverlay::ReleasesMouse() && // Hunter's Atlas: its map and tile use the pointer
+            !pointer) {                    // a game menu: the click is the menu pointer's
             CaptureMouse(true);
             continue;
         }
         if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat && event.key.key == SDLK_F1 &&
-            mouse_captured.load(std::memory_order_relaxed)) {
+            (mouse_captured.load(std::memory_order_relaxed) || retake_after_pointer)) {
             CaptureMouse(false);
+            retake_after_pointer = false; // F1 in a game menu: it stays free after the menu too
             continue;
         }
         if (event.type == SDL_EVENT_MOUSE_WHEEL && mouse_captured.load(std::memory_order_relaxed)) {
@@ -302,6 +369,7 @@ bool WindowSDL::PollEvents() {
         if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
             focused.store(false, std::memory_order_relaxed);
             CaptureMouse(false);
+            retake_after_pointer = false;
         }
         if (event.type == SDL_EVENT_WINDOW_FOCUS_GAINED) {
             focused.store(true, std::memory_order_relaxed);
@@ -323,6 +391,20 @@ bool WindowSDL::PollEvents() {
             break;
         }
     }
+    // A game menu the mouse points into (the menu pointer): the window lets the mouse go while it
+    // is open, and takes it back after if it had it.
+    if (pointer && mouse_captured.load(std::memory_order_relaxed)) {
+        CaptureMouse(false);
+        retake_after_pointer = true;
+    } else if (!pointer && retake_after_pointer) {
+        retake_after_pointer = false;
+        if (focused.load(std::memory_order_relaxed) && !text_active &&
+            mouse_look.load(std::memory_order_relaxed) && !BbOverlay::MenuOpen() &&
+            !BbOverlay::ReleasesMouse()) {
+            CaptureMouse(true);
+        }
+    }
+    pointer_shown = pointer;
     // The menu, the name dialog, Hunter's Atlas's map and tile, and mouse_look=0 want the cursor.
     if (mouse_captured.load(std::memory_order_relaxed) &&
         (BbOverlay::MenuOpen() || BbOverlay::ReleasesMouse() || text_active ||
@@ -349,11 +431,14 @@ void WindowSDL::UpdateMouseCamera() {
 }
 
 // Issue #3: the OS cursor over the game. Hidden in fullscreen, and in a window after 3 s without
-// moving the mouse; always shown while the settings menu is open.
+// moving the mouse; always shown while the settings menu is open. In a game menu the mouse points
+// into (pointer_shown) it shows in fullscreen too, and goes after 1.5 s without moving, so that the
+// tail of a closing menu does not leave it hanging over the game; any motion brings it back.
 void WindowSDL::UpdateCursor() {
     const bool fullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
+    const u64 idle = SDL_GetTicks() - last_mouse_motion_ms;
     const bool hide = !BbOverlay::MenuOpen() &&
-                      (fullscreen || SDL_GetTicks() - last_mouse_motion_ms > 3000);
+                      (pointer_shown ? idle > 1500 : (fullscreen || idle > 3000));
     if (hide != cursor_hidden) {
         cursor_hidden = hide;
         hide ? SDL_HideCursor() : SDL_ShowCursor();

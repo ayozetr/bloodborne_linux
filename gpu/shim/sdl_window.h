@@ -54,6 +54,8 @@ private:
     void UpdateCursor();
     u64 last_mouse_motion_ms{}; ///< SDL_GetTicks of the last mouse motion (UpdateCursor)
     bool cursor_hidden{};
+    bool pointer_shown{};        ///< a game menu the mouse points into is open (UpdateCursor)
+    bool retake_after_pointer{}; ///< the mouse was let go for that menu: taken back after it
     void CaptureMouse(bool capture);
     /// Installs or removes the direct mouse camera's hook (bloodborne_cam.h) as the capture goes.
     void UpdateMouseCamera();

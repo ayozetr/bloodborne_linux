@@ -120,6 +120,9 @@ static vk::Result WaitFrameFence(vk::Device device, vk::Fence fence, const char*
     }
 }
 
+/// bbport: the shown frame's aspect (bbgpu_frame_aspect, the menu pointer's stage): any thread.
+static std::atomic<float> shown_aspect{16.0f / 9.0f};
+
 static vk::Rect2D FitImage(s32 frame_width, s32 frame_height, s32 swapchain_width,
                            s32 swapchain_height) {
     float frame_aspect = static_cast<float>(frame_width) / frame_height;
@@ -418,6 +421,7 @@ Frame* Presenter::PrepareFrame(const Libraries::VideoOut::BufferAttributeGroup& 
         runtime.FlushBarriers();
     }
     expected_ratio = static_cast<float>(image_size.width) / static_cast<float>(image_size.height);
+    shown_aspect.store(expected_ratio, std::memory_order_relaxed);
 
     // Vulkan has no sRGB variant of the 10-bit format, so an A2R10G10B10Srgb buffer reaches
     // the post process pass still sRGB encoded and has to be decoded there instead.
@@ -826,3 +830,7 @@ void Presenter::SetExpectedGameSize(s32 width, s32 height) {
 }
 
 } // namespace Vulkan
+
+extern "C" float bbgpu_frame_aspect(void) {
+    return Vulkan::shown_aspect.load(std::memory_order_relaxed);
+}

@@ -12,6 +12,7 @@ uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t
 void bbgpu_mouse_take(double *dx, double *dy, int *up, int *down) { *dx=*dy=0; *up=*down=0; }
 int bbgpu_mouse_captured(void) { return 0; }
 void bbgpu_mouse_look_enable(int enabled) { (void)enabled; }
+void bbgpu_filter_pad(uint32_t *buttons, const uint8_t *sticks) { (void)buttons; (void)sticks; }
 static int camera_direct=-1;
 static float camera_sensitivity;
 void bbgpu_mouse_camera_configure(int direct, float sensitivity) { camera_direct=direct; camera_sensitivity=sensitivity; }
