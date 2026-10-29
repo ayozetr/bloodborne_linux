@@ -2995,17 +2995,28 @@ bool Rasterizer::IsComputeImageClear(const Pipeline* pipeline) {
         return false;
     }
 
-    // Find image the buffer alias
-    const auto image1_id =
-        texture_cache.FindImageFromRange(buf1.base_address, buf1.GetSize(), false);
+    // Find image the buffer alias. bbport: the whole image, or one layer of an array or cube (the
+    // point lights' shadow cube is cleared a face at a time: the game's shader alone wrote only
+    // memory, and the faces kept older shadows that showed as wedges of light; upstream 0.7).
+    auto image1_id = texture_cache.FindImageFromRange(buf1.base_address, buf1.GetSize(), false);
+    u32 layer = 0;
+    bool one_layer = false;
+    if (!image1_id || texture_cache.GetImage(image1_id).info.guest_size != buf1.GetSize()) {
+        image1_id = texture_cache.FindImageLayer(buf1.base_address, buf1.GetSize(), layer);
+        one_layer = bool(image1_id);
+    }
     if (!image1_id) {
         return false;
     }
 
     // Image clear must be valid
     VideoCore::Image& image1 = texture_cache.GetImage(image1_id);
-    if (image1.info.guest_size != buf1.GetSize() || image1.info.num_bits != buf1_bpp ||
-        image1.info.props.is_depth) {
+    if ((!one_layer && image1.info.guest_size != buf1.GetSize()) ||
+        image1.info.num_bits != buf1_bpp || image1.info.props.is_depth) {
+        return false;
+    }
+    // A clear drops the image's Dirty mark: with one layer, not over the others' CPU writes.
+    if (one_layer && True(image1.flags & VideoCore::ImageFlagBits::Dirty)) {
         return false;
     }
 
@@ -3014,14 +3025,11 @@ bool Rasterizer::IsComputeImageClear(const Pipeline* pipeline) {
     const vk::ClearValue clear = {
         .color = {.float32 = std::array<float, 4>{values[0], values[1], values[2], values[3]}},
     };
-    const VideoCore::SubresourceRange range = {
-        .base =
-            {
-                .level = 0,
-                .layer = 0,
-            },
-        .extent = image1.info.resources,
-    };
+    const VideoCore::SubresourceRange range =
+        one_layer ? VideoCore::SubresourceRange{.base = {.level = 0, .layer = layer},
+                                                .extent = {.levels = 1, .layers = 1}}
+                  : VideoCore::SubresourceRange{.base = {.level = 0, .layer = 0},
+                                                .extent = image1.info.resources};
     runtime.ClearImage(&image1, range, clear);
     return true;
 }

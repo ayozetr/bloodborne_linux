@@ -874,6 +874,25 @@ ImageId TextureCache::FindImageFromRange(VAddr address, size_t size, bool ensure
     return {};
 }
 
+ImageId TextureCache::FindImageLayer(VAddr address, size_t size, u32& layer) {
+    ImageId found{};
+    ForEachImageInRegion(address, size, [&](ImageId id, Image& image) {
+        const auto& info = image.info;
+        const u32 layers = info.resources.layers;
+        if (found || info.resources.levels != 1 || layers < 2 || info.guest_size % layers != 0 ||
+            address < info.guest_address) {
+            return;
+        }
+        const u64 layer_size = info.guest_size / layers;
+        const u64 offset = address - info.guest_address;
+        if (size == layer_size && offset % layer_size == 0 && offset / layer_size < layers) {
+            layer = u32(offset / layer_size);
+            found = id;
+        }
+    });
+    return found;
+}
+
 ImageView& TextureCache::FindTexture(ImageId image_id, const ImageDesc& desc, ViewMemo* memo,
                                      bool refresh) {
     Image& image = slot_images[image_id];
