@@ -492,9 +492,10 @@ static int key_from_name(const char *name) {
  * ~1000 pixels/s turn the camera at full speed), mouse_invert_y=1. */
 static int mouse_look=1, mouse_invert_y;
 static float mouse_sensitivity=1.0f;
-/* mouse_camera=direct: the mouse turns the game's camera itself, 1:1 (gpu/shim/bloodborne_cam.h),
- * at mouse_sensitivity (1: 900 counts per radian); default stick, the motion as the right stick. */
-static int mouse_camera_direct;
+/* mouse_camera (default direct, as in bbport 0.6): the mouse turns the game's camera itself, 1:1
+ * (gpu/shim/bloodborne_cam.h), at mouse_sensitivity (1: 900 counts per radian); stick: the motion
+ * as the right stick, at the game's stick speeds (#31: not the same sideways and up and down). */
+static int mouse_camera_direct=1;
 /* Keyboard movement (bbport.ini): stick_socd=neutral makes opposite keys held together cancel out
  * (default: the one pressed last wins); stick_circular=1 puts a diagonal of the movement keys
  * within a round gate, as a thumbstick (default: the square, see key_move). */
@@ -512,7 +513,7 @@ static int pad_camera_diagonal;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 static void load_bindings(void) {
     bind_defaults();
-    mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=0;
+    mouse_look=1; mouse_invert_y=0; mouse_sensitivity=1.0f; mouse_camera_direct=1;
     stick_socd_last=1; stick_circular=0; pad_round_gate=1;
     pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0;
     pad_camera_diagonal=0;
@@ -527,7 +528,7 @@ static void load_bindings(void) {
             const char *value=eq+1;
             if (!strncmp(line,"mouse_look=",11)) mouse_look=atoi(value)!=0;
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
-            else if (!strncmp(line,"mouse_camera=",13)) mouse_camera_direct=!strncmp(value,"direct",6);
+            else if (!strncmp(line,"mouse_camera=",13)) mouse_camera_direct=strncmp(value,"stick",5)!=0;
             else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
             else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
             else if (!strncmp(line,"pad_round_gate=",15)) pad_round_gate=atoi(value)!=0;

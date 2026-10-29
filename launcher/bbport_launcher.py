@@ -316,7 +316,7 @@ INI_DEFAULTS = {
     "mouse_look": "1",
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
-    "mouse_camera": "stick",
+    "mouse_camera": "direct",
     "pad_swap_sticks": "0",
     "pad_invert_look_x": "0",
     "pad_invert_look_y": "0",
@@ -394,6 +394,19 @@ def save_ini(values, lines):
         if key not in written and value is not None:
             out.append(f"{key}={value}")
     ini_path().write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
+def direct_mouse_camera_once(settings, values, lines):
+    """The direct mouse camera became the default (#31, as in bbport 0.6); earlier launchers wrote
+    mouse_camera=stick, their default, into bbport.ini with the rest: it is turned on once."""
+    if settings.get("mouse_camera_direct_default"):
+        return
+    if values.get("mouse_camera") == "stick":
+        values["mouse_camera"] = "direct"
+        save_ini({"mouse_camera": "direct"}, lines)
+        lines[:] = ini_path().read_text(encoding="utf-8").splitlines()
+    settings["mouse_camera_direct_default"] = True
+    save_settings(settings)
 
 
 def patches_dir(settings):
@@ -1036,6 +1049,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.settings = load_settings()
         set_language(self.settings.get("ui_language", ""))
         self.ini, self.ini_lines = load_ini()
+        direct_mouse_camera_once(self.settings, self.ini, self.ini_lines)
         self.ini_rows_seen = {}  # bbport.ini values as the rows showed them when last built or saved
         self.ini_controls_changed = {}  # key.* / pad.* bindings changed here, not yet saved
         self.process = None
