@@ -39,7 +39,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
   fewer stutters while areas load, stick options, the controller in use, save import, the
   version selector, occlusion counters in command order, vertex shaders with the right
   bindings, freezes in memory allocation and draw preparation, index buffers of indirect draws,
-  and ZPASS queries in order.
+  ZPASS queries in order, and camera motion vectors without NaN.
 - **[Classmg22](https://github.com/Classmg22)** (CLS_AMG): BBSC, Seamless Co-op.
 - **[MaskZeus](https://github.com/MaskZeus)**: bbbridge.
 - **[Wozzardman](https://github.com/Wozzardman)**: the online libraries and the co-op server.
@@ -64,8 +64,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[GoncaloLobo0](https://github.com/GoncaloLobo0)**: crashes while loading areas.
 - **[bmy](https://github.com/bmy)**: the interface outside 1080p, motion vectors for the large
   beasts, and a memory fault.
-- **[Mrsuss60](https://github.com/Mrsuss60)**: crashes when loading some maps, and the gestures
-  menu from the keyboard.
+- **[Mrsuss60](https://github.com/Mrsuss60)**: crashes when loading some maps, the gestures
+  menu from the keyboard, and image changes for the upscaler.
 - **[SrShadowy](https://github.com/SrShadowy)**: the on-screen keyboard for the character's name,
   and the shader compiling notice.
 - **[Obrikash](https://github.com/Obrikash)**: the game starts when DLSS cannot be used.
@@ -83,6 +83,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[AndiMajore](https://github.com/AndiMajore)**: crash debugging (`BB_FAULT_WAIT`).
 - **[AwesomeObserver](https://github.com/AwesomeObserver)**: large recorded command groups, and
   the swapchain after display changes.
+- **[iannitram](https://github.com/iannitram)**: FSR 3.1 without colour noise on the Ryzen Z1 (ROG Ally, Legion Go).
 
 ## Help and testing
 
@@ -100,10 +101,12 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.
 - **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
 - **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
-- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models and a crash on the Steam Deck.
+- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures and crashes in the game's memory manager.
 - **[thomasgarafano1](https://github.com/thomasgarafano1)**: Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix.
 - **[TacticalBill](https://github.com/TacticalBill)**: marking trophies already earned on the PS4.
 - **[holydingus](https://github.com/holydingus)**: BBSC's items not given to a new character.
 - **[OPGZ2](https://github.com/OPGZ2)**: the launcher's blank window at start.
 - **[kuday248](https://github.com/kuday248)**: settings from the in-game menu that the launcher overwrote.
 - **[BlazinKarp](https://github.com/BlazinKarp)**: the Steam overlay in the game.
+- **[molnar-a](https://github.com/molnar-a)**: a crash on the Steam Deck after lamp travel, and testing the fix.
+- **[gibs2193](https://github.com/gibs2193)**: the mouse camera turning slower sideways than up and down.
