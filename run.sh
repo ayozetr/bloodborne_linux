@@ -54,6 +54,23 @@ if [[ ${BB_SAVE_LOG:-} == 1 ]]; then
     # Bash builtins only (the AppImage's PATH has no tee).
     exec > >(while IFS= read -r line || [[ -n $line ]]; do printf '%s\n' "$line"; printf '%s\n' "$line" >&$log_fd; done) 2>&1
 fi
+# The version and the build first in every log, as issue reports rarely say which they ran: the
+# launcher's version (launcher/bbport_update.py) and, from packaging/appimage-sharun.sh's BUILD
+# file or a git checkout, the commit and branch (a test build is a branch other than main).
+# Bash builtins only, as above.
+bb_version=unknown
+if [[ -f launcher/bbport_update.py ]]; then
+    while IFS= read -r line; do
+        if [[ $line =~ ^VERSION\ =\ \"([^\"]+)\" ]]; then bb_version=${BASH_REMATCH[1]}; break; fi
+    done < launcher/bbport_update.py
+fi
+bb_build=''
+if [[ -f BUILD ]]; then
+    IFS= read -r bb_build < BUILD || true
+elif [[ -d .git || -f .git ]] && command -v git >/dev/null; then
+    bb_build="$(git rev-parse --short=8 HEAD 2>/dev/null)$(git diff --quiet HEAD 2>/dev/null || echo -modified) $(git rev-parse --abbrev-ref HEAD 2>/dev/null) (git checkout)" || true
+fi
+echo "bbport Linux $bb_version${bb_build:+, build $bb_build}"
 if [[ -z ${PYTHON:-} ]]; then
     PYTHON=$(command -v python3 || true)
     if [[ -z $PYTHON ]]; then

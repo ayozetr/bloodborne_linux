@@ -3114,7 +3114,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         page = Adw.PreferencesPage()
         about = Adw.PreferencesGroup()  # the section's title already says it
         app = Adw.ActionRow(title="bbport Linux",
-                            subtitle=tr("Версия {}").format(bbport_update.VERSION))
+                            subtitle=tr("Версия {}").format(bbport_update.VERSION_TEXT))
         app.add_prefix(Gtk.Image(file=str(PORT_DIR / "launcher" / "bloodborne.png"), pixel_size=48))
         about.add(app)
         for title, subtitle, url, icon in (

@@ -40,6 +40,9 @@ chmod +x "$quick"
 # share/bbport/{run.sh,scripts,...,bin/bb-probe}; bin/ is the AppImage's own bin directory.
 d=$appdir/share/bbport
 cp run.sh "$d/"
+# The commit, branch and date run.sh prints with the version first in every log.
+printf '%s%s %s %s\n' "$(git rev-parse --short=8 HEAD)" "$(git diff --quiet HEAD || echo -modified)" \
+    "$(git rev-parse --abbrev-ref HEAD)" "$(date -u +%Y-%m-%d)" > "$d/BUILD"
 cp -r scripts patches fsr4_shaders launcher assets "$d/"
 # The keyboard's button prompts (scripts/menu_prompts.py) are drawn with Pillow in this font.
 font=$(fc-match -f '%{file}' 'DejaVu Sans:bold')

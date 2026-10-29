@@ -14,6 +14,20 @@ import tempfile
 import urllib.request
 
 VERSION = "0.51-linux.18"
+
+
+def _build():
+    """The commit, branch and date of a packaged build (BUILD, written by
+    packaging/appimage-sharun.sh next to run.sh), or "" (a git checkout, the Nix package)."""
+    try:
+        return (Path(__file__).resolve().parent.parent / "BUILD").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
+BUILD = _build()
+# The version as the About page shows it: a test build (a branch other than main) says which.
+VERSION_TEXT = f"{VERSION} (build {BUILD})" if BUILD else VERSION
 REPOSITORY = "ayozetr/bloodborne_linux"
 REPOSITORY_URL = f"https://github.com/{REPOSITORY}"
 UPSTREAM_URL = "https://github.com/deadinside28/bloodborne_pc"

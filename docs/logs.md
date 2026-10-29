@@ -12,6 +12,9 @@ A log is the first thing needed to fix a problem: it says what the game and the 
 This also works when the game is started from Steam or from the Steam Deck's Game Mode: turn the
 option on once in the launcher, and every session saves its log.
 
+The log's first line says which version ran, and for a test build which one
+(`bbport Linux 0.51-linux.18, build 626ec908 fix/issue1-lamp-blur 2026-10-29`).
+
 ## Sending it
 
 Open an [issue](https://github.com/ayozetr/bloodborne_linux/issues/new/choose) and attach the
