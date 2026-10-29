@@ -3631,7 +3631,13 @@ bool BufferCache::SynchronizeMemoryFromImage(const Buffer* arena, u64 arena_offs
     }
     const ImageId image_id = texture_cache.FindImageFromRange(device_addr, size);
     if (!image_id) {
-        miss = {device_addr, size, generation};
+        // Only where no image is there at all: an image the GPU has not drawn into yet (or the CPU
+        // wrote over) is found once the GPU draws into it, which changes no generation. Memoized,
+        // the buffer read stale memory until the next image came or went: the motion blur frozen
+        // after lamp travel until the next one (#1; upstream 0.7, its #308).
+        if (!texture_cache.FindImageFromRange(device_addr, size, false)) {
+            miss = {device_addr, size, generation};
+        }
         return false;
     }
     // bbport: the lookups above only read what the texture binding helper leaves alone; the
