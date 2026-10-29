@@ -198,12 +198,6 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     }
 }
 
-void TextureCache::NoteGpuBase(Image& image) {
-    if (image.gpu_base_hash == 0 && image.info.guest_address != 0) {
-        image.gpu_base_hash = MaybeDirtyHash(image) | 1;
-    }
-}
-
 /// bbport: whether the game's memory under a GPU-written image changed since the GPU began
 /// writing it. The collector writes such an image back before freeing it only over unchanged
 /// memory: neither model sees every change there (the game's heap reusing the memory of an area
@@ -898,7 +892,7 @@ ImageView& TextureCache::FindTexture(ImageId image_id, const ImageDesc& desc, Vi
         UpdateImage(image_id);
     }
     if (desc.type == BindingType::Storage) {
-        NoteGpuBase(image);
+        image.NoteGpuBase();
     }
     if (memo && !BbToggle::Disabled(BbToggle::TextureViewMemo)) {
         if (memo->image_id == image_id && memo->backing == image.backing && memo->view_id) {
@@ -928,7 +922,7 @@ ImageView& TextureCache::FindRenderTarget(ImageId image_id, const ImageDesc& des
     }
     image.usage.render_target = 1u;
     UpdateImage(image_id);
-    NoteGpuBase(image);
+    image.NoteGpuBase();
 
     // Register meta data for this color buffer
     if (desc.info.meta_info.cmask_addr) {
@@ -953,7 +947,7 @@ ImageView& TextureCache::FindDepthTarget(ImageId image_id, const ImageDesc& desc
     image.gpu_write_tick = scheduler.CurrentTick();
     image.usage.depth_target = 1u;
     UpdateImage(image_id);
-    NoteGpuBase(image);
+    image.NoteGpuBase();
 
     // Register meta data for this depth buffer
     if (desc.info.meta_info.htile_addr) {

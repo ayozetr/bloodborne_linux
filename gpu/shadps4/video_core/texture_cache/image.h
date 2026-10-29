@@ -196,8 +196,12 @@ public:
     u64 lru_id{};
     u64 hash{};
     /// bbport: the game's memory under the image when the GPU began writing it (since its last
-    /// upload; 0: not taken yet). A tiled write-back checks it (TextureCache::WriteBackTiledImage).
+    /// upload; 0: not taken yet). A write-back checks it (TextureCache::GuestMemoryReused).
     u64 gpu_base_hash{};
+    /// bbport: takes gpu_base_hash at the GPU's first write since the last upload. Every path
+    /// that marks the image GpuModified calls it: draws, compute writes, copies, blits, resolves
+    /// and clears (an image left out was written back unchecked).
+    void NoteGpuBase();
 
 private:
     static Common::IncrementalIdProvider<u64> global_image_uid;

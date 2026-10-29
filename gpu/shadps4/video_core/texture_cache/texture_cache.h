@@ -367,7 +367,6 @@ private:
     /// bbport: a GPU-written tiled image back into the game's memory (the collector).
     void WriteBackTiledImage(ImageId image_id);
     /// bbport: takes Image::gpu_base_hash at the GPU's first write since the image's upload.
-    void NoteGpuBase(Image& image);
     /// bbport: the game's memory under the image changed since Image::gpu_base_hash was taken.
     static bool GuestMemoryReused(const Image& image);
 

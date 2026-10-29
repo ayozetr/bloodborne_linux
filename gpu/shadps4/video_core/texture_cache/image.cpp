@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "bbport_toggles.h"
+#include <bit>
 #include <ranges>
 #include "common/assert.h"
 #include "video_core/renderer_vulkan/liverpool_to_vk.h"
@@ -12,6 +13,7 @@
 #include "video_core/texture_cache/image.h"
 
 #include <vk_mem_alloc.h>
+#include <xxhash.h>
 
 namespace VideoCore {
 
@@ -355,6 +357,14 @@ void Image::GetBarriers(Barriers& barriers, vk::ImageLayout dst_layout, vk::Acce
     last_state.layout = dst_layout;
     last_state.access_mask = dst_mask;
     last_state.pl_stage = dst_stage;
+}
+
+void Image::NoteGpuBase() {
+    if (gpu_base_hash == 0 && info.guest_address != 0) {
+        // As TextureCache::MaybeDirtyHash: the same hash GuestMemoryReused compares.
+        gpu_base_hash =
+            XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), info.guest_size) | 1;
+    }
 }
 
 } // namespace VideoCore
