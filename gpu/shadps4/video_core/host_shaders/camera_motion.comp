@@ -87,7 +87,10 @@ void main() {
     const vec3 mv_color = sky ? vec3(0.0, 0.0, 0.3) : vec3(0.5) + vec3(motion / 128.0, 0.0);
     imageStore(color_img, pixel, vec4(mix(current.rgb, mv_color, 0.75), current.a));
 #else
-    vec2 result = motion;
+    // A camera with NaN/Inf or a wild matrix gives no motion rather than poisoning the upscaler's
+    // history (found by Awaken, LanternEngine 0.9.38).
+    vec2 result = any(isnan(motion)) || any(isinf(motion)) ? vec2(0.0)
+                                                           : clamp(motion, -4.0 * size, 4.0 * size);
     if (mode == 1) {
         const vec4 object_motion = texelFetch(object_tex, pixel, 0);
         // A later ordinary draw may have covered this pixel without touching the motion
