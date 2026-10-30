@@ -2039,7 +2039,8 @@ void BufferCache::ProcessIdleBlocks() {
 }
 
 // bbport (after Awaken's BloodBorneButPc 0.9.17): how full VRAM is against the driver's budget.
-// BB_VRAM_PRESSURE_PERCENT (85): tight from there, full 5 points above; 0 turns it off.
+// BB_VRAM_PRESSURE_PERCENT (85): tight from there, full 5 points above; 0 turns it off (the
+// texture collector's mark below too).
 void BufferCache::UpdateVramLevel(u32 now) {
     static const u64 percent = [] {
         const char* env = std::getenv("BB_VRAM_PRESSURE_PERCENT");
@@ -2052,6 +2053,16 @@ void BufferCache::UpdateVramLevel(u32 now) {
         budget = instance.GetDeviceMemoryBudgetNow();
         if (budget != 0) {
             level = used * 100 >= budget * (percent + 5) ? 2 : used * 100 >= budget * percent ? 1 : 0;
+        }
+        // bbport (#30): the 0.3 memory model is short of the texture collector's critical mark
+        // too. The collector compares all of our VRAM and can only free images: on an 8 GB card
+        // the copies grew to 1.8 GiB in an hour (never tight against the driver's budget), the
+        // usage stayed at the mark, and images the GPU drew were evicted (black effects).
+        const u64 critical = BbStats::gc_critical_bytes.load(std::memory_order_relaxed);
+        if (!GuestInPlace() && critical != 0) {
+            level = std::max(level, used >= critical                           ? 2
+                                    : used + PromoteCriticalMargin >= critical ? 1
+                                                                               : 0);
         }
     }
     if (now < vram_full_until.load(std::memory_order_relaxed)) {
@@ -2070,8 +2081,9 @@ void BufferCache::UpdateVramLevel(u32 now) {
             "tight: the game's data unused for 30 s leaves VRAM",
             "full: the game's data unused for 10 s leaves VRAM",
         };
-        std::printf("Guest memory: VRAM %llu of %llu MiB, %s\n", (unsigned long long)(used >> 20),
-                    (unsigned long long)(budget >> 20),
+        std::printf("Guest memory: VRAM %llu of %llu MiB (texture collector critical at %llu), %s\n",
+                    (unsigned long long)(used >> 20), (unsigned long long)(budget >> 20),
+                    (unsigned long long)(BbStats::gc_critical_bytes.load() >> 20),
                     GuestInPlace() ? kInPlace[level] : kCopies[level]);
     }
 }
