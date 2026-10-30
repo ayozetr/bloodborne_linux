@@ -30,7 +30,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 
 ## People
 
-- **[deadinside28](https://github.com/deadinside28)**: bbport, the port this whole project is built on.
+- **[deadinside28](https://github.com/deadinside28)**: bbport, the port this whole project is built on,
+  and 0.6's menu pointer and keyboard layout.
 - **[Supermedo](https://github.com/Supermedo)**: online play, DLSS, the cheats page, Add to Steam,
   the icon, and many fixes from the Windows port.
 - **[0xCydral](https://github.com/0xCydral)**: gathered and adapted dozens of fixes (crashes while
@@ -110,3 +111,5 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[BlazinKarp](https://github.com/BlazinKarp)**: the Steam overlay in the game.
 - **[molnar-a](https://github.com/molnar-a)**: a crash on the Steam Deck after lamp travel, and testing the fix.
 - **[gibs2193](https://github.com/gibs2193)**: the mouse camera turning slower sideways than up and down.
+- **[zFenrys](https://github.com/zFenrys)**: asking for the mouse pointer in the game's menus.
+- **[Aman9das](https://github.com/Aman9das)**: asking for bbport 0.6's keyboard layout.

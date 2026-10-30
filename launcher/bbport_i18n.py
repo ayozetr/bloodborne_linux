@@ -822,7 +822,7 @@ EN = {
     'Порт и его код': 'The port and its code',
     'Помощь и тесты': 'Help and testing',
     'Другие благодарности': 'Also thanks to',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, the port this whole project is built on',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': "bbport, the port this whole project is built on, and 0.6's menu pointer and keyboard layout",
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online play, DLSS, the cheats page, Add to Steam, the icon, skipping pipelines the driver cannot create, no crash when video memory runs out, and skipping draws with an empty vertex table',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Gathered and adapted dozens of fixes: crashes while loading, black images, the upscaler, the performance line in the log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': "The black character preview, the loading screen's picture and the texture cache's memory",
@@ -927,6 +927,8 @@ EN = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 without colour noise on the Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'A crash on the Steam Deck after lamp travel, and testing the fix',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': 'The mouse camera turning slower sideways than up and down',
+    'Просьба об указателе мыши в меню игры': "Asking for the mouse pointer in the game's menus",
+    'Просьба о раскладке клавиатуры из bbport 0.6': "Asking for bbport 0.6's keyboard layout",
 }
 
 PT_BR = {
@@ -1802,7 +1804,7 @@ PT_BR = {
     'Порт и его код': 'O port e seu código',
     'Помощь и тесты': 'Ajuda e testes',
     'Другие благодарности': 'Também agradecemos a',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, o port em que todo este projeto se baseia',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, o port em que todo este projeto se baseia, e o ponteiro nos menus e o layout de teclado da 0.6',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jogo online, DLSS, a página de trapaças, Adicionar à Steam, o ícone, pular pipelines que o driver não consegue criar, nenhum travamento quando a memória de vídeo acaba e pular desenhos com a tabela de vértices vazia',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Reuniu e adaptou dezenas de correções: travamentos ao carregar, imagens pretas, o upscaler, a linha de desempenho no log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'A prévia do personagem preta, a imagem da tela de carregamento e a memória do cache de texturas',
@@ -1907,6 +1909,8 @@ PT_BR = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 sem ruído colorido no Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Um crash no Steam Deck após viajar por uma lanterna, e o teste da correção',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': 'A câmera do mouse girando mais devagar na horizontal do que na vertical',
+    'Просьба об указателе мыши в меню игры': 'O pedido do ponteiro do mouse nos menus do jogo',
+    'Просьба о раскладке клавиатуры из bbport 0.6': 'O pedido do layout de teclado do bbport 0.6',
 }
 
 
@@ -2697,7 +2701,7 @@ ES = {
     'Порт и его код': 'El port y su código',
     'Помощь и тесты': 'Ayuda y pruebas',
     'Другие благодарности': 'También gracias a',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, el port en el que se basa todo este proyecto',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, el port en el que se basa todo este proyecto, y el puntero en los menús y la distribución de teclado de la 0.6',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Juego online, DLSS, la página de trucos, Añadir a Steam, el icono, saltar los pipelines que el driver no puede crear, ningún cierre al quedarse sin memoria de vídeo y saltar los dibujos con la tabla de vértices vacía',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Reunió y adaptó decenas de arreglos: cierres al cargar, imágenes en negro, el escalado, la línea de rendimiento del registro',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'La vista previa del personaje en negro, la imagen de la pantalla de carga y la memoria de la caché de texturas',
@@ -2802,6 +2806,8 @@ ES = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 sin ruido de colores en el Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Un cierre en Steam Deck tras viajar con un farol, y la prueba del arreglo',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': 'La cámara con ratón girando más despacio en horizontal que en vertical',
+    'Просьба об указателе мыши в меню игры': 'Pedir el puntero del ratón en los menús del juego',
+    'Просьба о раскладке клавиатуры из bbport 0.6': 'Pedir la distribución de teclado de bbport 0.6',
 }
 
 
@@ -3592,7 +3598,7 @@ IT = {
     'Порт и его код': 'Il port e il suo codice',
     'Помощь и тесты': 'Aiuto e test',
     'Другие благодарности': 'Grazie anche a',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, il port su cui si basa tutto questo progetto',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, il port su cui si basa tutto questo progetto, e il puntatore nei menu e il layout di tastiera della 0.6',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Gioco online, DLSS, la pagina dei trucchi, Aggiungi a Steam, l’icona, saltare le pipeline che il driver non riesce a creare, nessun crash quando finisce la memoria video e saltare i disegni con la tabella dei vertici vuota',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Ha raccolto e adattato decine di correzioni: crash durante il caricamento, immagini nere, l’upscaler, la riga delle prestazioni nel log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'L’anteprima nera del personaggio, l’immagine della schermata di caricamento e la memoria della cache delle texture',
@@ -3697,6 +3703,8 @@ IT = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 senza rumore colorato sul Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Un crash su Steam Deck dopo un viaggio con una lanterna, e il test della correzione',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': 'La camera col mouse che ruotava più lentamente in orizzontale che in verticale',
+    'Просьба об указателе мыши в меню игры': 'La richiesta del puntatore del mouse nei menu del gioco',
+    'Просьба о раскладке клавиатуры из bbport 0.6': 'La richiesta del layout di tastiera di bbport 0.6',
 }
 
 
@@ -4487,7 +4495,7 @@ FR = {
     'Порт и его код': 'Le port et son code',
     'Помощь и тесты': 'Aide et tests',
     'Другие благодарности': 'Merci aussi à',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, le port sur lequel repose tout ce projet',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, le port sur lequel repose tout ce projet, ainsi que le pointeur dans les menus et la disposition du clavier de la 0.6',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jeu en ligne, DLSS, la page des triches, Ajouter à Steam, l’icône, ignorer les pipelines que le pilote ne peut pas créer, plus de plantage quand la mémoire vidéo manque et ignorer les tracés à la table de sommets vide',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'A rassemblé et adapté des dizaines de correctifs : plantages au chargement, images noires, l’upscaler, la ligne de performances du journal',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'L’aperçu noir du personnage, l’image de l’écran de chargement et la mémoire du cache de textures',
@@ -4592,6 +4600,8 @@ FR = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 sans bruit coloré sur le Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Un plantage sur Steam Deck après un voyage par une lanterne, et le test du correctif',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': "La caméra à la souris qui tournait moins vite à l'horizontale qu'à la verticale",
+    'Просьба об указателе мыши в меню игры': 'La demande du pointeur de la souris dans les menus du jeu',
+    'Просьба о раскладке клавиатуры из bbport 0.6': 'La demande de la disposition du clavier de bbport 0.6',
 }
 
 
@@ -5382,7 +5392,7 @@ DE = {
     'Порт и его код': 'Der Port und sein Code',
     'Помощь и тесты': 'Hilfe und Tests',
     'Другие благодарности': 'Dank auch an',
-    'bbport — порт, на котором построен весь этот проект': 'bbport, der Port, auf dem dieses ganze Projekt aufbaut',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, der Port, auf dem dieses ganze Projekt aufbaut, sowie der Mauszeiger in den Menüs und die Tastaturbelegung aus 0.6',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online-Spiel, DLSS, die Cheat-Seite, Zu Steam hinzufügen, das Symbol, das Überspringen von Pipelines, die der Treiber nicht erstellen kann, kein Absturz bei vollem Videospeicher und das Überspringen von Zeichnungen mit leerer Vertex-Tabelle',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Hat Dutzende Korrekturen gesammelt und angepasst: Abstürze beim Laden, schwarze Bilder, der Upscaler, die Leistungszeile im Log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'Die schwarze Charaktervorschau, das Bild des Ladebildschirms und der Speicher des Texturcaches',
@@ -5487,6 +5497,8 @@ DE = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'FSR 3.1 ohne Farbrauschen auf dem Ryzen Z1 (ROG Ally, Legion Go)',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Ein Absturz auf dem Steam Deck nach einer Laternenreise und der Test der Korrektur',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': 'Die Mauskamera, die sich seitlich langsamer drehte als nach oben und unten',
+    'Просьба об указателе мыши в меню игры': 'Der Wunsch nach dem Mauszeiger in den Menüs des Spiels',
+    'Просьба о раскладке клавиатуры из bbport 0.6': 'Der Wunsch nach der Tastaturbelegung von bbport 0.6',
 }
 
 
@@ -6246,7 +6258,7 @@ ZH_CN = {
     'Порт и его код': '移植及其代码',
     'Помощь и тесты': '帮助与测试',
     'Другие благодарности': '同样感谢',
-    'bbport — порт, на котором построен весь этот проект': 'bbport，整个项目所基于的移植',
+    'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport，整个项目所基于的移植，以及 0.6 的菜单鼠标指针和键盘布局',
     'Игра по сети, DLSS, страница читов, добавление в Steam, значок, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': '联机、DLSS、作弊页面、添加到 Steam、图标、跳过驱动无法创建的管线、显存耗尽时不再崩溃，以及跳过顶点表为空的绘制',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': '收集并改编了数十项修复：加载时崩溃、黑色图像、超分辨率、日志中的性能行',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': '黑色的角色预览、加载画面图片与纹理缓存的内存',
@@ -6351,6 +6363,8 @@ ZH_CN = {
     'FSR 3.1 без цветного шума на Ryzen Z1 (ROG Ally, Legion Go)': 'Ryzen Z1（ROG Ally、Legion Go）上没有彩色噪点的 FSR 3.1',
     'Вылет на Steam Deck после путешествия через фонарь и проверка исправления': 'Steam Deck 上提灯传送后的崩溃，以及修复的测试',
     'Камера мышью, поворачивавшаяся по горизонтали медленнее, чем по вертикали': '鼠标镜头水平转动比垂直转动更慢',
+    'Просьба об указателе мыши в меню игры': '提议在游戏菜单中使用鼠标指针',
+    'Просьба о раскладке клавиатуры из bbport 0.6': '提议加入 bbport 0.6 的键盘布局',
 }
 
 # Translations by language code; Russian is the key itself. Strings missing in a translation
