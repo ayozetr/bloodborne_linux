@@ -365,6 +365,10 @@ def frame_time_writes(elf,settings,names):
         # Plants sway with the frame's time, not a step a frame.
         import foliage_time
         add(foliage_time,'Plant sway time','plant sway time')
+    if os.environ.get('BB_AIR_DRAG')!='0':
+        # Jumps as at 30 FPS at any frame rate (the air drag per second of 30 FPS).
+        import air_drag
+        add(air_drag,'Jumps as at 30 FPS','jumps as at 30 FPS')
     return writes
 
 
