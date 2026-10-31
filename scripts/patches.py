@@ -374,6 +374,10 @@ def frame_time_writes(elf,settings,names):
         # down to 45 FPS uncapped, 30 at 90 FPS++).
         import effect_time
         add(effect_time,'Effects in 1/60 s steps','effect time',measured='Uncap FPS++' in names)
+    if os.environ.get('BB_CRASH_GUARDS')!='0':
+        # The game's own unchecked pointers that crashed players.
+        import crash_guards
+        add(crash_guards,'Crash guards','crash guards')
     return writes
 
 
