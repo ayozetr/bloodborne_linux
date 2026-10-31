@@ -1,9 +1,15 @@
 bbport — a native PC port of Bloodborne (CUSA03173, 1.09)
 https://github.com/deadinside28/bloodborne_pc
 
+This copy is the Linux fork, https://github.com/ayozetr/bloodborne_linux. bbport's own files stay
+GPL-2.0-or-later, as below. The fork as a whole is distributed under the GNU General Public
+License, version 3 or (at your option) any later version (LICENSE has its text): it includes code
+under GPL-3.0-or-later (the online module's BBSC and The Hunter's Dream parts), and everything
+else in it allows that. Files from other projects keep their own notices.
+
 Copyright 2026 bbport contributors (the authors of this repository's commits and merged pull
 requests). Licensed under the GNU General Public License, version 2 or (at your option) any later
-version: see LICENSE. No game code or data is part of this project.
+version (the fork's LICENSE has version 3's text). No game code or data is part of this project.
 
 Files of this project carry, in their first lines,
     SPDX-FileCopyrightText: Copyright 2026 bbport contributors
