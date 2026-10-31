@@ -1,0 +1,54 @@
+Subject: [PATCH] ffx_vk: the port's shader override and job mark hooks
+
+ffxVkShaderOverride gives a pass its own SPIR-V (gpu/upscale/ffx_shaders.cpp) and ffxVkJobMark
+is called before each compute dispatch (gpu/upscale/fg_profile.cpp, BB_FG_PROFILE). Both are
+null unless the port sets them.
+---
+--- a/upstream/ffx-1.1.4/sdk/src/backends/vk/ffx_vk.cpp	2026-10-31 23:23:28.172465453 +0000
++++ b/upstream/ffx-1.1.4/sdk/src/backends/vk/ffx_vk.cpp	2026-10-31 23:23:28.172802073 +0000
+@@ -3359,6 +3359,15 @@
+     }
+ }
+ 
++// bbport: hooks the port sets (gpu/upscale): ffxVkShaderOverride gives a pass's own SPIR-V (its
++// size in bytes; the bindings stay the packaged blob's), ffxVkJobMark is called before each compute
++// job's dispatch (BB_FG_PROFILE). Both null unless the port sets them.
++extern "C" {
++bool (*ffxVkShaderOverride)(uint32_t effect, uint32_t pass, uint32_t permutationOptions,
++                            const uint32_t** words, size_t* size) = nullptr;
++void (*ffxVkJobMark)(uint32_t x, uint32_t y, uint32_t z) = nullptr;
++}
++
+ FfxErrorCode CreatePipelineVK(FfxInterface* backendInterface,
+     FfxEffect effect,
+     FfxPass pass,
+@@ -3738,6 +3747,14 @@
+     shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+     shaderModuleCreateInfo.pCode = (uint32_t*)shaderBlob.data;
+     shaderModuleCreateInfo.codeSize = shaderBlob.size;
++    const uint32_t* ownWords = nullptr;
++    size_t ownSize = 0;
++    if (ffxVkShaderOverride && ffxVkShaderOverride(uint32_t(effect), uint32_t(pass), permutationOptions, &ownWords, &ownSize)
++        && ownWords && ownSize)
++    {
++        shaderModuleCreateInfo.pCode = ownWords;
++        shaderModuleCreateInfo.codeSize = ownSize;
++    }
+ 
+     if (backendContext->vkFunctionTable.vkCreateShaderModule(backendContext->device, &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+         return FFX_ERROR_BACKEND_API_ERROR;
+@@ -4097,10 +4114,14 @@
+     {
+         const uint32_t resourceIndex = job->computeJobDescriptor.cmdArgument.internalIndex;
+         VkBuffer buffer = backendContext->pResources[resourceIndex].bufferResource;
++        if (ffxVkJobMark)
++            ffxVkJobMark(0, 0, 0);
+         backendContext->vkFunctionTable.vkCmdDispatchIndirect(vkCommandBuffer, buffer, job->computeJobDescriptor.cmdArgumentOffset);
+     }
+     else
+     {
++        if (ffxVkJobMark)
++            ffxVkJobMark(job->computeJobDescriptor.dimensions[0], job->computeJobDescriptor.dimensions[1], job->computeJobDescriptor.dimensions[2]);
+         backendContext->vkFunctionTable.vkCmdDispatch(vkCommandBuffer, job->computeJobDescriptor.dimensions[0], job->computeJobDescriptor.dimensions[1], job->computeJobDescriptor.dimensions[2]);
+     }
+ 
