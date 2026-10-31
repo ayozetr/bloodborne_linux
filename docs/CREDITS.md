@@ -56,7 +56,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[axpico](https://github.com/axpico)**: with VRAM full, the game waits for evicted textures to be freed instead of closing.
 - **[pmwork-personal](https://github.com/pmwork-personal)**: ultrawide monitors without a stretched picture.
 - **[emurphy04](https://github.com/emurphy04)**: ultrawide output and the HUD position, Quit to
-  Desktop in the game's menus, and a video player crash when it stops.
+  Desktop in the game's menus, a video player crash when it stops, cloth and plants as on the PS4
+  at any frame rate, jumps as at 30 FPS, and an online crash guard.
 - **[cassioKenji](https://github.com/cassioKenji)**: the keyboard sprint measurements.
 - **[jpramosjp](https://github.com/jpramosjp)**: summons through the public shadNet server.
 - **[yumlevi](https://github.com/yumlevi)**: the black character preview, the loading screen's
@@ -85,6 +86,8 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 - **[AwesomeObserver](https://github.com/AwesomeObserver)**: large recorded command groups, and
   the swapchain after display changes.
 - **[iannitram](https://github.com/iannitram)**: FSR 3.1 without colour noise on the Ryzen Z1 (ROG Ally, Legion Go).
+- **[whp199](https://github.com/whp199)**: the GX occlusion query guard against the 0x2169edc crash.
+- **[nick24051998](https://github.com/nick24051998)**: the SRT walker without faults on null tables, and effects in 1/60 s steps.
 
 ## Help and testing
 
