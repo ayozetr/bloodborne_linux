@@ -6,6 +6,7 @@
 #include "../gpu/shim/bb_env.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include <string.h>
 #include <inttypes.h>
 #include <cpuid.h>
@@ -506,6 +507,11 @@ void runtime_restart(void) {
 
 int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
+    /* Numbers are read and written with a decimal point whatever the user's language: the
+       AppImage without Nix preloads sharun's anylinux.so, which checks the host locale with
+       setlocale(LC_ALL, "") and leaves it set, so in Spanish, German, ... the log said "72,9 FPS"
+       and bbport.ini got "sharpness=0,30", read back as 0. */
+    setlocale(LC_NUMERIC, "C");
 #ifndef _WIN32
     /* Keep host heap objects handed to the guest (thread handles, TLS) in the
        non-PIE brk heap, i.e. below 1 TiB: the guest packs pointers into 40 bits. */
