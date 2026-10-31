@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Troubleshooting
+    url: https://github.com/ayozetr/bloodborne_linux/blob/main/docs/TROUBLESHOOTING.md
+    about: The common problems and what to do, before opening an issue.
+  - name: Online play and your own server
+    url: https://github.com/ayozetr/bloodborne_linux/blob/main/docs/ONLINE.md
+    about: Accounts, the connection test, summons and the private server guide.

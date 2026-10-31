@@ -1,0 +1,21 @@
+name: Feature request
+description: Something the port or the launcher could do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you would like
+      description: What it should do, and when you would use it.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What it solves for you, or what you do today instead.
+  - type: textarea
+    id: elsewhere
+    attributes:
+      label: Seen elsewhere
+      description: Another port, fork or mod that already has it (a link helps a lot).
