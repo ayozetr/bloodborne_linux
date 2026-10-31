@@ -609,6 +609,7 @@ BB_ENV(BB_BUNDLED_VK_DRIVER_FILES, INTERNAL, "the package's own Vulkan driver ma
 BB_ENV(BB_BUNDLED_VK_LAYER_PATH, INTERNAL, "the package's own Vulkan layers, found before the host's (set by the launcher)")
 BB_ENV(BB_CLIENT_VERSION, INTERNAL, "the online client's name for the server (bbport VERSION, set by run.py)")
 BB_ENV(BB_DATA_DIR, INTERNAL, "the port's data folder (set by run.py)")
+BB_ENV(BB_DLSS_DIR, INTERNAL, "the DLSS bridge and NVIDIA's DLSS libraries' folder in place of bb-probe's (set by the AppImage without Nix)")
 BB_ENV(BB_FSR411_OUT, INTERNAL, "where the launcher's FSR 4.1.1 build puts its assets")
 BB_ENV(BB_FSR4CAP_CLEAN, INTERNAL, "=1: the FSR 4.1.1 build removes its work folder afterwards (set by the launcher)")
 BB_ENV(BB_FSR4CAP_TOOLS, INTERNAL, "the FSR 4.1.1 build's tools folder (set by the launcher)")

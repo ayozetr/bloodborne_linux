@@ -108,7 +108,12 @@ constexpr std::string_view NgxPrefix = "libnvidia-ngx-dlss.so.";
 constexpr std::string_view NgxFrameGenPrefix = "libnvidia-ngx-dlssg.so.";
 using Module = void*;
 
+// BB_DLSS_DIR in place of bb-probe's own folder: packaged builds whose /proc/self/exe is the dynamic
+// loader (the AppImage without Nix, packaging/appimage-sharun.sh).
 std::filesystem::path ExecutableDirectory() {
+    if (const char* dir = bb_env("BB_DLSS_DIR"); dir && dir[0]) {
+        return dir;
+    }
     std::error_code error;
     return std::filesystem::read_symlink("/proc/self/exe", error).parent_path();
 }
