@@ -125,7 +125,7 @@ behaviour when the variable is unset. In the tables:
 | `BB_ANISO` | Anisotropic filtering ratio (default 16; 0 = the game's own). |
 | `BB_DLSS` | 0 turns DLSS support off on NVIDIA. |
 | `RADV_DEBUG` / `BB_AUTO_NOHIZ` | AMD GCN 3–5 on RADV: run.sh sets `RADV_DEBUG=nohiz` unless `BB_AUTO_NOHIZ=0`. |
-| `BB_PAD_DEADZONE` / `BB_PAD_DEADZONE_OUTER` | Inner (default 5) and outer (default 127) stick dead zones, of 127 (launcher: Controls → Stick dead zone (%), the inner one). |
+| `BB_PAD_DEADZONE` / `BB_PAD_DEADZONE_OUTER` | Inner (default 5) and outer (default 127) stick dead zones, of 127, round (BB_PAD_DEADZONE_RADIAL) (launcher: Controls → Stick dead zone (%), the inner one). |
 | `BB_MOUSE_DEADZONE` | Minimum stick deflection used for mouse look (default 16 of 127). |
 | `BB_AUDIO_GAIN` | Master volume multiplier, up to 8 (default 1.0). |
 | `BB_SAVE_LOG` | 1 saves the log and per-frame statistics to `<data>/logs/` (for bug reports). |
@@ -286,6 +286,7 @@ behaviour when the variable is unset. In the tables:
 | `BB_PAD_CENTER_CAL` | 0 = off (default on) | Disables measuring each axis' neutral and travel (for third-party pads whose axes are biased). | `src/runtime_pad.c:37`, `src/runtime_pad.c:119` |
 | `BB_PAD_DEADZONE` | 0–126 (default 5) | **Launcher:** Controls → "Stick dead zone (%)" (percent × 127 / 100; written only when not 4 %). Inner stick dead zone, as shadPS4's analog_deadzone. | `src/runtime_pad.c:122`, `launcher/bbport_launcher.py:659` |
 | `BB_PAD_DEADZONE_OUTER` | 1–127 (default 127) | Outer stick dead zone: travel up to this value maps to full deflection (helps pads that never reach full). | `src/runtime_pad.c:35`, `src/runtime_pad.c:124` |
+| `BB_PAD_DEADZONE_RADIAL` | 0 = per axis (default round) | The dead zone is held to the stick's length, not each axis: a round dead zone, mapped from 0 at its edge keeping the direction, so a push close to one axis no longer snaps onto it (the idea is from Lantern Engine). 0 = per axis, as before. | `src/runtime_pad.c:127` |
 | `BB_PAD_LIGHTBAR` | RRGGBB hex colour, an optional leading # (unset: SDL's own, the player's colour) | **Launcher:** Controls → "Controller light bar colour" (set only when on). Every controller with a light bar (DualShock 4, DualSense) shows this colour, set when it is opened. | `src/runtime_pad.c:306`, `launcher/bbport_launcher.py:663`, `launcher/bbport_launcher.py:1503` |
 | `BB_PROMPTS` | playstation \| xbox \| switch \| keyboard (default playstation) | **Launcher:** Controls → Gamepad → "Button prompts" (Automatic follows the controller). Button prompts of the game's menus, made from the game's files at start. | `run.sh:136`, `scripts/menu_prompts.py:66`, `launcher/bbport_launcher.py:645` |
 | `BB_STEAM_INPUT_X11` | 0 = keep Wayland (default on) | Launched from Steam with Steam Input on a Wayland desktop, the game window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`): Steam sends its virtual controller's input only to a focused window it can see, and it sees only X11 windows (issue #12). Not when `SDL_VIDEO_DRIVER` is set. | `run.sh` |

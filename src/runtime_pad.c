@@ -33,9 +33,9 @@
  * from its neutral's magnitude and is refined by the largest push seen per direction, so both
  * directions reach full deflection even when the two travels differ by a few percent (that
  * difference is what makes one direction run and the other only walk). A genuine pad keeps the
- * plain -32768..32767 -> -128..127 read. The stick is then converted as shadPS4 does, with an
- * inner/outer dead zone (BB_PAD_DEADZONE, default 5; BB_PAD_DEADZONE_OUTER, default 127) mapping
- * the axis' travel up to full deflection. BB_PAD_CENTER=lx,ly,rx,ry overrides the neutral,
+ * plain -32768..32767 -> -128..127 read. The stick is then converted with an inner/outer dead
+ * zone (BB_PAD_DEADZONE, default 5; BB_PAD_DEADZONE_OUTER, default 127), round (stick_deadzone),
+ * mapping the stick's travel up to full deflection. BB_PAD_CENTER=lx,ly,rx,ry overrides the neutral,
  * BB_PAD_CENTER_CAL=0 disables the measurement. */
 #define _GNU_SOURCE
 #include "runtime.h"
@@ -103,7 +103,7 @@ static uint8_t connected_count;
 #define PAD_CAL_BIAS 8192              /* |neutral| past this: a biased neutral and a reduced travel */
 #define PAD_CAL_RAIL 30000             /* |value| past this: an axis at the end of its travel, never a neutral */
 #define PAD_CAL_REFINE 90              /* % of the base travel a push must reach to count as the full scale */
-static int cal_enabled=-1, pad_deadzone=-1, pad_deadzone_outer=-1, cal_manual;
+static int cal_enabled=-1, pad_deadzone=-1, pad_deadzone_outer=-1, pad_deadzone_radial=1, cal_manual;
 static int cal_have_center, cal_started, cal_quiet_count;
 static int cal_center[4], cal_prev[4], cal_manual_center[4];
 static int cal_base[4];                /* 0: normal pad; else |neutral| of a biased axis */
@@ -123,6 +123,8 @@ static void cal_load(void) {
     if (pad_deadzone<0) pad_deadzone=0; else if (pad_deadzone>126) pad_deadzone=126;
     v=getenv("BB_PAD_DEADZONE_OUTER"); pad_deadzone_outer=v && *v ? atoi(v) : 127;
     if (pad_deadzone_outer<=pad_deadzone) pad_deadzone_outer=pad_deadzone<127 ? pad_deadzone+1 : 127;
+    /* BB_PAD_DEADZONE_RADIAL=0: the dead zone per axis, as before (see stick_deadzone). */
+    v=getenv("BB_PAD_DEADZONE_RADIAL"); pad_deadzone_radial=!(v && *v=='0');
     v=getenv("BB_PAD_CENTER");
     if (v && *v && sscanf(v,"%d,%d,%d,%d",&cal_manual_center[0],&cal_manual_center[1],
                           &cal_manual_center[2],&cal_manual_center[3])==4) {
@@ -202,11 +204,15 @@ static void cal_sample(const int16_t raw[4]) {
  * (cal_travel) is read as -128..127, so a full push reaches full deflection in both directions
  * whatever part of SDL's range the pad uses; the inner/outer dead zone (BB_PAD_DEADZONE /
  * BB_PAD_DEADZONE_OUTER) then maps that travel to the full deflection, as shadPS4 does. */
-static uint8_t stick_axis(int axis,int16_t raw) {
+static int stick_travel(int axis,int16_t raw) {
     const int d=raw-cal_center[axis];
     const int travel=cal_travel(axis,d>=0 ? 1 : 0);
     int v=travel>0 ? (int)((long long)d*128/travel) : 0;
     if (v>127) v=127; else if (v<-128) v=-128;
+    return v;
+}
+static uint8_t stick_axis(int axis,int16_t raw) {
+    int v=stick_travel(axis,raw);
     const int mag=abs(v);
     if (mag<=pad_deadzone || pad_deadzone>=pad_deadzone_outer) v=0;
     else {
@@ -216,6 +222,25 @@ static uint8_t stick_axis(int axis,int16_t raw) {
     }
     int x=v+128;
     return (uint8_t)(x<0 ? 0 : x>255 ? 255 : x);
+}
+/* A stick's two axes (stick_travel) through a round dead zone: the stick's length, not each
+ * axis, is held to the inner/outer dead zone and mapped from 0 at its edge, keeping the
+ * direction. Per axis (stick_axis, BB_PAD_DEADZONE_RADIAL=0) a push close to one axis lost the
+ * other one's part and snapped onto the axis, and the dead zone was a square; the idea is from
+ * Lantern Engine (Awaken). */
+static void stick_deadzone(int x, int y, uint8_t *out_x, uint8_t *out_y) {
+    const float length=sqrtf((float)(x*x+y*y));
+    if (length<=(float)pad_deadzone || pad_deadzone>=pad_deadzone_outer) {
+        *out_x=*out_y=128;
+        return;
+    }
+    float to=128.0f*(length-(float)pad_deadzone)/(float)(pad_deadzone_outer-pad_deadzone);
+    if (to>length*128.0f/fmaxf(fabsf((float)x),fabsf((float)y))) /* past the square's edge */
+        to=length*128.0f/fmaxf(fabsf((float)x),fabsf((float)y));
+    const float scale=to/length;
+    const long nx=lrintf(128.0f+(float)x*scale), ny=lrintf(128.0f+(float)y*scale);
+    *out_x=(uint8_t)(nx<0 ? 0 : nx>255 ? 255 : nx);
+    *out_y=(uint8_t)(ny<0 ? 0 : ny>255 ? 255 : ny);
 }
 static uint16_t touch_axis(float v, int max) {
     return (uint16_t)(v<=0.0f ? 0 : v>=1.0f ? max : (int)(v*max+0.5f));
@@ -978,8 +1003,13 @@ static void sample_host(PadData *d) {
         cal_load();
         cal_sample(raw);
         uint8_t *axis_out[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
-        for (int i=0;i<4;++i)
-            *axis_out[i]=stick_axis(i,raw[i]); /* center 0 until the neutral is known */
+        if (pad_deadzone_radial) {
+            stick_deadzone(stick_travel(0,raw[0]),stick_travel(1,raw[1]),&d->left_x,&d->left_y);
+            stick_deadzone(stick_travel(2,raw[2]),stick_travel(3,raw[3]),&d->right_x,&d->right_y);
+        } else {
+            for (int i=0;i<4;++i)
+                *axis_out[i]=stick_axis(i,raw[i]); /* center 0 until the neutral is known */
+        }
         if (pad_round_gate) {
             round_gate(0,&d->left_x,&d->left_y);
             round_gate(1,&d->right_x,&d->right_y);

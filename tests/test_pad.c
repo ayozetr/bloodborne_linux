@@ -319,6 +319,22 @@ int main(void) {
         x=255; y=200; round_gate(0,&x,&y);
         assert(x>=237 && x<=239 && y>=190 && y<=192); /* (127,72) scaled to reach 127 */
     }
+    /* The round dead zone: inside it the centre; along one axis as the per-axis one; a push close
+     * to an axis keeps its small part of the other one (per axis it was dropped). */
+    {
+        const int dz=pad_deadzone, outer=pad_deadzone_outer;
+        pad_deadzone=10; pad_deadzone_outer=127;
+        uint8_t x=0, y=0;
+        stick_deadzone(6,6,&x,&y); assert(x==128 && y==128);       /* length 8.5: inside */
+        stick_deadzone(0,-9,&x,&y); assert(x==128 && y==128);
+        stick_deadzone(127,0,&x,&y); assert(x==255 && y==128);     /* full: full */
+        stick_deadzone(-128,0,&x,&y); assert(x==0 && y==128);
+        stick_deadzone(0,40,&x,&y); assert(x==128 && y==128+33);   /* 128*30/117 */
+        stick_deadzone(8,100,&x,&y);                               /* per axis: x 128 */
+        assert(x>128+5 && x<=128+8 && y>=128+98 && y<=128+101);
+        stick_deadzone(127,127,&x,&y); assert(x==255 && y==255);   /* a square gate's corner */
+        pad_deadzone=dz; pad_deadzone_outer=outer;
+    }
     /* Stick options: swapped sticks, then the camera stick (now the left one) inverted; the
      * centre stays the centre. */
     {
