@@ -122,6 +122,13 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
     if (const char* background = std::getenv("BB_PAD_BACKGROUND"); background && background[0] == '1') {
         SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
     }
+    // Wayland with display scaling (KDE at 200%): the window in the monitor's pixels, as
+    // SDL_VIDEO_WAYLAND_SCALE_TO_DISPLAY=1 does; text was soft, drawn at the logical size and
+    // scaled up by the compositor. The variable, when set, wins. From upstream 0.7 (its #234, #328).
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_WAYLAND_SCALE_TO_DISPLAY, "1", SDL_HINT_DEFAULT);
+    // DualShock 4 / DualSense in their full reports: over Bluetooth the touchpad and the light bar
+    // come only so. From upstream 0.7 (after the SrShadowy fork); the variable, when set, wins.
+    SDL_SetHintWithPriority(SDL_HINT_JOYSTICK_ENHANCED_REPORTS, "1", SDL_HINT_DEFAULT);
     // Gamepads are sampled by runtime_pad.c; their events are pumped here with the window's.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         UNREACHABLE_MSG("Failed to initialize SDL video: {}", SDL_GetError());
@@ -174,8 +181,20 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, true);
     const char* fullscreen = std::getenv("BB_FULLSCREEN");
+    // Under gamescope (the Steam Deck's Game Mode) a window is shown letterboxed on all four
+    // sides: there it is always fullscreen. From upstream 0.7 (its #291).
+    const char* desktop = std::getenv("XDG_CURRENT_DESKTOP");
+    const bool gamescope = std::getenv("GAMESCOPE_WAYLAND_DISPLAY") != nullptr ||
+                           (desktop && std::strcmp(desktop, "gamescope") == 0);
+    const bool want_fullscreen = fullscreen && fullscreen[0] == '1';
+    if (gamescope && !placed && !want_fullscreen) {
+        std::printf("Display: gamescope: fullscreen\n");
+    }
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN,
-                           !placed && fullscreen && fullscreen[0] == '1');
+                           !placed && (gamescope || want_fullscreen));
+    // The swapchain at the display's pixels on a scaled desktop (Wayland 200%), not at the
+    // logical size stretched by the compositor; sizes are read in pixels below. From upstream 0.7.
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
     base_title = title;
     window = SDL_CreateWindowWithProperties(props);
     SDL_DestroyProperties(props);
