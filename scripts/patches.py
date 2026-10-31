@@ -369,6 +369,11 @@ def frame_time_writes(elf,settings,names):
         # Jumps as at 30 FPS at any frame rate (the air drag per second of 30 FPS).
         import air_drag
         add(air_drag,'Jumps as at 30 FPS','jumps as at 30 FPS')
+    if ('Uncap FPS++' in names or '90 FPS++' in names) and os.environ.get('BB_EFFECT_TIME')!='0':
+        # Effects in whole 1/60 s steps: with steps below 1/60, particles pile up (Ebrietas' fight
+        # down to 45 FPS uncapped, 30 at 90 FPS++).
+        import effect_time
+        add(effect_time,'Effects in 1/60 s steps','effect time',measured='Uncap FPS++' in names)
     return writes
 
 
