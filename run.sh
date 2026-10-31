@@ -55,8 +55,17 @@ if [[ ${BB_SAVE_LOG:-} == 1 ]]; then
     # Bash builtins only (the AppImage's PATH has no tee).
     exec > >(while IFS= read -r line || [[ -n $line ]]; do printf '%s\n' "$line"; printf '%s\n' "$line" >&$log_fd; done) 2>&1
 fi
-# The port's version (VERSION, issue #307), first in every log.
-[[ -f VERSION ]] && echo "bbport $(<VERSION)"
+# The port's version (VERSION, issue #307), first in every log, with the build: the commit, branch
+# and date from packaging/appimage-sharun.sh's BUILD file, or git's commit and branch in a checkout
+# (a test build is a branch other than main), as issue reports rarely say which build they ran.
+# Bash builtins only (the AppImage's PATH has no tee).
+bb_build=''
+if [[ -f BUILD ]]; then
+    IFS= read -r bb_build < BUILD || true
+elif [[ -d .git || -f .git ]] && command -v git >/dev/null; then
+    bb_build="$(git rev-parse --short=8 HEAD 2>/dev/null)$(git diff --quiet HEAD 2>/dev/null || echo -modified) $(git rev-parse --abbrev-ref HEAD 2>/dev/null) (git checkout)" || true
+fi
+[[ -f VERSION ]] && echo "bbport $(<VERSION)${bb_build:+, build $bb_build}"
 if [[ -z ${PYTHON:-} ]]; then
     PYTHON=$(command -v python3 || true)
     if [[ -z $PYTHON ]]; then
