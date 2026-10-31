@@ -335,6 +335,39 @@ def eboot_bytes(elf,start,end):
     return bytes(out)
 
 
+def frame_time_writes(elf,settings,names):
+    """The game's own code made right above 30 FPS, and its unchecked pointers that crashed players
+    (the scripts imported below, from Supermedo's port). Each checks the original bytes first and is skipped,
+    with a line, when they differ; their code goes in the free tail of the code segment's last page,
+    after Quit to Desktop's. `names` gets the ones applied."""
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    original=lambda start,end: eboot_bytes(elf,start,end)
+    writes=[]
+    def add(module,title,skipped,**kwargs):
+        try:
+            module.check_original(original)
+        except ValueError as error:
+            print(f'Patches: {error}; {skipped} skipped')
+            return False
+        writes.extend(module.code_writes(**kwargs))
+        names.append(title)
+        return True
+    cloth_time_on=False
+    if os.environ.get('BB_CLOTH_TIME')!='0':
+        # A steady time step for the cloth: a stutter is no kick to capes and dresses.
+        import cloth_time
+        cloth_time_on=add(cloth_time,'Steady cloth time','steady cloth time')
+    # Cloth as on PS4 steps with the steady time (cloth.py reads it): only with that one.
+    if cloth_time_on and settings.get('steady_cloth','1')!='0' and os.environ.get('BB_STEADY_CLOTH')!='0':
+        import cloth
+        add(cloth,'Steady cloth','steady cloth')
+    if os.environ.get('BB_FOLIAGE_TIME')!='0':
+        # Plants sway with the frame's time, not a step a frame.
+        import foliage_time
+        add(foliage_time,'Plant sway time','plant sway time')
+    return writes
+
+
 def quit_to_desktop_writes(elf,others=()):
     """Quit to Desktop in the title and System menus (scripts/quit_menu.py; its texts are a mod
     layer that run.sh makes first): [] when the eboot is not the 01.09 code it was made for, or
@@ -560,6 +593,7 @@ def main():
         if quit:
             writes+=quit
             names.append('Quit to Desktop')
+    writes+=frame_time_writes((a.out/'eboot.elf').read_bytes(),settings,names)
     # After the built-in ones: an external patch of the same bytes wins.
     writes+=external
     # BBPATCH2: the patch base, so the loader can rebase pointers the patches write into
