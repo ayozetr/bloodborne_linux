@@ -593,7 +593,8 @@ static bool ComputeOffset(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& p
     }
 }
 
-static inline bool PushPtr(Xbyak::CodeGenerator& c, PassInfo& pass_info, const IR::Value& off_dw) {
+static inline bool PushPtr(Xbyak::CodeGenerator& c, PassInfo& pass_info, const IR::Value& off_dw,
+                           Xbyak::Label& null_ptr) {
     c.push(rdi);
     if (off_dw.IsImmediate()) {
         c.mov(rdi, ptr[rdi + (off_dw.U32() << 2)]);
@@ -605,6 +606,9 @@ static inline bool PushPtr(Xbyak::CodeGenerator& c, PassInfo& pass_info, const I
     }
     c.mov(r10, 0xFFFFFFFFFFFFULL);
     c.and_(rdi, r10);
+    // bbport: a table the game left null in this draw: its subtree reads zero (VisitPointer),
+    // without a fault (a signal per draw). From nick24051998's work in Supermedo's port.
+    c.jz(null_ptr, Xbyak::CodeGenerator::T_NEAR);
     return true;
 }
 
@@ -620,12 +624,15 @@ static void VisitPointer(const IR::Value& off_dw, IR::Inst* subtree, PassInfo& p
         return;
     }
 
-    if (!PushPtr(c, pass_info, off_dw)) {
+    Xbyak::Label null_ptr, pop_ptr;
+    if (!PushPtr(c, pass_info, off_dw, null_ptr)) {
         LOG_ERROR(Render_Recompiler, "Failed to compute offset for SRT walker");
         return;
     }
     PassInfo::PtrUserList* use_list = pass_info.GetUsesAsPointer(subtree);
     ASSERT(use_list);
+    // The subtree's words are the ones assigned from here on, children included.
+    const u32 first_dw = pass_info.dst_off_dw;
 
     // First copy all the src data from this tree level
     // That way, all data that was contiguous in the guest SRT is also contiguous in the
@@ -657,6 +664,18 @@ static void VisitPointer(const IR::Value& off_dw, IR::Inst* subtree, PassInfo& p
         }
     }
 
+    // bbport: the null pointer's way: zero the subtree's words (rep stosd: rdi, ecx, eax; rdi
+    // is restored below, the others are scratch in the walker's ABI).
+    c.jmp(pop_ptr, Xbyak::CodeGenerator::T_NEAR);
+    c.L(null_ptr);
+    if (const u32 count = pass_info.dst_off_dw - first_dw; count != 0) {
+        c.lea(rdi, ptr[rsi + (first_dw << 2)]);
+        c.mov(ecx, count);
+        c.xor_(eax, eax);
+        c.rep();
+        c.stosd();
+    }
+    c.L(pop_ptr);
     PopPtr(c);
 }
 
