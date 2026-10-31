@@ -387,6 +387,8 @@ private:
     /// The image at device_addr, if any, tiled into `buffer` at `offset` (where the range is).
     bool SynchronizeMemoryFromImage(const Buffer* buffer, u64 offset, VAddr device_addr, u32 size);
     /// bbport BB_LAYER_MEMORY (statistics): a binding not whole in one chunk.
+    /// bbport: a read across guest chunks, copied from them into the stream buffer (else none).
+    std::optional<std::pair<const Buffer*, u64>> LayerStitch(VAddr address, u64 size);
     void NoteLayerMiss(VAddr address, u64 size, bool is_written);
     /// bbport BB_LAYER_MEMORY (buffer_cache_layer.cpp): a binding through the layer's memory
     /// module: a mirror in VRAM, or in place (empty: neither; the arena takes it). may_promote
