@@ -30,3 +30,16 @@ patches.json
 /docs/ISSUE_ACTION_PLAN_*.md
 # AMD FidelityFX DLLs (FSR 4.1.1 is built from the user's own): never in the repository
 *.dll
+# The mods folder of runs from source (the launcher's default, DATA_DIR/mods), and the list of the
+# last run's mods
+/mods/
+/mods.last
+# Game files and dumps: never in the repository
+eboot.bin
+param.sfo
+*.pkg
+*.dcx
+*.7z
+/CUSA*/
+# The launcher's icon (shipped)
+!launcher/bloodborne.png
