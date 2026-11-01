@@ -21,6 +21,7 @@
 #include "bbport_toggles.h"
 #include "common/assert.h"
 #include "render/gcn_to_vk.h"
+#include "textures/texture_cache.h"
 #include "vulkan/instance.h"
 #include "render/runtime.h"
 
@@ -252,6 +253,7 @@ void HostImage::Create(const vk::ImageCreateInfo& create_info) {
         result = vmaAllocateMemoryForImage(allocator, handle, &split_ci, &allocation, &alloc_info);
         if (result != VK_SUCCESS) {
             device.destroyImage(vk::Image{handle});
+            handle = {};
         }
     }
     const auto t2 = split_now();
@@ -259,6 +261,23 @@ void HostImage::Create(const vk::ImageCreateInfo& create_info) {
         result = vmaBindImageMemory(allocator, allocation, handle);
     }
     const auto t3 = split_now();
+    if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
+        // bbport (Linux fork, after Supermedo/bloodborne_pc 44e7644): VRAM full (4-6 GB cards,
+        // high resolutions) stopped the game here. Past the budget the driver may keep the image
+        // in system memory: slower, but the game goes on; the collector turns aggressive.
+        Vulkan::NoteOverBudget("image");
+        TextureCache::NoteVramShort();
+        if (handle && split) { // its memory was allocated, the bind failed
+            vmaFreeMemory(allocator, allocation);
+            device.destroyImage(vk::Image{handle});
+        }
+        handle = {};
+        allocation = {};
+        VmaAllocationCreateInfo over_budget = alloc_ci;
+        over_budget.flags &= ~VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT;
+        result = vmaCreateImage(allocator, &vk_create_info, &over_budget, &handle, &allocation,
+                                &alloc_info);
+    }
     BbStats::t_img_create.fetch_add(split_ns(t0, t1), std::memory_order_relaxed);
     BbStats::t_img_alloc.fetch_add(split_ns(t1, t2), std::memory_order_relaxed);
     BbStats::t_img_bind.fetch_add(split_ns(t2, t3), std::memory_order_relaxed);

@@ -25,6 +25,11 @@ VK_DEFINE_HANDLE(VmaAllocator)
 
 namespace Vulkan {
 
+/// bbport (Linux fork, after Supermedo/bloodborne_pc 44e7644): an allocation the VRAM budget
+/// refused, made past it instead (the driver may keep it in system memory). Logged once per kind
+/// ("image", "buffer").
+void NoteOverBudget(const char* what);
+
 class Instance {
 public:
     /// The device for the window (`device_index` < 0: the best GPU).

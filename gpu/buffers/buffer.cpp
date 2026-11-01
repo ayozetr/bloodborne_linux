@@ -166,8 +166,17 @@ void BufferAllocation::Create(vk::BufferCreateInfo& create_info, MemoryType type
         const VkBufferCreateInfo vk_info = create_info;
         VkBuffer handle{};
         BbStats::VkMemTimer timer{BbStats::t_vk_alloc, BbStats::n_vk_alloc};
-        const VkResult result =
+        VkResult result =
             vmaCreateBuffer(allocator, &vk_info, &alloc_info, &handle, &allocation, out_info);
+        if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY && !vram_only) {
+            // bbport (Linux fork, after Supermedo/bloodborne_pc 44e7644): VRAM full: past the
+            // budget, in system memory if need be (see image.cpp).
+            Vulkan::NoteOverBudget("buffer");
+            VmaAllocationCreateInfo over_budget = alloc_info;
+            over_budget.flags &= ~VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT;
+            result = vmaCreateBuffer(allocator, &vk_info, &over_budget, &handle, &allocation,
+                                     out_info);
+        }
         if (result != VK_SUCCESS && vram_only) {
             allocation = VK_NULL_HANDLE; // no room in VRAM: the caller does without (Buffer::Valid)
             return;

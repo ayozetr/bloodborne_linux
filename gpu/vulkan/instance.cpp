@@ -22,6 +22,18 @@
 
 namespace Vulkan {
 
+void NoteOverBudget(const char* what) {
+    static std::atomic<bool> image_noted{false}, buffer_noted{false};
+    auto& noted = what[0] == 'i' ? image_noted : buffer_noted;
+    if (!noted.exchange(true)) {
+        std::printf("GPU: video memory full: %s memory allocated past the driver's budget (the "
+                    "driver may keep it in system memory: slower, but the game goes on). A lower "
+                    "output resolution or upscaler preset needs less.\n",
+                    what);
+        std::fflush(stdout);
+    }
+}
+
 namespace {
 
 /// BB_VRAM_LIMIT_MB=N (tests): the driver's VRAM budget taken as at most N MiB, at startup and
