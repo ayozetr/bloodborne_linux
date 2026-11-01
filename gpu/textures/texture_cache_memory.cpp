@@ -7,9 +7,12 @@
 #include "textures/image_spares.h"
 
 #include <algorithm>
+#include <atomic>
 #include <boost/container/small_vector.hpp>
 #include <cstdio>
 #include <cstdlib>
+
+#include <xxhash.h>
 
 #include "bbport_free_check.h"
 #include "bbport_guest_memory.h"
@@ -163,6 +166,23 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
             runtime.GetStagingPool().FreeDeferred(staging);
         });
     }
+}
+
+bool TextureCache::GuestMemoryReused(const Image& image) {
+    if (image.gpu_base_hash == 0 ||
+        (XXH3_64bits(std::bit_cast<const u8*>(image.info.guest_address), image.info.guest_size) |
+         1) == image.gpu_base_hash) {
+        return false;
+    }
+    static std::atomic<u32> told{0};
+    if (told.fetch_add(1, std::memory_order_relaxed) < 20) {
+        std::printf("Texture cache: image %#llx (%ux%u, %llu bytes) not written back: the game's "
+                    "memory there changed since the GPU wrote it\n",
+                    static_cast<unsigned long long>(image.info.guest_address),
+                    image.info.size.width, image.info.size.height,
+                    static_cast<unsigned long long>(image.info.guest_size));
+    }
+    return true;
 }
 
 void TextureCache::NoteVramShort() {
@@ -329,7 +349,13 @@ void TextureCache::GarbageCollectImages() {
             return false;
         }
         --deletions;
-        if (write_back) {
+        // bbport (Linux fork, #25 #32 #35): not over memory the game reused since the GPU wrote
+        // the image. Write tracking does not see every change there (the heap reusing an area
+        // left behind); written back, the image overwrote the heap's bookkeeping and the game
+        // crashed later in its allocator (0x208599f). Such an image is dropped.
+        if (write_back && GuestMemoryReused(image)) {
+            ++gc_dropped_reused;
+        } else if (write_back) {
             // Synchronously, while the image still watches its pages: a deferred write-back
             // landed after they were given up, over whatever the game stored there meanwhile.
             DownloadImageMemory(image_id, true);
@@ -364,17 +390,19 @@ void TextureCache::GarbageCollectImages() {
         lru_cache.ForEachItemBelow(below_tick, evict);
     }
     // Evictions under pressure, at most every 5 s.
-    if (pressured || gc_downloads != 0) {
+    if (pressured || gc_downloads != 0 || gc_dropped_reused != 0) {
         const auto now = std::chrono::steady_clock::now();
         if (now - gc_report_time >= std::chrono::seconds(5)) {
             std::printf("Texture cache: memory pressure, %llu of %llu MiB (critical %llu): "
-                        "%llu images evicted, %llu written back since the last report\n",
+                        "%llu images evicted, %llu written back, %llu GPU-written dropped over "
+                        "reused memory since the last report\n",
                         (unsigned long long)(total_used_memory >> 20),
                         (unsigned long long)(pressure_mark >> 20),
                         (unsigned long long)(critical_mark >> 20),
-                        (unsigned long long)gc_evictions, (unsigned long long)gc_downloads);
+                        (unsigned long long)gc_evictions, (unsigned long long)gc_downloads,
+                        (unsigned long long)gc_dropped_reused);
             gc_report_time = now;
-            gc_evictions = gc_downloads = 0;
+            gc_evictions = gc_downloads = gc_dropped_reused = 0;
         }
     }
 }

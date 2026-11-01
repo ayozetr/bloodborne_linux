@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 #include <fmt/format.h>
+#include <xxhash.h>
 
 #include <vk_mem_alloc.h>
 
@@ -543,6 +544,13 @@ void Image::GetBarriers(Barriers& out, vk::ImageLayout dst_layout, vk::AccessFla
     backing->settled_state = target;
     backing->settled_uniform = partial && uniform_after;
     whole = target;
+}
+
+void Image::NoteGpuBase() {
+    if (gpu_base_hash == 0 && info.guest_address != 0) {
+        gpu_base_hash =
+            XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), info.guest_size) | 1;
+    }
 }
 
 } // namespace VideoCore

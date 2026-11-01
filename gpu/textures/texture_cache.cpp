@@ -508,6 +508,7 @@ ImageView& TextureCache::FindTexture(ImageId image_id, const ImageDesc& desc, Vi
     Image& image = slot_images[image_id];
     WatchImage(image, refresh ? "texture (refresh)" : "texture (no refresh)");
     if (desc.type == BindingType::Storage) {
+        image.NoteGpuBase();
         image.flags |= ImageFlagBits::GpuModified;
         image.gpu_write_tick = CurrentTick();
         if (readback_linear_images && (!image.info.props.is_tiled || image.info.size.width <= 8) &&
@@ -562,6 +563,7 @@ ImageView& TextureCache::FindTexture(ImageId image_id, const ImageDesc& desc, Vi
 ImageView& TextureCache::FindRenderTarget(ImageId image_id, const ImageDesc& desc) {
     Image& image = slot_images[image_id];
     WatchImage(image, "render target");
+    image.NoteGpuBase();
     image.flags |= ImageFlagBits::GpuModified;
     image.gpu_write_tick = CurrentTick();
     if (readback_linear_images && (!image.info.props.is_tiled || image.info.size.width <= 8)) {
@@ -584,6 +586,7 @@ ImageView& TextureCache::FindRenderTarget(ImageId image_id, const ImageDesc& des
 ImageView& TextureCache::FindDepthTarget(ImageId image_id, const ImageDesc& desc) {
     Image& image = slot_images[image_id];
     WatchImage(image, "depth target");
+    image.NoteGpuBase();
     image.flags |= ImageFlagBits::GpuModified;
     image.gpu_write_tick = CurrentTick();
     image.usage.depth_target = 1;

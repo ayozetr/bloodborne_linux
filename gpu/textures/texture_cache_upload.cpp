@@ -420,6 +420,7 @@ void TextureCache::RefreshImage(Image& image, bool partial_ok) {
         return;
     }
     UploadImageLevels(image, first, copies);
+    image.gpu_base_hash = 0; // uploaded again: taken anew at the GPU's next write
     image.resident_level = u8(first);
     if (first != 0) {
         u64 deferred = 0;

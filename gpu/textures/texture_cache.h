@@ -341,6 +341,9 @@ private:
     static u64 MaybeDirtyHash(const ImageInfo& info);
 
     // Memory (texture_cache_memory.cpp).
+    /// The game's memory under the image changed since Image::gpu_base_hash was taken: writing
+    /// the image back would overwrite what the game stored there since (its heap).
+    bool GuestMemoryReused(const Image& image);
     void DownloadImageMemory(ImageId image_id, bool sync);
     void GarbageCollectImages();
     void GarbageCollectSamplers();
@@ -402,6 +405,7 @@ private:
     u64 gc_second = 0;
     std::array<u64, 64> gc_tick_at_second{}; ///< gc_tick at each of the last 64 seconds
     u64 gc_evictions = 0, gc_downloads = 0;  ///< since the last pressure report
+    u64 gc_dropped_reused = 0; ///< GPU-written images not written back over reused memory
     std::chrono::steady_clock::time_point gc_report_time{};
     static inline std::atomic<u64> vram_short_until{0}; ///< steady seconds
 

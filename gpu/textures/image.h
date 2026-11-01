@@ -157,6 +157,13 @@ struct Image {
     mutable u64 lru_touched_tick = ~0ull; ///< the GC tick of the last LRU touch
     u64 tick_accessed_last{};
     u64 gpu_write_tick{}; ///< the scheduler tick of the last binding the GPU may write
+    /// bbport (Linux fork, #25 #32 #35): the game's memory under the image when the GPU began
+    /// writing it, since its last upload (0: not taken yet). The collector writes the image back
+    /// only while it is unchanged (TextureCache::GuestMemoryReused).
+    u64 gpu_base_hash{};
+    /// Takes gpu_base_hash at the GPU's first write since the last upload. Every path that marks
+    /// the image GpuModified calls it: draws, storage writes, copies, blits, resolves and clears.
+    void NoteGpuBase();
     ImageId depth_id{};
     u64 depth_uid{};
     u64 image_uid{};

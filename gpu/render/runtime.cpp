@@ -85,6 +85,9 @@ u32 BufferImageCopySize(const vk::BufferImageCopy& copy, vk::Format format) {
 
 /// The written image now holds what the source holds (or new GPU data) and no stale upload.
 void MarkCopied(VideoCore::Image* dst, VideoCore::ImageFlagBits modified) {
+    if (True(modified & VideoCore::ImageFlagBits::GpuModified)) {
+        dst->NoteGpuBase();
+    }
     dst->flags |= modified;
     dst->flags &= ~VideoCore::ImageFlagBits::Dirty;
 }

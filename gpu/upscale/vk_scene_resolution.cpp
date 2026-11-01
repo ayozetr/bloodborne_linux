@@ -636,6 +636,7 @@ bool SceneTargets::CopyProxy(VideoCore::ImageId src_id, VideoCore::ImageId dst_i
             cmd.pipelineBarrier2({.bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &read});
         });
         to.state.ProxyWrite();
+        dst.NoteGpuBase();
         dst.flags |= VideoCore::ImageFlagBits::GpuModified;
         dst.flags &= ~VideoCore::ImageFlagBits::Dirty;
         if (debug) {
@@ -661,6 +662,7 @@ bool SceneTargets::CopyProxy(VideoCore::ImageId src_id, VideoCore::ImageId dst_i
                       vk::ImageLayout::eTransferDstOptimal, region);
     });
     to.state.ProxyWrite(); // the native destination resolves on its first native access
+    dst.NoteGpuBase();
     dst.flags |= VideoCore::ImageFlagBits::GpuModified;
     dst.flags &= ~VideoCore::ImageFlagBits::Dirty;
     if (debug) {
