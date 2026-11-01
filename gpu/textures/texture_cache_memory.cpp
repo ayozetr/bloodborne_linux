@@ -275,6 +275,7 @@ void TextureCache::GarbageCollectImages() {
         return gc_tick_at_second[(second - seconds) % gc_tick_at_second.size()];
     };
     const u64 idle_tick = tick_seconds_ago(idle_seconds);
+    const u64 minute_tick = tick_seconds_ago(60);
 
     std::scoped_lock lock{mutex};
     bool pressured = false;
@@ -301,11 +302,28 @@ void TextureCache::GarbageCollectImages() {
             return true;
         }
         Image& image = slot_images[image_id];
+        // bbport (Linux fork, #30): "maybe touched by the CPU" is only a suspicion, settled by a
+        // hash when the image is used again (RefreshImage). Taken as dirty here, what the GPU had
+        // written was dropped undownloaded and the image came back with the game's old bytes:
+        // black effects drawn by compute shaders. The hash is checked first, as the refresh does.
+        if (True(image.flags & ImageFlagBits::GpuModified) &&
+            True(image.flags & ImageFlagBits::MaybeCpuDirty) &&
+            False(image.flags & (ImageFlagBits::CpuDirty | ImageFlagBits::GpuDirty)) &&
+            image.hash == MaybeDirtyHash(image.info)) {
+            image.flags &= ~ImageFlagBits::MaybeCpuDirty;
+        }
         const bool write_back = image.SafeToDownload();
         // Images that cannot go now (tiled GPU-written ones cannot be written back; GPU-written
         // ones only under pressure) neither use up the deletions nor stay first in line: the
         // oldest ten being such targets stopped the collector for good.
-        if ((write_back && image.info.IsTiled()) || (write_back && !pressured)) {
+        // bbport (Linux fork, #30): linear GPU-written ones only past the critical mark and unused
+        // for a minute. Downloaded and freed under mere pressure, they came back black once loaded
+        // again (the player's armour, effects) on 8 GB cards, under pressure all session.
+        // BB_GC_KEEP_GPU_WRITTEN=0: under mere pressure, as before.
+        static const bool keep_gpu_written = !bb_env_off("BB_GC_KEEP_GPU_WRITTEN");
+        const bool old_enough = aggressive && image.lru_touched_tick < minute_tick;
+        if ((write_back && image.info.IsTiled()) || (write_back && !pressured) ||
+            (write_back && keep_gpu_written && !old_enough)) {
             lru_cache.Touch(image.lru_id, gc_tick);
             BbStats::gc_kept_images.fetch_add(1, std::memory_order_relaxed);
             return false;

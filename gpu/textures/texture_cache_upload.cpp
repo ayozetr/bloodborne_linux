@@ -24,6 +24,14 @@
 
 namespace VideoCore {
 
+u64 TextureCache::MaybeDirtyHash(const ImageInfo& info) {
+    const u32 w = std::min(info.size.width, 8u);
+    const u32 h = std::min(info.size.height, 8u);
+    const u32 bytes = (info.props.is_block ? (w + 3) / 4 : w) *
+                      (info.props.is_block ? (h + 3) / 4 : h) * (info.num_bits / 8);
+    return XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), bytes);
+}
+
 namespace {
 
 /// BB_TEXTURE_UPLOAD_MB_PER_FRAME (32; 0: off): the image bytes uploaded a frame before new
@@ -354,11 +362,7 @@ void TextureCache::RefreshImage(Image& image, bool partial_ok) {
     // Maybe written (a page under it was, not it): compared by its first 8x8 texels.
     if (True(image.flags & ImageFlagBits::MaybeCpuDirty) &&
         False(image.flags & ImageFlagBits::CpuDirty)) {
-        const u32 w = std::min(info.size.width, 8u);
-        const u32 h = std::min(info.size.height, 8u);
-        const u32 bytes = (info.props.is_block ? (w + 3) / 4 : w) *
-                          (info.props.is_block ? (h + 3) / 4 : h) * (info.num_bits / 8);
-        const u64 hash = XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), bytes);
+        const u64 hash = MaybeDirtyHash(info);
         if (image.hash == hash) {
             image.flags &= ~ImageFlagBits::MaybeCpuDirty;
             return;

@@ -175,6 +175,7 @@ BB_ENV(BB_FX_INIT_CLEAR, TUNING, "=0: the effect buffers' initialization clears 
 BB_ENV(BB_GARLIC_VRAM, TUNING, "=0 / 1: VRAM copies of the game's GPU memory off / on (default: on discrete GPUs)")
 BB_ENV(BB_GC_BUDGET_MB, TUNING, "=N: texture cache budget in MiB, as on integrated GPUs")
 BB_ENV(BB_GC_IDLE_SECONDS, TUNING, "=N (default 20): unused textures evicted after N seconds")
+BB_ENV(BB_GC_KEEP_GPU_WRITTEN, TUNING, "=0: the collector downloads and frees linear images the GPU wrote under mere memory pressure; default only past the critical mark and unused for a minute (#30)")
 BB_ENV(BB_GC_LIVE_BUDGET, TUNING, "=0: texture cache marks from the startup budget instead of the driver's current one")
 BB_ENV(BB_GC_PRESSURE_IDLE_SECONDS, TUNING, "=N (default 5): the same under memory pressure")
 BB_ENV(BB_GC_SMALL_MARKS, TUNING, "=P,C: pressure and critical marks in percent on small cards")
