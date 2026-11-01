@@ -49,4 +49,12 @@ bool MenuOpen();
 /// Window thread: the game's text dialog (ImeDialog) state, drawn as a box over the frame.
 void SetTextPrompt(bool active, const std::string& prompt, const std::string& text);
 
+/// An edit typed on the text dialog's on-screen keyboard with a controller.
+struct TextEdit {
+    enum Kind { Append, Backspace, Clear, Confirm, Cancel } kind;
+    std::string text; ///< Append
+};
+/// Window thread: the edits made on the on-screen keyboard since the last call, in order.
+std::vector<TextEdit> TakeTextEdits();
+
 } // namespace BbOverlay

@@ -194,4 +194,17 @@ static const RuntimeExport exports[]={
     {"scePadSetMotionSensorState",pad_ok_handle_flag},
 };
 uintptr_t runtime_pad_resolve(const char *name) { return RUNTIME_LOOKUP(exports,name); }
+/* The SDL gamepad button the game's `input` ("cross", "circle", ...) is bound to first, or -1: the
+ * overlay's menu and on-screen keyboard accept and go back on the game's cross and circle,
+ * wherever bbport.ini puts them (A and B swapped on Nintendo-style pads). */
+int runtime_pad_button(const char *input) {
+    if (!bindings_ready || !input) return -1;
+    for (int i=0;i<IN_COUNT;++i) {
+        if (strcmp(input_names[i],input)) continue;
+        for (int j=0;j<bindings[i].pad_count;++j)
+            if (bindings[i].pad[j]<SDL_GAMEPAD_BUTTON_COUNT) return bindings[i].pad[j];
+        return -1;
+    }
+    return -1;
+}
 void runtime_pad_report(void) { printf("Runtime: pad reads=%zu, gamepad=%s\n",reads,gamepad ? SDL_GetGamepadName(gamepad) : "none"); }
