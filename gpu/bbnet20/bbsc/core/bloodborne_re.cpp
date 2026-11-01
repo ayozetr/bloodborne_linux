@@ -14009,9 +14009,11 @@ void StartBbscSolidNpcs() {
     if (!EnvFlagEnabled("SHADPS4_BBSC_SOLID_NPCS")) {
         return;
     }
+    // bbport: a search that gave up after 3 minutes never came back (a slow first start, compiling
+    // shaders). It keeps looking: every 5 s for those 3 minutes, then every 15 s.
     std::thread{[] {
-        for (int attempt = 0; attempt < 36; ++attempt) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+        for (int attempt = 0;; ++attempt) {
+            std::this_thread::sleep_for(std::chrono::seconds(attempt < 36 ? 5 : 15));
             const auto tables = FindBbscParamTables("NPC_PARAM_ST");
             size_t rows = 0;
             size_t cleared = 0;
@@ -14041,8 +14043,11 @@ void StartBbscSolidNpcs() {
                          tables.size(), rows, cleared);
                 return;
             }
+            if (attempt == 35) {
+                LOG_INFO(Debug, "BBSC solid NPCs: NpcParam table not found after 3 minutes - "
+                                "still looking every 15 s");
+            }
         }
-        LOG_INFO(Debug, "BBSC solid NPCs: NpcParam table not found after 3 minutes");
     }}.detach();
 }
 
@@ -14055,16 +14060,19 @@ void StartBbscScaling() {
     }
     bbsc_scale_state = BbscScaleState::Scanning;
     std::thread{[] {
-        for (int attempt = 0; attempt < 36; ++attempt) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+        // bbport: as for the solid NPCs, it keeps looking after 3 minutes, every 15 s.
+        for (int attempt = 0;; ++attempt) {
+            std::this_thread::sleep_for(std::chrono::seconds(attempt < 36 ? 5 : 15));
             PrepareBbscScaling();
             if (bbsc_scale_state == BbscScaleState::Ready) {
                 return;
             }
+            if (attempt == 35) {
+                LOG_INFO(Debug, "BBSC scaling: param tables not found after 3 minutes - still "
+                                "looking every 15 s");
+            }
             bbsc_scale_state = BbscScaleState::Scanning;
         }
-        bbsc_scale_state = BbscScaleState::Failed;
-        LOG_INFO(Debug, "BBSC scaling: param tables not found after 3 minutes - no scaling");
     }}.detach();
 }
 // ---- PvP toggle item: the Duel Bell (2026-10-05) ------------------------------------------------
