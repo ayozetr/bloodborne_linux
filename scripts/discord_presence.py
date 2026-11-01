@@ -26,6 +26,8 @@ import uuid
 # The "Bloodborne" application on Discord's developer portal (its icon is the art asset
 # "bloodborne").
 CLIENT_ID = '1558176258121269389'
+REPO_URL = 'https://github.com/ayozetr/bloodborne_linux'
+REPO_TEXT = 'github.com/ayozetr/bloodborne_linux'
 HANDSHAKE, FRAME, CLOSE = 0, 1, 2
 # The areas by map (map/mapstudio/mXX_YY_...): the names of Smithbox's Bloodborne map aliases
 # (github.com/vawser/Smithbox, MIT). The Chalice Dungeons (m29) are one name.
@@ -135,7 +137,10 @@ def activity(online, start, area=None, partners=()):
     value = {
         'details': area_name(area) or session,
         'timestamps': {'start': start},
-        'assets': {'large_image': 'bloodborne', 'large_text': 'Bloodborne · native Linux port'},
+        # The image's tooltip names the repository, and a button opens it (Discord shows the
+        # buttons to the other people looking at the profile, not to the player).
+        'assets': {'large_image': 'bloodborne', 'large_text': f'Bloodborne · native Linux port · {REPO_TEXT}'},
+        'buttons': [{'label': 'Get the Linux port', 'url': REPO_URL}],
     }
     if area_name(area):
         value['state'] = session

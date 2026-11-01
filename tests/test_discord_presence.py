@@ -54,5 +54,14 @@ class ActivityTests(unittest.TestCase):
         self.assertNotIn('state', value)
 
 
+class RepositoryLinkTests(unittest.TestCase):
+    def test_tooltip_and_button_lead_to_the_repository(self):
+        value = presence.activity(True, 0)
+        self.assertIn('github.com/ayozetr/bloodborne_linux', value['assets']['large_text'])
+        self.assertLessEqual(len(value['assets']['large_text']), 128)  # Discord's limits
+        [button] = value['buttons']
+        self.assertEqual(button['url'], 'https://github.com/ayozetr/bloodborne_linux')
+        self.assertLessEqual(len(button['label']), 32)
+
 if __name__ == '__main__':
     unittest.main()
