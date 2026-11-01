@@ -51,6 +51,17 @@ EFFECTS={
     'skip_intro':(None,'Skip Intro'),
     'debug_camera':(None,'Restore Debug Camera'),
     'debug_menu':(None,'Restore Debug Menu (READ NOTES)'),
+    # Cheats and gameplay tweaks (community patches for 1.09; the Linux fork's launcher, "Cheats").
+    'cheat_no_death':(None,'Player No Dead (Read note)'),
+    'cheat_stealth':(None,'Player Stealth (Read note)'),
+    'cheat_silent':(None,'Player Silent (Read note)'),
+    'cheat_rally_no_decay':(None,'No Rally Decay'),
+    'cheat_enemy_control':(None,'Enemy Control'),
+    'tweak_no_rally':(None,'Disable Rally (HP Regain)'),
+    'tweak_camera_distance':(None,'Increased camera distance'),
+    'tweak_no_camera_rotation':(None,'Disable Camera Auto Rotation via Movement'),
+    'tweak_easy_run':(None,'Sensitive Analog Input (easier to run)'),
+    'tweak_ragdoll':(None,'DS1-like physics'),
     # Loading and smoothness (from droogie/bbhost); the first two are on unless turned off.
     'tweak_quick_reentry':(None,'Quick Re-entry'),
     'tweak_fast_deflate':(None,'Fast Run-time Deflate'),
