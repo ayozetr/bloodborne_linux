@@ -89,9 +89,10 @@ players), the **Kin Bell** (join another player), the **Bloodlust Bell** (invade
 Bell, Small Resonant Bell and Silencing Blank out of the inventory, and they do not come back when
 BBSC is turned off; BBSC's own items stay, with their names (scripts/bbsc_kit_texts.py), and work again
 when it is back on. Before changing anything it backs the saves up to `user/bbsc/save-backups/`:
-copy a character's save from there to play it without BBSC with its old bells. Its texts follow the game's language (Spanish, French, German, Italian,
-Portuguese and Russian; English otherwise). **F8** puts you back on the ground if you get stuck
-inside another player.
+copy a character's save from there to play it without BBSC with its old bells. Its texts follow the
+language the game shows its text in (*Game text language* in the launcher, else the system's):
+Spanish, French, German, Italian, Portuguese and Russian; English otherwise. **F8** puts you back
+on the ground if you get stuck inside another player.
 
 **Not yet tested with more than one player on Linux:** one player alone works (its items, deaths,
 lamps, the Hunter's Dream). Report what you find with the log.
