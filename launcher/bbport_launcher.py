@@ -47,6 +47,7 @@ from mods import discover as discover_mods, unrecognized as unrecognized_mods  #
 from prepare import sfo  # noqa: E402
 import game_check  # noqa: E402
 import online  # noqa: E402
+import bbsc  # noqa: E402
 import save_import  # noqa: E402
 from patches import external_patches  # noqa: E402
 import trophies  # noqa: E402
@@ -291,6 +292,7 @@ DEFAULTS = {
     "thd_token": "",
     # Seamless co-op (BBSC): on or off, and the options the player changed ({mod.json id: value}).
     "bbsc": True,
+    "bbsc_options": {},  # BBSC's options the player changed (scripts/bbsc.py)
     # Local co-op (its page, bbport_coop.py): the players, the layout for two, each player's
     # controller (a device path or "keyboard") and whether players 2-4 are silent.
     "coop_players": 2,
@@ -560,6 +562,69 @@ def fsr411_build_command(upscaler, loader=None):
 
 # Trophy grades (scripts/trophies.py) as the Trophies page names them.
 TROPHY_GRADES = {"P": "Платиновый", "G": "Золотой", "S": "Серебряный", "B": "Бронзовый"}
+
+# Seamless co-op (BBSC, scripts/bbsc.py): the names and descriptions of its options, by id
+# (scripts/bbsc_options.json), in the launcher's key language (bbport_i18n.py).
+BBSC_OPTION_TEXTS = {
+    "connect_first": ("Призыв между локациями",
+                     "Сначала подключение, затем одна загрузка в локацию хозяина"),
+    "warp_together": ("Путешествовать вместе",
+                     "Гость следует за хозяином при переходах через фонари"),
+    "world_sync": ("Синхронизация мира",
+                  "Гость видит мир хозяина (двери, боссы, лифты)"),
+    "dream": ("Сон Охотника вместе",
+             "Гость пользуется Куклой, мастерской и посыльными"),
+    "no_fog_walls": ("Без туманных стен",
+                    "Можно покидать локацию во время кооператива"),
+    "lamp": ("Фонари в кооперативе",
+            "Хозяин может пользоваться фонарями во время сессии"),
+    "host_dead": ("Остаться, если хозяин погиб",
+                 "Гость не теряет сессию, когда хозяин умирает"),
+    "spectate": ("Возрождение на месте",
+                "Погибший игрок возрождается или наблюдает, а не уходит"),
+    "full_echoes": ("Полные отголоски",
+                   "Гость получает столько же отголосков, сколько хозяин, а не половину"),
+    "no_hp_penalty": ("Без штрафа к здоровью гостя",
+                     "Убирает снижение максимального здоровья гостя на 30 %"),
+    "guest_items": ("Предметы гостя",
+                   "Гость подбирает и сохраняет предметы"),
+    "solid_npcs": ("Плотные NPC",
+                  "Гость видит NPC обычными, а не серыми призраками"),
+    "death_penalty": ("Пятно крови после смерти",
+                     "Смерть без выхода из сессии всё равно оставляет пятно крови и отголоски"),
+    "free_bell": ("Бесплатный Зовущий колокол",
+                 "Колокол не тратит озарение"),
+    "bells_anywhere": ("Колокола где угодно",
+                      "Колокола BBSC звонят в любом месте, даже во Сне Охотника (роль, озарение и "
+                      "подключение к сети по-прежнему учитываются)"),
+    "five_hunters": ("Пять охотников",
+                    "Хозяин может призвать до 4 гостей"),
+    "messages": ("Тексты кооператива",
+                "Тексты под бесшовную игру (без «Возвращение в свой мир»)"),
+    "load_cover": ("Затемнение при подключении",
+                  "Загрузки гостя проходят за чёрным экраном"),
+    "floor_guard": ("Защита пола",
+                   "Без вылета, если пол под персонажем был выгружен"),
+    "scaling": ("Усиление врагов",
+               "Враги и боссы сильнее за каждого гостя (вместо усиления боссов в игре)"),
+    "scale_npc_hunters": ("Усиливать NPC-охотников",
+                         "Хенрик, Джура и другие враждебные охотники тоже усиливаются"),
+    "scale_enemy_hp": ("Здоровье врагов за гостя (%)",
+                      "Дополнительное здоровье обычных врагов за каждого гостя"),
+    "scale_boss_hp": ("Здоровье боссов за гостя (%)",
+                     "Дополнительное здоровье боссов за каждого гостя"),
+    "scale_damage": ("Урон врагов за гостя (%)",
+                    "Дополнительный урон врагов и боссов за каждого гостя"),
+    "scale_enemy_stagger": ("Устойчивость врагов за гостя (%)",
+                           "Обычных врагов сложнее оглушить, за каждого гостя"),
+    "scale_boss_stagger": ("Устойчивость боссов за гостя (%)",
+                          "Боссов сложнее оглушить, за каждого гостя"),
+    "shared_progress": ("Общий прогресс",
+                       "Когда гость уходит, пройденные хозяином боссы, срезки, двери и фонари добавляются в мир гостя (только добавляет; сохранения копируются заранее)"),
+    "relay": ("Адрес ретранслятора",
+             "host:20444; пусто — адрес игрового сервера"),
+}
+
 
 # The Online tab's shadNet server choice (online.server_kind). shadPS4's public server is not one:
 # it signs this port out since 2026-10-12.
@@ -2795,6 +2860,31 @@ class LauncherWindow(Adw.ApplicationWindow):
                         "в save-backups)"),
             active=bool(s.get("bbsc", True)))
         seamless.add(self.bbsc_row)
+        # BBSC's own options (scripts/bbsc.py), folded away; kept only where the player changed them.
+        self.bbsc_option_rows = {}
+        if bbsc.options():
+            options = Adw.ExpanderRow(title=tr("Настройки BBSC"),
+                                      subtitle=tr("Применяются при запуске игры"))
+            chosen = s.get("bbsc_options") or {}
+            for option in bbsc.options():
+                name, about = BBSC_OPTION_TEXTS.get(option["id"], (option.get("name", ""),
+                                                                    option.get("description", "")))
+                value = bbsc.value_of(option, chosen)
+                if option["type"] == "bool":
+                    row = Adw.SwitchRow(title=tr(name), subtitle=tr(about), active=value)
+                elif option["type"] == "int":
+                    row = Adw.SpinRow.new_with_range(option.get("min", 0), option.get("max", 1000), 5)
+                    row.set_title(tr(name))
+                    row.set_subtitle(tr(about))
+                    row.set_value(value)
+                else:
+                    row = Adw.EntryRow(title=tr(name), text=value)
+                    row.set_tooltip_text(tr(about))
+                options.add_row(row)
+                self.bbsc_option_rows[option["id"]] = (row, option)
+            seamless.add(options)
+            self.bbsc_row.bind_property("active", options, "sensitive",
+                                        GObject.BindingFlags.SYNC_CREATE)
         self.bbsc_group = seamless
 
         # The Hunter's Dream: a Discord sign-in, as in bbhost (a code approved on the website).
@@ -2928,6 +3018,20 @@ class LauncherWindow(Adw.ApplicationWindow):
     def own_server_missing(self):
         return combo_value(self.server_kind_row) == "own" and not self.server_row.get_text().strip()
 
+    def bbsc_options_changed(self):
+        """BBSC's options that differ from their defaults (scripts/bbsc.py)."""
+        changed = {}
+        for key, (row, option) in self.bbsc_option_rows.items():
+            if option["type"] == "bool":
+                value = row.get_active()
+            elif option["type"] == "int":
+                value = int(row.get_value())
+            else:
+                value = row.get_text().strip()
+            if value != option.get("default"):
+                changed[key] = value
+        return changed
+
     def online_settings(self):
         """The Online page's settings (the keys of DEFAULTS)."""
         return {
@@ -2943,6 +3047,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "online_seamless": self.settings.get("online_seamless", False),
             "online_accounts": self.kept_accounts(),
             "bbsc": self.bbsc_row.get_active(),
+            "bbsc_options": self.bbsc_options_changed(),
             "thd_server": self.thd_server_row.get_text().strip(),
             "thd_online_id": self.thd_id,
             "thd_token": self.thd_token,

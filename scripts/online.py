@@ -25,6 +25,7 @@ online variables (environment), the connection test with the sign-in, shadNet's 
 registration and the firewall's advice; by way of the Linux fork.
 """
 import argparse
+import bbsc
 import json
 from pathlib import Path
 import os
@@ -197,6 +198,7 @@ def environment(settings):
     # Seamless co-op (BBSC, gpu/bbnet20/bbsc), on Seamless Hunt or an own server.
     if settings.get('bbsc', True):
         env['BB_BBSC'] = '1'
+        env.update(bbsc.environment(settings))  # the options the player changed
     return env
 
 

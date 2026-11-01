@@ -70,6 +70,9 @@ marks much of it as untested.
 1. In the launcher's **Multiplayer → Online** tab, **Enable BBSC** in the **Seamless co-op (BBSC)**
    group (on by default). While it is on, BBSC's bells replace the game's; turned off, the game's
    come back the next time the character is loaded (the save is copied to `save-backups` first).
+   **BBSC settings**, folded under it, has BBSC's own options: what the guest shares with the host,
+   five hunters, enemy scaling and its percentages per guest, shared progress and the rest; only
+   the ones changed from BBSC's defaults are passed to the game.
 2. Every player of the session needs BBSC, the same version: on Linux this port, on Windows
    BBSC's package for the Windows port (its *BBport* release). A player without it plays the
    normal game.
