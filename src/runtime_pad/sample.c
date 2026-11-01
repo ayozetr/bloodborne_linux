@@ -14,6 +14,14 @@
 #include "../../gpu/shim/bb_env.h"
 int runtime_pad_steam_only(void) { return atomic_load_explicit(&steam_only_now,memory_order_relaxed); }
 
+/* bbport (Linux fork): BB_KEYBOARD=0 (local co-op): this game ignores the keyboard and the
+ * mouse, which reach whichever game window has the focus; its player has a gamepad. */
+static int keyboard_enabled(void) {
+    static int enabled=-1;
+    if (enabled<0) { const char *v=bb_env("BB_KEYBOARD"); enabled=!(v && v[0]=='0'); }
+    return enabled;
+}
+
 static int steam_pad_only(SDL_Gamepad *g) {
     static int off=-1;
     if (off<0) { const char *e=bb_env("BB_DECK_DESKTOP_INPUT"); off=e && e[0]=='1'; }
@@ -72,7 +80,9 @@ static void sample_host(PadData *d) {
     motion.last_us=d->timestamp;
     motion.shaking=0;
     SDL_Gamepad *g=current_gamepad();
-    if (!bindings_ready) { load_bindings(); bindings_ready=1; bbgpu_mouse_look_enable(mouse_look); }
+    if (!bindings_ready) {
+        load_bindings(); bindings_ready=1; bbgpu_mouse_look_enable(mouse_look && keyboard_enabled());
+    }
     /* The mouse's motion and wheel since the last sample (always taken: none of it piles up while
      * the menu is open); it counts while the window holds the mouse. */
     double mouse_dx=0, mouse_dy=0;
@@ -82,7 +92,7 @@ static void sample_host(PadData *d) {
     if (bbgpu_overlay_captures_input()) { apply_mouse_look(d,0,0,d->timestamp,0); return; } /* menu open: neutral input */
     const bool *k=SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetKeyboardState(NULL) : NULL;
     mouse_buttons=captured && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
-    const int pad_only=steam_pad_only(g);
+    const int pad_only=steam_pad_only(g) || !keyboard_enabled();
     atomic_store_explicit(&steam_only_now,pad_only,memory_order_relaxed);
     if (pad_only) {
         k=NULL; mouse_buttons=0; wheel_up=wheel_down=0; mouse_dx=mouse_dy=0;

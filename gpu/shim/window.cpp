@@ -6,6 +6,7 @@
 #include <atomic>
 #include <cstdio>
 #include <cstdlib>
+#include <charconv>
 #include <cstring>
 #include "bbgpu.h"
 #include <SDL3/SDL.h>
@@ -174,8 +175,41 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
     SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title);
     const SDL_DisplayID display = ChooseDisplay();
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED_DISPLAY(display));
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    // bbport (Linux fork): local co-op (BB_WINDOW_RECT=x,y,w,h, fractions of the game's display:
+    // 0,0,1,0.5 is its top half): each player's game in its own part of the screen, without
+    // borders. Fractions, as the desktop's coordinates and scale differ from screen to screen.
+    // Wayland lets no window place itself: the launcher runs these games through X11 (Xwayland),
+    // where the position is kept. std::from_chars: a '.' whatever the locale.
+    int rect_x = 0, rect_y = 0;
+    SDL_Rect bounds{};
+    const char* rect = bb_env("BB_WINDOW_RECT");
+    const auto read_fractions = [](const char* text, float* out) {
+        const char* end = text + std::strlen(text);
+        for (int i = 0; i < 4; ++i) {
+            const auto [next, error] = std::from_chars(text, end, out[i]);
+            if (error != std::errc{} || (i < 3 && (next == end || *next != ','))) {
+                return false;
+            }
+            text = next + 1;
+        }
+        return true;
+    };
+    float fractions[4] = {};
+    const bool placed = rect && read_fractions(rect, fractions) && fractions[2] > 0 &&
+                        fractions[3] > 0 && SDL_GetDisplayBounds(display, &bounds);
+    if (placed) {
+        rect_x = bounds.x + static_cast<int>(fractions[0] * bounds.w + 0.5f);
+        rect_y = bounds.y + static_cast<int>(fractions[1] * bounds.h + 0.5f);
+        width_ = static_cast<s32>(fractions[2] * bounds.w + 0.5f);
+        height_ = static_cast<s32>(fractions[3] * bounds.h + 0.5f);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
+        std::printf("Display: this game's part of it: %dx%d at %d,%d (BB_WINDOW_RECT)\n", width_,
+                    height_, rect_x, rect_y);
+    }
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER,
+                          placed ? rect_x : SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER,
+                          placed ? rect_y : SDL_WINDOWPOS_CENTERED_DISPLAY(display));
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width_);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height_);
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
@@ -190,7 +224,7 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
         std::printf("Display: gamescope: fullscreen\n");
     }
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN,
-                           gamescope || (fullscreen && fullscreen[0] == '1'));
+                           !placed && (gamescope || (fullscreen && fullscreen[0] == '1')));
     // Issue #234: the swapchain at the display's pixels on a scaled desktop (Wayland 200%), not at
     // the logical size stretched by the compositor. Sizes below are read in pixels already.
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
