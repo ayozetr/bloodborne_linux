@@ -2834,7 +2834,11 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.server_kind_row = combo_row(tr("Сервер shadNet"), None, kinds,
                                          kind if kind in (k[1] for k in kinds) else "seamlesshunt")
         coop.add(self.server_kind_row)
-        own = s["online_server"] if s["online_server"] != online.SHADNET_SERVER else ""
+        # The address of an own server, also when it is the default's (0.7's default is Seamless
+        # Hunt's, which the Linux fork's guide had players enter as their own server): left out,
+        # the field showed empty and saving it lost the server.
+        own = (s["online_server"] if kind == "own" or s["online_server"] != online.SHADNET_SERVER
+               else "")
         self.server_row = Adw.EntryRow(title=tr("Адрес сервера (host:port)"), text=own)
         self.webapi_row = Adw.EntryRow(title=tr("Адрес WebAPI (пусто: порт 31315 сервера)"),
                                        text=s["online_webapi"])
