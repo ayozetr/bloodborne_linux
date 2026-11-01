@@ -12,6 +12,7 @@
 #include <deque>
 #include <fstream>
 #include <string>
+#include <tuple>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -254,7 +255,8 @@ struct Fsr4Upscaler::Impl {
         }
     }
 
-    VkResult Register(const Image& image, VkAccessFlags access) {
+    VkResult Register(const Image& image, VkAccessFlags access,
+                      VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT) {
         const FfxFsr4VkExternalImageState state{
             .structSize = sizeof(FfxFsr4VkExternalImageState),
             .image = image.image,
@@ -265,6 +267,7 @@ struct Fsr4Upscaler::Impl {
             .restoreLayout = VK_IMAGE_LAYOUT_GENERAL,
             .restoreStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             .restoreAccessMask = access,
+            .aspectMask = aspect,
         };
         return ffxFsr4VkSetExternalImageState(&backend, &state);
     }
@@ -520,15 +523,24 @@ struct Fsr4Upscaler::Impl {
         // or every later BeginFrame fails (VK_ERROR_VALIDATION_FAILED_EXT).
         const auto abandon = [&] { in_flight.emplace_back(frame_id, scheduler.CurrentTick()); };
         constexpr VkAccessFlags read = VK_ACCESS_SHADER_READ_BIT;
-        const std::array<std::pair<const Image*, VkAccessFlags>, 4> images{{
-            {&f.color, read},
-            {&f.depth, read},
-            {&f.motion, read},
-            {&f.output, read | VK_ACCESS_SHADER_WRITE_BIT},
+        // bbport (0xCydral, Linux fork): the depth image's barriers name its own aspects (fsr-vulkan
+        // patch 0004): the color aspect is invalid for it (VUID-VkImageMemoryBarrier-image-03319).
+        constexpr VkImageAspectFlags color_aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+        const bool depth_only = f.depth.format == vk::Format::eD32Sfloat ||
+                                f.depth.format == vk::Format::eD16Unorm ||
+                                f.depth.format == vk::Format::eX8D24UnormPack32;
+        const VkImageAspectFlags depth_aspect =
+            VK_IMAGE_ASPECT_DEPTH_BIT | (depth_only ? 0 : VK_IMAGE_ASPECT_STENCIL_BIT);
+        const std::array<std::tuple<const Image*, VkAccessFlags, VkImageAspectFlags>, 4> images{{
+            {&f.color, read, color_aspect},
+            {&f.depth, read, depth_aspect},
+            {&f.motion, read, color_aspect},
+            {&f.output, read | VK_ACCESS_SHADER_WRITE_BIT, color_aspect},
         }};
         static constexpr const char* names[] = {"color", "depth", "motion", "output"};
         for (u32 i = 0; i < images.size(); ++i) {
-            if (const VkResult result = Register(*images[i].first, images[i].second);
+            if (const VkResult result = Register(*std::get<0>(images[i]), std::get<1>(images[i]),
+                                                 std::get<2>(images[i]));
                 result != VK_SUCCESS) {
                 Fail(std::string{"external image registration failed ("} + names[i] + ", " +
                          std::to_string(int(result)) + ")",

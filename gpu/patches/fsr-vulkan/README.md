@@ -13,3 +13,6 @@ patches here to its working tree when they are not applied yet:
   for a pass, `gpu/upscale/ffx_shaders.cpp`) and `ffxVkJobMark` (a mark before each compute
   dispatch, `gpu/upscale/fg_profile.cpp`, `BB_FG_PROFILE`). 0.7 used them without this patch, so it
   did not link from source (upstream #404).
+- `0004-...`: `aspectMask` in `FfxFsr4VkExternalImageState` (0 = color). The layout barriers of a
+  registered external image named the color aspect, which is invalid for a depth image (the
+  Linux fork's 0002).
