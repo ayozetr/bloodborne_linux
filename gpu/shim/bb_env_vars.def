@@ -643,6 +643,7 @@ BB_ENV(BB_MONITOR_SIZE, INTERNAL, "=WxH: the monitor's size the startup patch wa
 BB_ENV(BB_OUTPUT_RES, INTERNAL, "=WxH: the output the startup patch was made for (set by run.py)")
 BB_ENV(BB_PATCHES_CONFIG, INTERNAL, "the patch choice file (default <data>/patches.json)")
 BB_ENV(BB_PATCHES_DIR, INTERNAL, "the patches folder (default <data>/patches)")
+BB_ENV(BB_PKGEXTRACT, INTERNAL, "pkgextract for the launcher's Install from PKG (the AppImage's copy)")
 BB_ENV(BB_PREBUILT, INTERNAL, "=1: packaged build, run.sh builds nothing (set by the AppImage)")
 BB_ENV(BB_PROBE, INTERNAL, "path of bb-probe for run.py")
 BB_ENV(BB_PROMPT_ART, INTERNAL, "the Xbox and Switch button art for the live prompts, KG_*.rgba by style (scripts/prompt_art.py; set by run.sh)")
