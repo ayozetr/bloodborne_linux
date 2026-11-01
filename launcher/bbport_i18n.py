@@ -8,6 +8,26 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        "The co-op server for your own group, and BBSC's seamless summon",
+    'Модель FSR 4 без шлейфов за персонажами':
+        'The FSR 4 model without trails behind characters',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'A video player crash when it stops, the field of view, and an online crash guard',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        'Crashes: flips, descriptors and page faults; swapping the sticks and inverting the camera, the controller in use, save import, the version selector; vertex shaders with the right bindings, stale vertex inputs read again, index buffers of indirect draws, and camera motion vectors without NaN',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Motion vectors for the large beasts, and a memory fault',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        "The black character preview, the loading screen's picture, and a crash on an unreadable shader program",
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        "The gestures menu from the keyboard, a deleted image's slot, and the log of failed memory reservations",
+    'Обход SRT без ошибок на нулевых таблицах':
+        'The SRT walker without faults on null tables',
+    'Половины тачпада на Xbox':
+        'The touchpad halves on Xbox pads',
+    'Идеи для лаунчера':
+        'Ideas for the launcher',
     'Удерживать 0,8 с':
         'Hold for 0.8 s',
     'Удерживать 2 с':
@@ -834,7 +854,7 @@ EN = {
     'Помощь и тесты': 'Help and testing',
     'Другие благодарности': 'Also thanks to',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': "bbport, the port this whole project is built on, and 0.6's menu pointer and keyboard layout",
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online play, DLSS, the cheats page, Add to Steam, skipping pipelines the driver cannot create, no crash when video memory runs out, and skipping draws with an empty vertex table',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online play, the cheats page, Add to Steam, skipping pipelines the driver cannot create, no crash when video memory runs out, and skipping draws with an empty vertex table',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Gathered and adapted dozens of fixes: crashes while loading, black images, the upscaler, the performance line in the log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': "The black character preview, the loading screen's picture and the texture cache's memory",
     'Кэш текстур вовремя освобождает видеопамять': 'The texture cache frees video memory in time',
@@ -1015,6 +1035,26 @@ EN = {
 }
 
 PT_BR = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        'O servidor de cooperativo para o seu próprio grupo e a invocação contínua do BBSC',
+    'Модель FSR 4 без шлейфов за персонажами':
+        'O modelo do FSR 4 sem rastros atrás dos personagens',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'Um travamento do reprodutor de vídeo ao parar, o campo de visão e uma proteção contra travamento online',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        'Travamentos: flips, descritores e falhas de página; trocar os analógicos e inverter a câmera, o controle em uso, importar saves, o seletor de versão; vertex shaders com os bindings certos, entradas de vértices desatualizadas lidas de novo, buffers de índices de desenhos indiretos e vetores de movimento da câmera sem NaN',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Vetores de movimento das bestas grandes e uma falha de memória',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        'A pré-visualização preta do personagem, a imagem da tela de carregamento e um travamento com um programa de shader ilegível',
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        'O menu de gestos pelo teclado, o slot de uma imagem apagada e o registro de reservas de memória que falharam',
+    'Обход SRT без ошибок на нулевых таблицах':
+        'O percurso das SRT sem falhas em tabelas nulas',
+    'Половины тачпада на Xbox':
+        'As metades do touchpad em controles Xbox',
+    'Идеи для лаунчера':
+        'Ideias para o launcher',
     'Удерживать 0,8 с':
         'Segurar por 0,8 s',
     'Удерживать 2 с':
@@ -1898,7 +1938,7 @@ PT_BR = {
     'Помощь и тесты': 'Ajuda e testes',
     'Другие благодарности': 'Também agradecemos a',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, o port em que todo este projeto se baseia, e o ponteiro nos menus e o layout de teclado da 0.6',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jogo online, DLSS, a página de trapaças, Adicionar à Steam, pular pipelines que o driver não consegue criar, nenhum travamento quando a memória de vídeo acaba e pular desenhos com a tabela de vértices vazia',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jogo online, a página de trapaças, Adicionar à Steam, pular pipelines que o driver não consegue criar, nenhum travamento quando a memória de vídeo acaba e pular desenhos com a tabela de vértices vazia',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Reuniu e adaptou dezenas de correções: travamentos ao carregar, imagens pretas, o upscaler, a linha de desempenho no log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'A prévia do personagem preta, a imagem da tela de carregamento e a memória do cache de texturas',
     'Кэш текстур вовремя освобождает видеопамять': 'O cache de texturas libera a memória de vídeo a tempo',
@@ -2081,6 +2121,26 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        'El servidor de cooperativo para tu propio grupo y la invocación sin cortes de BBSC',
+    'Модель FSR 4 без шлейфов за персонажами':
+        'El modelo de FSR 4 sin estelas tras los personajes',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'Un cierre del reproductor de vídeo al detenerse, el campo de visión y una protección contra un cierre online',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        'Cierres: flips, descriptores y fallos de página; intercambiar los sticks e invertir la cámara, el mando en uso, importar partidas, el selector de versión; vertex shaders con los bindings correctos, entradas de vértices desfasadas leídas de nuevo, buffers de índices de los dibujados indirectos y vectores de movimiento de cámara sin NaN',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Vectores de movimiento de las bestias grandes y un fallo de memoria',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        'La vista previa negra del personaje, la imagen de la pantalla de carga y un cierre con un programa de shader ilegible',
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        'El menú de gestos desde el teclado, la ranura de una imagen borrada y el registro de las reservas de memoria fallidas',
+    'Обход SRT без ошибок на нулевых таблицах':
+        'El recorrido de las SRT sin fallos en tablas nulas',
+    'Половины тачпада на Xbox':
+        'Las mitades del panel táctil en mandos de Xbox',
+    'Идеи для лаунчера':
+        'Ideas para el lanzador',
     'Удерживать 0,8 с':
         'Mantener 0,8 s',
     'Удерживать 2 с':
@@ -2877,7 +2937,7 @@ ES = {
     'Помощь и тесты': 'Ayuda y pruebas',
     'Другие благодарности': 'También gracias a',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, el port en el que se basa todo este proyecto, y el puntero en los menús y la distribución de teclado de la 0.6',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Juego online, DLSS, la página de trucos, Añadir a Steam, saltar los pipelines que el driver no puede crear, ningún cierre al quedarse sin memoria de vídeo y saltar los dibujos con la tabla de vértices vacía',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Juego online, la página de trucos, Añadir a Steam, saltar los pipelines que el driver no puede crear, ningún cierre al quedarse sin memoria de vídeo y saltar los dibujos con la tabla de vértices vacía',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Reunió y adaptó decenas de arreglos: cierres al cargar, imágenes en negro, el escalado, la línea de rendimiento del registro',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'La vista previa del personaje en negro, la imagen de la pantalla de carga y la memoria de la caché de texturas',
     'Кэш текстур вовремя освобождает видеопамять': 'Que la caché de texturas libere la memoria de vídeo a tiempo',
@@ -3060,6 +3120,26 @@ ES = {
 
 # Italian.
 IT = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        "Il server cooperativo per il proprio gruppo e l'evocazione continua di BBSC",
+    'Модель FSR 4 без шлейфов за персонажами':
+        'Il modello FSR 4 senza scie dietro i personaggi',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'Un crash del lettore video quando si ferma, il campo visivo e una protezione da un crash online',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        'Crash: flip, descrittori e page fault; scambiare gli stick e invertire la telecamera, il controller in uso, importare i salvataggi, il selettore di versione; vertex shader con i binding giusti, input dei vertici obsoleti riletti, buffer degli indici dei draw indiretti e vettori di movimento della telecamera senza NaN',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Vettori di movimento delle bestie grandi e un errore di memoria',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        "L'anteprima nera del personaggio, l'immagine della schermata di caricamento e un crash con un programma shader illeggibile",
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        "Il menu dei gesti dalla tastiera, lo slot di un'immagine eliminata e il registro delle prenotazioni di memoria fallite",
+    'Обход SRT без ошибок на нулевых таблицах':
+        "L'attraversamento SRT senza errori sulle tabelle nulle",
+    'Половины тачпада на Xbox':
+        'Le metà del touchpad sui controller Xbox',
+    'Идеи для лаунчера':
+        'Idee per il launcher',
     'Удерживать 0,8 с':
         'Tieni premuto 0,8 s',
     'Удерживать 2 с':
@@ -3856,7 +3936,7 @@ IT = {
     'Помощь и тесты': 'Aiuto e test',
     'Другие благодарности': 'Grazie anche a',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, il port su cui si basa tutto questo progetto, e il puntatore nei menu e il layout di tastiera della 0.6',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Gioco online, DLSS, la pagina dei trucchi, Aggiungi a Steam, saltare le pipeline che il driver non riesce a creare, nessun crash quando finisce la memoria video e saltare i disegni con la tabella dei vertici vuota',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Gioco online, la pagina dei trucchi, Aggiungi a Steam, saltare le pipeline che il driver non riesce a creare, nessun crash quando finisce la memoria video e saltare i disegni con la tabella dei vertici vuota',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Ha raccolto e adattato decine di correzioni: crash durante il caricamento, immagini nere, l’upscaler, la riga delle prestazioni nel log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'L’anteprima nera del personaggio, l’immagine della schermata di caricamento e la memoria della cache delle texture',
     'Кэш текстур вовремя освобождает видеопамять': 'La cache delle texture libera la memoria video in tempo',
@@ -4039,6 +4119,26 @@ IT = {
 
 # French.
 FR = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        "Le serveur de coopération pour votre propre groupe et l'invocation continue de BBSC",
+    'Модель FSR 4 без шлейфов за персонажами':
+        'Le modèle FSR 4 sans traînées derrière les personnages',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'Un plantage du lecteur vidéo à son arrêt, le champ de vision et une protection contre un plantage en ligne',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        "Plantages : flips, descripteurs et défauts de page ; inverser les sticks et la caméra, la manette utilisée, l'import des sauvegardes, le sélecteur de version ; vertex shaders avec les bons bindings, entrées de sommets périmées relues, tampons d'indices des dessins indirects et vecteurs de mouvement de caméra sans NaN",
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Vecteurs de mouvement des grandes bêtes et un défaut de mémoire',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        "L'aperçu noir du personnage, l'image de l'écran de chargement et un plantage sur un programme de shader illisible",
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        "Le menu des gestes au clavier, l'emplacement d'une image supprimée et le journal des réservations de mémoire échouées",
+    'Обход SRT без ошибок на нулевых таблицах':
+        'Le parcours SRT sans erreur sur les tables nulles',
+    'Половины тачпада на Xbox':
+        'Les moitiés du pavé tactile sur les manettes Xbox',
+    'Идеи для лаунчера':
+        'Des idées pour le lanceur',
     'Удерживать 0,8 с':
         'Maintenir 0,8 s',
     'Удерживать 2 с':
@@ -4835,7 +4935,7 @@ FR = {
     'Помощь и тесты': 'Aide et tests',
     'Другие благодарности': 'Merci aussi à',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, le port sur lequel repose tout ce projet, ainsi que le pointeur dans les menus et la disposition du clavier de la 0.6',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jeu en ligne, DLSS, la page des triches, Ajouter à Steam, ignorer les pipelines que le pilote ne peut pas créer, plus de plantage quand la mémoire vidéo manque et ignorer les tracés à la table de sommets vide',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Jeu en ligne, la page des triches, Ajouter à Steam, ignorer les pipelines que le pilote ne peut pas créer, plus de plantage quand la mémoire vidéo manque et ignorer les tracés à la table de sommets vide',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'A rassemblé et adapté des dizaines de correctifs : plantages au chargement, images noires, l’upscaler, la ligne de performances du journal',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'L’aperçu noir du personnage, l’image de l’écran de chargement et la mémoire du cache de textures',
     'Кэш текстур вовремя освобождает видеопамять': 'Le cache de textures libère la mémoire vidéo à temps',
@@ -5018,6 +5118,26 @@ FR = {
 
 # German.
 DE = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        'Der Koop-Server für die eigene Gruppe und BBSCs nahtlose Beschwörung',
+    'Модель FSR 4 без шлейфов за персонажами':
+        'Das FSR-4-Modell ohne Schlieren hinter Figuren',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        'Ein Absturz des Videoplayers beim Anhalten, das Sichtfeld und ein Schutz vor einem Online-Absturz',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        'Abstürze: Flips, Deskriptoren und Seitenfehler; Sticks tauschen und Kamera invertieren, der benutzte Controller, Spielstand-Import, die Versionsauswahl; Vertex-Shader mit den richtigen Bindings, veraltete Vertex-Eingaben neu gelesen, Indexpuffer indirekter Draws und Kamera-Bewegungsvektoren ohne NaN',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        'Bewegungsvektoren der großen Bestien und ein Speicherfehler',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        'Die schwarze Charaktervorschau, das Bild des Ladebildschirms und ein Absturz bei einem unlesbaren Shader-Programm',
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        'Das Gestenmenü per Tastatur, der Slot eines gelöschten Bildes und das Protokoll fehlgeschlagener Speicherreservierungen',
+    'Обход SRT без ошибок на нулевых таблицах':
+        'Der SRT-Walker ohne Fehler bei Null-Tabellen',
+    'Половины тачпада на Xbox':
+        'Die Touchpad-Hälften auf Xbox-Controllern',
+    'Идеи для лаунчера':
+        'Ideen für den Launcher',
     'Удерживать 0,8 с':
         '0,8 s halten',
     'Удерживать 2 с':
@@ -5814,7 +5934,7 @@ DE = {
     'Помощь и тесты': 'Hilfe und Tests',
     'Другие благодарности': 'Dank auch an',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport, der Port, auf dem dieses ganze Projekt aufbaut, sowie der Mauszeiger in den Menüs und die Tastaturbelegung aus 0.6',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online-Spiel, DLSS, die Cheat-Seite, Zu Steam hinzufügen, das Überspringen von Pipelines, die der Treiber nicht erstellen kann, kein Absturz bei vollem Videospeicher und das Überspringen von Zeichnungen mit leerer Vertex-Tabelle',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': 'Online-Spiel, die Cheat-Seite, Zu Steam hinzufügen, das Überspringen von Pipelines, die der Treiber nicht erstellen kann, kein Absturz bei vollem Videospeicher und das Überspringen von Zeichnungen mit leerer Vertex-Tabelle',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': 'Hat Dutzende Korrekturen gesammelt und angepasst: Abstürze beim Laden, schwarze Bilder, der Upscaler, die Leistungszeile im Log',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': 'Die schwarze Charaktervorschau, das Bild des Ladebildschirms und der Speicher des Texturcaches',
     'Кэш текстур вовремя освобождает видеопамять': 'Der Texturcache gibt Videospeicher rechtzeitig frei',
@@ -5997,6 +6117,26 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Сервер для своего кооператива и бесшовный призыв BBSC':
+        '自建合作服务器，以及 BBSC 的无缝召唤',
+    'Модель FSR 4 без шлейфов за персонажами':
+        '角色身后无拖影的 FSR 4 模型',
+    'Вылет видеоплеера при его остановке, поле зрения и защита от вылета онлайн':
+        '视频播放器停止时的崩溃、视野设置，以及一处联机崩溃防护',
+    'Вылеты: флипы, дескрипторы и ошибки страниц; смена стиков и инверсия камеры, геймпад, которым играют, импорт сохранений, выбор версии; вершинные шейдеры с правильными привязками, повторное чтение устаревших вершинных входов, буферы индексов непрямых отрисовок и векторы движения камеры без NaN':
+        '崩溃修复：翻转、描述符与缺页；交换摇杆与反转镜头、当前使用的手柄、存档导入、版本选择；绑定正确的顶点着色器、重新读取过期的顶点输入、间接绘制的索引缓冲，以及无 NaN 的镜头运动矢量',
+    'Векторы движения больших чудовищ и ошибка памяти':
+        '大型野兽的运动矢量，以及一处内存错误',
+    'Чёрный предпросмотр персонажа, картинка экрана загрузки и вылет из-за нечитаемой программы шейдера':
+        '黑色的角色预览、加载画面的图片，以及着色器程序不可读时的崩溃',
+    'Меню жестов с клавиатуры, слот удалённого изображения и журнал неудачных резервирований памяти':
+        '键盘打开手势菜单、已删除图像的槽位，以及内存预留失败的日志',
+    'Обход SRT без ошибок на нулевых таблицах':
+        'SRT 遍历在空表上不再出错',
+    'Половины тачпада на Xbox':
+        'Xbox 手柄上的触摸板左右两半',
+    'Идеи для лаунчера':
+        '启动器的建议',
     'Удерживать 0,8 с':
         '按住 0.8 秒',
     'Удерживать 2 с':
@@ -6762,7 +6902,7 @@ ZH_CN = {
     'Помощь и тесты': '帮助与测试',
     'Другие благодарности': '同样感谢',
     'bbport — порт, на котором построен весь этот проект, а также указатель мыши в меню и раскладка клавиатуры из 0.6': 'bbport，整个项目所基于的移植，以及 0.6 的菜单鼠标指针和键盘布局',
-    'Игра по сети, DLSS, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': '联机、DLSS、作弊页面、添加到 Steam、跳过驱动无法创建的管线、显存耗尽时不再崩溃，以及跳过顶点表为空的绘制',
+    'Игра по сети, страница читов, добавление в Steam, пропуск конвейеров, которые драйвер не может создать, игра без вылета при нехватке видеопамяти и пропуск отрисовок с пустой таблицей вершин': '联机、作弊页面、添加到 Steam、跳过驱动无法创建的管线、显存耗尽时不再崩溃，以及跳过顶点表为空的绘制',
     'Собрал и адаптировал десятки исправлений: вылеты при загрузке, чёрные изображения, апскейлер, строка производительности в журнале': '收集并改编了数十项修复：加载时崩溃、黑色图像、超分辨率、日志中的性能行',
     'Чёрный предпросмотр персонажа, картинка экрана загрузки и память кэша текстур': '黑色的角色预览、加载画面图片与纹理缓存的内存',
     'Кэш текстур вовремя освобождает видеопамять': '纹理缓存及时释放显存',
