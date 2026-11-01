@@ -583,6 +583,7 @@ void NpHandler::WorkerThread() {
         }
 
         TryReconnect();
+        NpSignaling::PublishPresence(); // bbport: Discord Rich Presence's co-op partners
     }
 }
 

@@ -296,7 +296,7 @@ index 66a9886..19625bc 100644
  
  static std::string GetLibhttpSystemVersionString() {
 diff --git a/a/core/libraries/np/np_handler/np_handler.cpp b/b/core/libraries/np/np_handler/np_handler.cpp
-index 56a8ab9..2f638cf 100644
+index 56a8ab9..1730bdf 100644
 --- a/a/core/libraries/np/np_handler/np_handler.cpp
 +++ b/b/core/libraries/np/np_handler/np_handler.cpp
 @@ -3,6 +3,7 @@
@@ -530,7 +530,15 @@ index 56a8ab9..2f638cf 100644
  }
  
  void NpHandler::OnUserLoggedOut(s32 user_id) {
-@@ -498,10 +619,16 @@ void NpHandler::TryReconnect() {
+@@ -462,6 +583,7 @@ void NpHandler::WorkerThread() {
+         }
+ 
+         TryReconnect();
++        NpSignaling::PublishPresence(); // bbport: Discord Rich Presence's co-op partners
+     }
+ }
+ 
+@@ -498,10 +620,16 @@ void NpHandler::TryReconnect() {
          }
          // ConnectUserById locks m_mutex_clients internally; call it unlocked.
          const bool ok = ConnectUserById(uid);
@@ -578,3 +586,73 @@ index fc64e82..8e05874 100644
      return addHttpRequestHeader(request_id, field_name, field_value);
  }
  
+diff --git a/a/core/libraries/np/np_signaling/np_signaling_state.cpp b/b/core/libraries/np/np_signaling/np_signaling_state.cpp
+index 05d318d..f4e9731 100644
+--- a/a/core/libraries/np/np_signaling/np_signaling_state.cpp
++++ b/b/core/libraries/np/np_signaling/np_signaling_state.cpp
+@@ -5,7 +5,10 @@
+ #include <cctype>
+ #include <cstring>
+ #include <mutex>
++#include <cstdio>
++#include <cstdlib>
+ #include <random>
++#include <set>
+ #include <string>
+ #include <string_view>
+ 
+@@ -664,4 +667,40 @@ bool GetPeerAddress(std::string_view online_id, u32* out_addr, u16* out_port) {
+     return false;
+ }
+ 
++void PublishPresence() {
++    static const char* dir = std::getenv("BB_PRESENCE_DIR");
++    if (dir == nullptr || dir[0] == '\0') {
++        return;
++    }
++    std::set<std::string> peers;
++    {
++        SignalingMutexGuard lock;
++        for (const auto& [conn_id, ci] : NpHandler::GetInstance().GetSignalingState().connections) {
++            if (ci.status == ORBIS_NP_SIGNALING_CONN_STATUS_ACTIVE && !ci.dead_fired) {
++                peers.insert(OnlineIdToString(ci.online_id));
++            }
++        }
++    }
++    std::string text;
++    for (const auto& peer : peers) {
++        text += peer + "\n";
++    }
++    static std::string published = "\n";
++    if (text == published) {
++        return;
++    }
++    published = text;
++    const std::string path = std::string(dir) + "/coop";
++    const std::string temp = path + ".tmp";
++    std::FILE* file = std::fopen(temp.c_str(), "w");
++    if (file == nullptr) {
++        return;
++    }
++    std::fwrite(text.data(), 1, text.size(), file);
++    if (std::fclose(file) == 0) {
++        std::rename(temp.c_str(), path.c_str());
++    }
++    LOG_INFO(Lib_NpSignaling, "Presence: connected with {} player(s)", peers.size());
++}
++
+ } // namespace Libraries::Np::NpSignaling
+diff --git a/a/core/libraries/np/np_signaling/np_signaling_state.h b/b/core/libraries/np/np_signaling/np_signaling_state.h
+index 208ac31..3bae09d 100644
+--- a/a/core/libraries/np/np_signaling/np_signaling_state.h
++++ b/b/core/libraries/np/np_signaling/np_signaling_state.h
+@@ -380,4 +380,9 @@ void DispatchPeerActivatedEvent(OrbisNpSignalingConnectionId conn_id);
+ const char* SignalingEventName(u32 event_type);
+ bool ConsumeActivationBudgetLocked(NpSignalingContext& ctx);
+ 
++// bbport: Discord Rich Presence (BB_PRESENCE_DIR, scripts/discord_presence.py): the online IDs of
++// the players this one is connected with, one per line in BB_PRESENCE_DIR/coop, written when they
++// change. Called by NpHandler's worker.
++void PublishPresence();
++
+ } // namespace Libraries::Np::NpSignaling

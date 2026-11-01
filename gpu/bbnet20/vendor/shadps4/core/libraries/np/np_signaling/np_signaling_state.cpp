@@ -5,7 +5,10 @@
 #include <cctype>
 #include <cstring>
 #include <mutex>
+#include <cstdio>
+#include <cstdlib>
 #include <random>
+#include <set>
 #include <string>
 #include <string_view>
 
@@ -662,6 +665,42 @@ bool GetPeerAddress(std::string_view online_id, u32* out_addr, u16* out_port) {
         }
     }
     return false;
+}
+
+void PublishPresence() {
+    static const char* dir = std::getenv("BB_PRESENCE_DIR");
+    if (dir == nullptr || dir[0] == '\0') {
+        return;
+    }
+    std::set<std::string> peers;
+    {
+        SignalingMutexGuard lock;
+        for (const auto& [conn_id, ci] : NpHandler::GetInstance().GetSignalingState().connections) {
+            if (ci.status == ORBIS_NP_SIGNALING_CONN_STATUS_ACTIVE && !ci.dead_fired) {
+                peers.insert(OnlineIdToString(ci.online_id));
+            }
+        }
+    }
+    std::string text;
+    for (const auto& peer : peers) {
+        text += peer + "\n";
+    }
+    static std::string published = "\n";
+    if (text == published) {
+        return;
+    }
+    published = text;
+    const std::string path = std::string(dir) + "/coop";
+    const std::string temp = path + ".tmp";
+    std::FILE* file = std::fopen(temp.c_str(), "w");
+    if (file == nullptr) {
+        return;
+    }
+    std::fwrite(text.data(), 1, text.size(), file);
+    if (std::fclose(file) == 0) {
+        std::rename(temp.c_str(), path.c_str());
+    }
+    LOG_INFO(Lib_NpSignaling, "Presence: connected with {} player(s)", peers.size());
 }
 
 } // namespace Libraries::Np::NpSignaling

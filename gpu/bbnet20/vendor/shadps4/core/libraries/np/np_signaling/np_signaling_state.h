@@ -380,4 +380,9 @@ void DispatchPeerActivatedEvent(OrbisNpSignalingConnectionId conn_id);
 const char* SignalingEventName(u32 event_type);
 bool ConsumeActivationBudgetLocked(NpSignalingContext& ctx);
 
+// bbport: Discord Rich Presence (BB_PRESENCE_DIR, scripts/discord_presence.py): the online IDs of
+// the players this one is connected with, one per line in BB_PRESENCE_DIR/coop, written when they
+// change. Called by NpHandler's worker.
+void PublishPresence();
+
 } // namespace Libraries::Np::NpSignaling

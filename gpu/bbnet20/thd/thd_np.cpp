@@ -6,8 +6,11 @@
 
 #include <atomic>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <map>
+#include <set>
+#include <string>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -54,10 +57,33 @@ void sig_fire(unsigned ctx, unsigned conn, std::uint16_t event, int error) {
               static_cast<std::int64_t>(error), c.arg);
 }
 
+// bbport (Linux fork): Discord Rich Presence (BB_PRESENCE_DIR, scripts/discord_presence.py): the
+// online IDs of the players with an announced, live connection, one per line in
+// BB_PRESENCE_DIR/coop, written when they change. Under g_sig_mu.
+void publish_presence_locked() {
+    static const char* dir = std::getenv("BB_PRESENCE_DIR");
+    if (!dir || !*dir) return;
+    std::set<std::string> peers;
+    for (const auto& [id, c] : g_conn) {
+        if (c.announced && !c.dead) peers.insert(c.online_id);
+    }
+    std::string text;
+    for (const auto& peer : peers) text += peer + "\n";
+    static std::string published = "\n";
+    if (text == published) return;
+    published = text;
+    const std::string path = std::string(dir) + "/coop", temp = path + ".tmp";
+    std::FILE* file = std::fopen(temp.c_str(), "w");
+    if (!file) return;
+    std::fwrite(text.data(), 1, text.size(), file);
+    if (std::fclose(file) == 0) std::rename(temp.c_str(), path.c_str());
+}
+
 // A connection with a known peer: ESTABLISHED at +200 ms, ACTIVE at +400.
 void announce_locked(unsigned conn_id, Conn& c) {
     if (c.announced || !c.member_id) return;
     c.announced = true;
+    publish_presence_locked();
     PeersSetConn(c.member_id, conn_id, 2);
     const unsigned ctx = c.ctx;
     DispatchAfter(200, Prio::Signaling, [ctx, conn_id] { sig_fire(ctx, conn_id, kEvEstablished, 0); });
@@ -69,6 +95,7 @@ s32 PS4_SYSV_ABI sig_term() {
     std::lock_guard lk(g_sig_mu);
     g_sig_ctx.clear();
     g_conn.clear();
+    publish_presence_locked();
     return 0;
 }
 s32 PS4_SYSV_ABI sig_create_ctx(const void*, void* cb, void* arg, unsigned* ctx) {
@@ -83,6 +110,7 @@ s32 PS4_SYSV_ABI sig_delete_ctx(unsigned ctx) {
     std::lock_guard lk(g_sig_mu);
     g_sig_ctx.erase(ctx);
     for (auto it = g_conn.begin(); it != g_conn.end();) it = it->second.ctx == ctx ? g_conn.erase(it) : std::next(it);
+    publish_presence_locked();
     return 0;
 }
 // Idempotent per peer: the game re-activates.
@@ -135,6 +163,7 @@ s32 PS4_SYSV_ABI sig_deactivate(unsigned ctx, unsigned conn) {
     const auto it = g_conn.find(conn);
     if (it != g_conn.end() && it->second.ctx == ctx) {
         it->second.dead = true;
+        publish_presence_locked();
         if (it->second.member_id) PeersSetConn(it->second.member_id, conn, 0);
     }
     return 0;
@@ -387,6 +416,7 @@ void SignalingPeerDead(const std::string& online_id) {
                 dead.emplace_back(c.ctx, id);
             }
         }
+        publish_presence_locked();
     }
     for (const auto& [ctx, conn] : dead) {
         DispatchAfter(100, Prio::Signaling, [ctx = ctx, conn = conn] { sig_fire(ctx, conn, kEvDead, 0); });
@@ -396,6 +426,7 @@ void SignalingPeerDead(const std::string& online_id) {
 void SignalingReset() {
     std::lock_guard lk(g_sig_mu);
     for (auto& [id, c] : g_conn) c.dead = true;
+    publish_presence_locked();
 }
 
 void RegisterNp(Core::Loader::SymbolsResolver* sym) {
