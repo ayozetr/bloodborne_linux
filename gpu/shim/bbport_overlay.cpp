@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "bbport_overlay.h"
 #include "bbport_overlay_internal.h"
+#include "bbport_atlas_menu.h"
+#include "bbport_atlas_paths.h"
+#include "bbport_map.h"
+#include "bbport_map_art.h"
 #include "shim/bb_env.h"
 
 #include "bbport_toggles.h"
@@ -17,6 +21,7 @@
 #include <cstring>
 #include <deque>
 #include <filesystem>
+#include <fstream>
 #include <unordered_map>
 #include <mutex>
 #include <string>
@@ -184,6 +189,16 @@ std::chrono::steady_clock::time_point last_present{};
 float frame_ms_avg = 0.0f;
 
 float PixelDensity(SDL_WindowID id);
+
+// Hunter's Atlas (MikeTat1988): the in-game map, only with BB_ATLAS_ENABLED=1 (the launcher's
+// switch). Off, none of its code runs: no files read, no tile, no input routed.
+bool AtlasOn() {
+    static const bool on = [] {
+        const char* env = bb_env("BB_ATLAS_ENABLED");
+        return env && env[0] && std::strcmp(env, "0") != 0;
+    }();
+    return on;
+}
 
 /// The size the menu is drawn at (the swapchain's, Draw), for the mouse's position in it.
 std::atomic<u32> display_width{0}, display_height{0};
@@ -455,6 +470,9 @@ void Menu() {
     Slider(BbSettings::MenuText("Horizontal speed", "Скорость по горизонтали"), s.camera_speed[1], 0.25f, 2.0f);
     Slider(BbSettings::MenuText("Vertical speed", "Скорость по вертикали"), s.camera_speed[0], 0.25f, 2.0f);
 
+    if (AtlasOn()) {
+        BbMap::Settings();
+    }
     ImGui::SeparatorText(BbSettings::MenuText("Other", "Прочее"));
     Checkbox(BbSettings::MenuText("FPS counter in corner", "Счётчик FPS в углу"), s.show_fps);
     Checkbox(BbSettings::MenuText("Mute in the background", "Без звука в фоне"), s.mute_unfocused);
@@ -1124,6 +1142,28 @@ void Init(const Vulkan::Instance& instance, vk::Format format, u32 image_count) 
     font_config.FontDataOwnedByAtlas = false;
     io.Fonts->AddFontFromMemoryTTF(const_cast<unsigned char*>(bb_font_ttf),
                                    int(bb_font_ttf_end - bb_font_ttf), 18.0f, &font_config);
+    // Hunter's Atlas: the map's serif title font, made from the player's own menu asset by the
+    // map generator (the port's font above stays the default).
+    if (AtlasOn()) {
+        const auto map_font = BbAtlasPath("BB_MAP_FONT", BbAtlasPath("BB_MAP_DIR", "navigation-map/maps")
+                                                              .parent_path() / "fonts/bloodborne-native.ttf");
+        std::ifstream face_file(map_font, std::ios::binary | std::ios::ate);
+        if (face_file) {
+            const auto bytes = face_file.tellg();
+            if (bytes > 0 && bytes < 16 * 1024 * 1024) {
+                void* data = IM_ALLOC(size_t(bytes));
+                face_file.seekg(0);
+                face_file.read(static_cast<char*>(data), bytes);
+                if (face_file) {
+                    if (auto* face = io.Fonts->AddFontFromMemoryTTF(data, int(bytes), 24.0f)) {
+                        BbMap::SetTitleFont(face);
+                    }
+                } else {
+                    IM_FREE(data);
+                }
+            }
+        }
+    }
 
     const vk::Instance vk_instance = instance.GetInstance();
     ImGui_ImplVulkan_LoadFunctions(
@@ -1157,6 +1197,10 @@ void Init(const Vulkan::Instance& instance, vk::Format format, u32 image_count) 
         return;
     }
     initialized = true;
+    if (AtlasOn()) {
+        BbMapArt::Init();
+        BbMap::Init();
+    }
     std::printf("Overlay: menu ready (Insert, or hold L3+R3)\n");
 }
 
@@ -1181,14 +1225,28 @@ bool HandleEvent(const SDL_Event& event) {
         return false;
     }
     ImGuiIO& io = ImGui::GetIO();
-    const bool is_open = menu_open;
+    if (AtlasOn()) {
+        BbAtlasMenu::Suppress(menu_open || prompt_active);
+        if (!prompt_active && BbAtlasMenu::HandleMouse(event)) {
+            return true;
+        }
+        if (!prompt_active && BbMap::HandleEvent(event)) {
+            return true;
+        }
+    }
+    // The map takes the keyboard, the mouse and the pad's ImGui navigation as the menu does.
+    const bool map_open = AtlasOn() && BbMap::IsOpen();
+    const bool is_open = menu_open || map_open;
     switch (event.type) {
     case SDL_EVENT_KEY_DOWN:
     case SDL_EVENT_KEY_UP: {
         const bool down = event.type == SDL_EVENT_KEY_DOWN;
         if (down && !event.key.repeat &&
             (event.key.key == SDLK_INSERT || (is_open && event.key.key == SDLK_ESCAPE))) {
-            SetOpen(event.key.key == SDLK_INSERT ? !is_open : false);
+            if (map_open) {
+                BbMap::Close();
+            }
+            SetOpen(event.key.key == SDLK_INSERT ? !menu_open : false);
             return true;
         }
         if (!is_open) {
@@ -1317,16 +1375,31 @@ bool Visible() {
     }
     const bool shader_progress = ShaderProgressShown();
     return initialized && (menu_open || open_requested || prompt_active || banner_active ||
-                           trophy_active || notice_busy || BbSettings::Get().show_fps || shader_progress);
+                           trophy_active || notice_busy || BbSettings::Get().show_fps || shader_progress ||
+                           (AtlasOn() && (BbMap::IsOpen() || BbAtlasMenu::Visible())));
+}
+
+uint32_t RoutePad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx, uint8_t ry) {
+    if (!AtlasOn()) {
+        return buttons;
+    }
+    std::scoped_lock lock{imgui_mutex};
+    if (!initialized || menu_open || prompt_active) {
+        return buttons;
+    }
+    return BbAtlasMenu::RoutePad(buttons, lx, ly, rx, ry);
 }
 
 bool MenuOpen() {
-    return menu_open;
+    // bbport (Linux fork): also while Hunter's Atlas's map or its quick-menu tile uses the pointer
+    // (main's ReleasesMouse): the window lets the mouse go and shows the system cursor.
+    return menu_open || (AtlasOn() && initialized && BbAtlasMenu::Interacting());
 }
 
 bool CapturesInput() {
     // The text dialog too: keys typed into it (Backspace is the touchpad) stay out of the game.
-    return menu_open || prompt_active;
+    // Hunter's Atlas: its open map and its controller shortcut while it is being held.
+    return menu_open || prompt_active || (AtlasOn() && BbMap::CapturesInput());
 }
 
 void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
@@ -1355,6 +1428,14 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
     if (bb_env("BB_MENU_KEYS_FILE") && initialized) {
         std::scoped_lock lock{imgui_mutex};
         ScriptedKeys();
+    }
+    // Hunter's Atlas follows every presented frame, also while nothing is drawn.
+    if (AtlasOn() && initialized) {
+        std::scoped_lock lock{imgui_mutex};
+        BbMap::PollTestCommands();
+        BbMap::Tick();
+        BbAtlasMenu::Suppress(menu_open || prompt_active);
+        BbAtlasMenu::Tick();
     }
     if (!Visible()) {
         return;
@@ -1394,8 +1475,18 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
     }
     if (menu_open) {
         Menu();
+        if (AtlasOn() && BbMap::IsOpen()) {
+            SetOpen(false);
+        }
     }
-    if (BbSettings::Get().show_fps && !menu_open) {
+    const bool map_open = AtlasOn() && BbMap::IsOpen();
+    if (map_open) {
+        BbMap::Draw();
+    }
+    if (AtlasOn() && !menu_open && !prompt_active && !map_open) {
+        BbAtlasMenu::Draw();
+    }
+    if (BbSettings::Get().show_fps && !menu_open && !map_open) {
         FpsCounter();
     }
     if (prompt_active && !menu_open) {

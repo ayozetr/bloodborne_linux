@@ -254,6 +254,10 @@ target_include_directories(bbgpu PRIVATE . shim layer games cp ${SHADER_INCLUDE}
 if (WIN32)
     target_include_directories(bbgpu PUBLIC platform/win32/include)
 endif()
+# Hunter's Atlas (shim/bbport_map*.cpp) reads its map packs with nlohmann/json (header only, MIT).
+# bbport (Linux fork): the system package the online module (bbnet20) builds with.
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(bbgpu PRIVATE nlohmann_json::nlohmann_json)
 target_compile_definitions(bbgpu PRIVATE BOOST_ASIO_STANDALONE NDEBUG)
 target_compile_options(bbgpu PRIVATE -Wno-deprecated-declarations -Wno-missing-field-initializers)
 # Loaded with bb-probe at startup (DT_NEEDED, never dlopen): thread_local access without a

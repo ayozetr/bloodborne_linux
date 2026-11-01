@@ -114,6 +114,8 @@ echo "Built $PWD/out/bb-probe"
 if [[ ${1:-} == --test ]]; then
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread "${includes[@]}" -I. -Isrc tests/test_pad.c "${libraries[@]}" -lm -o out/pad-test
     out/pad-test
+    "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread "${includes[@]}" -I. -Isrc tests/test_pad_atlas.c "${libraries[@]}" -lm -o out/pad-atlas-test
+    out/pad-atlas-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -I. -Isrc tests/test_runtime.c "${runtime[@]}" out/libatrac9.a -lm "${gpu[@]}" "${libraries[@]}" -o out/runtime-test
     out/runtime-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -Isrc tests/test_file_mods.c src/runtime_remote.c -o out/file-mods-test
@@ -131,4 +133,16 @@ if [[ ${1:-} == --test ]]; then
     out/map-location-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -Isrc tests/test_atlas_state.c src/runtime_atlas_state.c -lm -o out/atlas-state-test
     out/atlas-state-test
+    # Hunter's Atlas: its tile's state machine, map styles, floor interiors, controller shortcut.
+    # (-Wno-misleading-indentation: Atlas's compact one-line style.) bbport (Linux fork):
+    # nlohmann/json from the system, as gpu/CMakeLists.txt.
+    atlas_cxx=(-std=c++20 -O2 -g -Wall -Wextra -Werror -Wno-misleading-indentation -Igpu/shim -Igpu/third_party/imgui "${includes[@]}")
+    for test in test_bbport_atlas_menu_state test_bbport_atlas_style test_bbport_atlas_interiors; do
+        "${CXX:-c++}" "${atlas_cxx[@]}" "tests/$test.cpp" -o "out/$test" || exit 1
+        (cd out && "./$test") || exit 1
+    done
+    "${CXX:-c++}" "${atlas_cxx[@]}" tests/test_map_controller.cpp gpu/shim/bbport_map_controller.cpp "${libraries[@]}" -o out/map-controller-test
+    out/map-controller-test
+    "${CXX:-c++}" "${atlas_cxx[@]}" tests/test_atlas_features.cpp gpu/shim/bbport_map_features.cpp "${libraries[@]}" -o out/atlas-features-test
+    rm -rf out/atlas-features && out/atlas-features-test out/atlas-features
 fi

@@ -369,6 +369,10 @@ int* PS4_SYSV_ABI __Error() {
 extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
 }
+extern "C" uint32_t bbgpu_atlas_route_pad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx,
+                                          uint8_t ry) {
+    return BbOverlay::RoutePad(buttons, lx, ly, rx, ry);
+}
 
 extern "C" void bbgpu_trophy_notice(int id, char grade, const char* name_utf8, const char* icon_path) {
     std::vector<u8> icon;

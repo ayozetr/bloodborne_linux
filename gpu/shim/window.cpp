@@ -478,7 +478,8 @@ bool WindowSDL::PollEvents() {
         !text_active) {
         CaptureMouse(true);
     }
-    // The menu, the name dialog and mouse_look=0 want the cursor.
+    // The menu, the name dialog, Hunter's Atlas's map and tile (BbOverlay::MenuOpen) and
+    // mouse_look=0 want the cursor.
     if (mouse_captured.load(std::memory_order_relaxed) &&
         (BbOverlay::MenuOpen() || text_active || !mouse_look.load(std::memory_order_relaxed))) {
         CaptureMouse(false);
