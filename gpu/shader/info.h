@@ -262,9 +262,26 @@ struct Info : InfoPersistent {
         }
     }
 
+    /// bbport (Linux fork): binding numbers the images take: one each, or one per mip level for an
+    /// image with a binding per level (DynamicIndex; its T# is read only then).
+    u32 ImageBindingCount() const {
+        u32 count = 0;
+        for (const auto& image : images) {
+            count += image.mip_fallback_mode == MipStorageFallbackMode::DynamicIndex
+                         ? image.NumBindings(*this)
+                         : 1u;
+        }
+        return count;
+    }
+
     void AddBindings(Backend::Bindings& bnd) const {
         bnd.buffer += buffers.size();
-        bnd.unified += buffers.size() + images.size() + samplers.size();
+        // bbport (Linux fork): an image with a binding per mip level (DynamicIndex, on GPUs without
+        // VK_AMD_shader_image_load_store_lod such as NVIDIA's) takes as many binding numbers as
+        // the SPIR-V emitter and the pipeline layout give it, not one; the rasterizer advances the
+        // same way when it binds the next stage. A stage whose start moves gets a new permutation:
+        // StageSpecialization compares the start.
+        bnd.unified += buffers.size() + ImageBindingCount() + samplers.size();
         bnd.user_data += ud_mask.NumRegs();
     }
 
