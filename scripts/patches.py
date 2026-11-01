@@ -397,6 +397,14 @@ def encode(line):
     raise ValueError(f'unsupported patch type {kind!r}')
 
 
+def same_app_version(value, app_version):
+    """'1.09' is '01.09' (patch files write either)."""
+    try:
+        return value is not None and [int(p) for p in value.strip().split('.')]==[int(p) for p in app_version.split('.')]
+    except ValueError:
+        return False
+
+
 def compile_patches(xml, names, app_version, segments):
     found={}
     for meta in ET.parse(xml).getroot().iter('Metadata'):
@@ -427,7 +435,9 @@ def external_patches(directory, app_version='01.09', exclude=Path(__file__).reso
     found=[]
     directory=Path(directory)
     for path in sorted(directory.glob('*.xml')) if directory.is_dir() else []:
-        if path.resolve()==Path(exclude).resolve(): continue  # the built-in file (patches/ in a checkout)
+        # The built-in file, and copies of it in another patches folder (an older package's): those
+        # applied its frame-rate patches over the port's own (from Awaken's BloodBorneButPc).
+        if path.resolve()==Path(exclude).resolve() or path.name.lower()==Path(exclude).name.lower(): continue
         try:
             root=ET.parse(path).getroot()
         except ET.ParseError as error:
@@ -436,7 +446,7 @@ def external_patches(directory, app_version='01.09', exclude=Path(__file__).reso
         ids={e.text.strip() for e in root.iter('ID') if e.text}
         if ids and not ids&BLOODBORNE_IDS: continue
         for meta in root.iter('Metadata'):
-            if meta.get('AppVer')==app_version and meta.get('AppElf','eboot.bin')=='eboot.bin':
+            if same_app_version(meta.get('AppVer'),app_version) and meta.get('AppElf','eboot.bin')=='eboot.bin':
                 found.append((f'{path.name}/{meta.get("Name")}',path,meta))
     return found
 

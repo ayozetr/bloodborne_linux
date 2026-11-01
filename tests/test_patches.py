@@ -175,6 +175,18 @@ EXTERNAL = """<?xml version="1.0"?>
 
 
 class ExternalPatchTests(unittest.TestCase):
+    def test_short_version_and_copies_of_the_built_in_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            # "1.09" is "01.09"; a copy of Bloodborne.xml (any case) is the built-in one.
+            (folder / 'short.xml').write_text(EXTERNAL.replace('AppVer="01.09"', 'AppVer="1.09"'))
+            (folder / 'BLOODBORNE.xml').write_text(EXTERNAL)
+            found = external_patches(folder)
+            self.assertEqual([key for key, _, _ in found],
+                             ['short.xml/On', 'short.xml/Off', 'short.xml/Mask'])
+            self.assertFalse(patches.same_app_version('1.08', '01.09'))
+            self.assertFalse(patches.same_app_version('v1', '01.09'))
+
     def test_selection_and_unsupported_lines(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
