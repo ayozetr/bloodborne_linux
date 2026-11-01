@@ -281,6 +281,17 @@ else
     bash build.sh
     probe=${BB_PROBE:-out/bb-probe}  # BB_PROBE: a wrapper (gdb) around it
 fi
+# Steam Input (Linux fork issue #12): Steam sends its virtual controller's input only while it
+# sees the game's window focused, and on a Wayland desktop it only sees X11 windows. A native
+# Wayland window got nothing from the controller; through Xwayland it works. Only when Steam made a
+# virtual controller for the game and SDL_VIDEO_DRIVER is not set (BB_STEAM_INPUT_X11=0: keep
+# Wayland).
+if [[ -z ${SDL_VIDEO_DRIVER:-} && -n ${WAYLAND_DISPLAY:-} && -n ${DISPLAY:-} \
+        && ${BB_STEAM_INPUT_X11:-1} != 0 && ${SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD:-0} == 1 ]] \
+        && grep -qs '^\[slot' "${SteamVirtualGamepadInfo:-}"; then
+    echo "Window: X11 (Xwayland), so Steam Input reaches the game (BB_STEAM_INPUT_X11=0: Wayland)"
+    export SDL_VIDEO_DRIVER=x11
+fi
 # The Xbox and Switch button art for the live button prompts (scripts/prompt_art.py): without it
 # (Pillow missing) those pads' prompts are letters.
 if prompt_art=$("$PYTHON" scripts/prompt_art.py --out "$out/prompt_art") && [[ -n $prompt_art ]]; then
