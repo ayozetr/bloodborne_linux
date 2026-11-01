@@ -11,7 +11,10 @@ third-party license notices.
 
 The bbport changes: the shadNet session starts once the game is loaded
 (`NpManager::InitializeRuntime`, called by `bbnet_initialize`), and the client reports
-itself to the server as this port (`BB_CLIENT_VERSION`), not as shadPS4.
+itself to the server as this port (`BB_CLIENT_VERSION`), not as shadPS4. A server that does not answer
+when the game starts (still starting, a VPN not up yet, a short outage) is tried again in the
+background, every 2 s and up to every 30 s, as after a dropped connection; one that answers and
+refuses the sign-in is not. An `exit()` with the network worker running no longer aborts.
 
 The renderer, shaders and upscalers were not imported. `bbnet_glue.cpp` and `include/`
 implement what these libraries need from the rest of shadPS4 (kernel threads, user
