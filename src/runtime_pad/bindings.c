@@ -131,7 +131,8 @@ static int key_from_name(const char *name) {
 }
 /* Mouse look (bbport.ini): mouse_look=0 leaves the mouse alone; mouse_sensitivity (default 1:
  * ~1000 pixels/s turn the camera at full speed), mouse_invert_y=1, mouse_invert_x=1. */
-/* Issue #299: bbport.ini button_prompts=auto (the device used last), playstation, xbox or keyboard. */
+/* Issue #299: bbport.ini button_prompts=auto (the device used last), playstation, xbox, switch
+ * (the Linux fork's launcher: a Nintendo pad's art and labels) or keyboard. */
 static int prompt_forced=-1;
 static int mouse_look=1, mouse_invert_y, mouse_invert_x;
 static float mouse_sensitivity=1.0f;
@@ -175,7 +176,7 @@ static void load_bindings(void) {
             else if (!strncmp(line,"pad_motion=",11) && motion_enabled<0) motion_enabled=atoi(value)!=0;
             else if (!strncmp(line,"button_prompts=",15)) {
                 prompt_forced=!strncmp(value,"playstation",11) ? 0 : !strncmp(value,"xbox",4) ? 1 :
-                              !strncmp(value,"keyboard",8) ? 2 : -1;
+                              !strncmp(value,"keyboard",8) ? 2 : !strncmp(value,"switch",6) ? 3 : -1;
             }
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
             else if (!strncmp(line,"mouse_invert_x=",15)) mouse_invert_x=atoi(value)!=0;

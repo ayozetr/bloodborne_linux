@@ -260,5 +260,24 @@ int main(void) {
         load_bindings();
         assert(!layout_classic && bindings[IN_DODGE].keys[0]==SDL_SCANCODE_SPACE);
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options, classic keyboard layout");
+    /* button_prompts=switch: another gamepad's prompts, with a Nintendo pad's art and labels. */
+    {
+        char prompts_path[]="/tmp/bbport-prompts-XXXXXX";
+        const int fd=mkstemp(prompts_path);
+        assert(fd>=0);
+        const char text[]="button_prompts=switch\n";
+        assert(write(fd,text,sizeof(text)-1)==(ssize_t)(sizeof(text)-1));
+        close(fd);
+        const char *saved=getenv("BB_CONFIG");
+        char saved_copy[512]; snprintf(saved_copy,sizeof saved_copy,"%s",saved ? saved : "");
+        setenv("BB_CONFIG",prompts_path,1);
+        load_bindings();
+        prompt_note(NULL,0,0);
+        assert(runtime_pad_prompt_device()==1 && runtime_pad_prompt_nintendo());
+        unlink(prompts_path);
+        setenv("BB_CONFIG",saved_copy,1);
+        load_bindings();
+        assert(prompt_forced==-1);
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options, classic keyboard layout, Switch prompts");
 }

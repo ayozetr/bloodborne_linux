@@ -20,8 +20,9 @@ static void prompt_note(SDL_Gamepad *g, int pad_active, int keyboard_active) {
     else if (device<0) device=2;
     SDL_GamepadType shown_type=type;
     if (prompt_forced>=0) {
-        device=prompt_forced;
-        if (device==1) shown_type=SDL_GAMEPAD_TYPE_XBOXONE;
+        device=prompt_forced==3 ? 1 : prompt_forced;
+        if (prompt_forced==1) shown_type=SDL_GAMEPAD_TYPE_XBOXONE;
+        if (prompt_forced==3) shown_type=SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO;
     }
     if (device!=prompt_device || (device!=2 && shown_type!=prompt_pad_type)) {
         prompt_device=device;
