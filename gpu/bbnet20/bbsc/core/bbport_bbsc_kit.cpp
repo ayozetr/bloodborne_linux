@@ -34,18 +34,35 @@ extern "C" void extra_bbsc_setup_save_dir(void) {
     const char* user = extra_bbsc_save_root();
     const std::filesystem::path save_root =
         std::filesystem::path(user && user[0] ? user : "user") / "savedata";
+    // bbport (Linux fork): the most recently written save folder, not the first one listed (a
+    // second region's copy, an old one); on a first start, with none yet, the one the game will
+    // write (user 1, src/runtime_services.c; BB_SAVEDATA_TITLE from src/runtime_savedata.c) -
+    // without a folder the kit was never given.
+    std::filesystem::path newest;
+    std::filesystem::file_time_type newest_time{};
     std::error_code error;
     for (const auto& id : std::filesystem::directory_iterator(save_root, error)) {
         std::error_code title_ec;
         for (const auto& title : std::filesystem::directory_iterator(id.path(), title_ec)) {
             const auto folder = title.path() / "SPRJ0005";
-            if (std::filesystem::is_directory(folder, error)) {
-                const std::string text = folder.string();
-                setenv("BBSC_SAVE_DIR", text.c_str(), 0);
-                std::printf("BBSC: save folder %s\n", text.c_str());
-                return;
+            std::error_code ec;
+            const auto written = std::filesystem::last_write_time(folder, ec);
+            if (!ec && std::filesystem::is_directory(folder, ec) &&
+                (newest.empty() || written > newest_time)) {
+                newest = folder;
+                newest_time = written;
             }
         }
+    }
+    const char* title = std::getenv("BB_SAVEDATA_TITLE");
+    if (newest.empty() && title != nullptr && title[0] != '\0' &&
+        std::strcmp(title, "UNKNOWN") != 0) {
+        newest = save_root / "1" / title / "SPRJ0005";
+    }
+    if (!newest.empty()) {
+        const std::string text = newest.string();
+        setenv("BBSC_SAVE_DIR", text.c_str(), 0);
+        std::printf("BBSC: save folder %s\n", text.c_str());
     }
 }
 
