@@ -76,10 +76,29 @@ index a87556c..e3ba25a 100644
 +void InitializeRuntime();
  } // namespace Libraries::Np::NpManager
 diff --git a/a/shadnet/client.cpp b/b/shadnet/client.cpp
-index 1d8b958..f05d5cb 100644
+index 1d8b958..19b851c 100644
 --- a/a/shadnet/client.cpp
 +++ b/b/shadnet/client.cpp
-@@ -558,18 +558,8 @@ static std::vector<u8> MakeComIdPayload(const std::string& com_id, const std::st
+@@ -470,9 +470,16 @@ bool ShadNetClient::SendAll(const std::vector<u8>& data) {
+     std::lock_guard lock(m_mutex_send_direct);
+     int sent = 0;
+     const int total = static_cast<int>(data.size());
++    // bbport: a server that went away mid-send raised SIGPIPE on Linux, which ends the game
++    // instead of the reconnect.
++#ifdef MSG_NOSIGNAL
++    constexpr int send_flags = MSG_NOSIGNAL;
++#else
++    constexpr int send_flags = 0;
++#endif
+     while (sent < total) {
+-        const int r = static_cast<int>(
+-            ::send(m_sock, reinterpret_cast<const char*>(data.data() + sent), total - sent, 0));
++        const int r = static_cast<int>(::send(m_sock, reinterpret_cast<const char*>(data.data() + sent),
++                                              total - sent, send_flags));
+         if (r < 0) {
+             LOG_ERROR(ShadNet, "send() failed");
+             return false;
+@@ -558,18 +565,8 @@ static std::vector<u8> MakeComIdPayload(const std::string& com_id, const std::st
  }
  
  std::string ShadNetClient::BuildVersionString() {
@@ -100,10 +119,6 @@ index 1d8b958..f05d5cb 100644
  }
  
  u64 ShadNetClient::ReportClientVersion() {
-
-bbport: on top of the changes above, the login in plain words, no secrets in HTTP logs and the
-UPnP lease.
-
 diff --git a/a/core/libraries/net/net_upnp.cpp b/b/core/libraries/net/net_upnp.cpp
 index 7c093ab..adf7dad 100644
 --- a/a/core/libraries/net/net_upnp.cpp

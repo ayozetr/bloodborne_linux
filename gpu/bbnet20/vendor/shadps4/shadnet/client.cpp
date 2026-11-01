@@ -470,9 +470,16 @@ bool ShadNetClient::SendAll(const std::vector<u8>& data) {
     std::lock_guard lock(m_mutex_send_direct);
     int sent = 0;
     const int total = static_cast<int>(data.size());
+    // bbport: a server that went away mid-send raised SIGPIPE on Linux, which ends the game
+    // instead of the reconnect.
+#ifdef MSG_NOSIGNAL
+    constexpr int send_flags = MSG_NOSIGNAL;
+#else
+    constexpr int send_flags = 0;
+#endif
     while (sent < total) {
-        const int r = static_cast<int>(
-            ::send(m_sock, reinterpret_cast<const char*>(data.data() + sent), total - sent, 0));
+        const int r = static_cast<int>(::send(m_sock, reinterpret_cast<const char*>(data.data() + sent),
+                                              total - sent, send_flags));
         if (r < 0) {
             LOG_ERROR(ShadNet, "send() failed");
             return false;

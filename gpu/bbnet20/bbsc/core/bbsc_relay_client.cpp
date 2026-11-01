@@ -223,7 +223,12 @@ void WriterThread() {
         int left = static_cast<int>(frame.size());
         const char* at = frame.data();
         while (left > 0) {
+            // bbport: no SIGPIPE (it ends the game on Linux) when the relay went away mid-send.
+#ifdef MSG_NOSIGNAL
+            const int sent = send(s, at, left, MSG_NOSIGNAL);
+#else
             const int sent = send(s, at, left, 0);
+#endif
             if (sent <= 0) {
                 shutdown(s, SD_BOTH); // the relay thread sees it in recv and reconnects
                 break;
