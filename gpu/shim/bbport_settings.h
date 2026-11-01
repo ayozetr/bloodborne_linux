@@ -178,6 +178,8 @@ struct Values {
     alignas(16) std::atomic<float> camera_speed[4]{1.0f, 1.0f, 1.0f, 1.0f};
     /// Silent while the window does not have focus (bbgpu_audio_muted).
     std::atomic<bool> mute_unfocused{false};
+    /// A short chime of our own when a trophy notice shows.
+    std::atomic<bool> trophy_sound{true};
     /// The settings menu's position (fraction of the screen), -1 until it is moved.
     std::atomic<float> menu_x{-1.0f}, menu_y{-1.0f};
     // FSR 4 checks (menu): the provider's auto exposure, the jitter sign it is given.

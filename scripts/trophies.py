@@ -1,0 +1,513 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright 2026 bbport contributors
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Trophies: the game's list from its own dump, and the ones the player has earned.
+
+The dump's sce_sys/trophy/trophy00.trp holds the icons (PNG) and the trophy lists (TROPCONF.ESFM,
+TROP.ESFM and TROP_xx.ESFM per language). The lists are encrypted: AES-128-CBC with a key made by
+encrypting the game's NP communication id (sce_sys/npbind.dat, NPWR05818_00) with the PS4's trophy
+key, which the player supplies (shadPS4's TrophyKey). Without it, the icons, and for Bloodborne
+PSN's English names (BLOODBORNE_ENGLISH).
+
+`trophies.py prepare --game DIR --user DIR [--language N]` (key in BB_TROPHY_KEY) writes
+DIR/trophies/<NP communication id>/: icons/ (the PNGs, and TROPxxx.rgba for the overlay's notice:
+width and height as little-endian u32, then 128x128 RGBA, made with Pillow), and trophies.tsv for
+the runtime (id, grade P/G/S/B or -, hidden 1/0, name, detail, platinum 1/0: whether it counts
+toward the platinum, which add-on trophies do not); prints that directory. The runtime appends what the game unlocks
+to earned.tsv there (id, Unix time) and shows it in the overlay (src/runtime_services.c). The
+launcher's Trophies page can mark trophies earned on a PS4 (a third column, "manual").
+"""
+import argparse
+import hashlib
+import os
+from pathlib import Path
+import re
+import struct
+import sys
+import threading
+import time
+import xml.etree.ElementTree as ET
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from game_check import SUPPORTED_TITLES  # noqa: E402
+from prepare import sfo  # noqa: E402
+
+TRP_MAGIC = 0xDCA24D00
+NOTICE_ICON = 128  # pixels, the overlay's icon (gpu/shim/bbport_overlay.cpp)
+GRADES = {'P': 'platinum', 'G': 'gold', 'S': 'silver', 'B': 'bronze'}
+
+
+# ---- AES-128 (FIPS-197), enough for CBC decryption and the key's one encrypted block --------
+
+def _xtime(a):
+    return ((a << 1) ^ 0x1B) & 0xFF if a & 0x80 else a << 1
+
+
+def _mul(a, b):
+    result = 0
+    while b:
+        if b & 1:
+            result ^= a
+        a, b = _xtime(a), b >> 1
+    return result
+
+
+def _sbox():
+    box, inverse = [0] * 256, [0] * 256
+    p = q = 1
+    while True:
+        p = p ^ ((p << 1) & 0xFF) ^ (0x1B if p & 0x80 else 0)  # p * 3
+        q ^= q << 1
+        q ^= q << 2
+        q ^= q << 4
+        q &= 0xFF
+        if q & 0x80:
+            q ^= 0x09                                           # q / 3
+        x = q ^ ((q << 1 | q >> 7) & 0xFF) ^ ((q << 2 | q >> 6) & 0xFF) \
+            ^ ((q << 3 | q >> 5) & 0xFF) ^ ((q << 4 | q >> 4) & 0xFF)
+        box[p] = x ^ 0x63
+        if p == 1:
+            break
+    box[0] = 0x63
+    for i, v in enumerate(box):
+        inverse[v] = i
+    return box, inverse
+
+
+SBOX, INV_SBOX = _sbox()
+
+
+def _expand_key(key):
+    words = [list(key[i:i + 4]) for i in range(0, 16, 4)]
+    rcon = 1
+    for i in range(4, 44):
+        word = list(words[i - 1])
+        if i % 4 == 0:
+            word = [SBOX[b] for b in word[1:] + word[:1]]
+            word[0] ^= rcon
+            rcon = _xtime(rcon)
+        words.append([a ^ b for a, b in zip(words[i - 4], word)])
+    return [sum(words[r * 4:r * 4 + 4], []) for r in range(11)]
+
+
+def _add(state, round_key):
+    return [a ^ b for a, b in zip(state, round_key)]
+
+
+def aes_encrypt_block(key, block):
+    keys = _expand_key(key)
+    s = _add(list(block), keys[0])
+    for r in range(1, 11):
+        s = [SBOX[b] for b in s]
+        s = [s[(i + 4 * (i % 4)) % 16] for i in range(16)]           # ShiftRows
+        if r != 10:
+            m = []
+            for c in range(4):
+                a = s[c * 4:c * 4 + 4]
+                m += [_mul(a[0], 2) ^ _mul(a[1], 3) ^ a[2] ^ a[3],
+                      a[0] ^ _mul(a[1], 2) ^ _mul(a[2], 3) ^ a[3],
+                      a[0] ^ a[1] ^ _mul(a[2], 2) ^ _mul(a[3], 3),
+                      _mul(a[0], 3) ^ a[1] ^ a[2] ^ _mul(a[3], 2)]
+            s = m
+        s = _add(s, keys[r])
+    return bytes(s)
+
+
+def _decrypt_block(keys, block):
+    s = _add(list(block), keys[10])
+    for r in range(9, -1, -1):
+        s = [s[(i - 4 * (i % 4)) % 16] for i in range(16)]           # InvShiftRows
+        s = [INV_SBOX[b] for b in s]
+        s = _add(s, keys[r])
+        if r != 0:
+            m = []
+            for c in range(4):
+                a = s[c * 4:c * 4 + 4]
+                m += [_mul(a[0], 14) ^ _mul(a[1], 11) ^ _mul(a[2], 13) ^ _mul(a[3], 9),
+                      _mul(a[0], 9) ^ _mul(a[1], 14) ^ _mul(a[2], 11) ^ _mul(a[3], 13),
+                      _mul(a[0], 13) ^ _mul(a[1], 9) ^ _mul(a[2], 14) ^ _mul(a[3], 11),
+                      _mul(a[0], 11) ^ _mul(a[1], 13) ^ _mul(a[2], 9) ^ _mul(a[3], 14)]
+            s = m
+    return bytes(s)
+
+
+def aes_cbc_decrypt(key, iv, data):
+    keys = _expand_key(key)
+    out = bytearray()
+    previous = iv
+    for i in range(0, len(data) - len(data) % 16, 16):
+        block = data[i:i + 16]
+        out += bytes(a ^ b for a, b in zip(_decrypt_block(keys, block), previous))
+        previous = block
+    return bytes(out)
+
+
+# ---- The dump's files --------------------------------------------------------------------
+
+class NotTrophyFile(ValueError):
+    """trophy00.trp is not a trophy file: a dump made with a tool that left sce_sys encrypted
+    (issue #22: its npbind.dat was), or a damaged copy. Not a wrong key."""
+
+
+def read_trp(path):
+    """{entry name: bytes} of a TRP file (sce_sys/trophy/trophy00.trp)."""
+    data = Path(path).read_bytes()
+    try:
+        magic, _version, _size, count, entry_size = struct.unpack('>IIQII', data[:24])
+    except struct.error:
+        magic = entry_size = 0
+    if magic != TRP_MAGIC or entry_size < 48:
+        raise NotTrophyFile(f'{path}: not a trophy file')
+    entries = {}
+    for i in range(count):
+        entry = data[0x60 + i * entry_size:0x60 + (i + 1) * entry_size]
+        name = entry[:32].split(b'\0')[0].decode('ascii', 'replace')
+        offset, length = struct.unpack('>QQ', entry[32:48])
+        entries[name] = data[offset:offset + length]
+    return entries
+
+
+def dump_file(game, *names):
+    """game/names..., each name matched without regard to case, or None: a dump copied through
+    Windows or extracted by some tools has SCE_SYS/TROPHY/TROPHY00.TRP, and Linux tells the cases
+    apart (issue #22)."""
+    path = Path(game)
+    for name in names:
+        if (path / name).exists():
+            path = path / name
+            continue
+        try:
+            path = next(p for p in path.iterdir() if p.name.casefold() == name.casefold())
+        except (OSError, StopIteration):
+            return None
+    return path
+
+
+TRP_PATH = ('sce_sys', 'trophy', 'trophy00.trp')
+NPBIND_PATH = ('sce_sys', 'npbind.dat')
+
+
+def missing(game):
+    """What the dump lacks for its trophies ("sce_sys/npbind.dat", ...), or None."""
+    if dump_file(game, *TRP_PATH) is None:
+        return '/'.join(TRP_PATH)
+    if np_comm_id(game) is None:
+        npbind = '/'.join(NPBIND_PATH)
+        return npbind if dump_file(game, *NPBIND_PATH) is None else f'NPWR… in {npbind}'
+    return None
+
+
+def np_comm_id(game):
+    """The game's NP communication id (NPWR05818_00) from sce_sys/npbind.dat; for Bloodborne, its
+    own when that file lacks it (issue #22: a dump whose npbind.dat holds no NPWR id); or None."""
+    try:
+        found = re.search(rb'NPWR\d{5}_\d{2}', dump_file(game, *NPBIND_PATH).read_bytes())
+    except (OSError, AttributeError):
+        found = None
+    if found:
+        return found.group().decode()
+    return BLOODBORNE if bloodborne(game) else None
+
+
+def bloodborne(game):
+    """The dump is a Bloodborne release the port runs (its param.sfo's TITLE_ID)."""
+    try:
+        info = sfo(dump_file(game, 'sce_sys', 'param.sfo').read_bytes())
+    except (OSError, AttributeError, ValueError, IndexError):
+        return False
+    return str(info.get('TITLE_ID', '')).strip('\0') in SUPPORTED_TITLES
+
+
+def parse_key(text):
+    """The trophy key from 32 hex digits (spaces and a 0x prefix allowed), or None."""
+    text = re.sub(r'\s+', '', str(text or '')).removeprefix('0x')
+    return bytes.fromhex(text) if re.fullmatch(r'[0-9A-Fa-f]{32}', text) else None
+
+
+def decrypt_esfm(data, key, comm_id):
+    """The XML of an ESFM entry: its first 16 bytes are the IV."""
+    title_key = aes_encrypt_block(key, comm_id.encode().ljust(16, b'\0')[:16])
+    xml = aes_cbc_decrypt(title_key, data[:16], data[16:])
+    end = xml.rfind(b'>')
+    return xml[:end + 1] if end >= 0 else b''
+
+
+def parse_sfm(xml):
+    """(title, {id: {grade, hidden, name, detail, platinum}}) of a decrypted trophy list.
+    platinum: the trophy counts toward the platinum (its pid names it; add-on trophies have -1)."""
+    text = xml.decode('utf-8', 'replace')
+    start = text.find('<trophyconf')
+    if start < 0:
+        raise ValueError('not a trophy list (wrong trophy key?)')
+    root = ET.fromstring(text[start:])
+    trophies = {}
+    for node in root.iter('trophy'):
+        trophies[int(node.get('id'))] = {
+            'grade': node.get('ttype', '-'),
+            'hidden': node.get('hidden', 'no') == 'yes',
+            'name': (node.findtext('name') or '').strip(),
+            'detail': (node.findtext('detail') or '').strip(),
+            'platinum': node.get('pid', '-1') != '-1',
+        }
+    return (root.findtext('title-name') or '').strip(), trophies
+
+
+# Bloodborne's trophies in English (PSN's list, ids 0-39; 34-39 are The Old Hunters') for a
+# player without the trophy key: grade, hidden, name, detail. From GerasimosKan's list in
+# deadinside28/bloodborne_pc#127.
+BLOODBORNE = 'NPWR05818_00'
+BLOODBORNE_ENGLISH = (
+    ('P', False, 'Bloodborne', 'All trophies acquired. Hats off!'),
+    ('G', True, 'Yharnam Sunrise', 'You lived through the hunt, and saw another day.'),
+    ('G', True, 'Honoring Wishes', "Captivated by the Moon Presence, you pledge to watch over the Hunter's Dream."),
+    ('G', True, "Childhood's Beginning", 'You became an infant Great One, lifting humanity into its next childhood.'),
+    ('G', True, 'Yharnam, Pthumerian Queen', 'Defeat Yharnam, Blood Queen of the Old Labyrinth.'),
+    ('G', False, "Hunter's Essence", 'Acquire all hunter weapons.'),
+    ('G', False, "Hunter's Craft", 'Acquire all special hunter tools.'),
+    ('S', False, 'Weapon Master', 'Acquire a weapon of the highest level.'),
+    ('S', False, 'Blood Gem Master', 'Acquire an extremely precious blood gem.'),
+    ('S', False, 'Rune Master', 'Acquire an extremely precious Caryll Rune.'),
+    ('S', True, 'Cainhurst', 'Gain entry to Cainhurst, the lost and ruined castle.'),
+    ('S', True, 'The Choir', 'Gain entry to the realm of the Choir, the high stratum of the Healing Church.'),
+    ('S', True, 'The Source of the Dream', "Discover the abandoned old workshop, the source of the Hunter's Dream."),
+    ('S', True, 'Nightmare Lecture Building', 'Gain entry into the Byrgenwerth lecture building, that drifts within the realm of nightmare.'),
+    ('B', True, 'Father Gascoigne', 'Defeat the beast that once was Father Gascoigne.'),
+    ('B', True, 'Vicar Amelia', 'Defeat the beast that once was Vicar Amelia.'),
+    ('B', True, 'Shadow of Yharnam', 'Defeat the Shadow of Yharnam.'),
+    ('B', True, 'Rom, the Vacuous Spider', 'Defeat Great One: Rom, the Vacuous Spider.'),
+    ('B', True, 'The One Reborn', 'Defeat the One Reborn.'),
+    ('B', True, 'Micolash, Host of the Nightmare', 'Defeat Micolash, Host of the Nightmare.'),
+    ('B', True, "Mergo's Wet Nurse", "Defeat Great One: Mergo's Wet Nurse."),
+    ('B', True, 'Cleric Beast', 'Defeat Cleric Beast.'),
+    ('B', True, 'Blood-starved Beast', 'Defeat Blood-starved Beast.'),
+    ('B', True, 'The Witch of Hemwick', 'Defeat the Witch of Hemwick.'),
+    ('B', True, 'Darkbeast Paarl', 'Defeat Darkbeast Paarl.'),
+    ('B', True, 'Amygdala', 'Defeat Great One: Amygdala.'),
+    ('B', True, 'Martyr Logarius', 'Defeat Martyr Logarius.'),
+    ('B', True, 'Celestial Emissary', 'Defeat Great One: Celestial Emissary.'),
+    ('B', True, 'Ebrietas, Daughter of the Cosmos', 'Defeat Great One: Ebrietas, Daughter of the Cosmos.'),
+    ('B', False, 'Blood Gem Contact', 'Acquire a blood gem that imbues hunter weapons with special strength.'),
+    ('B', False, 'Rune Contact', 'Acquire a Caryll Rune that endows hunters with special strength.'),
+    ('B', False, 'Chalice of Pthumeru', 'Acquire the Chalice of Pthumeru that seals the catacombs that form a web deep below Yharnam.'),
+    ('B', True, 'Chalice of Ailing Loran', 'Acquire the Chalice of Ailing Loran that seals the tragic land lost to the sands.'),
+    ('B', True, 'Chalice of Isz', 'Acquire the Great Chalice of Isz that seals the home of the cosmic kin.'),
+    ('G', False, "Old Hunter's Essence", 'Acquire all old hunter weapons.'),
+    ('S', True, 'Orphan of Kos', 'Defeat Great One: Orphan of Kos.'),
+    ('B', True, 'Ludwig, the Holy Blade', 'Defeat the beast that was once Ludwig, the Holy Blade.'),
+    ('B', True, 'Lady Maria of the Astral Clocktower', 'Defeat Lady Maria of the Astral Clocktower.'),
+    ('B', True, 'Living Failures', 'Defeat the failed attempts to become Great Ones.'),
+    ('B', True, 'Laurence, the First Vicar', 'Defeat the beast that was once Laurence, the First Vicar.'),
+)
+
+
+def trophy_list(entries, key=None, comm_id=None, language=None):
+    """{id: {grade, hidden, name, detail, platinum}} from a TRP's entries: names in the game language
+    (TROP_xx, xx the PS4 language number) or the default list; without a key, the icons' ids
+    (Bloodborne's with PSN's English names)."""
+    icons = sorted(int(n[4:7]) for n in entries if re.fullmatch(r'TROP\d{3}\.PNG', n))
+    trophies = {i: {'grade': '-', 'hidden': False, 'name': '', 'detail': '', 'platinum': False}
+                for i in icons}
+    if key is None or comm_id is None:
+        if comm_id == BLOODBORNE:  # without the key: PSN's English list, the platinum's 1-33
+            for i, (grade, hidden, name, detail) in enumerate(BLOODBORNE_ENGLISH):
+                if i in trophies:
+                    trophies[i] = {'grade': grade, 'hidden': hidden, 'name': name,
+                                   'detail': detail, 'platinum': 1 <= i <= 33}
+        return trophies
+    _title, config = parse_sfm(decrypt_esfm(entries['TROPCONF.ESFM'], key, comm_id))
+    trophies.update(config)
+    names = f'TROP_{language:02d}.ESFM' if language is not None else None
+    for entry in (names, 'TROP.ESFM'):
+        if entry in entries:
+            _title, texts = parse_sfm(decrypt_esfm(entries[entry], key, comm_id))
+            for i, text in texts.items():
+                trophies.setdefault(i, dict(text)).update(name=text['name'], detail=text['detail'])
+            break
+    return trophies
+
+
+# ---- The player's data -------------------------------------------------------------------
+
+def trophy_dir(user, comm_id):
+    return Path(user) / 'trophies' / comm_id
+
+
+def read_earned(directory):
+    """{id: Unix time} from earned.tsv (the first time each was unlocked)."""
+    earned = {}
+    try:
+        lines = (Path(directory) / 'earned.tsv').read_text(encoding='utf-8').splitlines()
+    except OSError:
+        return earned
+    for line in lines:
+        fields = line.split('\t')
+        if len(fields) >= 2 and fields[0].isdigit() and fields[1].isdigit():
+            earned.setdefault(int(fields[0]), int(fields[1]))
+    return earned
+
+
+def read_marked(directory):
+    """The ids marked as earned in the launcher (earned.tsv lines ending in "manual")."""
+    try:
+        lines = (Path(directory) / 'earned.tsv').read_text(encoding='utf-8').splitlines()
+    except OSError:
+        return set()
+    return {int(f[0]) for f in (line.split('\t') for line in lines)
+            if len(f) >= 3 and f[0].isdigit() and f[2] == 'manual'}
+
+
+def platinum_due(listed, earned):
+    """The platinum's id once every trophy that counts toward it is earned, else None, as the
+    runtime awards it (src/runtime_services.c)."""
+    platinum = next((i for i, t in listed.items() if t['grade'] == 'P'), None)
+    if platinum is None or platinum in earned:
+        return None
+    column = any(t['platinum'] for t in listed.values())  # a list without it counts every trophy
+    rest = [i for i, t in listed.items() if t['grade'] != 'P' and (t['platinum'] or not column)]
+    return platinum if all(i in earned for i in rest) else None
+
+
+def mark_earned(directory, ids, now=None):
+    """Marks trophies as earned (on a PS4, for a save carried over), and the platinum when they
+    complete it; returns the ids added. Only with the game closed: it reads earned.tsv at start."""
+    listed, earned = read_list(directory), read_earned(directory)
+    now = int(time.time() if now is None else now)
+    added = [i for i in sorted(set(ids)) if i in listed and i not in earned]
+    earned.update(dict.fromkeys(added, now))
+    platinum = platinum_due(listed, earned)
+    if added and platinum is not None:
+        added.append(platinum)
+    if added:
+        with open(Path(directory) / 'earned.tsv', 'a', encoding='utf-8') as f:
+            f.writelines(f'{i}\t{now}\tmanual\n' for i in added)
+    return added
+
+
+def unmark_earned(directory, trophy):
+    """Takes back a trophy marked in the launcher, and a platinum marked there that needs it;
+    the ones the game unlocked stay. Returns the ids removed."""
+    marked = read_marked(directory)
+    if trophy not in marked:
+        return []
+    listed = read_list(directory)
+    platinum = next((i for i, t in listed.items() if t['grade'] == 'P'), None)
+    column = any(t['platinum'] for t in listed.values())
+    counts = trophy in listed and (listed[trophy]['platinum'] or not column)
+    removed = {trophy} | ({platinum} if platinum in marked and counts else set())
+    path = Path(directory) / 'earned.tsv'
+    kept = [line for line in path.read_text(encoding='utf-8').splitlines()
+            if not ((f := line.split('\t'))[0].isdigit() and int(f[0]) in removed
+                    and f[2:3] == ['manual'])]
+    temp = Path(str(path) + '.tmp')
+    temp.write_text(''.join(line + '\n' for line in kept), encoding='utf-8')
+    os.replace(temp, path)
+    return sorted(removed)
+
+
+def read_list(directory):
+    """{id: {grade, hidden, name, detail, platinum}} from trophies.tsv."""
+    trophies = {}
+    try:
+        lines = (Path(directory) / 'trophies.tsv').read_text(encoding='utf-8').splitlines()
+    except OSError:
+        return trophies
+    for line in lines:
+        fields = line.split('\t')
+        if len(fields) in (5, 6) and fields[0].isdigit():
+            trophies[int(fields[0])] = {'grade': fields[1], 'hidden': fields[2] == '1',
+                                        'name': fields[3], 'detail': fields[4],
+                                        'platinum': fields[5:] == ['1']}
+    return trophies
+
+
+def write_rgba(png, target, size=NOTICE_ICON):
+    """The overlay's raw icon (TROPxxx.rgba) from a PNG; False without Pillow or for a damaged
+    PNG."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return False
+    import io
+    try:
+        with Image.open(io.BytesIO(png)) as image:
+            pixels = image.convert('RGBA').resize((size, size), Image.LANCZOS).tobytes()
+    except (OSError, ValueError):  # a damaged icon: the overlay draws a cup instead
+        return False
+    temp = Path(str(target) + '.tmp')
+    temp.write_bytes(struct.pack('<II', size, size) + pixels)
+    os.replace(temp, target)
+    return True
+
+
+def _clean(text):
+    return ' '.join(str(text).split())
+
+
+def prepare(game, user, key=None, language=None):
+    """Writes the trophy directory for a game (icons, trophies.tsv); returns it, or None when the
+    dump has no trophies. A wrong key raises ValueError."""
+    comm_id = np_comm_id(game)
+    trp = dump_file(game, *TRP_PATH)
+    if comm_id is None or trp is None or not trp.is_file():
+        return None
+    directory = trophy_dir(user, comm_id)
+    # The launcher asks on every visit to its Trophies page, and decrypting the names in Python
+    # takes half a second: the same .trp, key, language and script are made once. The key is in
+    # the digest only, not written down.
+    st = trp.stat()
+    source = hashlib.sha256(f'{trp.resolve()}\0{st.st_size}\0{st.st_mtime_ns}\0{language}\0'.encode()
+                            + (key or b'-') + Path(__file__).read_bytes()).hexdigest()
+    stamp = directory / 'trophies.source'
+    try:
+        if stamp.read_text() == source and (directory / 'trophies.tsv').is_file() \
+                and (directory / 'icons').is_dir():
+            return directory
+    except OSError:
+        pass
+    entries = read_trp(trp)
+    trophies = trophy_list(entries, key, comm_id, language)
+    icons = directory / 'icons'
+    icons.mkdir(parents=True, exist_ok=True)
+    for name, data in entries.items():
+        if name.endswith('.PNG'):
+            target = icons / name
+            if not target.is_file() or target.stat().st_size != len(data):
+                target.write_bytes(data)
+            raw = icons / (name[:-4] + '.rgba')
+            if re.fullmatch(r'TROP\d{3}\.PNG', name) and not raw.is_file():
+                write_rgba(data, raw)
+    lines = [f'{i}\t{t["grade"]}\t{int(t["hidden"])}\t{_clean(t["name"])}\t{_clean(t["detail"])}'
+             f'\t{int(t.get("platinum", False))}' for i, t in sorted(trophies.items())]
+    temp = directory / f'trophies.tsv.{os.getpid()}.{threading.get_ident()}.tmp'  # two at once
+    temp.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    os.replace(temp, directory / 'trophies.tsv')
+    stamp.write_text(source)
+    return directory
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    sub = parser.add_subparsers(dest='command', required=True)
+    p = sub.add_parser('prepare')
+    p.add_argument('--game', required=True)
+    p.add_argument('--user', required=True)
+    p.add_argument('--language', type=int, help='PS4 language number (1 English, 3 Spanish, ...)')
+    a = parser.parse_args()
+    key = parse_key(os.environ.get('BB_TROPHY_KEY'))
+    try:
+        directory = prepare(a.game, a.user, key, a.language)
+    except (OSError, ValueError, ET.ParseError) as error:
+        print(f'Trophies: {error}', file=sys.stderr)
+        directory = None
+        if key is not None:  # the icons without the names
+            try:
+                directory = prepare(a.game, a.user, None, a.language)
+                print('Trophies: names unavailable; check the trophy key', file=sys.stderr)
+            except (OSError, ValueError):
+                pass
+    if directory is not None:
+        print(directory)
+
+
+if __name__ == '__main__':
+    main()

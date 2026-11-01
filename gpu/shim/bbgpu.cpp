@@ -370,6 +370,27 @@ extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
 }
 
+extern "C" void bbgpu_trophy_notice(int id, char grade, const char* name_utf8, const char* icon_path) {
+    std::vector<u8> icon;
+    int size = 0;
+    if (icon_path != nullptr) {
+        if (std::FILE* file = std::fopen(icon_path, "rb")) {
+            u32 header[2]{};
+            if (std::fread(header, sizeof(header), 1, file) == 1 && header[0] == header[1] &&
+                header[0] > 0 && header[0] <= 512) {
+                icon.resize(size_t(header[0]) * header[0] * 4);
+                if (std::fread(icon.data(), 1, icon.size(), file) == icon.size()) {
+                    size = int(header[0]);
+                } else {
+                    icon.clear();
+                }
+            }
+            std::fclose(file);
+        }
+    }
+    BbOverlay::TrophyNotice(id, grade, name_utf8 ? name_utf8 : "", std::move(icon), size);
+}
+
 extern "C" int bbgpu_audio_muted(void) {
     return g_window && BbSettings::Get().mute_unfocused && !g_window->IsFocused() ? 1 : 0;
 }

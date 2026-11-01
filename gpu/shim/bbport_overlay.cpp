@@ -156,6 +156,24 @@ std::unordered_map<std::string, ImTextureData*> trophy_icons;
 std::mutex trophy_mutex;
 std::deque<TrophyToast> trophy_queue;
 std::atomic<bool> trophy_active{false};
+// bbport (the Linux fork): its own trophy notices take the place of the toast above.
+// Trophy notices (bbgpu_trophy_notice): one card at a time in the top-left corner, in the style
+// of the PS4's, with the trophy's icon (a cup in its grade's colour when it has none).
+struct Notice {
+    int id = 0;
+    char grade = '-';
+    std::string name;
+    std::vector<u8> icon; // RGBA
+    int icon_size = 0;
+};
+std::mutex notice_mutex;
+std::deque<Notice> notices;
+std::atomic<bool> notice_busy{false}; // queued or on screen
+bool notice_shown = false;            // the present thread's (imgui_mutex)
+Notice notice;
+std::chrono::steady_clock::time_point notice_start;
+std::unordered_map<int, ImTextureData*> notice_icons; // kept: one per trophy, 64 KiB each
+constexpr float NoticeIn = 0.35f, NoticeHold = 5.0f, NoticeOut = 0.6f;
 constexpr float TrophySeconds = 6.0f, TrophySlide = 0.4f;
 
 // Present rate for the FPS counter.
@@ -437,6 +455,8 @@ void Menu() {
     ImGui::SeparatorText(BbSettings::MenuText("Other", "Прочее"));
     Checkbox(BbSettings::MenuText("FPS counter in corner", "Счётчик FPS в углу"), s.show_fps);
     Checkbox(BbSettings::MenuText("Mute in the background", "Без звука в фоне"), s.mute_unfocused);
+    Checkbox(BbSettings::MenuText("Sound when a trophy is earned", "Звук при получении трофея"),
+             s.trophy_sound);
     ShadersSection();
 
     ImGui::Spacing();
@@ -679,6 +699,151 @@ void TrophyWindow(float dt) {
     draw->AddText({text_x, y + 12.0f * s}, a(200, 185, 150, 255), russian ? "Получен трофей" : "Trophy earned");
     draw->AddText(nullptr, 0.0f, {text_x, y + 12.0f * s + ImGui::GetTextLineHeightWithSpacing()},
                   a(240, 232, 215, 255), toast.name.c_str(), nullptr, wrap);
+}
+
+ImU32 GradeColour(char grade, float alpha) {
+    const int a = int(255.0f * alpha);
+    switch (grade) {
+    case 'P':
+        return IM_COL32(170, 200, 228, a);
+    case 'G':
+        return IM_COL32(226, 186, 72, a);
+    case 'S':
+        return IM_COL32(196, 200, 206, a);
+    case 'B':
+        return IM_COL32(186, 118, 68, a);
+    default:
+        return IM_COL32(200, 200, 200, a);
+    }
+}
+
+// A small cup: bowl, handles, stem and base, `size` high from `top`.
+void DrawCup(ImDrawList* draw, ImVec2 top, float size, ImU32 colour) {
+    const float w = size * 0.8f, x = top.x, y = top.y;
+    draw->PathLineTo(ImVec2(x, y));
+    draw->PathLineTo(ImVec2(x + w, y));
+    draw->PathBezierCubicCurveTo(ImVec2(x + w, y + size * 0.45f), ImVec2(x + w * 0.65f, y + size * 0.6f),
+                                 ImVec2(x + w * 0.5f, y + size * 0.6f));
+    draw->PathBezierCubicCurveTo(ImVec2(x + w * 0.35f, y + size * 0.6f), ImVec2(x, y + size * 0.45f),
+                                 ImVec2(x, y));
+    draw->PathFillConvex(colour);
+    const float handle = size * 0.12f;
+    draw->AddCircle(ImVec2(x - handle * 0.4f, y + size * 0.2f), handle, colour, 12, size * 0.07f);
+    draw->AddCircle(ImVec2(x + w + handle * 0.4f, y + size * 0.2f), handle, colour, 12, size * 0.07f);
+    draw->AddRectFilled(ImVec2(x + w * 0.44f, y + size * 0.58f), ImVec2(x + w * 0.56f, y + size * 0.82f),
+                        colour);
+    draw->AddRectFilled(ImVec2(x + w * 0.22f, y + size * 0.82f), ImVec2(x + w * 0.78f, y + size * 0.95f),
+                        colour, size * 0.04f);
+}
+
+ImTextureData* NoticeIcon(const Notice& n) {
+    if (n.icon_size <= 0) {
+        return nullptr;
+    }
+    auto& texture = notice_icons[n.id];
+    if (texture == nullptr) {
+        texture = new ImTextureData();
+        texture->Create(ImTextureFormat_RGBA32, n.icon_size, n.icon_size);
+        std::memcpy(texture->GetPixels(), n.icon.data(), n.icon.size());
+        ImGui::RegisterUserTexture(texture);
+    }
+    return texture;
+}
+
+// The trophy chime: a short bell of our own (no audio from the console), two notes and a third
+// for the platinum, on its own SDL stream beside the game's. From GerasimosKan's trophies
+// (deadinside28/bloodborne_pc#127). BB_AUDIO=none keeps it silent like the game.
+void TrophyChime(bool platinum) {
+    static SDL_AudioStream* stream = []() -> SDL_AudioStream* {
+        const char* mode = bb_env("BB_AUDIO");
+        if ((mode && !std::strcmp(mode, "none")) || !SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+            return nullptr;
+        }
+        const SDL_AudioSpec spec{SDL_AUDIO_F32, 1, 48000};
+        SDL_AudioStream* s =
+            SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
+        if (s) {
+            SDL_ResumeAudioStreamDevice(s);
+        }
+        return s;
+    }();
+    if (!stream) {
+        return;
+    }
+    constexpr int rate = 48000;
+    constexpr float two_pi = 6.2831853f, step = 0.09f;
+    std::vector<float> pcm(rate * 6 / 5);
+    const float notes[] = {1318.5f, 1975.5f, 2637.0f}; // E6, B6, E7
+    for (int k = 0; k < (platinum ? 3 : 2); ++k) {
+        for (std::size_t i = std::size_t(k * step * rate); i < pcm.size(); ++i) {
+            const float t = float(i) / rate - k * step, f = notes[k];
+            const float envelope = std::min(t / 0.004f, 1.0f) * std::exp(-t * 5.0f);
+            // A bell: the fundamental and a quickly fading inharmonic partial.
+            pcm[i] += 0.12f * envelope *
+                      (std::sin(two_pi * f * t) +
+                       0.35f * std::exp(-t * 8.0f) * std::sin(two_pi * 2.76f * f * t));
+        }
+    }
+    SDL_PutAudioStreamData(stream, pcm.data(), int(pcm.size() * sizeof(float)));
+}
+
+void TrophyCard() {
+    const auto now = std::chrono::steady_clock::now();
+    if (!notice_shown) {
+        std::scoped_lock lock{notice_mutex};
+        if (notices.empty()) {
+            notice_busy = false;
+            return;
+        }
+        notice = std::move(notices.front());
+        notices.pop_front();
+        notice_shown = true;
+        notice_start = now;
+        if (BbSettings::Get().trophy_sound) {
+            TrophyChime(notice.grade == 'P');
+        }
+    }
+    const float t = std::chrono::duration<float>(now - notice_start).count();
+    if (t > NoticeIn + NoticeHold + NoticeOut) {
+        notice_shown = false;
+        return;
+    }
+    const float in = std::min(t / NoticeIn, 1.0f);
+    const float alpha = t < NoticeIn + NoticeHold ? in : 1.0f - (t - NoticeIn - NoticeHold) / NoticeOut;
+    const float ease = 1.0f - (1.0f - in) * (1.0f - in);
+    const float s = base_scale;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImDrawList* draw = ImGui::GetForegroundDrawList();
+    ImFont* font = ImGui::GetFont();
+    const float text_size = ImGui::GetFontSize();
+    const float pad = 12.0f * s, icon = 72.0f * s, width = 470.0f * s;
+    const float text_x = pad + icon + 16.0f * s, text_w = width - text_x - pad;
+    const char* earned = BbSettings::MenuText("You have earned a trophy.", "Вы получили трофей.");
+    const ImVec2 name_size =
+        font->CalcTextSizeA(text_size * 1.05f, FLT_MAX, text_w, notice.name.c_str());
+    const float height = std::max(icon + 2.0f * pad, pad * 2.0f + text_size * 1.6f + name_size.y);
+    const ImVec2 p0(viewport->WorkPos.x + 36.0f * s - (1.0f - ease) * 48.0f * s,
+                    viewport->WorkPos.y + 36.0f * s);
+    const ImVec2 p1(p0.x + width, p0.y + height);
+    draw->AddRectFilled(ImVec2(p0.x + 3.0f * s, p0.y + 4.0f * s), ImVec2(p1.x + 3.0f * s, p1.y + 4.0f * s),
+                        IM_COL32(0, 0, 0, int(90 * alpha)), 8.0f * s);
+    draw->AddRectFilled(p0, p1, IM_COL32(24, 24, 30, int(232 * alpha)), 8.0f * s);
+    draw->AddRect(p0, p1, IM_COL32(255, 255, 255, int(28 * alpha)), 8.0f * s);
+    const ImVec2 icon0(p0.x + pad, p0.y + (height - icon) * 0.5f);
+    if (ImTextureData* texture = NoticeIcon(notice)) {
+        draw->AddImageRounded(texture->GetTexRef(), icon0, ImVec2(icon0.x + icon, icon0.y + icon),
+                              ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, int(255 * alpha)),
+                              4.0f * s);
+    } else {
+        draw->AddRectFilled(icon0, ImVec2(icon0.x + icon, icon0.y + icon),
+                            IM_COL32(50, 50, 58, int(255 * alpha)), 4.0f * s);
+        DrawCup(draw, ImVec2(icon0.x + icon * 0.28f, icon0.y + icon * 0.22f), icon * 0.56f,
+                GradeColour(notice.grade, alpha));
+    }
+    const ImVec2 line1(p0.x + text_x, p0.y + pad + 2.0f * s);
+    draw->AddText(font, text_size * 0.92f, line1, IM_COL32(205, 205, 212, int(255 * alpha)), earned);
+    draw->AddText(font, text_size * 1.05f, ImVec2(line1.x, line1.y + text_size * 1.45f),
+                  IM_COL32(255, 255, 255, int(255 * alpha)), notice.name.c_str(), nullptr, text_w);
 }
 
 const OskExtraRow& OskExtra() {
@@ -1125,6 +1290,16 @@ void ShowTrophy(char grade, const std::string& name, const std::filesystem::path
     trophy_active = true;
 }
 
+void TrophyNotice(int id, char grade, std::string name, std::vector<u8> icon, int icon_size) {
+    if (icon.size() != size_t(icon_size) * size_t(icon_size) * 4) {
+        icon.clear();
+        icon_size = 0;
+    }
+    std::scoped_lock lock{notice_mutex};
+    notices.push_back(Notice{id, grade, std::move(name), std::move(icon), icon_size});
+    notice_busy = true;
+}
+
 bool Visible() {
     // BB_OVERLAY_OPEN=1 (tests): the menu open from the start, its sections unfolded.
     static bool open_at_start = bb_env_on("BB_OVERLAY_OPEN");
@@ -1139,7 +1314,7 @@ bool Visible() {
     }
     const bool shader_progress = ShaderProgressShown();
     return initialized && (menu_open || open_requested || prompt_active || banner_active ||
-                           trophy_active || BbSettings::Get().show_fps || shader_progress);
+                           trophy_active || notice_busy || BbSettings::Get().show_fps || shader_progress);
 }
 
 bool MenuOpen() {
@@ -1222,6 +1397,9 @@ void Render(vk::CommandBuffer cmdbuf, vk::ImageView view, vk::Extent2D extent) {
     }
     if (prompt_active && !menu_open) {
         TextPrompt();
+    }
+    if (notice_busy) {
+        TrophyCard();
     }
     if (!menu_open) {
         ShaderProgressLine();

@@ -263,6 +263,12 @@ else
     bash build.sh
     probe=${BB_PROBE:-out/bb-probe}  # BB_PROBE: a wrapper (gdb) around it
 fi
+# Trophies (scripts/trophies.py): the dump's list and icons in the user directory, for the
+# runtime's notices and the launcher; BB_TROPHY_KEY (the PS4's trophy key) decrypts the names.
+if trophies=$("$PYTHON" scripts/trophies.py prepare --game "$original_game" \
+        --user "${BB_USER_DIR:-$data/user}" --language "${BB_LANGUAGE:-1}") && [[ -n $trophies ]]; then
+    export BB_TROPHY_DIR=$trophies
+fi
 # Online play (BB_ONLINE=1, launcher: Online; the online module gpu/bbnet20): the game's own server
 # goes to the community server, summon signs to the shadNet WebAPI (scripts/online.py).
 if [[ ${BB_ONLINE:-0} == 1 && -f scripts/online.py ]]; then

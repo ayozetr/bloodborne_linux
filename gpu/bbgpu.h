@@ -35,6 +35,9 @@ int bbgpu_overlay_captures_input(void);
 /* 1 while the game should be silent: bbport.ini mute_unfocused is on and the window does not
  * have focus. Safe from any thread (the audio ports read it for every buffer). */
 int bbgpu_audio_muted(void);
+/* A trophy the game unlocked (runtime_services.c): the overlay's notice. grade: P, G, S, B or '-';
+ * icon: a TROPxxx.rgba file of scripts/trophies.py (u32 width, u32 height, RGBA), or NULL. */
+void bbgpu_trophy_notice(int id, char grade, const char *name_utf8, const char *icon_path);
 /* Mouse look (runtime_pad.c): the window takes the mouse when it is clicked (relative mode) and
  * lets it go on F1, losing focus or the menu opening. take: motion (pixels) and wheel notches
  * since the last call, reset; captured: 1 while the window holds it; enable: mouse_look=0 in

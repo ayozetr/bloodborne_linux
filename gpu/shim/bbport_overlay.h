@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 #include "common/types.h"
 #include "vulkan/vk_common.h"
 
@@ -56,5 +57,9 @@ struct TextEdit {
 };
 /// Window thread: the edits made on the on-screen keyboard since the last call, in order.
 std::vector<TextEdit> TakeTextEdits();
+
+/// A trophy the game unlocked: a card in the top-left corner for a few seconds (queued while one is
+/// shown). `icon`: `icon_size` x `icon_size` RGBA, or empty for a cup in the grade's colour.
+void TrophyNotice(int id, char grade, std::string name, std::vector<u8> icon, int icon_size);
 
 } // namespace BbOverlay

@@ -82,6 +82,8 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         v.camera_speed[0] = Clamp(f, 0.25f, 2.0f);
     } else if (key == "mute_unfocused") {
         v.mute_unfocused = i != 0;
+    } else if (key == "trophy_sound") {
+        v.trophy_sound = i != 0;
     } else if (key == "menu_pos") {
         float x = -1.0f, y = -1.0f;
         if (std::sscanf(value.c_str(), "%f,%f", &x, &y) == 2 && x >= 0.0f && x <= 1.0f && y >= 0.0f &&
@@ -505,6 +507,7 @@ void Save() {
     put("camera_speed_x", fixed(v.camera_speed[1], 2));
     put("camera_speed_y", fixed(v.camera_speed[0], 2));
     put("mute_unfocused", flag(v.mute_unfocused));
+    put("trophy_sound", flag(v.trophy_sound));
     put("fsr4_auto_exposure", flag(v.fsr4_auto_exposure));
     put("fsr4_invert_jitter", flag(v.fsr4_invert_jitter));
     // Read by patches.py at start.
