@@ -7,6 +7,7 @@
 #include "textures/image_spares.h"
 
 #include <algorithm>
+#include <boost/container/small_vector.hpp>
 #include <cstdio>
 #include <cstdlib>
 
@@ -96,24 +97,39 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
         return;
     }
     const ImageInfo& info = image.info;
-    const u32 bytes =
+    // bbport (Linux fork, #30): every mip level of a linear image, at its offset in the game's
+    // layout. Only level 0 was copied: an image freed by the collector and loaded again came back
+    // with the game's old bytes in its smaller levels, black where those were drawn (effects,
+    // models seen from afar). Tiled images and ones without their largest levels keep level 0.
+    const u32 levels = !info.IsTiled() && info.skip_levels == 0
+                           ? std::clamp(info.resources.levels, 1u, u32(info.mips_layout.size()))
+                           : 1u;
+    const u32 level0_bytes =
         info.pitch * info.size.height * info.size.depth * info.resources.layers * (info.num_bits / 8);
+    const u32 bytes = levels > 1 ? u32(info.guest_size) : level0_bytes;
     ASSERT(bytes <= info.guest_size);
     const auto copy_to = [&](vk::DeviceSize offset) {
-        return vk::BufferImageCopy{
-            .bufferOffset = offset,
-            .bufferRowLength = info.pitch,
-            .bufferImageHeight = info.size.height,
-            .imageSubresource{
-                .aspectMask = info.props.is_depth ? vk::ImageAspectFlagBits::eDepth
-                                                  : vk::ImageAspectFlagBits::eColor,
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = info.resources.layers,
-            },
-            .imageOffset = {0, 0, 0},
-            .imageExtent = {info.size.width, info.size.height, info.size.depth},
-        };
+        boost::container::small_vector<vk::BufferImageCopy, 14> copies;
+        for (u32 mip = 0; mip < levels; ++mip) {
+            const auto& layout = info.mips_layout[mip];
+            copies.push_back(vk::BufferImageCopy{
+                .bufferOffset = offset + (levels > 1 ? layout.offset : 0),
+                .bufferRowLength = levels > 1 ? layout.pitch : info.pitch,
+                .bufferImageHeight = levels > 1 ? layout.height : info.size.height,
+                .imageSubresource{
+                    .aspectMask = info.props.is_depth ? vk::ImageAspectFlagBits::eDepth
+                                                      : vk::ImageAspectFlagBits::eColor,
+                    .mipLevel = mip,
+                    .baseArrayLayer = 0,
+                    .layerCount = info.resources.layers,
+                },
+                .imageOffset = {0, 0, 0},
+                .imageExtent = {std::max(info.size.width >> mip, 1u),
+                                std::max(info.size.height >> mip, 1u),
+                                std::max(info.size.depth >> mip, 1u)},
+            });
+        }
+        return copies;
     };
 
     // The game's memory in place: the GPU copies the image there itself, in stream order (before
@@ -122,15 +138,15 @@ void TextureCache::DownloadImageMemory(ImageId image_id, bool sync) {
     // target as a buffer from a copy refreshed only once the CPU write-back landed, frames later).
     if (info.guest_address != 0) {
         const auto [arena, offset] = buffer_cache.ObtainBuffer(info.guest_address, bytes, true);
-        auto copy = copy_to(offset);
-        runtime.DownloadImage(&image, arena, std::span{&copy, 1});
+        const auto copies = copy_to(offset);
+        runtime.DownloadImage(&image, arena, std::span{copies.data(), copies.size()});
         if (buffer_cache.IsInPlace(info.guest_address, bytes)) {
             return;
         }
     }
     const auto staging = runtime.GetStagingPool().Request(bytes, MemoryType::HostCached, 16, !sync);
-    auto copy = copy_to(staging.offset);
-    runtime.DownloadImage(&image, staging.buffer, std::span{&copy, 1});
+    const auto copies = copy_to(staging.offset);
+    runtime.DownloadImage(&image, staging.buffer, std::span{copies.data(), copies.size()});
     const auto write_back = [this, address = info.guest_address, bytes](const auto& download) {
         download.Invalidate();
         BbFreeCheck::Check(address, bytes, download.mapped, BbFreeCheck::ImageDownload);
