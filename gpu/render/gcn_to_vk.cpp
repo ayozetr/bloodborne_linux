@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
+#include <cstdio>
 
 #include "common/logging/log.h"
 #include "common/number_utils.h"
@@ -418,9 +420,30 @@ vk::Format TrySurfaceFormat(Gcn::DataFormat data_format, Gcn::NumberFormat num_f
 }
 
 vk::Format SurfaceFormat(Gcn::DataFormat data_format, Gcn::NumberFormat num_format) {
-    const vk::Format format = TrySurfaceFormat(data_format, num_format);
-    ASSERT_MSG(format != vk::Format::eUndefined || data_format == Gcn::DataFormat::FormatInvalid,
-               "Unknown data_format={} and num_format={}", u32(data_format), u32(num_format));
+    vk::Format format = TrySurfaceFormat(data_format, num_format);
+    if (format != vk::Format::eUndefined || data_format == Gcn::DataFormat::FormatInvalid)
+        [[likely]] {
+        return format;
+    }
+    // bbport (Linux fork, from Awaken's BloodBorneButPc 0.9.24): a combination the table lacks
+    // (a garbage descriptor) ended the game (an assertion, exit 23). The same data format with
+    // another number format keeps the texel size; reported a few times. At worst that surface
+    // renders wrong.
+    using N = Gcn::NumberFormat;
+    for (const N other : {N::Unorm, N::Uint, N::Float, N::Snorm, N::Sint}) {
+        format = TrySurfaceFormat(data_format, other);
+        if (format != vk::Format::eUndefined) {
+            break;
+        }
+    }
+    if (format == vk::Format::eUndefined) {
+        format = vk::Format::eR8G8B8A8Unorm;
+    }
+    static std::atomic<u32> notes{0};
+    if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+        std::fprintf(stderr, "GPU: unknown data_format=%u and num_format=%u, using %s\n",
+                     u32(data_format), u32(num_format), vk::to_string(format).c_str());
+    }
     return format;
 }
 
@@ -669,8 +692,15 @@ vk::ClearValue ColorBufferClearValue(const Gcn::ColorBuffer& color_buffer) {
 }
 
 vk::SampleCountFlagBits NumSamples(u32 num_samples, vk::SampleCountFlags supported) {
-    ASSERT_MSG(std::has_single_bit(num_samples) && num_samples <= 16, "{} samples",
-               num_samples);
+    if (!std::has_single_bit(num_samples) || num_samples > 16) {
+        // bbport (Linux fork): not a sample count (a garbage register or sharp): one sample,
+        // reported a few times; this ended the game (an assertion, exit 23).
+        static std::atomic<u32> notes{0};
+        if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+            std::fprintf(stderr, "GPU: invalid sample count %u, using 1\n", num_samples);
+        }
+        return vk::SampleCountFlagBits::e1;
+    }
     while (num_samples > 1 && !(supported & vk::SampleCountFlagBits(num_samples))) {
         num_samples /= 2;
     }

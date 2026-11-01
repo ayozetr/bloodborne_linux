@@ -4,13 +4,25 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
+#include <cstdio>
 
 #include "common/assert.h"
 
 namespace Gcn {
 
 namespace {
+
+/// bbport (Linux fork, from Awaken's BloodBorneButPc 0.9.24): a mode outside the tables (a
+/// garbage or unsupported descriptor) is reported a few times and treated as a known one (linear,
+/// 1x1_16 banks); it ended the game (an assertion, exit 23). At worst that surface renders wrong.
+void NoteUnknown(const char* what, u32 value) {
+    static std::atomic<u32> notes{0};
+    if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+        std::fprintf(stderr, "GPU: unknown %s %u, using a fallback\n", what, value);
+    }
+}
 
 constexpr u32 MicroTileSize = 8; ///< texels per side of a micro tile
 constexpr u32 DramRowSize = 1024;
@@ -74,7 +86,10 @@ constexpr std::array<TileModeInfo, NUM_TILE_MODES> TileModes = [] {
 
 const TileModeInfo& Info(TileMode mode) {
     const u32 index = u32(mode);
-    ASSERT_MSG(index < NUM_TILE_MODES && !TileModes[index].name.empty(), "tile mode {}", index);
+    if (index >= NUM_TILE_MODES || TileModes[index].name.empty()) {
+        NoteUnknown("tile mode", index);
+        return TileModes[u32(TileMode::DisplayLinearAligned)];
+    }
     return TileModes[index];
 }
 
@@ -108,12 +123,18 @@ constexpr std::array<MacroTileModeInfo, 16> MacroTileModes = {{
 }};
 
 const MacroTileModeInfo& Info(MacroTileMode mode) {
-    ASSERT_MSG(u32(mode) < MacroTileModes.size(), "macro tile mode {}", u32(mode));
+    if (u32(mode) >= MacroTileModes.size()) {
+        NoteUnknown("macro tile mode", u32(mode));
+        return MacroTileModes[u32(MacroTileMode::Mode_1x1_16)];
+    }
     return MacroTileModes[u32(mode)];
 }
 
 u32 CheckedArrayMode(ArrayMode mode) {
-    ASSERT_MSG(u32(mode) < 16, "array mode {}", u32(mode));
+    if (u32(mode) >= 16) {
+        NoteUnknown("array mode", u32(mode));
+        return u32(ArrayMode::ArrayLinearAligned);
+    }
     return u32(mode);
 }
 
@@ -195,8 +216,10 @@ u32 GetMicroTileThickness(ArrayMode array_mode) {
 
 u32 GetPipeCount(PipeConfig pipe_cfg) {
     const u32 config = u32(pipe_cfg);
-    ASSERT_MSG(config <= u32(PipeConfig::P16) && (config == 0 || config >= 4),
-               "pipe config {}", config);
+    if (config > u32(PipeConfig::P16) || (config != 0 && config < 4)) {
+        NoteUnknown("pipe config", config);
+        return 8;
+    }
     return config == 0 ? 2 : config < 8 ? 4 : config < 16 ? 8 : 16;
 }
 
@@ -211,10 +234,21 @@ u32 CalculateTileSplit(TileMode tile_mode, ArrayMode array_mode, MicroTileMode m
 }
 
 MacroTileMode CalculateMacrotileMode(TileMode tile_mode, u32 bpp, u32 num_samples) {
-    ASSERT_MSG(std::has_single_bit(num_samples) && num_samples <= 16, "{} samples", num_samples);
-    ASSERT_MSG(bpp >= 1 && bpp <= 128, "{} bits per element", bpp);
+    // bbport (Linux fork): input out of range (a garbage sharp: MSAA levels, format) is clamped
+    // and reported instead of the assertions that ended the game.
+    if (!std::has_single_bit(num_samples) || num_samples > 16) {
+        NoteUnknown("sample count", num_samples);
+        num_samples = 1;
+    }
+    if (bpp < 1 || bpp > 128) {
+        NoteUnknown("bits per element", bpp);
+        bpp = std::clamp(bpp, 1u, 128u);
+    }
     const ArrayMode array_mode = GetArrayMode(tile_mode);
-    ASSERT_MSG(IsMacroTiled(array_mode), "tile mode {} is not macro tiled", u32(tile_mode));
+    if (!IsMacroTiled(array_mode)) {
+        NoteUnknown("macro tiled mode", u32(tile_mode));
+        return MacroTileMode::Mode_1x1_16;
+    }
     const u32 thickness = GetMicroTileThickness(array_mode);
     const u32 tile_bytes_1x = bpp * MicroTileSize * MicroTileSize * thickness / 8;
     const u32 split = CalculateTileSplit(tile_mode, array_mode, GetMicroTileMode(tile_mode), bpp);

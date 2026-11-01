@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "gcn/formats.h"
 
+#include <atomic>
+#include <cstdio>
+
 namespace Gcn {
 
 namespace {
@@ -85,7 +88,15 @@ constexpr std::array<FormatInfo, 64> Formats = [] {
 /// Formats with sizes known (the translator handles nothing after BC7).
 const FormatInfo& Info(DataFormat format) {
     const u32 index = u32(format);
-    ASSERT_MSG(index <= u32(DataFormat::FormatBc7), "data format {} has no size", index);
+    if (index > u32(DataFormat::FormatBc7)) {
+        // bbport (Linux fork): a garbage descriptor's data format ended the game (an assertion,
+        // exit 23); it is taken as 8_8_8_8 (32 bits a texel), reported a few times.
+        static std::atomic<u32> notes{0};
+        if (notes.fetch_add(1, std::memory_order_relaxed) < 8) {
+            std::fprintf(stderr, "GPU: data format %u has no size, using 8_8_8_8\n", index);
+        }
+        return Formats[u32(DataFormat::Format8_8_8_8)];
+    }
     return Formats[index];
 }
 
