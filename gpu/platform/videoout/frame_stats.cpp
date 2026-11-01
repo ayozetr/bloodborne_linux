@@ -49,6 +49,32 @@ extern std::atomic<u32> g_bb_compiles;
 
 namespace BbVideoOut {
 
+// bbport (0xCydral, Linux fork): without BB_FRAME_STATS, one short line every 30 seconds, so a
+// player's last_run.log says how the game ran: game frames per second, the slowest 1% of frames,
+// the worst frame and the shader/pipeline compiles of the window.
+void OnFlipPerf() {
+    using Clock = std::chrono::steady_clock;
+    static Clock::time_point window_start = Clock::now(), last = window_start;
+    static std::vector<float> intervals;
+    const auto now = Clock::now();
+    intervals.push_back(std::chrono::duration<float, std::milli>(now - last).count());
+    last = now;
+    const double window = std::chrono::duration<double>(now - window_start).count();
+    if (window < 30.0) {
+        return;
+    }
+    std::sort(intervals.begin(), intervals.end());
+    const size_t n = intervals.size();
+    const double slow_ms = intervals[n - 1 - n / 100];
+    std::printf("Perf: %.1f FPS over %.0f s, 1%% low %.1f FPS, worst frame %.1f ms, %u "
+                "shader/pipeline compiles\n",
+                n / window, window, 1000.0 / std::max(slow_ms, 0.001),
+                static_cast<double>(intervals.back()), Vulkan::g_bb_compiles.exchange(0));
+    std::fflush(stdout);
+    intervals.clear();
+    window_start = now;
+}
+
 bool FrameStatsEnabled() {
     static const bool enabled = EmulatorSettingsImpl::Flag("BB_FRAME_STATS", false);
     return enabled;

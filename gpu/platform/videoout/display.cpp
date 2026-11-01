@@ -343,6 +343,8 @@ void Display::Flip(const Request& request) {
                                                     : 0);
     if (FrameStatsEnabled()) {
         OnFlipStats();
+    } else {
+        OnFlipPerf();
     }
     // BB_HONEST_FLIPS=1 (an experiment): the flip completes once the GPU has finished the frame,
     // as on the console (a vblank after the frame's commands end), instead of when it is queued.

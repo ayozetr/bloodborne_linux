@@ -6,4 +6,6 @@
 namespace BbVideoOut {
 bool FrameStatsEnabled();
 void OnFlipStats();
+/// bbport: without BB_FRAME_STATS, one "Perf:" line every 30 s (OnFlipPerf, at each flip).
+void OnFlipPerf();
 } // namespace BbVideoOut
