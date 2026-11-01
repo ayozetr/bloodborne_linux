@@ -7,6 +7,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <cstdio>
 #include <cstdlib>
 #include <limits>
 
@@ -21,6 +22,7 @@
 #include "textures/image.h"
 #include "textures/texture_cache.h"
 #include "bbport_settings.h"
+#include "render/vk_breadcrumbs.h"
 #include "render/vk_low_latency.h"
 #include "upscale/vk_frame_generation.h"
 #include "upscale/vk_temporal_upscaler.h"
@@ -76,14 +78,29 @@ u32 FramesAhead() {
     return value;
 }
 
+// bbport (Linux fork, #5): in 10 s slices. Past the first one the log says so, once per wait,
+// with the GPU breadcrumbs (which command it has not finished), and again when it does finish:
+// waited for without a limit, a GPU that never finished a frame froze the game with nothing in
+// the log (frozen loading screens, GPU at 0 %, NVIDIA Xid 109).
 void WaitFence(vk::Device device, vk::Fence fence) {
+    bool told = false;
     while (true) {
-        const vk::Result result = device.waitForFences(fence, true, std::numeric_limits<u64>::max());
+        const vk::Result result = device.waitForFences(fence, true, 10'000'000'000ull);
         if (result == vk::Result::eSuccess) {
+            if (told) {
+                std::printf("Presenter: the frame finished after all\n");
+                std::fflush(stdout);
+            }
             return;
         }
         if (result != vk::Result::eTimeout) {
             Check<"wait for a frame">(result);
+        }
+        if (!told) {
+            told = true;
+            std::printf("Presenter: a frame not finished after 10 s: the GPU is stuck on it\n");
+            std::fflush(stdout);
+            Breadcrumbs::ReportStuck("a frame the presenter waits for");
         }
     }
 }

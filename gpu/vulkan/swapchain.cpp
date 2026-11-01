@@ -249,9 +249,25 @@ void Swapchain::SetHDR(bool hdr) {
 }
 
 bool Swapchain::AcquireNextImage() {
-    const vk::Result result = instance.GetDevice().acquireNextImageKHR(
-        swapchain, std::numeric_limits<u64>::max(), acquired[frame_index], VK_NULL_HANDLE,
-        &image_index);
+    // bbport (Linux fork, #5): in 10 s slices, saying so once when the compositor holds every
+    // image that long (a frozen game with nothing in the log).
+    vk::Result result;
+    bool told = false;
+    while ((result = instance.GetDevice().acquireNextImageKHR(
+                swapchain, 10'000'000'000ull, acquired[frame_index], VK_NULL_HANDLE,
+                &image_index)) == vk::Result::eTimeout ||
+           result == vk::Result::eNotReady) {
+        if (!told) {
+            told = true;
+            std::printf("Swapchain: no image from the compositor in 10 s (it holds all %zu)\n",
+                        images.size());
+            std::fflush(stdout);
+        }
+    }
+    if (told) {
+        std::printf("Swapchain: the compositor gave an image back\n");
+        std::fflush(stdout);
+    }
     switch (result) {
     case vk::Result::eSuccess:
         break;
