@@ -65,7 +65,18 @@ if [[ -f BUILD ]]; then
 elif [[ -d .git || -f .git ]] && command -v git >/dev/null; then
     bb_build="$(git rev-parse --short=8 HEAD 2>/dev/null)$(git diff --quiet HEAD 2>/dev/null || echo -modified) $(git rev-parse --abbrev-ref HEAD 2>/dev/null) (git checkout)" || true
 fi
-[[ -f VERSION ]] && echo "bbport $(<VERSION)${bb_build:+, build $bb_build}"
+# The Linux fork's version (launcher/bbport_update.py), with bbport's it is built on.
+bb_version=
+if [[ -f launcher/bbport_update.py ]]; then
+    while IFS= read -r line; do
+        if [[ $line =~ ^VERSION\ =\ \"([^\"]+)\" ]]; then bb_version=${BASH_REMATCH[1]}; break; fi
+    done < launcher/bbport_update.py
+fi
+if [[ -n $bb_version ]]; then
+    echo "bbport Linux $bb_version${bb_build:+, build $bb_build} (bbport $(<VERSION))"
+elif [[ -f VERSION ]]; then
+    echo "bbport $(<VERSION)${bb_build:+, build $bb_build}"
+fi
 if [[ -z ${PYTHON:-} ]]; then
     PYTHON=$(command -v python3 || true)
     if [[ -z $PYTHON ]]; then
