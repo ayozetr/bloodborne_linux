@@ -3,6 +3,7 @@
 #include "memory/page_watch.h"
 #include "shim/bb_env.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cstdio>
 #include <cstdlib>
@@ -302,7 +303,11 @@ bool PageWatch::Impl::OnFault(void* context, void* fault_address) {
     if (!write) {
         BbStats::read_faults.fetch_add(1, std::memory_order_relaxed);
         BbStats::Timer timer{BbStats::t_read_faults};
-        return rasterizer->ReadMemory(address, 8, gpu_thread);
+        // bbport (Linux fork, from Awaken's BloodBorneButPc 0.9.24): within the faulting page.
+        // 8 bytes from a read of the last bytes of a mapping reached past its end: IsMapped
+        // failed and the fault went unhandled (the game ended).
+        return rasterizer->ReadMemory(address, std::min<u64>(8, NextPage(address) - address),
+                                      gpu_thread);
     }
     if (ImageTraps() && !(reasons & BbLayer::WriteTraps::Image)) {
         // Not an image's trap: another owner's being lifted by another thread, or one lifted

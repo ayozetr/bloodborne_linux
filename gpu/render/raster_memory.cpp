@@ -132,7 +132,12 @@ void Rasterizer::OnCpuWrite(VAddr addr, u64 size) {
 
 bool Rasterizer::OnWriteFault(VAddr addr, bool assume_locks, u64 guest_rip) {
     DrainDrawPipe();
-    if (!InvalidateMemory(addr, 8, assume_locks)) {
+    // bbport (Linux fork, from Awaken's BloodBorneButPc 0.9.24): within the faulting page. 8
+    // bytes from a write to the last bytes of a mapping reached past its end: IsMapped failed
+    // and the fault went unhandled (the game ended).
+    constexpr u64 Page = 4096; // the guest pages the faults are tracked by (BbMem::PageSize)
+    const u64 fault_size = std::min<u64>(8, Page - (addr & (Page - 1)));
+    if (!InvalidateMemory(addr, fault_size, assume_locks)) {
         return false;
     }
     buffer_cache.ExtendWriteFault(addr, guest_rip);
