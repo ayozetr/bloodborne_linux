@@ -416,6 +416,7 @@ BB_ENV(BB_COPY_FILTER_GATE, TUNING, "=1 with BB_COPY_SKIP_SAME: the copy filter 
 BB_ENV(BB_COPY_WHERE, DEBUG, "=1: the copy shader's sources and destinations per frame, VRAM or in place (log lines)")
 BB_ENV(BB_VERTEX_IN_PLACE, DEBUG, "=1: vertex data bound in place per frame, by why it has no VRAM copy, and what draws read of it (log lines)")
 BB_ENV(BB_VERTEX_READ_COPY, TUNING, "=1 (experimental): vertex data bound in place copied into VRAM for the vertices each draw reads (once per guest submission)")
+BB_ENV(BB_ATLAS_DEBUG, DEBUG, "=1: Hunter's Atlas logs what its game-state readers find")
 BB_ENV(BB_EXPERIMENT_CYCLE, DEBUG, "=bits,bits,...:seconds: the experiment bits step through the list, over and over (test builds)")
 BB_ENV(BB_EXP_EXTRA_BREAKS, DEBUG, "=N (experiment): the render pass ended before every Nth draw, to measure breaks")
 BB_ENV(BB_EXP_FINISH_BEFORE_TARGET, DEBUG, "=hex address (experiment): the GPU finishes everything before a draw into that target")

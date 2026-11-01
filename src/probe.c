@@ -12,6 +12,8 @@
 #include <cpuid.h>
 #include "runtime.h"
 #include "runtime_trophy.h"
+#include "runtime_map.h"
+#include "runtime_atlas_state.h"
 #include "gpu/bbgpu.h"
 #if !defined(__x86_64__) || !defined(__GNUC__)
 #error This prototype requires x86-64 GCC or Clang (including MinGW).
@@ -799,6 +801,15 @@ int main(int argc, char **argv) {
     runtime_net_image_mapped(image, size); /* online modules that read the original code */
     if (patch_file) apply_patches(patch_file, segments, ns, relocs, nr);
     if (!cpu_only) bbgpu_patch_image(image, size);
+    /* Hunter's Atlas (BB_ATLAS_ENABLED=1): its guarded readers, and the opt-in lamp travel hook,
+     * written here while the image is still writable. Off, nothing of the game is touched. */
+    if (!cpu_only) {
+        const char *atlas = bb_env("BB_ATLAS_ENABLED");
+        if (atlas && atlas[0] && strcmp(atlas, "0")) {
+            runtime_map_bind(image, size);
+            runtime_atlas_state_bind(image, size);
+        }
+    }
 #ifdef _WIN32
     patch_guest_tls(segments, ns);
 #endif
