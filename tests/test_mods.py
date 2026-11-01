@@ -160,3 +160,57 @@ class ModTests(unittest.TestCase):
         self.assertEqual(mounted['content'], 'mod')
         self.assertFalse(Path(mounted['path']).exists())
         self.assertEqual((self.assets/'a.dcx').read_bytes(), b'original')
+
+    def test_ui_mods_come_first_and_stay_with_mods_off(self):
+        ui = self.root / 'ui-mods/prompts-xbox'
+        (ui / 'dvdroot_ps4/chr').mkdir(parents=True)
+        (ui / 'dvdroot_ps4/chr/a.dcx').write_bytes(b'prompts')
+        self.mod('A', b'user mod')
+        for enabled, expected in [('1', b'user mod'), ('0', b'prompts')]:
+            result = subprocess.run([sys.executable, str(ROOT / 'scripts/mods.py'), str(self.game),
+                '--out', str(self.root / 'out'), '--mods-dir', str(self.moddir), '--enabled', enabled,
+                '--ui-mods', str(ui)], capture_output=True, text=True, check=True)
+            self.assertEqual((Path(result.stdout.strip()) / 'dvdroot_ps4/chr/a.dcx').read_bytes(), expected)
+
+    def test_title_id_wrapped_mod_discovered(self):
+        self.moddir.mkdir()
+        for name, title in (('Europe', 'CUSA03173'), ('US', 'CUSA00900')):
+            (self.moddir / name / title / 'dvdroot_ps4').mkdir(parents=True)
+        self.assertEqual(mods.discover(self.moddir), ['Europe', 'US'])
+
+    def test_mod_site_layouts(self):
+        # As mods come from mod sites: notes without a suffix and previews beside the wrapper,
+        # two wrappers deep, and the game's folders next to screenshots (Supermedo's dd2314e).
+        layouts = {'Readme': 'Readme v1/dvdroot_ps4/chr', 'Deep': 'Deep/Deep v2/dvdroot_ps4/chr',
+                   'Shots': 'chr'}
+        for name, path in layouts.items():
+            folder = self.moddir / name / path
+            folder.mkdir(parents=True)
+            (folder / 'a.dcx').write_bytes(name.encode())
+        (self.moddir / 'Readme/README').write_text('notes')
+        (self.moddir / 'Readme/preview.webp').write_bytes(b'image')
+        (self.moddir / 'Readme/Nexus page.url').write_text('[InternetShortcut]')
+        (self.moddir / 'Shots/Screenshots').mkdir()
+        (self.moddir / 'Shots/Screenshots/1.png').write_bytes(b'image')
+        (self.moddir / 'Shots/readme.txt').write_text('notes')
+        self.assertEqual(mods.discover(self.moddir), ['Deep', 'Readme', 'Shots'])
+        for name in layouts:
+            with self.subTest(name=name):
+                result = mods.build_overlay(self.game, self.root / 'out',
+                                            [(name, self.moddir / name)])
+                self.assertEqual((result / 'dvdroot_ps4/chr/a.dcx').read_bytes(), name.encode())
+                self.assertFalse((result / 'dvdroot_ps4/Screenshots').exists())
+                self.assertFalse((result / 'dvdroot_ps4/readme.txt').exists())
+
+    def test_unrecognized_folders_say_why(self):
+        self.moddir.mkdir()
+        (self.moddir / 'Zipped').mkdir()
+        (self.moddir / 'Zipped/mod.zip').write_bytes(b'PK')
+        (self.moddir / 'Two/A/dvdroot_ps4').mkdir(parents=True)
+        (self.moddir / 'Two/B/dvdroot_ps4').mkdir(parents=True)
+        (self.moddir / 'Two/A/dvdroot_ps4/x').write_bytes(b'x')
+        (self.moddir / 'Empty').mkdir()
+        (self.moddir / 'Notes').mkdir()
+        (self.moddir / 'Notes/readme.txt').write_text('notes')
+        self.assertEqual(dict(mods.unrecognized(self.moddir)),
+                         {'Empty': 'empty', 'Notes': 'no-game-files', 'Two': 'several', 'Zipped': 'archive'})
