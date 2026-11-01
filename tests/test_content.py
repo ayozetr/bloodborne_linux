@@ -19,6 +19,17 @@ class ProfileTests(unittest.TestCase):
                 content_profile.prepare(p,p,'trial')
             self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes()),(b'BBCONT01',1,13,0,0,0xffffffff))
 
+    def test_dump_without_a_region_gets_europe(self):
+        # Without one the game has no address for its server (the Linux fork's issue #9); a
+        # dump's own region is kept.
+        for given,value in ((None,13),(2,2)):
+            with self.subTest(given=given), tempfile.TemporaryDirectory() as tmp:
+                p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')
+                values={} if given is None else {'USER_DEFINED_PARAM_1':given}
+                with patch.object(content_profile,'sfo',return_value=values):
+                    content_profile.prepare(p,p)
+                self.assertEqual(struct.unpack('<8s5I',(p/'content.bin').read_bytes())[2],value)
+
     def test_invalid_sfo_parameter_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp);(p/'sce_sys').mkdir();(p/'sce_sys/param.sfo').write_bytes(b'fixture')

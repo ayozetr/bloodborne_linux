@@ -1,11 +1,18 @@
 # SPDX-FileCopyrightText: Copyright 2026 bbport contributors
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Prepare explicit offline AppContent metadata; SKU is a probe setting, not a license check."""
+"""Prepare explicit offline AppContent metadata; SKU is a probe setting, not a license check.
+
+USER_DEFINED_PARAM_1 is Bloodborne's region (2 the Americas, 13 Europe). A dump without one (0)
+gets Europe: with no region the game has no address for its server, and Log In fails with "Unable
+to obtain Bloodborne server information" (the Linux fork's issue #9). The text and voice
+languages no longer depend on it (bbport.ini game_text_language, game_voice_language)."""
 import argparse
 import json
 import struct
 from pathlib import Path
 from prepare import sfo
+
+EUROPE=13
 
 
 def prepare(game, out, sku='full'):
@@ -13,6 +20,8 @@ def prepare(game, out, sku='full'):
     params=[values.get(f'USER_DEFINED_PARAM_{i}',0) for i in range(1,5)]
     if any(type(v) is not int or not 0<=v<=0xffffffff for v in params):
         raise ValueError('invalid user-defined parameter')
+    if params[0]==0:
+        params[0]=EUROPE
     profile=dict(title_id=values.get('TITLE_ID'),sku=sku,sku_source='explicit probe setting',
                  user_params=params, mounted_addons=[],boot_attr=0)
     out.mkdir(parents=True,exist_ok=True)
