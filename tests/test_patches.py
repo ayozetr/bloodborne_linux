@@ -93,6 +93,24 @@ class NativeUiTests(unittest.TestCase):
         self.assertIsNone(scaled_sizes({'output_res': '1280x720', 'upscaler': 'taa', 'preset': '3'}))
 
 
+class NetworkChoiceTests(unittest.TestCase):
+    def test_online_play_answers_play_online(self):
+        self.assertEqual(patches.skip_network_choice({}), patches.SKIP_NETWORK_CHOICE)
+        self.assertEqual(patches.skip_network_choice({'BB_ONLINE': '1'}),
+                         patches.SKIP_NETWORK_CHOICE_ONLINE)
+        self.assertIsNone(patches.skip_network_choice({'BB_SKIP_NETWORK_CHOICE': '0',
+                                                       'BB_ONLINE': '1'}))
+        (at, offline), = compile_patches(XML, [patches.SKIP_NETWORK_CHOICE], '01.09', SEGMENTS)
+        (at2, online), = compile_patches(XML, [patches.SKIP_NETWORK_CHOICE_ONLINE], '01.09',
+                                         SEGMENTS)
+        self.assertEqual(at, at2)
+        # The same builder: the PLAY ONLINE item's vtable (0x533be80) and operator() (0x1b49eb0).
+        lea = lambda code: at + 0x13 + struct.unpack_from('<i', code, 0xf)[0]
+        call = lambda code: at + 0x24 + struct.unpack_from('<i', code, 0x20)[0]
+        self.assertEqual((lea(offline), call(offline)), (0x533be30, 0x1b49cd0))
+        self.assertEqual((lea(online), call(online)), (0x533be80, 0x1b49eb0))
+
+
 class LoadingPatchTests(unittest.TestCase):
     def test_bbhost_loading_patches_on_unless_turned_off(self):
         on = ['Quick Re-entry', 'Fast Run-time Deflate']
