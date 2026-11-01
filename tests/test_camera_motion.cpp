@@ -138,5 +138,8 @@ int main() {
     run("static camera cancels jitter",distant,0,0,0,0,0,true);
     run("matching object vector",distant,0,0,distant,1,2);
     run("stale distant object vector",distant,0,0,0.9999f,1,0);
+    // History that is not the object's: far from the camera vector, which stays.
+    run("object vector far from the camera's",distant,0,0,distant,1,0,false,100.f);
+    run("moving object within the bound",distant,0,0,distant,1,30,false,30.f);
     vmaDestroyBuffer(instance.GetAllocator(),staging,allocation);
 }
