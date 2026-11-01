@@ -309,7 +309,8 @@ struct StageSpecialization {
     }
 
     bool operator==(const StageSpecialization& other) const {
-        if (!Valid()) {
+        if (!Valid() || !other.Valid() || buffers.size() != other.buffers.size() ||
+            images.size() != other.images.size() || samplers.size() != other.samplers.size()) {
             return false;
         }
 
@@ -330,7 +331,13 @@ struct StageSpecialization {
         }
 
         // Without bindings the start bindings (which follow the other stages) do not matter.
-        if (bitset.none() && other.bitset.none()) {
+        // bbport (Linux fork): only for a stage with no bindings at all. `bitset` marks only
+        // resources with a guest sharp; the engine's own buffers (user data, clip planes and the
+        // like) have none, yet are bound from `start` on. A vertex shader with only those was
+        // reused after a fragment shader with another binding count, and its bindings did not
+        // match the pipeline layout. Found by Awaken (Lantern Engine 0.9.37 beta 7).
+        if (bitset.none() && other.bitset.none() && buffers.empty() && images.empty() &&
+            samplers.empty() && fmasks.empty()) {
             return true;
         }
 
