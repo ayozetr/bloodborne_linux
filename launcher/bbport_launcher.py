@@ -292,6 +292,7 @@ DEFAULTS = {
     "thd_token": "",
     # Seamless co-op (BBSC): on or off, and the options the player changed ({mod.json id: value}).
     "bbsc": True,
+    "gestures_no_motion": False,  # the gestures menu without motion-control icons
     "bbsc_options": {},  # BBSC's options the player changed (scripts/bbsc.py)
     # Local co-op (its page, bbport_coop.py): the players, the layout for two, each player's
     # controller (a device path or "keyboard") and whether players 2-4 are silent.
@@ -755,6 +756,7 @@ def game_environment(s):
     # On, the packaged entry's BB_STEAM_OVERLAY (Steam's preload, kept for the game) stays.
     if not s.get("steam_overlay", True):
         env["BB_STEAM_OVERLAY"] = "0"
+    env["BB_GESTURES_NO_MOTION"] = "1" if s.get("gestures_no_motion") else "0"
     if s.get("trophy_key", "").strip():
         env["BB_TROPHY_KEY"] = s["trophy_key"].strip()
     if s.get("online") and online_module():
@@ -1540,6 +1542,10 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.ab_swap_syncing = False
         self.ab_swap_row.connect("notify::active", lambda *_: self.on_ab_swap())
         controls.add(self.ab_swap_row)
+        # Dommo's gestures menu without the motion-control icons (scripts/gestures_menu.py).
+        self.gestures_row = Adw.SwitchRow(title=tr("Меню жестов без значков управления движением"),
+                                          active=bool(self.settings.get("gestures_no_motion")))
+        controls.add(self.gestures_row)
         # Controller sticks (runtime_pad.c): swapped, camera stick inverted.
         self.stick_rows = {}
         for key, title in (("pad_swap_sticks", tr("Поменять стики местами")),
@@ -2485,6 +2491,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         s["mods_enabled"] = self.mods_enabled_row.get_active()
         s["discord"] = self.discord_row.get_active()
         s["steam_overlay"] = self.steam_overlay_row.get_active()
+        s["gestures_no_motion"] = self.gestures_row.get_active()
         s["trophy_key"] = self.trophy_key_row.get_text().strip()
         s["online"] = self.online_row.get_active()
         s.update(self.online_settings())

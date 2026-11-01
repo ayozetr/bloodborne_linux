@@ -101,6 +101,11 @@ ui_mods=$("$PYTHON" scripts/fov.py "$game" --out "$out/fov" --config "$BB_CONFIG
 bbsc_on=0; [[ ${BB_BBSC:-0} == 1 && ${BB_ONLINE:-0} == 1 && ${BB_NET_BACKEND:-} != thd ]] && bbsc_on=1
 kit_layer=$("$PYTHON" scripts/bbsc_kit_texts.py "$game" --out "$out/bbsc-kit" --bbsc "$bbsc_on") || kit_layer=
 if [[ -n $kit_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$kit_layer; fi
+# The gestures menu without the motion-control icons (the launcher's switch, Dommo's mod):
+# BB_GESTURES_NO_MOTION=1, a layer under the mods (scripts/gestures_menu.py). Optional.
+gestures_layer=$("$PYTHON" scripts/gestures_menu.py "$game" --out "$out/gestures" \
+    --on "${BB_GESTURES_NO_MOTION:-0}") || gestures_layer=
+if [[ -n $gestures_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$gestures_layer; fi
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
     --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods" \

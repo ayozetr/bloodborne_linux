@@ -11,6 +11,8 @@ Only what the mods drew is here, never the game's own files:
   of big prompts from the shared UI atlas (`atlas.dds`, scaled down to the game's atlas size).
 - `gesturetop.json`: the edits that turn the game's `menu/gesturetop.gfx` into the mod's.
 
-`scripts/menu_prompts.py` puts them into the player's own `menu/common.tpf.dcx` and
-`menu/gesturetop.gfx` at each start; `tools/extract_prompt_assets.py` rebuilds this folder from
-the mods' ZIPs. Keyboard prompts are drawn by `scripts/menu_prompts.py` itself.
+The port draws its button prompts live (`gpu/shim/bbport_button_prompts.cpp`): `scripts/prompt_art.py`
+turns the 20 icons into the raw images it uses for the Xbox and Switch styles, and the keyboard's
+are its own. `scripts/gestures_menu.py` applies `gesturetop.json` to the player's own
+`menu/gesturetop.gfx` when the launcher's *Gestures menu without motion-control icons* is on.
+The Linux fork's `tools/extract_prompt_assets.py` rebuilt this folder from the mods' ZIPs.
