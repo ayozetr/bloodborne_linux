@@ -79,9 +79,13 @@ if [[ -z ${PYTHON:-} ]]; then echo 'Install Python 3 or set PYTHON.' >&2; exit 1
 game=${BB_GAME_DIR:-../CUSA03173}
 if [[ ! -f $game/eboot.bin ]]; then echo "No eboot.bin in $game (set BB_GAME_DIR)." >&2; exit 1; fi
 original_game=$game
+# Field of view (bbport.ini fov, degrees; unset or 43 the game's): the camera table with every
+# camera's field of view scaled, a layer under the mods (a mod's own camera table wins). Optional:
+# without it the game keeps its own (scripts/fov.py).
+ui_mods=$("$PYTHON" scripts/fov.py "$game" --out "$out/fov" --config "$BB_CONFIG") || ui_mods=
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
-    --enabled "${BB_MODS_ENABLED:-1}" \
+    --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods" \
     --saves "${BB_USER_DIR:-$data/user}/savedata" --state "$data/mods.last")
 # A private merged view lasts for this launch, including restarts. Cleanup only our own view.
 if [[ $game != "$(realpath "$original_game")" ]]; then

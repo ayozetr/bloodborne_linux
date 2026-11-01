@@ -233,10 +233,14 @@ def main():
     parser.add_argument('--mods-dir', required=True, type=Path)
     parser.add_argument('--config', type=Path)
     parser.add_argument('--enabled', choices=('0', '1'), default='1')
+    # Layers the port makes from the game's files for this launch (scripts/fov.py), each a folder,
+    # os.pathsep-separated: settings of their own, so laid first, under the player's mods, and kept
+    # with mods switched off.
+    parser.add_argument('--ui-mods', default='')
     parser.add_argument('--saves', type=Path, help='the save folder, copied when the set of mods changes')
     parser.add_argument('--state', type=Path, help='where the last launch\'s set of mods is kept')
     args = parser.parse_args()
-    layers = []
+    layers = [(Path(p).name, Path(p)) for p in args.ui_mods.split(os.pathsep) if p]
     if args.enabled == '1':
         # shadPS4's loose overlay convention, beside the original game.
         legacy = Path(str(args.game.resolve()) + '-mods')
@@ -249,7 +253,9 @@ def main():
             for name in selected(args.mods_dir, args.config):
                 layers.append((name, args.mods_dir / name))
     if args.saves and args.state:
-        backup_saves(args.saves, args.state, [name for name, _ in layers])
+        # The player's mods only: the port's own layers add no items to a save.
+        ui_count = len([p for p in args.ui_mods.split(os.pathsep) if p])
+        backup_saves(args.saves, args.state, [name for name, _ in layers[ui_count:]])
     print(build_overlay(args.game, args.out, layers))
 
 
