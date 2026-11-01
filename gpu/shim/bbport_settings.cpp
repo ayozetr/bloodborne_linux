@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2026 bbport contributors
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "bbport_settings.h"
+#include "bbport_menu_i18n.h"
 #include "shim/bb_env.h"
+#include <cctype>
 #include <cmath>
 
 #include <algorithm>
@@ -36,10 +38,14 @@ void Set(Values& v, const std::string& key, const std::string& value) {
     const float f = float(std::atof(value.c_str()));
     const int i = std::atoi(value.c_str());
     if (key == "menu_language") {
-        if (value == "en") v.menu_language = MenuLanguage::English;
-        else if (value == "ru") v.menu_language = MenuLanguage::Russian;
-        else std::printf("Settings: unknown menu_language '%s' (expected en or ru)\n", value.c_str());
-        v.menu_language_chosen = value == "en" || value == "ru";
+        const auto it = std::find_if(std::begin(MenuLanguageCodes), std::end(MenuLanguageCodes),
+                                     [&](const char* code) { return value == code; });
+        if (it != std::end(MenuLanguageCodes)) {
+            v.menu_language = MenuLanguage(it - std::begin(MenuLanguageCodes));
+            v.menu_language_chosen = true;
+        } else {
+            std::printf("Settings: unknown menu_language '%s'\n", value.c_str());
+        }
     } else if (key == "upscaler") {
         for (int u = 0; u < UpscalerCount; ++u) {
             if (value == UpscalerName(u)) {
@@ -270,7 +276,31 @@ Values& Get() {
 }
 
 const char* MenuText(const char* english, const char* russian) {
-    return Get().menu_language == MenuLanguage::Russian ? russian : english;
+    return MenuTextIn(Get().menu_language, english, russian);
+}
+
+const char* MenuTextIn(MenuLanguage language, const char* english, const char* russian) {
+    switch (language) {
+    case MenuLanguage::English:
+        return english;
+    case MenuLanguage::Russian:
+        return russian;
+    default:
+        return MenuTranslation(language, english);
+    }
+}
+
+MenuLanguage MenuLanguageFromCode(const char* code) {
+    if (code && code[0] && code[1]) {
+        // The longer codes first: "pt_BR" before a plain two-letter match.
+        for (int l = int(MenuLanguage::Count) - 1; l >= 0; --l) {
+            if (std::tolower(code[0]) == MenuLanguageCodes[l][0] &&
+                std::tolower(code[1]) == MenuLanguageCodes[l][1]) {
+                return MenuLanguage(l);
+            }
+        }
+    }
+    return MenuLanguage::English;
 }
 
 void Load() {
@@ -290,9 +320,7 @@ void Load() {
                 }
             }
         }
-        v.menu_language = lang && (lang[0] == 'r' || lang[0] == 'R') && (lang[1] == 'u' || lang[1] == 'U')
-                              ? MenuLanguage::Russian
-                              : MenuLanguage::English;
+        v.menu_language = MenuLanguageFromCode(lang);
     }
     if (FILE* file = std::fopen(Path(), "r")) {
         char line[256];
@@ -457,7 +485,7 @@ void Save() {
     };
     const auto flag = [](bool value) { return std::string(value ? "1" : "0"); };
     if (v.menu_language_chosen) {
-        put("menu_language", v.menu_language == MenuLanguage::Russian ? "ru" : "en");
+        put("menu_language", MenuLanguageCodes[int(v.menu_language.load())]);
     }
     put("upscaler", UpscalerName(v.upscaler));
     put("preset", std::to_string(v.preset.load()));

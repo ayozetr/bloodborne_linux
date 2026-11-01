@@ -92,8 +92,9 @@ F Game(u64 va) {
 
 // ---- Texts: ids from IdBase up, looked up by the game like its own messages. ----
 constexpr u32 IdBase = 0x7f0000;
+constexpr int Languages = int(BbSettings::MenuLanguage::Count);
 struct Text {
-    std::u16string english, russian;
+    std::array<std::u16string, Languages> languages; ///< by BbSettings::MenuLanguage
 };
 std::vector<Text> texts;
 
@@ -121,20 +122,81 @@ std::u16string Utf16(const char* utf8) {
     }
     return out;
 }
+/// The game's font has no Chinese characters: its pages stay in English there.
+BbSettings::MenuLanguage InGameFont(BbSettings::MenuLanguage language) {
+    return language == BbSettings::MenuLanguage::ChineseSimplified ? BbSettings::MenuLanguage::English
+                                                                   : language;
+}
 u32 AddText(const char* english, const char* russian) {
-    texts.push_back({Utf16(english), Utf16(russian)});
+    Text text;
+    for (int l = 0; l < Languages; ++l) {
+        text.languages[l] =
+            Utf16(BbSettings::MenuTextIn(InGameFont(BbSettings::MenuLanguage(l)), english, russian));
+    }
+    texts.push_back(std::move(text));
     return IdBase + u32(texts.size() - 1);
 }
-/// The game's own language decides (its "Screen/Sound" text in Cyrillic: Russian, else English);
-/// the port's menu language until the game has looked that text up.
-enum class GameLanguage { Unknown, English, Russian };
-std::atomic<GameLanguage> game_language{GameLanguage::Unknown};
+/// The game's text language as a menu language: bbport.ini game_text_language when it names one
+/// (scripts/patches.py), else the language the runtime gives the game (BB_LANGUAGE, else the
+/// desktop's locale); English for the languages the menu does not have. From the Linux fork.
+BbSettings::MenuLanguage LanguageOfTheGame() {
+    using BbSettings::MenuLanguage;
+    if (const char* config = bb_env("BB_CONFIG"); config && *config) {
+        if (FILE* file = std::fopen(config, "r")) {
+            char line[256];
+            std::string chosen;
+            while (std::fgets(line, sizeof(line), file)) {
+                if (!std::strncmp(line, "game_text_language=", 19)) {
+                    chosen.assign(line + 19, std::strcspn(line + 19, "\r\n"));
+                }
+            }
+            std::fclose(file);
+            static const std::pair<const char*, MenuLanguage> codes[] = {
+                {"enus", MenuLanguage::English}, {"engb", MenuLanguage::English},
+                {"ruru", MenuLanguage::Russian}, {"eses", MenuLanguage::Spanish},
+                {"esar", MenuLanguage::Spanish}, {"itit", MenuLanguage::Italian},
+                {"frfr", MenuLanguage::French},  {"dede", MenuLanguage::German},
+                {"ptbr", MenuLanguage::PortugueseBrazil},
+            };
+            if (!chosen.empty() && chosen != "auto") {
+                for (const auto& [code, language] : codes) {
+                    if (chosen == code) return language;
+                }
+                return MenuLanguage::English;
+            }
+        }
+    }
+    int id = 1;
+    if (const char* v = bb_env("BB_LANGUAGE"); v && *v) {
+        id = std::atoi(v);
+    } else {
+        for (const char* key : {"LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"}) {
+            if (const char* locale = std::getenv(key); locale && *locale) {
+                const MenuLanguage l = BbSettings::MenuLanguageFromCode(locale);
+                return l == MenuLanguage::PortugueseBrazil || l == MenuLanguage::ChineseSimplified
+                           ? MenuLanguage::English
+                           : l;
+            }
+        }
+    }
+    switch (id) {
+    case 2: return MenuLanguage::French;
+    case 3: return MenuLanguage::Spanish;
+    case 4: return MenuLanguage::German;
+    case 5: return MenuLanguage::Italian;
+    case 8: return MenuLanguage::Russian;
+    case 17: return MenuLanguage::PortugueseBrazil;
+    default: return MenuLanguage::English;
+    }
+}
+/// The game's own language decides (its "Screen/Sound" text in Cyrillic: Russian, else the
+/// language the game was given); the port's menu language until the game has looked that text up.
+/// -1: not known yet.
+std::atomic<int> game_language{-1};
 
-bool RussianTexts() {
-    const GameLanguage game = game_language.load();
-    return game == GameLanguage::Unknown
-               ? BbSettings::Get().menu_language == BbSettings::MenuLanguage::Russian
-               : game == GameLanguage::Russian;
+int TextLanguage() {
+    const int game = game_language.load();
+    return game < 0 ? int(InGameFont(BbSettings::Get().menu_language.load())) : game;
 }
 
 // Texts that change while the game runs (the chosen aspect ratio's resolutions, "Auto (21:9)"):
@@ -142,7 +204,7 @@ bool RussianTexts() {
 constexpr u32 DynamicBase = IdBase + 0x8000;
 constexpr std::size_t DynamicLength = 40;
 struct DynamicText {
-    char16_t english[DynamicLength]{}, russian[DynamicLength]{};
+    char16_t languages[Languages][DynamicLength]{};
 };
 constexpr u32 OutputSlots = 12; ///< BbSettings::OutputList
 std::array<DynamicText, 1 + OutputSlots> dynamic_texts{};
@@ -157,10 +219,12 @@ void Store16(char16_t (&out)[DynamicLength], const char* utf8) {
     }
     __atomic_store_n(&out[n], char16_t(0), __ATOMIC_RELAXED);
 }
-void SetDynamic(u32 id, const char* english, const char* russian) {
+/// `text(language)`: the text in each menu language.
+template <typename F> void SetDynamic(u32 id, F text) {
     DynamicText& t = dynamic_texts[id - DynamicBase];
-    Store16(t.english, english);
-    Store16(t.russian, russian);
+    for (int l = 0; l < Languages; ++l) {
+        Store16(t.languages[l], text(InGameFont(BbSettings::MenuLanguage(l))).c_str());
+    }
 }
 
 bool OurText(u32 id) {
@@ -168,13 +232,11 @@ bool OurText(u32 id) {
            (id >= DynamicBase && id < DynamicBase + dynamic_texts.size());
 }
 const char16_t* TextOf(u32 id) {
-    const bool russian = RussianTexts();
+    const int language = TextLanguage();
     if (id >= DynamicBase) {
-        const DynamicText& t = dynamic_texts[id - DynamicBase];
-        return russian ? t.russian : t.english;
+        return dynamic_texts[id - DynamicBase].languages[language];
     }
-    const Text& t = texts[id - IdBase];
-    return russian ? t.russian.c_str() : t.english.c_str();
+    return texts[id - IdBase].languages[language].c_str();
 }
 
 // ---- The port's values the game's rows edit (ints: the list rows bind ints). ----
@@ -213,11 +275,13 @@ int MenuOutputIndex(int aspect, BbSettings::OutputSize output) {
 /// The resolution row's texts for `aspect`, "Auto (..)" for the monitor's aspect ratio.
 void RefreshOutputs(int aspect) {
     const std::string group = BbSettings::AspectKey(BbSettings::ResolvedAspect(BbSettings::AspectAuto));
-    SetDynamic(AutoText, ("Auto (" + group + ")").c_str(), ("Авто (" + group + ")").c_str());
+    SetDynamic(AutoText, [&](BbSettings::MenuLanguage l) {
+        return std::string(BbSettings::MenuTextIn(l, "Auto", "Авто")) + " (" + group + ")";
+    });
     for (int i = 0; i < int(OutputSlots); ++i) {
         const auto o = MenuOutput(aspect, i);
         const std::string text = std::to_string(o.width) + " x " + std::to_string(o.height);
-        SetDynamic(OutputTexts + u32(i), text.c_str(), text.c_str());
+        SetDynamic(OutputTexts + u32(i), [&](BbSettings::MenuLanguage) { return text; });
     }
 }
 
@@ -681,7 +745,7 @@ const char16_t* PS4_SYSV_ABI LookupHook(void* repository, u32 table, u32 categor
         for (const char16_t* c = text; *c; ++c) {
             cyrillic = cyrillic || (*c >= 0x400 && *c < 0x500);
         }
-        game_language = cyrillic ? GameLanguage::Russian : GameLanguage::English;
+        game_language = int(cyrillic ? BbSettings::MenuLanguage::Russian : LanguageOfTheGame());
     }
     return text;
 }

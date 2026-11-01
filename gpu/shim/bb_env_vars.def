@@ -36,6 +36,7 @@ BB_ENV(BB_FFX_DIR, SETTING, "the folder with AMD's FSR DLLs for Vulkan, amd_fide
 BB_ENV(BB_FFX_FG_VERSION, SETTING, "=<part of a name>: the frame generation AMD's DLL runs, from those the log lists (default: theirs)")
 BB_ENV(BB_FFX_FG_ML, SETTING, "=1: AMD's ML frame generation (4.0.x) accepts any GPU (AMD ships it for RDNA4); =0: refuses it (FSR 3.1)")
 BB_ENV(BB_FFX_FG_DEBUG, DEBUG, "=1: AMD's frame generation draws its tear lines and reset marks")
+BB_ENV(BB_CJK_FONT, SETTING, "=path: a font file with Chinese characters for the menu in Simplified Chinese (default: fontconfig's choice for zh-cn)")
 BB_ENV(BB_FFX_VERSION, SETTING, "=<part of a name>: the upscaler AMD's FSR DLLs run, from those the log lists (default: theirs)")
 BB_ENV(BB_FSR411_DIR, SETTING, "the FSR 4.1.1 assets folder (default fsr4_411)")
 BB_ENV(BB_FSR411_VARIANT, SETTING, "=int8 / fp8 / fp8emu / navi2 / lite: FSR 4.1.1 model variant (default: the menu's model)")

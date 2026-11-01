@@ -40,7 +40,18 @@ enum FrameGen : int {
 /// through VK_AMD_anti_lag).
 enum LowLatencyMode : int { LowLatencyOff = 0, LowLatencyOn = 1, LowLatencyBoost = 2, LowLatencyCount };
 enum DebugView : int { DebugNone = 0, DebugReactive = 1, DebugMotion = 2, DebugAo = 3, DebugViewCount };
-enum class MenuLanguage { English, Russian };
+/// Overlay languages, in the order of the menu's Language selector (Spanish onwards: the Linux
+/// fork's, bbport_menu_i18n.h).
+enum class MenuLanguage {
+    English, Russian, Spanish, Italian, French, German, PortugueseBrazil, ChineseSimplified, Count
+};
+/// bbport.ini / BB_MENU_LANGUAGE codes, indexed by MenuLanguage.
+inline constexpr const char* MenuLanguageCodes[] = {"en", "ru", "es", "it", "fr", "de", "pt_BR",
+                                                    "zh_CN"};
+/// Each language's own name, for the selector.
+inline constexpr const char* MenuLanguageNames[] = {"English", "Русский", "Español",
+                                                    "Italiano", "Français", "Deutsch",
+                                                    "Português (Brasil)", "简体中文"};
 
 /// Game effects switched by the community patches at start (patches.py EFFECTS): ini key,
 /// menu label, default (the game's own behaviour).
@@ -244,6 +255,10 @@ struct Values {
 Values& Get();
 /// Localized overlay text; the Language selector itself stays in English.
 const char* MenuText(const char* english, const char* russian);
+/// The same in a given language.
+const char* MenuTextIn(MenuLanguage language, const char* english, const char* russian);
+/// The MenuLanguage of a code ("es", "pt_BR", a locale such as "de_DE.UTF-8"); English when none.
+MenuLanguage MenuLanguageFromCode(const char* code);
 
 /// Reads the file, then the environment overrides. Called once at start.
 void Load();
