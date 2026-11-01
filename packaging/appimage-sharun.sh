@@ -136,6 +136,10 @@ if [[ -f $root/out/libbbport_dlss.so ]]; then
     mkdir -p "$appdir/share/bbport/dlss"
     cp "$root"/out/libbbport_dlss.so "$root"/out/libnvidia-ngx-dlss.so.* \
         "$root"/out/NVIDIA-DLSS-LICENSE.txt "$appdir/share/bbport/dlss/"
+    # DLSS Frame Generation (GeForce RTX 40 and newer), when the SDK had it.
+    for library in "$root"/out/libnvidia-ngx-dlssg.so.*; do
+        [[ -f $library ]] && cp "$library" "$appdir/share/bbport/dlss/"
+    done
 fi
 if [[ -n $net ]]; then
     module=$(find "$appdir/lib" -name libbbnet20.so -print -quit)
