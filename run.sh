@@ -91,6 +91,18 @@ fi
 "$PYTHON" scripts/prepare.py "$game" --out "$out"
 "$PYTHON" scripts/link_libc.py "$game" --out "$out"
 "$PYTHON" scripts/link_modules.py "$game" --out "$out"
+# BB_DLC_DIR (the launcher's DLC folder): the dumped add-ons of this title, one folder each (e.g.
+# SPEXPANSIONDLC03). The runtime reports <user>/addcont/<title id>/<label> as installed (shadPS4's
+# layout), so the folder is linked there; a real folder already in its place is left alone.
+if [[ -n ${BB_DLC_DIR:-} && -d $BB_DLC_DIR ]]; then
+    title=$("$PYTHON" -c 'import sys; sys.path.insert(0, "scripts"); from prepare import sfo
+print(sfo(open(sys.argv[1] + "/sce_sys/param.sfo", "rb").read()).get("TITLE_ID", ""))' "$game" 2>/dev/null) || title=
+    addcont=${BB_USER_DIR:-$data/user}/addcont
+    if [[ $title =~ ^[A-Z]{4}[0-9]{5}$ && ( ! -e $addcont/$title || -L $addcont/$title ) ]]; then
+        mkdir -p "$addcont"
+        ln -sfn "$(realpath "$BB_DLC_DIR")" "$addcont/$title"
+    fi
+fi
 "$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}"
 # Sizes chosen below for the previous launch are recomputed after an in-game restart.
 if [[ ${BB_AUTO_RENDER_RES:-} == 1 ]]; then

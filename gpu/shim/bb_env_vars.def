@@ -22,6 +22,7 @@ BB_ENV(BB_CONTENT_SKU, SETTING, "=full / ...: the content profile run.py prepare
 BB_ENV(BB_CURSOR, SETTING, "=0: the system's mouse cursor instead of the port's")
 BB_ENV(BB_DECK_DESKTOP_INPUT, SETTING, "=1: keep keyboard and mouse on a Steam Deck in game mode")
 BB_ENV(BB_DISPLAY, SETTING, "=N: the monitor to open the window on")
+BB_ENV(BB_DLC_DIR, SETTING, "=path: the dumped add-ons of this title, one folder each, linked as <user>/addcont/<title id> (the launcher's DLC folder)")
 BB_ENV(BB_DLSS, SETTING, "=0: no DLSS even on NVIDIA RTX")
 BB_ENV(BB_DMEM_EXTRA_MB, SETTING, "=N (0-2048, default 512): direct memory beyond the PS4's for the port's extras")
 BB_ENV(BB_DMEM_MB, SETTING, "=N: the game's direct memory size in MiB (PS4: 5056; raised for high resolutions and large heaps)")
