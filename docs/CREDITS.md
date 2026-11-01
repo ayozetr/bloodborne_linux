@@ -8,7 +8,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 | Project | What this fork takes from it |
 |---|---|
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [here](../BBPORT.md). |
-| [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
+| [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
 | [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): video memory on 4 GB cards, crash and freeze fixes, fewer stutters while areas load, stick options, save import and the version selector. |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler they started from, and the online code: shadPS4 0.20's network, NP and shadNet libraries, put together for bbport by Awaken ([gpu/bbnet20](../gpu/bbnet20)). |
 | [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([hosting your own server](SERVER.md)). |
@@ -41,7 +41,7 @@ Obrikash and noelmiller. What each one did:
 - **[deadinside28](https://github.com/deadinside28)**: bbport, the port this whole project is built on,
   and 0.6's menu pointer and keyboard layout.
 - **[Supermedo](https://github.com/Supermedo)**: online play, DLSS, the cheats page, Add to Steam,
-  the icon, and many fixes from the Windows port.
+  and many fixes from the Windows port.
 - **[0xCydral](https://github.com/0xCydral)**: gathered and adapted dozens of fixes (crashes while
   loading, black images, the upscaler, the performance line in the log).
 - **[Awakenchan](https://github.com/Awakenchan)**: video memory on 4 GB cards and crash fixes,
