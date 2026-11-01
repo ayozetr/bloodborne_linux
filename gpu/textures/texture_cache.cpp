@@ -14,6 +14,7 @@
 #include "buffers/buffer_cache.h"
 #include "bbport_settings.h"
 #include "vulkan/instance.h"
+#include "render/gcn_to_vk.h"
 #include "render/runtime.h"
 #include "render/scheduler.h"
 
@@ -604,12 +605,19 @@ ImageView& TextureCache::FindDepthTarget(ImageId image_id, const ImageDesc& desc
     // The stencil surface: an image of its own (a placeholder of no format) linked to the depth.
     if (desc.info.stencil_addr != 0) {
         ImageId stencil_id{};
-        ForEachImageInRegion(desc.info.stencil_addr, desc.info.stencil_size,
-                             [&](ImageId id, Image& candidate) {
-                                 if (candidate.info.guest_address == desc.info.stencil_addr) {
-                                     stencil_id = id;
-                                 }
-                             });
+        ForEachImageInRegion(
+            desc.info.stencil_addr, desc.info.stencil_size, [&](ImageId id, Image& candidate) {
+                if (candidate.info.guest_address != desc.info.stencil_addr) {
+                    return;
+                }
+                // bbport (artemkaVG, shadPS4 #5118; Linux fork): not a color image that reuses
+                // the memory: reads and storage writes to it went to the depth buffer through an
+                // invalid view. Only a stencil-compatible format, or none yet.
+                if (candidate.info.pixel_format == vk::Format::eUndefined ||
+                    Vulkan::GcnToVk::IsFormatStencilCompatible(candidate.info.pixel_format)) {
+                    stencil_id = id;
+                }
+            });
         if (!stencil_id) {
             ImageInfo info{};
             info.guest_address = desc.info.stencil_addr;
