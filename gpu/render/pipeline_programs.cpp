@@ -69,6 +69,9 @@ extern char** environ;
 
 // common/assert.cpp: the hook a failed check calls before stopping (SpeculativeAssertExit below).
 extern void (*g_assert_speculative_exit)();
+// The runtime's mappings (src/runtime_memory): what is at an address, and the table's generation.
+extern "C" int runtime_memory_vma_info(uintptr_t address, int* prot, int* type, uintptr_t* end);
+extern "C" const uint64_t* runtime_memory_generation(void);
 
 namespace Vulkan {
 
@@ -165,6 +168,67 @@ bool PipelineCache::SyncProgramMemory(VAddr address, u64 size) {
     return true;
 }
 
+namespace {
+// bbport (0xCydral, after yumlevi/bloodborne_pc ce385b6 and GoncaloLobo0/bloodborne_pc_win
+// ef70ed2; Linux fork): a stage's program address points at readable memory. A malformed command
+// buffer (a register packet whose values are the next packets) set a shader address of
+// 0x4c0012d0000 during an area load, and reading the program there ended the game; such a draw
+// or dispatch is skipped instead. Checked for every stage of every draw: the last readable
+// mapping found is remembered for as long as the mapping table keeps its generation (an odd one
+// is a change in progress).
+bool ProgramReadable(const u32* code) {
+    const auto address = reinterpret_cast<uintptr_t>(code);
+    if (!address) {
+        return false;
+    }
+    thread_local uintptr_t known_start = 0, known_end = 0;
+    thread_local uint64_t known_generation = 1;
+    const uint64_t generation = __atomic_load_n(runtime_memory_generation(), __ATOMIC_ACQUIRE);
+    if (generation == known_generation && address >= known_start && address < known_end) {
+        return true;
+    }
+    int prot = 0, type = -1;
+    uintptr_t end = 0;
+    if (!runtime_memory_vma_info(address, &prot, &type, &end)) {
+        return true; // not a guest mapping (the executable's image)
+    }
+    if ((prot & 1) == 0) {
+        static std::atomic<int> reports{0};
+        if (reports.fetch_add(1, std::memory_order_relaxed) < 8) {
+            std::fprintf(stderr,
+                         "Pipeline: shader program address %#llx is not readable; the draw is "
+                         "skipped\n",
+                         (unsigned long long)address);
+        }
+        return false;
+    }
+    if ((generation & 1) == 0) {
+        known_start = address; // the mapping's start is not known: from here on
+        known_end = end;
+        known_generation = generation;
+    }
+    return true;
+}
+
+// bbport (0xCydral, Linux fork): a check that fails while a speculative read has its recovery
+// point armed (draw preparation ahead of the GPU thread specializing a shader from descriptors the
+// game may still be rewriting) ends that attempt like a fault does, and the GPU thread prepares the
+// draw in order. Anywhere else the assertion still stops (common/assert.cpp).
+void SpeculativeAssertExit() {
+    sigjmp_buf* const recover = runtime_fault_recover;
+    if (!recover) {
+        return;
+    }
+    runtime_fault_recover = nullptr;
+    std::fputs("GPU: speculative draw preparation abandoned after the check above; the GPU "
+               "thread prepares this draw in order\n",
+               stderr);
+    siglongjmp(*recover, 1);
+}
+[[maybe_unused]] const bool speculative_assert_hook =
+    (::g_assert_speculative_exit = SpeculativeAssertExit, true);
+} // namespace
+
 /// Every program the games' compilers emit starts with "s_mov_b32 vcc_hi, length" and ends in
 /// an "OrbShdr" header. Anything else at a program address is not a program yet: the game copied
 /// it into place with the GPU (DMA) and the CPU's view does not have it (or only its start), or
@@ -173,6 +237,9 @@ bool PipelineCache::SyncProgramMemory(VAddr address, u64 size) {
 /// what the GPU wrote there is read back first; still nothing: the draw is skipped. A draw
 /// preparation worker gives such a draw to the GPU command thread.
 bool PipelineCache::LooksLikeProgram(const u32* code, HwStage stage, bool may_sync) {
+    if (!ProgramReadable(code)) {
+        return false;
+    }
     if (may_sync && program_write_sync) {
         program_write_sync(reinterpret_cast<VAddr>(code), 256);
     }
@@ -262,26 +329,6 @@ bool PipelineCache::ProgramDecodes(const Shader::ShaderParams& params, HwStage s
     }
     return bad < 0;
 }
-
-// bbport (0xCydral, Linux fork): a check that fails while a speculative read has its recovery
-// point armed (draw preparation ahead of the GPU thread specializing a shader from descriptors the
-// game may still be rewriting) ends that attempt like a fault does, and the GPU thread prepares the
-// draw in order. Anywhere else the assertion still stops (common/assert.cpp).
-namespace {
-void SpeculativeAssertExit() {
-    sigjmp_buf* const recover = runtime_fault_recover;
-    if (!recover) {
-        return;
-    }
-    runtime_fault_recover = nullptr;
-    std::fputs("GPU: speculative draw preparation abandoned after the check above; the GPU "
-               "thread prepares this draw in order\n",
-               stderr);
-    siglongjmp(*recover, 1);
-}
-[[maybe_unused]] const bool speculative_assert_hook =
-    (::g_assert_speculative_exit = SpeculativeAssertExit, true);
-} // namespace
 
 PipelineCache::Result PipelineCache::LookUpProgram(PipelineSelection& sel,
                                                    const Shader::RuntimeInfo& runtime_info,
