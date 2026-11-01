@@ -11,8 +11,9 @@
 #define PAD_CAL_TIMEOUT_US 3000000u    /* after this, an all-zero reading is accepted as the neutral */
 #define PAD_CAL_BIAS 8192              /* |neutral| past this: a biased neutral and a reduced travel */
 #define PAD_CAL_REFINE 90              /* % of the base travel a push must reach to count as the full scale */
+#define PAD_CAL_RAIL 30000             /* |value| past this: an axis at the end of its travel, never a neutral (issue #20) */
 #include "../../gpu/shim/bb_env.h"
-static int cal_enabled=-1, pad_deadzone=-1, pad_deadzone_outer=-1, cal_manual;
+static int cal_enabled=-1, pad_deadzone=-1, pad_deadzone_outer=-1, pad_deadzone_radial=1, cal_manual;
 static int cal_have_center, cal_started, cal_quiet_count;
 static int cal_center[4], cal_prev[4], cal_manual_center[4];
 static int cal_base[4];                /* 0: normal pad; else |neutral| of a biased axis */
@@ -32,6 +33,8 @@ static void cal_load(void) {
     if (pad_deadzone<0) pad_deadzone=0; else if (pad_deadzone>126) pad_deadzone=126;
     v=bb_env("BB_PAD_DEADZONE_OUTER"); pad_deadzone_outer=v && *v ? atoi(v) : 127;
     if (pad_deadzone_outer<=pad_deadzone) pad_deadzone_outer=pad_deadzone<127 ? pad_deadzone+1 : 127;
+    /* BB_PAD_DEADZONE_RADIAL=0: the dead zone per axis, as before (see stick_deadzone). */
+    v=bb_env("BB_PAD_DEADZONE_RADIAL"); pad_deadzone_radial=!(v && *v=='0');
     v=bb_env("BB_PAD_CENTER");
     if (v && *v && sscanf(v,"%d,%d,%d,%d",&cal_manual_center[0],&cal_manual_center[1],
                           &cal_manual_center[2],&cal_manual_center[3])==4) {
@@ -68,7 +71,9 @@ static void cal_reset(void) {
     else { cal_have_center=0; memset(cal_center,0,sizeof cal_center); memset(cal_base,0,sizeof cal_base); }
     if (cal_have_center) cal_set_base();
 }
-/* The value each axis holds while the sticks are untouched (SDL's pre-report zeros are skipped);
+/* The value each axis holds while the sticks are untouched (SDL's pre-report zeros, and axes at
+ * the end of their travel, are skipped: an 8BitDo Pro 2, as an Xbox One controller, reported
+ * -32768 on all four axes right after reconnecting, the Linux fork's issue #20);
  * once it is known, the largest push seen per direction on a biased axis (see cal_travel). */
 static void cal_sample(const int16_t raw[4]) {
     if (cal_have_center) {
@@ -79,23 +84,28 @@ static void cal_sample(const int16_t raw[4]) {
         }
         return;
     }
-    int allzero=1; for (int i=0;i<4;++i) if (raw[i]) allzero=0;
+    int allzero=1, railed=0;
+    for (int i=0;i<4;++i) { if (raw[i]) allzero=0; if (abs(raw[i])>=PAD_CAL_RAIL) ++railed; }
     int quiet=1; for (int i=0;i<4;++i) if (cal_started && abs(raw[i]-cal_prev[i])>PAD_CAL_QUIET) quiet=0;
     const uint64_t now=now_us();
     if (!cal_started) { cal_started=1; cal_since=now; }
-    if (allzero && now-cal_since<PAD_CAL_TIMEOUT_US) quiet=0;
+    /* Before the first report: zeros, or axes at the end of their travel. */
+    if ((allzero || railed) && now-cal_since<PAD_CAL_TIMEOUT_US) quiet=0;
     if (quiet) {
         if (++cal_quiet_count>=PAD_CAL_QUIET_SAMPLES) {
             /* Only the clone pattern (all four axes biased) is taken as the neutral: a genuine pad
              * opened with a stick held steady would otherwise keep that push as its neutral. */
             int biased=0;
-            for (int i=0;i<4;++i) biased+=abs(raw[i])>=PAD_CAL_BIAS;
+            for (int i=0;i<4;++i) biased+=abs(raw[i])>=PAD_CAL_BIAS && abs(raw[i])<PAD_CAL_RAIL;
             for (int i=0;i<4;++i) cal_center[i]=biased==4 ? raw[i] : 0;
             cal_have_center=1;
             if (biased==4)
                 printf("Runtime: pad neutral: lx=%d ly=%d rx=%d ry=%d\n",cal_center[0],cal_center[1],cal_center[2],cal_center[3]);
             else if (biased)
                 printf("Runtime: pad neutral 0 (%d of 4 axes off-center at open: a stick held, not a biased pad)\n",biased);
+            else if (railed)
+                printf("Runtime: pad neutral 0 (%d of 4 axes still at the end of their travel after %u s: not a neutral)\n",
+                       railed,PAD_CAL_TIMEOUT_US/1000000u);
             cal_set_base();
         }
     } else cal_quiet_count=0;
@@ -105,11 +115,15 @@ static void cal_sample(const int16_t raw[4]) {
  * (cal_travel) is read as -128..127, so a full push reaches full deflection in both directions
  * whatever part of SDL's range the pad uses; the inner/outer dead zone (BB_PAD_DEADZONE /
  * BB_PAD_DEADZONE_OUTER) then maps that travel to the full deflection, as shadPS4 does. */
-static uint8_t stick_axis(int axis,int16_t raw) {
+static int stick_travel(int axis,int16_t raw) {
     const int d=raw-cal_center[axis];
     const int travel=cal_travel(axis,d>=0 ? 1 : 0);
     int v=travel>0 ? (int)((long long)d*128/travel) : 0;
     if (v>127) v=127; else if (v<-128) v=-128;
+    return v;
+}
+static uint8_t stick_axis(int axis,int16_t raw) {
+    int v=stick_travel(axis,raw);
     const int mag=abs(v);
     if (mag<=pad_deadzone || pad_deadzone>=pad_deadzone_outer) v=0;
     else {
@@ -119,4 +133,43 @@ static uint8_t stick_axis(int axis,int16_t raw) {
     }
     int x=v+128;
     return (uint8_t)(x<0 ? 0 : x>255 ? 255 : x);
+}
+/* A stick's two axes (stick_travel) through a round dead zone: the stick's length, not each
+ * axis, is held to the inner/outer dead zone and mapped from 0 at its edge, keeping the
+ * direction. Per axis (stick_axis, BB_PAD_DEADZONE_RADIAL=0) a push close to one axis lost the
+ * other one's part and snapped onto the axis, and the dead zone was a square. The idea is from
+ * Lantern Engine (Awaken); from the Linux fork. */
+static void stick_deadzone(int x, int y, uint8_t *out_x, uint8_t *out_y) {
+    const float length=sqrtf((float)(x*x+y*y));
+    if (length<=(float)pad_deadzone || pad_deadzone>=pad_deadzone_outer) {
+        *out_x=*out_y=128;
+        return;
+    }
+    float to=128.0f*(length-(float)pad_deadzone)/(float)(pad_deadzone_outer-pad_deadzone);
+    if (to>length*128.0f/fmaxf(fabsf((float)x),fabsf((float)y))) /* past the square's edge */
+        to=length*128.0f/fmaxf(fabsf((float)x),fabsf((float)y));
+    const float scale=to/length;
+    const long nx=lrintf(128.0f+(float)x*scale), ny=lrintf(128.0f+(float)y*scale);
+    *out_x=(uint8_t)(nx<0 ? 0 : nx>255 ? 255 : nx);
+    *out_y=(uint8_t)(ny<0 ? 0 : ny>255 ? 255 : ny);
+}
+/* Some sticks report a diagonal near the corner of the square, up to ~1.41x the full deflection
+ * of one axis, which a stick with a round gate (as the game expects) never does. A stick past the
+ * round gate is brought back onto it, keeping its direction; the log says once how far past it
+ * each stick went (and again when further). From the Linux fork (its issue #7). */
+static void round_gate(int stick, uint8_t *x, uint8_t *y) {
+    static float reported[2];
+    const float dx=(float)*x-128.0f, dy=(float)*y-128.0f;
+    const float reach=sqrtf(dx*dx+dy*dy);
+    if (reach<=128.0f) return; /* one axis all the way: 0 is 128 from the centre, 255 is 127 */
+    const float past=reach/127.0f;
+    if (past>=1.05f && past>=reported[stick]+0.05f) {
+        reported[stick]=past;
+        printf("Runtime: pad %s stick at %.2fx the round gate's reach, brought back onto it\n",
+               stick ? "right" : "left",(double)past);
+        fflush(stdout);
+    }
+    const float scale=127.0f/reach;
+    *x=(uint8_t)lrintf(128.0f+dx*scale);
+    *y=(uint8_t)lrintf(128.0f+dy*scale);
 }

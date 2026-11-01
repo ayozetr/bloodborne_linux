@@ -106,12 +106,23 @@ static int key_from_name(const char *name) {
 static int prompt_forced=-1;
 static int mouse_look=1, mouse_invert_y, mouse_invert_x;
 static float mouse_sensitivity=1.0f;
+/* pad_round_gate=0 (bbport.ini) passes a controller's sticks on as they come (default: within a
+ * round gate, see round_gate). */
+static int pad_round_gate=1;
+/* pad_swap_sticks=1 (bbport.ini) moves with the right stick and looks with the left;
+ * pad_invert_look_x / pad_invert_look_y=1 invert the controller's camera stick. From Awaken's
+ * BloodBorneButPc, by way of the Linux fork. */
+static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
+/* pad_camera_diagonal=1 (bbport.ini) evens out the camera stick's diagonals (see camera_diagonal;
+ * default: as the game turns them, as on a PS4). */
+static int pad_camera_diagonal;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 /* Motion emulation (apply_motion): -1 unknown yet, from bbport.ini pad_motion; BB_PAD_MOTION wins. */
 static int motion_enabled = -1;
 static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_invert_x=0; mouse_sensitivity=1.0f; prompt_forced=-1;
+    pad_round_gate=1; pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0; pad_camera_diagonal=0;
     const char *path=bb_env("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -129,6 +140,11 @@ static void load_bindings(void) {
             }
             else if (!strncmp(line,"mouse_invert_y=",15)) mouse_invert_y=atoi(value)!=0;
             else if (!strncmp(line,"mouse_invert_x=",15)) mouse_invert_x=atoi(value)!=0;
+            else if (!strncmp(line,"pad_round_gate=",15)) pad_round_gate=atoi(value)!=0;
+            else if (!strncmp(line,"pad_swap_sticks=",16)) pad_swap_sticks=atoi(value)!=0;
+            else if (!strncmp(line,"pad_invert_look_x=",18)) pad_invert_look_x=atoi(value)!=0;
+            else if (!strncmp(line,"pad_invert_look_y=",18)) pad_invert_look_y=atoi(value)!=0;
+            else if (!strncmp(line,"pad_camera_diagonal=",20)) pad_camera_diagonal=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -228,10 +244,49 @@ static int key_down(const bool *k, int input) {
     return 0;
 }
 /* The bound gamepad buttons' state; triggers as their analog value. */
+/* Pads without a touch surface (Xbox and other XInput pads) have only Back for the touchpad,
+ * and the game needs both halves (left: gestures, right: key items and the right choice of some
+ * prompts). While Back is bound to nothing but the touchpad (the default), Back + d-pad left or
+ * right clicks that half for as long as the d-pad is held, and Back alone clicks the left half
+ * for 150 ms when it is released, so Back + right does not open the gestures first. The idea and
+ * timing are parsifal295's, as Supermedo/bloodborne_pc 1.7.3 did it; from the Linux fork. */
+static int back_combo, back_held; /* the combo is on for this pad; Back is down */
+static int back_combo_wanted(SDL_Gamepad *g) {
+    if (SDL_GetNumGamepadTouchpads(g)>0) return 0;
+    for (int i=0;i<IN_COUNT;++i)
+        for (int j=0;j<bindings[i].pad_count;++j)
+            if (bindings[i].pad[j]==SDL_GAMEPAD_BUTTON_BACK && i!=IN_TOUCHPAD) return 0;
+    return 1;
+}
+/* The touchpad half the combo clicks now: 0 left, 1 right, -1 none. */
+static int back_combo_side(SDL_Gamepad *g, uint64_t now) {
+    static int was_down, combo;
+    static uint64_t click_until;
+    int side=-1;
+    if (back_held) {
+        if (!was_down) combo=0;
+        const int left=SDL_GetGamepadButton(g,SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+        const int right=SDL_GetGamepadButton(g,SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+        if (left || right) { side=right ? 1 : 0; combo=1; }
+    } else if (was_down && !combo) {
+        click_until=now+150000;
+    }
+    was_down=back_held;
+    if (side<0 && now<click_until) side=0;
+    return side;
+}
+/* With the combo, Back and (while Back is held) d-pad left/right belong to it, not to their
+ * bindings. */
+static int back_combo_owns(int input, int button) {
+    if (!back_combo) return 0;
+    if (button==SDL_GAMEPAD_BUTTON_BACK) return input==IN_TOUCHPAD;
+    return back_held && (button==SDL_GAMEPAD_BUTTON_DPAD_LEFT || button==SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+}
 static int pad_value(SDL_Gamepad *g, int input) {
     int value=0;
     for (int i=0;i<bindings[input].pad_count;++i) {
         const int b=bindings[input].pad[i];
+        if (back_combo_owns(input,b)) continue;
         const int v=b==PAD_LEFT_TRIGGER ? trigger(SDL_GetGamepadAxis(g,SDL_GAMEPAD_AXIS_LEFT_TRIGGER))
                   : b==PAD_RIGHT_TRIGGER ? trigger(SDL_GetGamepadAxis(g,SDL_GAMEPAD_AXIS_RIGHT_TRIGGER))
                   : SDL_GetGamepadButton(g,(SDL_GamepadButton)b) ? 255 : 0;

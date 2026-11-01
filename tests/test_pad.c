@@ -158,5 +158,85 @@ int main(void) {
     assert(!mouse_key_down(MOUSE_WHEEL_DOWN));
     mouse_wheel_step(1140000,0,0);
     assert(mouse_key_down(MOUSE_WHEEL_DOWN) && wheel_pending[1]==0);
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse");
+    /* Issue #20: right after reconnecting, an 8BitDo Pro 2 (as an Xbox One controller) reported
+       -32768 on all four axes before its first real report. That was taken as a biased neutral,
+       and the sticks at rest then read as pushed all the way: the camera and the player spun. */
+    {
+        const int16_t railed[4]={-32768,-32768,-32768,-32768}, rest[4]={120,-80,40,-20};
+        cal_reset();
+        for (int i=0;i<30;++i) cal_sample(railed);
+        assert(!cal_have_center); /* not a neutral: waits for a real report */
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(rest); /* the first one moved: not quiet */
+        assert(cal_have_center && !cal_center[0] && !cal_center[1] && !cal_center[2] && !cal_center[3]);
+        assert(stick_axis(0,0)==128 && stick_axis(3,0)==128);
+        /* A clone's biased neutral (both sticks at a constant ~ +/-16380) is still taken. */
+        const int16_t clone[4]={16380,-16380,16380,-16380};
+        cal_reset();
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(clone);
+        assert(cal_have_center && cal_center[0]==16380 && cal_center[1]==-16380);
+        assert(stick_axis(0,16380)==128);
+        /* Back to a genuine pad at rest for the checks below. */
+        const int16_t quiet_rest[4]={5,5,5,5};
+        cal_reset();
+        for (int i=0;i<=PAD_CAL_QUIET_SAMPLES;++i) cal_sample(quiet_rest);
+        assert(cal_have_center && !cal_center[0]);
+    }
+    /* Issue #7: a controller stick past the round gate comes back onto it, keeping its direction;
+     * one axis all the way (0 or 255) stays as it is. */
+    {
+        uint8_t x=255, y=255; round_gate(1,&x,&y);
+        assert(x==128+90 && y==128+90);
+        x=0; y=128; round_gate(1,&x,&y); assert(x==0 && y==128);
+        x=255; y=128; round_gate(1,&x,&y); assert(x==255 && y==128);
+        x=255; y=200; round_gate(0,&x,&y);
+        assert(x>=237 && x<=239 && y>=190 && y<=192); /* (127,72) scaled to reach 127 */
+    }
+    /* The round dead zone: inside it the centre; along one axis as the per-axis one; a push close
+     * to an axis keeps its small part of the other one (per axis it was dropped). */
+    {
+        const int dz=pad_deadzone, outer=pad_deadzone_outer;
+        pad_deadzone=10; pad_deadzone_outer=127;
+        uint8_t x=0, y=0;
+        stick_deadzone(6,6,&x,&y); assert(x==128 && y==128);       /* length 8.5: inside */
+        stick_deadzone(0,-9,&x,&y); assert(x==128 && y==128);
+        stick_deadzone(127,0,&x,&y); assert(x==255 && y==128);     /* full: full */
+        stick_deadzone(-128,0,&x,&y); assert(x==0 && y==128);
+        stick_deadzone(0,40,&x,&y); assert(x==128 && y==128+33);   /* 128*30/117 */
+        stick_deadzone(8,100,&x,&y);                               /* per axis: x 128 */
+        assert(x>128+5 && x<=128+8 && y>=128+98 && y<=128+101);
+        stick_deadzone(127,127,&x,&y); assert(x==255 && y==255);   /* a square gate's corner */
+        pad_deadzone=dz; pad_deadzone_outer=outer;
+    }
+    /* Stick options: swapped sticks, then the camera stick (now the left one) inverted; the
+     * centre stays the centre. */
+    {
+        PadData m; memset(&m,0,sizeof m);
+        m.left_x=10; m.left_y=20; m.right_x=128; m.right_y=0;
+        apply_stick_options(&m);
+        assert(m.left_x==10 && m.left_y==20 && m.right_x==128 && m.right_y==0);
+        pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=1;
+        apply_stick_options(&m);
+        assert(m.left_x==128 && m.left_y==0 && m.right_x==246 && m.right_y==236);
+        m.right_x=128; m.right_y=0; pad_swap_sticks=0;
+        apply_stick_options(&m);
+        assert(m.right_x==128 && m.right_y==255);
+        pad_invert_look_x=pad_invert_look_y=0;
+    }
+    /* Issue #7: a camera stick all the way out on a diagonal is pulled in under the game's fast
+     * turn (~96%); straight sideways, straight up/down and anything short of the rim stay. */
+    {
+        PadData m; memset(&m,0,sizeof m);
+        m.right_x=218; m.right_y=38; camera_diagonal(&m); assert(m.right_x==218 && m.right_y==38); /* off */
+        pad_camera_diagonal=1;
+        m.right_x=218; m.right_y=38; /* 45 degrees, all the way */
+        camera_diagonal(&m);
+        const float r=hypotf((float)m.right_x-128.0f,(float)m.right_y-128.0f)/127.0f;
+        assert(r>0.91f && r<0.94f && m.right_x-128==128-m.right_y);
+        m.right_x=255; m.right_y=128; camera_diagonal(&m); assert(m.right_x==255 && m.right_y==128);
+        m.right_x=250; m.right_y=100; camera_diagonal(&m); assert(m.right_x==250 && m.right_y==100); /* 13 degrees */
+        m.right_x=140; m.right_y=1; camera_diagonal(&m); assert(m.right_x==140 && m.right_y==1);   /* 85 degrees */
+        m.right_x=200; m.right_y=56; camera_diagonal(&m); assert(m.right_x==200 && m.right_y==56); /* 80% */
+        pad_camera_diagonal=0;
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options");
 }

@@ -29,6 +29,36 @@ static int steam_pad_only(SDL_Gamepad *g) {
     return steam;
 }
 
+/* Issue #7 of the Linux fork: the camera turned two or three times faster on a diagonal, with any
+ * controller (and in shadPS4). Measured 2026-10-15 (camera yaw/pitch read while the stick was held
+ * at set positions): the camera turns in proportion to how far the stick is pushed, diagonals
+ * included, up to ~82 degrees a second; past ~96% of the stick's reach the game switches to its
+ * fast turn, 174 degrees a second sideways, and does so whenever the stick is not near vertical
+ * (still at 60 degrees from horizontal, not at 80) - so a stick pushed all the way on a diagonal
+ * turned sideways at full speed. With pad_camera_diagonal=1 a camera stick that far out between 20
+ * and 80 degrees from horizontal is pulled in to 93%: the diagonal turns at the proportional
+ * speed, the fast turn stays straight sideways. Off by default: it is how the game turns on a PS4
+ * too, and without the fast turn on diagonals the camera feels heavier to players used to it. */
+static void camera_diagonal(PadData *d) {
+    if (!pad_camera_diagonal) return;
+    const float dx=(float)d->right_x-128.0f, dy=(float)d->right_y-128.0f;
+    const float reach=sqrtf(dx*dx+dy*dy)/127.0f;
+    const float ax=fabsf(dx), ay=fabsf(dy);
+    if (reach<0.94f || ay<=ax*0.364f || ay>=ax*5.67f) return; /* tan 20 and tan 80 degrees */
+    const float scale=0.93f/reach;
+    d->right_x=(uint8_t)lrintf(128.0f+dx*scale);
+    d->right_y=(uint8_t)lrintf(128.0f+dy*scale);
+}
+/* The controller's sticks swapped and the camera stick inverted, as bbport.ini asks; keyboard and
+ * mouse are applied later and keep their own directions (mouse_invert_x / mouse_invert_y). */
+static void apply_stick_options(PadData *d) {
+    if (pad_swap_sticks) {
+        uint8_t t=d->left_x; d->left_x=d->right_x; d->right_x=t;
+        t=d->left_y; d->left_y=d->right_y; d->right_y=t;
+    }
+    if (pad_invert_look_x) d->right_x=(uint8_t)(256-d->right_x>255 ? 255 : 256-d->right_x);
+    if (pad_invert_look_y) d->right_y=(uint8_t)(256-d->right_y>255 ? 255 : 256-d->right_y);
+}
 static void sample_host(PadData *d) {
     report_guest_heap();
     memset(d,0,sizeof(*d));
@@ -61,6 +91,8 @@ static void sample_host(PadData *d) {
     mouse_wheel_step(d->timestamp,captured ? wheel_up : 0,captured ? wheel_down : 0);
     if (g) {
         int touch_right=0;
+        back_combo=back_combo_wanted(g);
+        back_held=back_combo && SDL_GetGamepadButton(g,SDL_GAMEPAD_BUTTON_BACK);
         for (int i=IN_CROSS;i<=IN_RIGHT;++i) {
             const int v=pad_value(g,i);
             if (i==IN_L2) d->l2=(uint8_t)v;
@@ -75,8 +107,18 @@ static void sample_host(PadData *d) {
         cal_load();
         cal_sample(raw);
         uint8_t *axis_out[4]={&d->left_x,&d->left_y,&d->right_x,&d->right_y};
-        for (int i=0;i<4;++i)
-            *axis_out[i]=stick_axis(i,raw[i]); /* center 0 until the neutral is known */
+        if (pad_deadzone_radial) {
+            stick_deadzone(stick_travel(0,raw[0]),stick_travel(1,raw[1]),&d->left_x,&d->left_y);
+            stick_deadzone(stick_travel(2,raw[2]),stick_travel(3,raw[3]),&d->right_x,&d->right_y);
+        } else {
+            for (int i=0;i<4;++i)
+                *axis_out[i]=stick_axis(i,raw[i]); /* center 0 until the neutral is known */
+        }
+        if (pad_round_gate) {
+            round_gate(0,&d->left_x,&d->left_y);
+            round_gate(1,&d->right_x,&d->right_y);
+        }
+        apply_stick_options(d);
         if (SDL_GetNumGamepadTouchpads(g)>0) {
             const int fingers=SDL_GetNumGamepadTouchpadFingers(g,0);
             for (int finger=0;finger<fingers && d->touch_count<2;++finger) {
@@ -98,6 +140,10 @@ static void sample_host(PadData *d) {
         // Back/Select on pads without a touch surface is a left-side click.
         if ((d->buttons & BTN_TOUCHPAD) && !d->touch_count) touch_click(d,0);
         if (touch_right) touch_click(d,1);
+        if (back_combo) {
+            const int side=back_combo_side(g,d->timestamp);
+            if (side>=0 && !d->touch_count) touch_click(d,side);
+        }
     }
     {
         /* BB_PAD_TRACE=1 (diagnostics): the gamepad's buttons and touches as read, on change. */
@@ -292,13 +338,24 @@ static void touch_ids(PadData *d) {
     else if (!since) since=d->timestamp;
     d->touch_held_time=d->touch_count ? (uint32_t)(d->timestamp-since) : 0;
 }
+/* After the menu or the text dialog closes, buttons still held (the Cross that accepted a
+ * name, the button that closed the menu) stay hidden until released: the game would take them
+ * as a new press. Each is shown again once let go, and a button pressed after the menu closed
+ * shows at once (0xCydral's port; before, every button waited until all were released). From
+ * Supermedo/bloodborne_pc 1d34202 (hold_after_capture), via Awaken's BloodBorneButPc and the
+ * Linux fork. */
+static uint32_t hold_after_capture;
 static void sample(PadData *d) {
     sample_host(d);
-    if (bbgpu_overlay_captures_input()) return;
+    if (bbgpu_overlay_captures_input()) { hold_after_capture=UINT32_MAX; return; }
     record_sample(d);
     read_inject();
     replay_sample(d);
     d->buttons|=injected.buttons;
+    hold_after_capture&=d->buttons;
+    d->buttons&=~hold_after_capture;
+    if (hold_after_capture & BTN_L2) d->l2=0;
+    if (hold_after_capture & BTN_R2) d->r2=0;
     if (injected.touch_side>=0) touch_click(d,injected.touch_side);
     else if ((d->buttons & BTN_TOUCHPAD) && !d->touch_count) touch_click(d,0);
     if (injected.buttons & BTN_L2) d->l2=255;
@@ -315,5 +372,6 @@ static void sample(PadData *d) {
     /* Game modules (a menu pointer's presses). */
     const uint8_t sticks[4]={d->left_x,d->left_y,d->right_x,d->right_y};
     bbgpu_filter_pad(&d->buttons,sticks);
+    camera_diagonal(d);
     touch_ids(d);
 }
