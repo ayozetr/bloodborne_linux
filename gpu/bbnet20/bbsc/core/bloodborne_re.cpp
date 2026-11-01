@@ -1025,6 +1025,31 @@ std::string BbscTimelineWhere() {
     return fmt::format("{}, {}", role, BbscAreaName(map));
 }
 
+// bbport: every game start wrote a timeline and a trace capture of its own, kept for good. The
+// newest `keep` files of a folder named `prefix`...`extension` stay; older starts' files go.
+void KeepNewestFiles(const std::filesystem::path& folder, std::string_view prefix,
+                     std::string_view extension, std::size_t keep) {
+    std::error_code ignored;
+    std::vector<std::filesystem::directory_entry> files;
+    for (const auto& entry : std::filesystem::directory_iterator(folder, ignored)) {
+        const std::string name = entry.path().filename().string();
+        if (entry.is_regular_file(ignored) && name.starts_with(prefix) &&
+            entry.path().extension() == extension) {
+            files.push_back(entry);
+        }
+    }
+    if (files.size() <= keep) {
+        return;
+    }
+    std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
+        std::error_code e;
+        return a.last_write_time(e) > b.last_write_time(e);
+    });
+    for (std::size_t i = keep; i < files.size(); ++i) {
+        std::filesystem::remove(files[i].path(), ignored);
+    }
+}
+
 void BbscTimeline(std::string_view kind, std::string_view text) {
     static const bool enabled =
         Core::Bbsc::BuiltIn && EnvFlagEnabled("SHADPS4_BLOODBORNE_RE_TRACE") &&
@@ -1056,6 +1081,7 @@ void BbscTimeline(std::string_view kind, std::string_view text) {
 #endif
         std::error_code ec;
         fs::create_directories(dir, ec);
+        KeepNewestFiles(dir, "bbsc-timeline-", ".txt", 4); // with this one, 5
         const fs::path path =
             dir / fmt::format("bbsc-timeline-{:04}{:02}{:02}-{:02}{:02}{:02}-{}.txt",
                               local.tm_year + 1900, local.tm_mon + 1, local.tm_mday,
@@ -16281,7 +16307,9 @@ void PS4_SYSV_ABI TraceEntry(u64 tag, const GuestRegisterSnapshot* registers) {
     if (site.kind == TraceKind::ResponderBellAvailability) {
         if (site.offset == 0x0157F686) {
             responder_goods = static_cast<s32>(registers->r12);
-            if (responder_goods != 205 && responder_goods != 225) {
+            // bbport: and the kit's Kin and Bloodlust Bells (4121, 11201), which replace them.
+            if (responder_goods != 205 && responder_goods != 225 && responder_goods != 4121 &&
+                responder_goods != 11201) {
                 return;
             }
             responder_availability_frame = registers->rbp;
@@ -16312,6 +16340,12 @@ void PS4_SYSV_ABI TraceEntry(u64 tag, const GuestRegisterSnapshot* registers) {
     try {
         std::scoped_lock lock{capture_mutex};
         if (!capture_file) {
+            return;
+        }
+        // bbport: one capture stops at 64 MB (a long session wrote about 30 MB an hour).
+        if (capture_file.tellp() > std::streampos{64 << 20}) {
+            capture_file.close();
+            LOG_INFO(Debug, "Bloodborne RE capture stopped at 64 MB");
             return;
         }
         capture_file << "{\"type\":\"entry\",\"seq\":" << sequence << ",\"time_ms\":" << timestamp
@@ -17870,6 +17904,7 @@ void InstallReverseEngineeringTrace() {
                   Common::FS::PathToUTF8String(capture_dir), error.message());
         return;
     }
+    KeepNewestFiles(capture_dir, "cusa03173-", ".jsonl", 4); // bbport: with this one, 5
 
     const auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
                                std::chrono::system_clock::now().time_since_epoch())
