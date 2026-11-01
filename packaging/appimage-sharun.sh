@@ -48,7 +48,7 @@ done
 # The commit, branch and date run.sh prints with the version first in every log.
 printf '%s%s %s %s\n' "$(git rev-parse --short=8 HEAD)" "$(git diff --quiet HEAD || echo -modified)" \
     "$(git rev-parse --abbrev-ref HEAD)" "$(date -u +%Y-%m-%d)" > "$d/BUILD"
-cp -r scripts patches fsr4_shaders launcher "$d/"
+cp -r scripts patches fsr4_shaders launcher assets "$d/"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
 # Hunter's Atlas's map generator and art: the launcher's Prepare maps runs it (bbport_atlas_maps.py).
