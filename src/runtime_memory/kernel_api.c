@@ -36,7 +36,7 @@ static ABI int32_t direct_allocate(int64_t low, int64_t high, uint64_t size,
         }
         if (!overlap) break;
     }
-    blocks[slot] = (Block){start, size, type, 1}; *out = (int64_t)start;
+    blocks[slot] = (Block){start, size, type, 1};
     static int ordinal;
     host_only_next = ordinal<64 && (host_only_ordinals>>ordinal & 1);
     ++ordinal;
@@ -57,6 +57,7 @@ static ABI int32_t direct_allocate(int64_t low, int64_t high, uint64_t size,
     host_only_next=0;
     ++allocations; live_bytes += size;
     write_unlock();
+    *out = (int64_t)start; /* guest memory: unlocked (see lock) */
     printf("Runtime: direct allocation offset=0x%" PRIx64 ", size=%" PRIu64 " bytes, type=%d (from guest %p)\n",
            start, size, type, __builtin_return_address(0));
     return 0;
@@ -169,10 +170,11 @@ static void zero_scan_note(uintptr_t address, uint64_t size) {
     }
 }
 static ABI int32_t direct_map(void **out, uint64_t size, int prot, int flags, int64_t physical, uint64_t alignment) {
-
+    void *address=out ? *out : NULL; /* guest memory: unlocked (see lock) */
     write_lock();
-    int32_t result=map_direct_locked(out,size,prot,flags,physical,alignment);
+    int32_t result=map_direct_locked(out ? &address : NULL,size,prot,flags,physical,alignment);
     write_unlock();
+    if (!result) *out=address;
     flush_hooks();
     if (!result) printf("Runtime: mapped direct memory %p, size=%" PRIu64 ", prot=0x%x\n", *out, size, prot);
     if (!result) zero_scan_note((uintptr_t)*out,size);
@@ -259,9 +261,11 @@ static int32_t map_flexible_locked(void **inout, uint64_t size, int prot, int fl
     return result;
 }
 static ABI int32_t map_flexible(void **inout, uint64_t size, int prot, int flags) {
+    void *address=inout ? *inout : NULL; /* guest memory: unlocked (see lock) */
     write_lock();
-    int32_t result=map_flexible_locked(inout,size,prot,flags);
+    int32_t result=map_flexible_locked(inout ? &address : NULL,size,prot,flags);
     write_unlock();
+    if (!result) *inout=address;
     flush_hooks();
     if (!result) printf("Runtime: mapped flexible memory %p, size=%" PRIu64 ", prot=0x%x\n", *inout, size, prot);
     else fprintf(stderr,"Runtime: flexible map of %" PRIu64 " bytes failed (0x%x), in use=%" PRIu64 "\n",
@@ -295,12 +299,14 @@ static ABI void *posix_mmap(void *addr, uint64_t size, int prot, int flags, int 
 static ABI int32_t reserve_range(void **inout, uint64_t size, int flags, uint64_t alignment) {
     if (!alignment) alignment=PAGE;
     if (!inout || !size || size%PAGE || !valid_alignment(alignment)) return INVALID;
+    void *address=*inout; /* guest memory: unlocked (see lock) */
     write_lock();
-    if ((flags & MAP_FIXED_FLAG) && overlaps((uintptr_t)*inout,(uintptr_t)*inout+size,0)) {
+    if ((flags & MAP_FIXED_FLAG) && overlaps((uintptr_t)address,(uintptr_t)address+size,0)) {
         write_unlock(); allocation_failed("virtual range reservation (fixed, in use)", size, NO_MEMORY); return NO_MEMORY;
     }
-    int32_t result=place(inout,size,0,flags,alignment,KIND_RESERVED,0,0);
+    int32_t result=place(&address,size,0,flags,alignment,KIND_RESERVED,0,0);
     write_unlock();
+    if (!result) *inout=address;
     if (!result) printf("Runtime: reserved virtual range %p, size=%" PRIu64 "\n", *inout, size);
     else allocation_failed("virtual range reservation", size, result);
     return result;
@@ -335,11 +341,14 @@ static ABI int32_t query_protection(void *address, void **start, void **end, uin
     size_t first=i, last=i;
     while (first && vmas[first-1].end==vmas[first].start && vmas[first-1].kind!=KIND_RESERVED && vmas[first-1].prot==vmas[i].prot) --first;
     while (last+1<vma_count && vmas[last+1].start==vmas[last].end && vmas[last+1].kind!=KIND_RESERVED && vmas[last+1].prot==vmas[i].prot) ++last;
-    if (start) *start=(void *)vmas[first].start;
-    if (end) *end=(void *)vmas[last].end;
-    if (prot) *prot=(uint32_t)vmas[i].prot;
+    const uintptr_t run_start=vmas[first].start, run_end=vmas[last].end;
+    const uint32_t run_prot=(uint32_t)vmas[i].prot;
     __atomic_add_fetch(&queries,1,__ATOMIC_RELAXED);
     read_unlock();
+    /* Guest memory: unlocked (see lock). */
+    if (start) *start=(void *)run_start;
+    if (end) *end=(void *)run_end;
+    if (prot) *prot=run_prot;
     return 0;
 }
 static ABI int32_t virtual_query(const void *address, int flags, VirtualQueryInfo *info, uint64_t info_size) {
@@ -348,23 +357,29 @@ static ABI int32_t virtual_query(const void *address, int flags, VirtualQueryInf
     size_t i=vma_index((uintptr_t)address);
     if (i==vma_count || (vmas[i].start>(uintptr_t)address && !(flags & 1))) { read_unlock(); return ACCESS; }
     Vma v=vmas[i];
-    memset(info,0,sizeof(*info));
-    info->start=v.start; info->end=v.end;
-    info->offset=v.kind==KIND_DIRECT ? v.phys : 0;
-    info->protection=v.prot; info->memory_type=v.type;
-    info->flags=(v.kind==KIND_FLEXIBLE ? 1u : 0) | (v.kind==KIND_DIRECT ? 2u : 0) | (v.kind!=KIND_RESERVED ? 16u : 0);
-    strcpy(info->name, v.kind==KIND_RESERVED ? "reserved" : v.kind==KIND_DIRECT ? "direct" : "flexible");
     __atomic_add_fetch(&queries,1,__ATOMIC_RELAXED);
     read_unlock();
+    /* Built here and copied out unlocked (guest memory, see lock). */
+    VirtualQueryInfo result;
+    memset(&result,0,sizeof(result));
+    result.start=v.start; result.end=v.end;
+    result.offset=v.kind==KIND_DIRECT ? v.phys : 0;
+    result.protection=v.prot; result.memory_type=v.type;
+    result.flags=(v.kind==KIND_FLEXIBLE ? 1u : 0) | (v.kind==KIND_DIRECT ? 2u : 0) | (v.kind!=KIND_RESERVED ? 16u : 0);
+    strcpy(result.name, v.kind==KIND_RESERVED ? "reserved" : v.kind==KIND_DIRECT ? "direct" : "flexible");
+    memcpy(info,&result,sizeof(result));
     return 0;
 }
 static ABI int32_t direct_memory_type(uint64_t phys, int *type, void **start, void **end) {
     read_lock();
     for (int i=0;i<LIMIT;++i) if (blocks[i].used && phys>=blocks[i].start && phys-blocks[i].start<blocks[i].size) {
-        if (type) *type=blocks[i].type;
-        if (start) *start=(void *)(uintptr_t)blocks[i].start;
-        if (end) *end=(void *)(uintptr_t)(blocks[i].start+blocks[i].size);
-        read_unlock(); return 0;
+        const Block b=blocks[i];
+        read_unlock();
+        /* Guest memory: unlocked (see lock). */
+        if (type) *type=b.type;
+        if (start) *start=(void *)(uintptr_t)b.start;
+        if (end) *end=(void *)(uintptr_t)(b.start+b.size);
+        return 0;
     }
     read_unlock();
     return ACCESS;
@@ -382,20 +397,26 @@ static ABI int32_t direct_query(int64_t offset, int flags, DirectQueryInfo *info
         if (at>=blocks[i].start && at-blocks[i].start<blocks[i].size) { best=i; break; }
         if ((flags & 1) && blocks[i].start>at && (best<0 || blocks[i].start<blocks[best].start)) best=i;
     }
-    if (best>=0) {
-        info->start=(int64_t)blocks[best].start;
-        info->end=(int64_t)(blocks[best].start+blocks[best].size);
-        info->memory_type=blocks[best].type;
-    }
+    const Block found=best>=0 ? blocks[best] : (Block){0};
     read_unlock();
+    if (best>=0) { /* guest memory: unlocked (see lock) */
+        info->start=(int64_t)found.start;
+        info->end=(int64_t)(found.start+found.size);
+        info->memory_type=found.type;
+    }
     return best>=0 ? 0 : (int32_t)UINT32_C(0x80020002); /* ENOENT */
 }
 static ABI int32_t batch_map2(BatchEntry *entries, int count, int *processed, int flags) {
     if (!entries || count<0) return INVALID;
     int32_t result=0; int done=0;
+    /* The entries are guest memory: copied in before the lock and the mapped addresses copied
+     * back after it (see lock). */
+    BatchEntry small[64], *local=small;
+    if (count>64 && !(local=malloc((size_t)count*sizeof(*local)))) return NO_MEMORY;
+    if (count) memcpy(local,entries,(size_t)count*sizeof(*local));
     write_lock();
     for (; done<count; ++done) {
-        BatchEntry *e=&entries[done];
+        BatchEntry *e=&local[done];
         switch (e->operation) {
         case 0: result=map_direct_locked(&e->start,e->length,(uint8_t)e->prot,flags,(int64_t)e->offset,0); break;
         case 1: result=unmap_locked((uintptr_t)e->start,e->length); break;
@@ -407,6 +428,9 @@ static ABI int32_t batch_map2(BatchEntry *entries, int count, int *processed, in
         if (result) break;
     }
     write_unlock();
+    for (int i=0;i<done;++i)
+        if (local[i].operation==0 || local[i].operation==3) entries[i].start=local[i].start;
+    if (local!=small) free(local);
     flush_hooks();
     if (processed) *processed=done;
     return result;

@@ -75,7 +75,10 @@ _Static_assert(sizeof(BatchEntry)==32,"PS4 batch map entry layout");
  * protection) share it; map/unmap/protect take it exclusively. Both nest: code
  * under the lock may write guest memory, and a GPU-tracked page then faults into
  * runtime_memory_gpu_protect on the same thread. Readers nest because glibc's
- * default rwlock prefers readers; a thread holding it exclusively skips relocking. */
+ * default rwlock prefers readers; a thread holding it exclusively skips relocking.
+ * The guest's in/out arguments are read and written with it dropped (locals in between): a
+ * fault on a GPU-tracked page under it waited for the page tracking's locks, or for a readback
+ * by the GPU thread, while the threads holding those waited for this lock: a hang. */
 static pthread_rwlock_t lock=PTHREAD_RWLOCK_INITIALIZER;
 static __thread unsigned exclusive_depth;
 /* Odd while a writer holds the lock; readers' region caches are valid for one even value. */
