@@ -208,6 +208,13 @@ elif [[ -n ${scaled_output:-} ]]; then
     large_scene_memory "$scaled_render"
     echo "Output ${scaled_output}: scene ${scaled_render}, direct memory ${BB_DMEM_MB:-5056} MiB (BB_LIVE_RES=0: no live changes)"
 fi
+# bbport (Linux fork): an explicit render size (BB_RENDER_RES by hand) above 1080p skips the scaled
+# path above, but patches.py still grows the graphics heaps for it: the direct memory follows, or
+# the game stops at start (exit 139).
+if [[ -n ${BB_RENDER_RES:-} && ${BB_AUTO_RENDER_RES:-0} != 1 ]]; then
+    large_scene_memory "${BB_RENDER_RES// /}"
+    [[ -n ${BB_DMEM_MB:-} ]] && echo "Render ${BB_RENDER_RES}: direct memory ${BB_DMEM_MB} MiB"
+fi
 # Texture packs (upscaled map textures, baked into the game folder or from the mods folder) fill
 # the game's graphics heaps where the retail game fits: its GPU allocations fail, textures flicker,
 # then it crashes (139 at Iosefka's Clinic, #240). They get the full larger heaps and the direct
