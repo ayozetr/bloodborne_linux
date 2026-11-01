@@ -204,8 +204,17 @@ bool Display::SubmitFlip(Port* port, s32 index, s64 flip_arg, bool at_eop) {
     {
         std::scoped_lock lock{port->status_mutex};
         if (index != -1 && port->flip_status.flip_pending_num > 16) {
-            LOG_ERROR(Lib_VideoOut, "flip queue full");
-            return false;
+            // bbport (Linux fork, from Awaken's BloodBorneButPc 0.9.24): an end-of-pipe flip
+            // cannot be taken back (its caller asserted, exit 23): it is queued anyway. A flip
+            // the game submits itself is still refused, as the console does.
+            if (!at_eop) {
+                LOG_ERROR(Lib_VideoOut, "flip queue full");
+                return false;
+            }
+            static std::atomic<u32> told{0};
+            if (told.fetch_add(1, std::memory_order_relaxed) < 8) {
+                LOG_WARNING(Lib_VideoOut, "flip queue full: an end-of-pipe flip queued anyway");
+            }
         }
         if (at_eop) {
             ++port->flip_status.gc_queue_num;
