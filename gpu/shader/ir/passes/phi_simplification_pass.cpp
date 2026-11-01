@@ -351,10 +351,12 @@ void Deduplicate(std::vector<PhiScc>& sccs) {
     }
     std::vector<Group*> worklist;
     worklist.reserve(groups.size());
-    for (auto& [hash, group] : groups) {
-        if (group.sccs.size() > 1) {
+    // bbport (Linux fork): in the SCCs' order, not the hash table's, so the same shader always
+    // compiles to the same SPIR-V (upstream shadPS4 #5364, via Awaken's Lantern Engine).
+    for (const auto& scc : sccs) {
+        Group& group = groups.at(scc.hash);
+        if (group.sccs.size() > 1 && !std::exchange(group.queued, true)) {
             worklist.push_back(&group);
-            group.queued = true;
         }
     }
 
