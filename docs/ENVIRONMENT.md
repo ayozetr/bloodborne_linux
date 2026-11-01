@@ -617,7 +617,7 @@ Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame t
 | `BB_WRITE_VERIFY` | =1: page protection to catch writes nothing announced |
 | `BB_ZERO_SCAN` | =seconds: that long after the first mapping, how much direct memory is zero |
 
-## Internal (31)
+## Internal (37)
 
 Passed between the launchers, run.py / run.sh and the game. Not meant to be set by hand.
 
@@ -633,6 +633,12 @@ Passed between the launchers, run.py / run.sh and the game. Not meant to be set 
 | `BB_FSR4CAP_TOOLS` | the FSR 4.1.1 build's tools folder (set by the launcher) |
 | `BB_FSR4CAP_WORK` | the FSR 4.1.1 build's work folder (set by the launcher) |
 | `BB_GPU_USER_DIR` | the user folder as the GPU library and the online module see it (set by the runtime) |
+| `BB_HOST_VK_ADD_DRIVER_FILES` | the host's VK_ADD_DRIVER_FILES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_ADD_LAYER_PATH` | the host's VK_ADD_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_DRIVER_FILES` | the host's VK_DRIVER_FILES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_ICD_FILENAMES` | the host's VK_ICD_FILENAMES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_IMPLICIT_LAYER_PATH` | the host's VK_IMPLICIT_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_LAYER_PATH` | the host's VK_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
 | `BB_IMAGE_SHAPES` | the package's image shapes list for spare images (set by run.py) |
 | `BB_INTERNAL_HEIGHT` | the game's internal screen height (default 1080; set by run.py) |
 | `BB_INTERNAL_WIDTH` | the game's internal screen width (default 1920; set by run.py) |

@@ -51,12 +51,6 @@ printf '%s%s %s %s\n' "$(git rev-parse --short=8 HEAD)" "$(git diff --quiet HEAD
 cp -r scripts patches fsr4_shaders launcher "$d/"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
-# bbbridge (GPL-3.0-or-later): its licence and notices next to the port; its source is bbbridge/.
-if [[ -x out/bbbridge/bbbridge-cli ]]; then
-    install -Dm644 bbbridge/LICENSE "$d/bbbridge/LICENSE"
-    install -Dm644 bbbridge/README.md "$d/bbbridge/README.md"
-    install -Dm644 bbbridge/THIRD_PARTY_NOTICES.txt "$d/bbbridge/THIRD_PARTY_NOTICES.txt"
-fi
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
 
@@ -69,19 +63,20 @@ export PYTHON="$APPDIR/bin/python3"
 export BB_VULKANINFO="$APPDIR/bin/vulkaninfo"
 export BB_DLSS_DIR="$APPDIR/share/bbport/dlss"
 [ -f "$APPDIR/share/bbport/net/libbbnet20.so" ] && export BB_NET_MODULE="$APPDIR/share/bbport/net/libbbnet20.so"
-[ -x "$APPDIR/bin/bbbridge-cli" ] && export BB_BRIDGE_CLI="$APPDIR/bin/bbbridge-cli"
-[ -x "$APPDIR/bin/pkgextract" ] && export BB_PKGEXTRACT="$APPDIR/bin/pkgextract"
 export BB_DATA_DIR="${BB_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bbport}"
 mkdir -p "$BB_DATA_DIR"
 # deadinside28#172: Steam's Game Mode runs a non-Steam game in pressure-vessel, which points
 # Vulkan at its own driver and layer manifests. They are not the user's choice: dropped (kept as
 # BB_HOST_* for the log), so sharun registers the package's Mesa and the host's NVIDIA driver as
 # anywhere else. The host's gamescope WSI layer, a host library too, is turned off with them.
-for name in VK_DRIVER_FILES VK_ICD_FILENAMES VK_ADD_DRIVER_FILES VK_IMPLICIT_LAYER_PATH \
-            VK_LAYER_PATH VK_ADD_LAYER_PATH; do
+for pair in VK_DRIVER_FILES:BB_HOST_VK_DRIVER_FILES VK_ICD_FILENAMES:BB_HOST_VK_ICD_FILENAMES \
+            VK_ADD_DRIVER_FILES:BB_HOST_VK_ADD_DRIVER_FILES \
+            VK_IMPLICIT_LAYER_PATH:BB_HOST_VK_IMPLICIT_LAYER_PATH VK_LAYER_PATH:BB_HOST_VK_LAYER_PATH \
+            VK_ADD_LAYER_PATH:BB_HOST_VK_ADD_LAYER_PATH; do
+    name=${pair%%:*}
     eval "value=\${$name-}"
     case $value in
-    */pressure-vessel/*) export "BB_HOST_$name=$value"; unset "$name"; pressure_vessel=1 ;;
+    */pressure-vessel/*) export "${pair#*:}=$value"; unset "$name"; pressure_vessel=1 ;;
     esac
 done
 [ -n "${pressure_vessel-}" ] && export DISABLE_GAMESCOPE_WSI=1
@@ -108,13 +103,8 @@ export OUTPUT_APPIMAGE=0
 # The online module (gpu/bbnet20), when the build has it: named so that its libraries (OpenSSL,
 # ...) come along; the runtime dlopens it at BB_NET_MODULE (below).
 net=$(ls "$root/out/gpu/libbbnet20.so" 2>/dev/null || true)
-# The Hunter's Dream's bridge (bbbridge/, GPL-3.0-or-later), when the build has it: with libcurl and
-# OpenSSL, named here so that they come along.
-bridge=$(ls "$root/out/bbbridge/bbbridge-cli" 2>/dev/null || true)
-# Install from PKG (scripts/pkg_install.py): pkgextract (Unlicense), when the build has it.
-pkgextract=$(ls "$root/out/pkgextract/bin/pkgextract" 2>/dev/null || true)
 "$quick" \
-    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} ${bridge:+"$bridge"} ${pkgextract:+"$pkgextract"} \
+    "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
