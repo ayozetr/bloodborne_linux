@@ -394,6 +394,33 @@ def eboot_segments(elf):
     return segments
 
 
+
+def eboot_bytes(elf,start,end):
+    """The eboot's memory image at [start, end): its PT_LOAD file bytes, zero past their file size."""
+    phoff,=struct.unpack_from('<Q',elf,0x20)
+    phentsize,phnum=struct.unpack_from('<HH',elf,0x36)
+    out=bytearray(end-start)
+    for i in range(phnum):
+        kind,_,offset,vaddr,_,filesz,_,_=struct.unpack_from('<IIQQQQQQ',elf,phoff+i*phentsize)
+        low,high=max(start,vaddr),min(end,vaddr+filesz)
+        if kind==1 and low<high: out[low-start:high-start]=elf[offset+low-vaddr:offset+high-vaddr]
+    return bytes(out)
+
+
+def crash_guard_writes(elf,env=os.environ):
+    """The game's own unchecked pointers that crashed players (scripts/crash_guards.py), unless
+    BB_CRASH_GUARDS=0; none, with a line, when the executable is not the 01.09 code they were found in."""
+    if env.get('BB_CRASH_GUARDS')=='0':
+        return []
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    import crash_guards
+    if not crash_guards.applies(lambda offset,size: eboot_bytes(elf,offset,offset+size)):
+        print('Patches: crash guards skipped: the game\'s code differs from 01.09')
+        return []
+    print('Patches: crash guards (an online event without its data)')
+    return crash_guards.code_writes()
+
+
 def encode(line):
     kind,value=line.get('Type'),line.get('Value')
     if kind=='bytes': return bytes.fromhex(value.replace(' ',''))
@@ -538,6 +565,7 @@ def main():
     segments=eboot_segments(elf)
     writes=compile_patches(a.xml,names,a.app_version,segments)
     writes+=language_writes(read_settings(a.settings),elf)
+    writes+=crash_guard_writes(elf)
     size=render_size(read_settings(a.settings),a.render_res) if a.render_res else None
     # The UI keeps the game's 1920x1080 coordinates even for a larger output: the port draws
     # it into the output-size image with a viewport scaled by output / 1920

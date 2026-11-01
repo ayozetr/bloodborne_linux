@@ -126,6 +126,7 @@ BB_ENV(BB_COPY_PAGED_RANGES, TUNING, "=0: copy shader ranges whole instead of by
 BB_ENV(BB_COPY_SHADER_NATIVE, TUNING, "=0: the copy shader's list read on the CPU")
 BB_ENV(BB_COPY_THREADS, TUNING, "=N (0-16): threads for large guest memory copies")
 BB_ENV(BB_CORE_RESERVE, TUNING, "=0 / 1: keep the game's threads off a reserved core (Linux, SMT CPUs with 6+ cores)")
+BB_ENV(BB_CRASH_GUARDS, TUNING, "=0: without the guards of the game's own unchecked pointers that crashed players (scripts/crash_guards.py)")
 BB_ENV(BB_DEAD_IMAGES, TUNING, "=0: images of freed memory left to the collector instead of dropped on the GPU thread")
 BB_ENV(BB_DEAD_IMAGES_LATE, TUNING, "set: dead images dropped at the frame's end only, as before")
 BB_ENV(BB_DETILE_SKIPPED, TUNING, "=1: texture levels the quality setting leaves out are still detiled and read")
