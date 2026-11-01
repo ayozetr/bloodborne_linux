@@ -346,6 +346,16 @@ if [[ -z ${BB_IMAGE_SHAPES+set} && -f image_shapes.txt ]]; then
     export BB_IMAGE_SHAPES=$PWD/image_shapes.txt
 fi
 export BB_SHADER_GAME_DIR=${BB_SHADER_GAME_DIR:-$(realpath "$original_game")}
+# Discord Rich Presence (launcher: Discord; BB_DISCORD=0 turns it off): $$ becomes the game
+# below (exec), and the helper ends with it. The game writes its area and co-op partners into
+# BB_PRESENCE_DIR (scripts/discord_presence.py), new for each start.
+if [[ ${BB_DISCORD:-1} != 0 ]]; then
+    BB_PRESENCE_DIR=$(cd -- "$out" && pwd)/presence; export BB_PRESENCE_DIR
+    rm -rf "$BB_PRESENCE_DIR" && mkdir -p "$BB_PRESENCE_DIR"
+    presence=(--pid $$ --presence-dir "$BB_PRESENCE_DIR")
+    [[ ${BB_ONLINE:-0} == 1 ]] && presence+=(--online)
+    "$PYTHON" scripts/discord_presence.py "${presence[@]}" </dev/null &
+fi
 # Steam overlay (#77, #217: Shift+Tab, Remote Play, the controller's Steam Input layout): the
 # packaged entry (packaging/bbport-entry.c) keeps Steam's preload out of the launcher and names it
 # in BB_STEAM_OVERLAY; the game alone loads it, with its Vulkan layer. BB_STEAM_OVERLAY=0: off.
