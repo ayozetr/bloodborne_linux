@@ -156,6 +156,11 @@ ImageId TextureCache::FindImage(ImageDesc& desc, bool exact_fmt) {
         if (found.view_mip >= 0 || found.view_slice >= 0 || !found.image_id) {
             return false;
         }
+        // bbport (Linux fork): once registrations changed, the remembered image may have been
+        // deleted; its slot is not read then. From Mrsuss60's Windows port.
+        if (!slot_images.is_allocated(found.image_id)) {
+            return false;
+        }
         const Image& image = slot_images[found.image_id];
         return True(image.flags & ImageFlagBits::Registered) &&
                image.guest_info.guest_address == info.guest_address &&
