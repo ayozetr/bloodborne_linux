@@ -112,6 +112,8 @@ int main() {
     assert(ClassifyBuffer(864) == BufferRole::Other && ClassifyBuffer(416) == BufferRole::Other);
     assert(ClassifyBuffer(96) == BufferRole::SmallSkeleton &&
            ClassifyBuffer(384) == BufferRole::SmallSkeleton);
+    assert(ClassifyBuffer(49152) == BufferRole::LargeSkeleton &&
+           ClassifyBuffer(24576) == BufferRole::LargeSkeleton && ClassifyBuffer(20000) == BufferRole::Other);
     assert(ClassifyBuffer(656) == BufferRole::Skeleton && ClassifyBuffer(64) == BufferRole::Other);
 
     // Index ranges: reused between full scans, rescanned every Revalidate frames, trimmed.
