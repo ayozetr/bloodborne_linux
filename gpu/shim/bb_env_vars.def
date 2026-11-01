@@ -645,6 +645,7 @@ BB_ENV(BB_PATCHES_CONFIG, INTERNAL, "the patch choice file (default <data>/patch
 BB_ENV(BB_PATCHES_DIR, INTERNAL, "the patches folder (default <data>/patches)")
 BB_ENV(BB_PREBUILT, INTERNAL, "=1: packaged build, run.sh builds nothing (set by the AppImage)")
 BB_ENV(BB_PROBE, INTERNAL, "path of bb-probe for run.py")
+BB_ENV(BB_PROMPT_ART, INTERNAL, "the Xbox and Switch button art for the live prompts, KG_*.rgba by style (scripts/prompt_art.py; set by run.sh)")
 BB_ENV(BB_SHADER_GAME_DIR, INTERNAL, "the game's files the shader recipes' programs come from (set by run.py)")
 BB_ENV(BB_SHADER_RECIPES, INTERNAL, "the shader recipes pack (set by run.py)")
 BB_ENV(BB_SKIP_NETWORK_CHOICE, INTERNAL, "=1: no online choice at start (the launcher's)")

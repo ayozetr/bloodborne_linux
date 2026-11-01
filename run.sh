@@ -263,6 +263,11 @@ else
     bash build.sh
     probe=${BB_PROBE:-out/bb-probe}  # BB_PROBE: a wrapper (gdb) around it
 fi
+# The Xbox and Switch button art for the live button prompts (scripts/prompt_art.py): without it
+# (Pillow missing) those pads' prompts are letters.
+if prompt_art=$("$PYTHON" scripts/prompt_art.py --out "$out/prompt_art") && [[ -n $prompt_art ]]; then
+    export BB_PROMPT_ART=$prompt_art
+fi
 # Trophies (scripts/trophies.py): the dump's list and icons in the user directory, for the
 # runtime's notices and the launcher; BB_TROPHY_KEY (the PS4's trophy key) decrypts the names.
 if trophies=$("$PYTHON" scripts/trophies.py prepare --game "$original_game" \

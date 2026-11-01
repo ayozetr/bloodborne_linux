@@ -48,6 +48,8 @@ int runtime_pad_prompt_device() { return 0; }
 unsigned runtime_pad_prompt_generation() { return 0; }
 int runtime_pad_mouse_look() { return 0; }
 int runtime_pad_prompt(const char*, int, char*, int) { return 0; }
+int runtime_pad_prompt_nintendo() { return 0; }
+int runtime_pad_button(const char*) { return -1; }
 int runtime_file_host_path(const char*, char*, size_t) { return -1; }
 void runtime_re_watch(uint64_t) {}
 }

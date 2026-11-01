@@ -27,6 +27,8 @@ extern "C" {
 // runtime_file.c / runtime_pad.c
 int runtime_file_host_path(const char* guest, char* out, std::size_t size);
 int runtime_pad_prompt(const char* name, int prefer_mouse, char* label, int size);
+int runtime_pad_prompt_nintendo(void);
+int runtime_pad_button(const char* input);
 unsigned runtime_pad_prompt_generation(void);
 int runtime_pad_prompt_device(void);
 int runtime_pad_mouse_look(void);
@@ -477,6 +479,88 @@ void Shoulder(Canvas& c, std::string_view label) {
 }
 
 /// One icon for the device in use; false: the game's own stays.
+// bbport (the Linux fork): on an Xbox or a Switch pad the icons are its art, not letters: Dommo's
+// "DS3 Style" prompts (Nexus, Bloodborne mod 30; assets/menu_prompts), 32x32 RGBA files that
+// scripts/prompt_art.py writes to BB_PROMPT_ART/<xbox|switch>/KG_*.rgba. A single button's icon
+// is the art of the button the input is bound to (A and B swapped on Nintendo-style pads come out
+// right); the sticks, the d-pad clusters, the triggers and the right touchpad half have art of
+// their own. Without the files, or for a button with no art, the letters as before.
+const char* ArtFor(const IconDef& icon) {
+    const std::string_view name = icon.name;
+    if (icon.layout != Layout::Single || name == "KG_TP_R" || name == "KG_L2" || name == "KG_R2") {
+        if ((name == "KG_L2" || name == "KG_R2") && runtime_pad_button(icon.inputs[0]) >= 0) {
+            return nullptr; // a trigger's input bound to a button: its letters
+        }
+        return icon.name;
+    }
+    switch (runtime_pad_button(icon.inputs[0])) {
+    case 0: return "KG_Cancel";  // SDL_GAMEPAD_BUTTON_SOUTH (the cross's place)
+    case 1: return "KG_OK";      // EAST (the circle's)
+    case 2: return "KG_R_L";     // WEST (the square's)
+    case 3: return "KG_R_U";     // NORTH (the triangle's)
+    case 4: return "KG_TP_L";    // BACK
+    case 6: return "KG_Start";   // START
+    case 7: return "KG_L3";      // LEFT_STICK
+    case 8: return "KG_R3";      // RIGHT_STICK
+    case 9: return "KG_L1";      // LEFT_SHOULDER
+    case 10: return "KG_R1";     // RIGHT_SHOULDER
+    case 11: return "KG_L_U";    // DPAD_UP
+    case 12: return "KG_L_D";    // DPAD_DOWN
+    case 13: return "KG_L_L";    // DPAD_LEFT
+    case 14: return "KG_L_R";    // DPAD_RIGHT
+    default: return nullptr;
+    }
+}
+
+/// The art for `icon` scaled to the port's icon size (bilinear), straight RGBA as Canvas::Store
+/// writes it; false when there is none.
+bool DrawArt(const IconDef& icon, u32* out) {
+    static const char* dir = bb_env("BB_PROMPT_ART");
+    const char* art = dir && *dir ? ArtFor(icon) : nullptr;
+    if (!art) {
+        return false;
+    }
+    const std::string path = std::string(dir) + (runtime_pad_prompt_nintendo() ? "/switch/" : "/xbox/") +
+                             art + ".rgba";
+    std::FILE* file = std::fopen(path.c_str(), "rb");
+    if (!file) {
+        return false;
+    }
+    constexpr int S = int(GameIconSize), N = int(IconSize);
+    std::vector<u8> src(std::size_t(S) * S * 4);
+    const bool read = std::fread(src.data(), 1, src.size(), file) == src.size();
+    std::fclose(file);
+    if (!read) {
+        return false;
+    }
+    for (int y = 0; y < N; ++y) {
+        const float fy = std::clamp((y + 0.5f) * S / N - 0.5f, 0.0f, float(S - 1));
+        const int y0 = int(fy), y1 = std::min(y0 + 1, S - 1);
+        const float ty = fy - y0;
+        for (int x = 0; x < N; ++x) {
+            const float fx = std::clamp((x + 0.5f) * S / N - 0.5f, 0.0f, float(S - 1));
+            const int x0 = int(fx), x1 = std::min(x0 + 1, S - 1);
+            const float tx = fx - x0;
+            // Weighted by alpha so transparent texels' colour does not bleed into the edges.
+            float rgb[3] = {}, a = 0.0f;
+            const int xs[2] = {x0, x1}, ys[2] = {y0, y1};
+            const float wx[2] = {1.0f - tx, tx}, wy[2] = {1.0f - ty, ty};
+            for (int j = 0; j < 2; ++j) {
+                for (int i = 0; i < 2; ++i) {
+                    const u8* p = &src[(std::size_t(ys[j]) * S + xs[i]) * 4];
+                    const float w = wx[i] * wy[j] * p[3] / 255.0f;
+                    rgb[0] += p[0] * w; rgb[1] += p[1] * w; rgb[2] += p[2] * w;
+                    a += w;
+                }
+            }
+            const auto unit = [&](float v) { return u32(std::lround(a > 0.0f ? std::clamp(v / a, 0.0f, 255.0f) : 0.0f)); };
+            out[std::size_t(y) * N + x] = unit(rgb[0]) | unit(rgb[1]) << 8 | unit(rgb[2]) << 16 |
+                                          u32(std::lround(std::clamp(a, 0.0f, 1.0f) * 255.0f)) << 24;
+        }
+    }
+    return true;
+}
+
 bool Draw(const IconDef& icon, Canvas& c) {
     char labels[4][32] = {};
     int kinds[4] = {};
@@ -620,6 +704,11 @@ bool Update(u32 generation, Set& out) {
     out.drawn.assign(IconCount, false);
     out.pixels.assign(IconCount * IconSize * IconSize, 0);
     for (std::size_t i = 0; i < IconCount; ++i) {
+        if (icon_hashes[i] != 0 && runtime_pad_prompt_device() == 1 &&
+            DrawArt(Icons[i], out.pixels.data() + i * IconSize * IconSize)) {
+            out.drawn[i] = true;
+            continue;
+        }
         Canvas canvas;
         if (icon_hashes[i] != 0 && Draw(Icons[i], canvas)) {
             out.drawn[i] = true;

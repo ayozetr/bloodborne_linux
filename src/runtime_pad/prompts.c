@@ -33,6 +33,12 @@ static int stick_moved(uint8_t v) { return v<128-48 || v>128+48; }
 int runtime_pad_prompt_device(void) {
     return __atomic_load_n(&prompt_device,__ATOMIC_RELAXED);
 }
+/* A Nintendo-style gamepad in use (its prompts' art and labels: the Switch's). */
+int runtime_pad_prompt_nintendo(void) {
+    const SDL_GamepadType type=__atomic_load_n(&prompt_pad_type,__ATOMIC_RELAXED);
+    return type==SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO || type==SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_LEFT ||
+           type==SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT || type==SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR;
+}
 unsigned runtime_pad_prompt_generation(void) {
     return __atomic_load_n(&prompt_generation,__ATOMIC_RELAXED);
 }
