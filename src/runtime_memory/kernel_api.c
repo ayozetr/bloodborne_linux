@@ -11,14 +11,22 @@ static ABI int32_t direct_allocate(int64_t low, int64_t high, uint64_t size,
     if (!out || low < 0 || high < 0 || !size || size % PAGE || !valid_alignment(alignment) || type < 0 || type > 10)
         return INVALID;
     uint64_t end = (uint64_t)high < GAME_POOL_SIZE ? (uint64_t)high : GAME_POOL_SIZE;
-    if ((uint64_t)low >= end || size > end - (uint64_t)low) return NO_SPACE;
+    if ((uint64_t)low >= end || size > end - (uint64_t)low) {
+        allocation_failed("direct allocation (outside the pool)", size, NO_SPACE);
+        return NO_SPACE;
+    }
     write_lock();
-    if (pool()) { write_unlock(); return NO_MEMORY; }
+    if (pool()) { write_unlock(); allocation_failed("direct allocation (no pool)", size, NO_MEMORY); return NO_MEMORY; }
     uint64_t start = align_up((uint64_t)low, alignment);
     int slot = -1;
     for (int i=0; i<LIMIT; ++i) if (!blocks[i].used) { slot=i; break; }
     for (;;) {
-        if (slot<0 || start > end || size > end-start) { write_unlock(); return NO_SPACE; }
+        if (slot<0 || start > end || size > end-start) {
+            write_unlock();
+            allocation_failed(slot<0 ? "direct allocation (block table full)" : "direct allocation (no room)",
+                              size, NO_SPACE);
+            return NO_SPACE;
+        }
         int overlap = 0;
         for (int i=0; i<LIMIT; ++i) {
             Block b = blocks[i];
@@ -289,11 +297,12 @@ static ABI int32_t reserve_range(void **inout, uint64_t size, int flags, uint64_
     if (!inout || !size || size%PAGE || !valid_alignment(alignment)) return INVALID;
     write_lock();
     if ((flags & MAP_FIXED_FLAG) && overlaps((uintptr_t)*inout,(uintptr_t)*inout+size,0)) {
-        write_unlock(); return NO_MEMORY;
+        write_unlock(); allocation_failed("virtual range reservation (fixed, in use)", size, NO_MEMORY); return NO_MEMORY;
     }
     int32_t result=place(inout,size,0,flags,alignment,KIND_RESERVED,0,0);
     write_unlock();
     if (!result) printf("Runtime: reserved virtual range %p, size=%" PRIu64 "\n", *inout, size);
+    else allocation_failed("virtual range reservation", size, result);
     return result;
 }
 static int32_t protect_locked(uintptr_t start, uint64_t size, int prot, int type) {

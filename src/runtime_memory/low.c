@@ -97,5 +97,6 @@ void *runtime_low_map(size_t size, int prot) {
     fprintf(stderr,"Runtime: low memory %p+%#zx (prot %d)\n",p==MAP_FAILED ? NULL : p,size,prot);
 #endif
     write_unlock();
+    if (p==MAP_FAILED) allocation_failed("low memory map (guest stack or heap)", size, NO_MEMORY);
     return p==MAP_FAILED ? NULL : p;
 }

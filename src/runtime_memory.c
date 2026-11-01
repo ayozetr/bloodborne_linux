@@ -233,6 +233,15 @@ static uint64_t live_bytes, flexible_bytes;
 
 static int valid_alignment(uint64_t a) { return a >= PAGE && a <= POOL_SIZE && !(a & (a-1)); }
 static uint64_t align_up(uint64_t n, uint64_t a) { return (n+a-1) & ~(a-1); }
+/* A reservation the game asked for and did not get (the mapping failures print their own line):
+ * a guest NULL read soon after one is the allocation's, not a bug of its own (the Linux fork's
+ * issue #23). The first 16 only, so a game that tries again and again does not fill the log. */
+static void allocation_failed(const char *what, uint64_t size, int32_t result) {
+    static _Atomic unsigned printed;
+    if (atomic_fetch_add(&printed,1)>=16) return;
+    fprintf(stderr,"Runtime: %s of %" PRIu64 " bytes failed (0x%x), direct memory in use=%" PRIu64 "\n",
+            what, size, (unsigned)result, live_bytes);
+}
 /* The rest by topic, in src/runtime_memory/ (one translation unit with this file). */
 #include "runtime_memory/backing.c"
 #include "runtime_memory/vma.c"
