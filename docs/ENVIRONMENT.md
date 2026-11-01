@@ -1,33 +1,25 @@
 # Environment variables
 
-The port reads a few hundred environment variables. Some are for players (upscaler, frame rate,
-controls). Most are diagnostics and developer switches. This page lists every variable found in
-`src/`, `gpu/`, `bbsc/`, `scripts/`, `launcher/`, `run.sh`, `packaging/` and `tools/`, with what the
-code does with it. The information comes from the code on `main` (0.51-linux.16). When a comment and
-the code disagree, the code wins.
+The port reads a few hundred `BB_*` environment variables. Some are for players (upscaler, frame
+rate, controls); most are diagnostics and developer switches. The list below is every one the code
+reads, from the port's own registry (`gpu/shim/bb_env_vars.def`); `tests/test_env_vars.py` fails
+when the code and the registry disagree, so it stays complete. Regenerate it with
+`python3 scripts/env_vars.py --doc`.
 
 ## How to set them
 
-**In the launcher:** go to *Advanced → Developer → Extra variables (NAME=value, space-separated)*.
-The settings key is `extra_env` in the launcher's `settings.json`. The field is parsed in
-`game_environment()` (`launcher/bbport_launcher.py:707`):
+**In the launcher:** *Advanced → Developer → Extra variables (NAME=value, space-separated)*. The
+settings key is `extra_env` in the launcher's `settings.json`, read by `game_environment()` in
+`launcher/bbport_launcher.py`:
 
-```python
-for item in s["extra_env"].split():
-    if "=" in item:
-        key, value = item.split("=", 1)
-        env[key] = value
-```
-
-- The field is split on whitespace. Each piece is split at its **first** `=`:
+- The field is split on whitespace, and each piece at its **first** `=`:
   `BB_UPSCALER=fsr4 BB_AUDIO_GAIN=1.5 RADV_DEBUG=nohiz`.
-- **There is no quoting.** A value cannot contain spaces, and quotes are kept literally as part of
-  the value (`BB_X="a"` gives `"a"` with the quotes). Use separators the variable itself accepts,
-  such as `;` or `,`.
-- A piece without `=` is ignored without any message. If a name appears twice, the last one wins.
-- Any name is accepted, including third-party ones (`RADV_DEBUG`, `MANGOHUD`, `VK_*`, `__GL_*`).
-- The result goes to `run.sh`. Both the launcher's *Play* button and `--play` (Steam shortcut, Steam
-  Deck game mode) use it.
+- **There is no quoting.** A value cannot contain spaces, and quotes stay part of the value. Use
+  separators the variable itself accepts, such as `;` or `,`.
+- A piece without `=` is ignored. If a name appears twice, the last one wins.
+- Any name is accepted, third-party ones included (`RADV_DEBUG`, `MANGOHUD`, `VK_*`, `__GL_*`).
+- The result goes to `run.sh`. Both the launcher's *Play* button and `--play` (a Steam shortcut,
+  the Steam Deck's Game Mode) use it.
 
 **From a terminal (source checkout):** `BB_GAME_DIR=/path/to/CUSA03173 BB_FPS=60 bash run.sh`.
 Without the launcher, nothing sets the launcher's variables. `run.sh` then uses its own defaults
@@ -42,681 +34,738 @@ AppImage keeps its data (bbport.ini, saves, logs) in `BB_DATA_DIR`, by default
 **bbport.ini:** many graphics options live in `bbport.ini` and the in-game menu, not in the
 environment. A few variables override those keys at start: `BB_UPSCALER`, `BB_UPSCALE_PRESET`,
 `BB_FSR_SHARPNESS`, `BB_JITTER`, `BB_REACTIVE*` and `BB_OBJECT_MOTION`
-(`gpu/shim/bbport_settings.cpp:192-208`). Values set this way stay in force until the next start.
+(`gpu/shim/bbport_settings.cpp`). Values set this way stay in force until the next start.
 
 ## Precedence
 
-The environment is built in this order. A later step wins.
+The environment is built in this order; a later step wins:
 
-1. **The environment the launcher (or the AppImage) was started with.**
-2. **The launcher's own settings** (`game_environment()`, `launcher/bbport_launcher.py:633-712`).
-   - Some are always written: `BB_GAME_DIR`, `BB_MODS_*`, `BB_PROMPTS`, `BB_GESTURES_NO_MOTION`,
-     `BB_PATCHES_*`, `BB_LANGUAGE`, `BB_REGION`, `BB_MENU_LANGUAGE`, `BB_FULLSCREEN`,
-     `BB_PRESENT_MODE`, `BB_SKIP_NETWORK_CHOICE`, `BB_FPS`, `BB_DISCORD` and `BB_STEAM_OVERLAY`. For these, a shell value
-     is replaced.
-   - Others are written only when the setting is on or not empty: `BB_HDR`, `BB_FPS_LIMIT`,
-     `BB_DRAW_PIPE`, `BB_READBACKS`, `BB_PREUPLOAD`, `BB_PC_MODEL`, `BB_GPU_PROFILE`,
-     `BB_PAD_DEADZONE` (only when the dead zone is not 4 %), `BB_PAD_LIGHTBAR` and others. For these, a shell value
-     survives while the setting is off.
-   - **Hunter's Atlas** (`atlas_environment()`, `launcher/bbport_launcher.py:612`): always
-     `BB_ATLAS_ENABLED` (0 when the map is off or not prepared); with the map on also `BB_MAP_DIR`,
-     `BB_MAP_ART_DIR`, `BB_MAP_FONT`, `BB_MAP_CATALOG`, `BB_MAP_CONFIG`, `BB_MAP_TRAVEL_ENABLED`,
-     `BB_MAP_ITEMS_ENABLED`, `BB_MAP_ITEM_CATEGORIES`, `BB_MAP_FOG_ENABLED=0` and
-     `BB_MAP_NPC_MODE=all`.
-3. **Online** (only when *Play online* is on and the online module exists): `scripts/online.py`
-   `environment()` adds `BB_ONLINE`, `BB_SHADNET_*`, `BB_UPNP`, `BB_COMMUNITY_SERVER`, `BB_SEAMLESSHUNT_TOMBS`,
-   `SHADPS4_P2P_*` and the BBSC options (`scripts/bbsc.py`).
-4. **Extra variables come last** and override everything above, including the launcher's own
-   settings and the BBSC options.
-5. **`run.sh`** mostly fills in defaults with `${VAR:-default}`, so a value you set is kept. It does
-   force a few:
-   - `BB_AS_0_3=1` forces `BB_GUEST_IN_PLACE=0`, `BB_HOST_COPY_WAITS=all` and `BB_PRODUCER_CHECK=1`.
-   - `BB_SAVE_LOG=1` forces `BB_FRAME_STATS=1`.
-   - `BB_AUTO_RENDER_RES=1` makes `run.sh` **unset** `BB_RENDER_RES`, `BB_OUTPUT_RES` and `BB_UI_RES`,
-     so do not set it by hand.
-   - When `bbport.ini` asks for a non-1080p output without live resolution and `BB_RENDER_RES` is
-     unset, `run.sh` exports `BB_RENDER_RES`, `BB_OUTPUT_RES` and `BB_DMEM_MB` itself.
-   - `BB_BBSC_LIB` is unset unless `BB_BBSC=1` and `BB_ONLINE=1`.
-   - `SHADPS4_HTTP_HOST_OVERRIDES_JSON` is rewritten whenever online play is on.
-   - `BB_PRESENCE_DIR` is rewritten when Discord is on, and `BB_TROPHY_DIR` when the trophy list is
-     prepared.
-   - `MANGOHUD` is dropped while Steam's own performance overlay (mangoapp) runs.
-   - `run.sh` exports defaults that differ from the code's built-in ones: `BB_COPY_GPU_BUFFERS=1`,
-     `BB_GPU_WRITE_TWINS=1`, `BB_GPU_WRITE_TWINS_MAX=65536`, `BB_PREUPLOAD=1`, `BB_UFFD=0`,
-     `BB_GUEST_IN_PLACE=$BB_PC_MODEL`, `BB_VBLANK_HZ` (from `BB_FPS`) and `BB_PC_MODEL` (1 on AMD,
-     0 elsewhere).
-6. **libbbsc** sets `BBSC_MOD_SEAMLESS=0` and `SHADPS4_BBSC_FIVE_HUNTERS=0` itself on a public game
-   server (The Hunter's Dream, nodreamforthehunter.com, shadps4.net or scej-network.jp; Seamless
-   Hunt is not one), whatever was asked (`bbsc/emulator/mod/linux/bbsc_mod_linux.cpp:360`, the list
-   in `bbsc/emulator/mod/bbsc_http.cpp:245`).
+1. The environment the launcher (or the AppImage) was started with.
+2. The launcher's own settings (`game_environment()`): some are always written (the game folder,
+   mods, languages, frame rate, fullscreen and the like) and replace a shell value; others only
+   when the setting is on.
+3. The launcher's **Extra variables**.
+4. `run.sh`, which fills in what is still unset (the data folder, the online module, Discord).
 
-Value formats vary from one variable to another:
+Every `BB_*` variable the port reads, by kind, from `gpu/shim/bb_env_vars.def`
+(`scripts/env_vars.py --doc`). The game prints the variables set
+at its start (`Environment:` in the log) and warns about `BB_*` names it does not know.
 
-- The shadPS4-style `Flag()` (`gpu/shim/core/emulator_settings.h:14`) takes any value starting with
-  `1`, `y` or `t` as on.
-- Most port switches look at a leading `1`, or treat everything but `0` as on.
-- A few logs and traps turn on when set to **any** value, `0` included.
-- BBSC switches are off only with `0`.
+`=1: ...` / `=0: ...` / `=N: ...` say what that value does; `set: ...` means any value
+turns it on (even `0`).
 
-The *Values* column gives the rule for each variable. Where it says "(default X)", that is the
-behaviour when the variable is unset. In the tables:
+## Settings (105)
 
-- **Launcher:** marks variables the launcher writes from a setting. Use the setting rather than the
-  extra field.
-- **Internal:** marks variables set by `run.sh` or the package. Leave them alone.
-
-## Most useful
+What players and the launchers set. The menu, bbport.ini and the launcher write most of them; set one by hand to override them.
 
 | Variable | What it does |
 |---|---|
-| `BB_UPSCALER` | Upscaler at start: `off`, `fsr3`, `fsr4`, `fsr411`, `taa`, `dlss` (overrides bbport.ini/menu). |
-| `BB_UPSCALE_PRESET` | Upscaler preset at start: 0 Native AA, 1 Quality, 2 Balanced, 3 Performance, 4 Ultra Performance. |
-| `BB_FSR_SHARPNESS` | Upscaler sharpening strength, 0–2 (default 0.5). |
-| `BB_RENDER_RES` | Fixed render resolution `WxH` patched in at start (presets then need a restart). |
-| `BB_FPS` | Frame-rate patch: `uncap` (default), `60`, `90` or `30` (launcher: Frame rate → Mode). |
-| `BB_FPS_LIMIT` | FPS cap; 0 or unset = no limit (launcher: FPS limit). |
-| `BB_PRESENT_MODE` | Vulkan present mode: `Mailbox` (default), `Fifo` (vsync), `FifoRelaxed` or `Immediate`. |
-| `BB_DISPLAY` | Monitor for the window/fullscreen: number or part of its name. |
-| `BB_GPU_ID` | Which GPU to use, by Vulkan device index. |
-| `BB_PC_MODEL` | Memory model: 1 = new (default on AMD), 0 = the 0.3 one (default elsewhere). |
-| `BB_DRAW_PIPE` | Two-stage GPU pipeline, 20–30 % faster: 1 on, 0 off (default on with 8+ CPU threads). |
-| `BB_PREUPLOAD` | Background upload into VRAM: 0 off, 1 rewritten memory only (run.sh default), 2 everything (~3 GB more VRAM). |
-| `BB_ASYNC_PIPELINES` | 0 makes the game wait for shader compiles instead of skipping a draw for a frame or two. |
-| `BB_ANISO` | Anisotropic filtering ratio (default 16; 0 = the game's own). |
-| `BB_DLSS` | 0 turns DLSS support off on NVIDIA. |
-| `RADV_DEBUG` / `BB_AUTO_NOHIZ` | AMD GCN 3–5 on RADV: run.sh sets `RADV_DEBUG=nohiz` unless `BB_AUTO_NOHIZ=0`. |
-| `BB_PAD_DEADZONE` / `BB_PAD_DEADZONE_OUTER` | Inner (default 5) and outer (default 127) stick dead zones, of 127, round (BB_PAD_DEADZONE_RADIAL) (launcher: Controls → Stick dead zone (%), the inner one). |
-| `BB_MOUSE_DEADZONE` | Minimum stick deflection used for mouse look (default 16 of 127). |
-| `BB_AUDIO_GAIN` | Master volume multiplier, up to 8 (default 1.0). |
-| `BB_SAVE_LOG` | 1 saves the log and per-frame statistics to `<data>/logs/` (for bug reports). |
-| `MANGOHUD` | 1 shows the MangoHud overlay. |
+| `BB_ANISO` | =N: anisotropic filtering of scene textures (default 16) |
+| `BB_ASYNC_PIPELINES` | =0: new pipelines of passes drawn every frame compiled at once instead of skipping a draw for a frame or two |
+| `BB_ATLAS_ENABLED` | =1 / 0: Hunter's Atlas, the in-game map, on or off (the launcher's Map switch; unset: the map's own settings.ini) |
+| `BB_AUTO_RENDER_RES` | =1: render resolution picked from the measured frame rate |
+| `BB_BBSC` | =1: seamless co-op (BBSC), the launcher's co-op switch |
+| `BB_BBSC_LOCAL_SERVER` | =1 / auto (default) / 0: the BBSC game server on this PC (scripts/bbsc_gameserver) |
+| `BB_BUTTON_PROMPTS` | =0: the game's PlayStation button icons always |
+| `BB_CJK_FONT` | =path: a font file with Chinese characters for the menu in Simplified Chinese (default: fontconfig's choice for zh-cn) |
+| `BB_COMMUNITY_SERVER` | URL of the online pool server (default: the community server) |
+| `BB_CONFIG` | =path: the controls file (default bbport.ini) |
+| `BB_CONTENT_SKU` | =full / ...: the content profile run.py prepares |
+| `BB_CURSOR` | =0: the system's mouse cursor instead of the port's |
+| `BB_DECK_DESKTOP_INPUT` | =1: keep keyboard and mouse on a Steam Deck in game mode |
+| `BB_DISCORD` | =0: no Discord Rich Presence (the launcher's Discord switch) |
+| `BB_DISPLAY` | =N: the monitor to open the window on |
+| `BB_DLC_DIR` | =path: the dumped add-ons of this title, one folder each, linked as <user>/addcont/<title id> (the launcher's DLC folder) |
+| `BB_DLSS` | =0: no DLSS even on NVIDIA RTX |
+| `BB_DMEM_EXTRA_MB` | =N (0-2048, default 512): direct memory beyond the PS4's for the port's extras |
+| `BB_DMEM_MB` | =N: the game's direct memory size in MiB (PS4: 5056; raised for high resolutions and large heaps) |
+| `BB_EVDEV_TOUCHPAD` | =0: no DualSense/DualShock touchpad through evdev |
+| `BB_FFX_DIR` | the folder with AMD's FSR DLLs for Vulkan, amd_fidelityfx_loader_vk.dll and amd_fidelityfx_upscaler_vk.dll (upscaler fsr_amd; default <user>/fsr, then beside the game) |
+| `BB_FFX_FG_ML` | =1: AMD's ML frame generation (4.0.x) accepts any GPU (AMD ships it for RDNA4); =0: refuses it (FSR 3.1) |
+| `BB_FFX_FG_VERSION` | =<part of a name>: the frame generation AMD's DLL runs, from those the log lists (default: theirs) |
+| `BB_FFX_VERSION` | =<part of a name>: the upscaler AMD's FSR DLLs run, from those the log lists (default: theirs) |
+| `BB_FPS` | =uncap (default) / 90 / 60 / 30: the frame rate (the launcher's) |
+| `BB_FPS_LIMIT` | =N: frame rate limit (the launcher's) |
+| `BB_FRAME_GEN` | =fsr3 / dlss / fsr_amd (1: fsr3): frame generation |
+| `BB_FRAME_GEN_MULTIPLIER` | =2..4: frames shown per rendered one with frame generation |
+| `BB_FRAME_STATS` | set: frame statistics in the log every 5 s and slow frames (the launcher's statistics switch) |
+| `BB_FSR411_DIR` | the FSR 4.1.1 assets folder (default fsr4_411) |
+| `BB_FSR411_VARIANT` | =int8 / fp8 / fp8emu / navi2 / lite: FSR 4.1.1 model variant (default: the menu's model) |
+| `BB_FSR4_DIR` | the FSR 4 v07 assets folder (default fsr4_shaders) |
+| `BB_FSR_SHARPNESS` | =0..1: RCAS sharpening (the menu's) |
+| `BB_FULLSCREEN` | =0 / 1 / exclusive: window mode |
+| `BB_GAMEPAD` | =SDL GUID or part of the name: the controller to use (the launcher's) |
+| `BB_GAME_DIR` | the game's folder (with eboot.bin) |
+| `BB_GAME_MENU` | =0: no port pages in the game's System menu |
+| `BB_GPU_ID` | =N: the GPU to use, by Vulkan index (the launcher's) |
+| `BB_GPU_PROFILE` | =1: GPU profiler: time per labelled pass in the log (the launcher's) |
+| `BB_HDR` | =1: HDR output allowed |
+| `BB_HUD_ANCHOR` | =0: on wide screens the HUD stays in the 16:9 middle |
+| `BB_INTEL_TONEMAP_FIX` | =0 / 1: Intel CPU tone mapping fix patch off / on (default on on Intel) |
+| `BB_JITTER` | =0 / 1: upscaler camera jitter (the menu's) |
+| `BB_JUMP_GAP_MS` | =N (default 70): pause around a keyboard jump while running |
+| `BB_JUMP_TAP_MS` | =N (default 70): press length of a keyboard jump while running |
+| `BB_KEYBOARD` | =0: local co-op, this game ignores the keyboard and the mouse |
+| `BB_KEY_FALL_MS` | =N (default 45): keyboard stick release time |
+| `BB_KEY_RISE_MS` | =N (default 70): keyboard stick rise time |
+| `BB_KEY_TURN_DPS` | =N (default 1100): keyboard stick turn speed in degrees a second |
+| `BB_LANGUAGE` | =N: the game's language, PS4 number (1 English, 8 Russian; the launcher's) |
+| `BB_LARGE_HEAPS` | =1 / 0: larger graphics heaps for texture packs on / off (default: detected) |
+| `BB_LAYER_MEMORY` | =1 / 0: the layer's memory module (default on non-AMD GPUs) |
+| `BB_LOW_LATENCY` | =off / on / boost: NVIDIA Reflex / AMD Anti-Lag (the menu's) |
+| `BB_MAP_ART_DIR` | folder: the map's pictures (the launcher's) |
+| `BB_MAP_CATALOG` | file: the names of the map's places and items (the launcher's) |
+| `BB_MAP_CONFIG` | file: the map's settings (the launcher's) |
+| `BB_MAP_DIR` | folder: the maps Hunter's Atlas generated (the launcher's) |
+| `BB_MAP_FOG_ENABLED` | =1: areas not visited yet stay hidden on the map |
+| `BB_MAP_FONT` | file: the font of the map's names (the launcher's) |
+| `BB_MAP_ITEMS_ENABLED` | =1: items on the map (the launcher's) |
+| `BB_MAP_ITEM_CATEGORIES` | =list: the items the map shows (healing,insight,equipment,echoes) |
+| `BB_MAP_NPC_MODE` | =all / new_dialogue / ...: the NPCs the map shows |
+| `BB_MAP_SOUND_GAIN` | =0-2: the level of the map's cursor sounds (0.024, the game's own quick-menu cursor) |
+| `BB_MAP_TRAVEL_ENABLED` | =1: travel to lamps from the map (the launcher's) |
+| `BB_MENU_LANGUAGE` | =ru / en / ...: the port's menu language (default: the launcher's, else the system's) |
+| `BB_MENU_POINTER` | =0: no mouse pointer in the game's menus |
+| `BB_MODS_ENABLED` | =0: no mods |
+| `BB_MOUSE_AUTO_ROTATE` | =1: the game's camera auto rotation also with the mouse |
+| `BB_MOUSE_DEADZONE` | =N (default 16 of 127): mouse look dead zone |
+| `BB_NATIVE_MOUSE` | =0: mouse look through the right stick instead of the camera hook |
+| `BB_NET_BACKEND` | =thd: The Hunter's Dream online pool (the launcher's online pool) |
+| `BB_OBJECT_MOTION` | =0 / 1: motion vectors of moving objects (the menu's) |
+| `BB_ONLINE` | =1: online play (the launcher's) |
+| `BB_P2P_PORT` | =N: the UDP port for P2P online traffic (default 3658, 0: any) |
+| `BB_PAD_BACKGROUND` | =1: local co-op, the controller keeps driving the game and its sound plays while another window has the focus |
+| `BB_PAD_DEADZONE` | =N (default 5): stick inner dead zone |
+| `BB_PAD_DEADZONE_OUTER` | =N (default 127): stick outer limit |
+| `BB_PAD_LIGHTBAR` | =RRGGBB: the light bar colour of DualShock 4 and DualSense pads (the launcher's Controls) |
+| `BB_PAD_MOTION` | =0 / 1: motion sensor emulation (over bbport.ini pad_motion) |
+| `BB_PATCHES` | =name,...: extra patches by name (patches.py) |
+| `BB_PROCESS_PRIORITY` | =normal / above / high: process priority on Windows (default above) |
+| `BB_REACTIVE` | =1: FSR reactive mask (the menu's) |
+| `BB_REACTIVE_MAX` | reactive mask maximum (the menu's) |
+| `BB_REACTIVE_SCALE` | reactive mask scale (the menu's) |
+| `BB_REACTIVE_THRESHOLD` | reactive mask threshold (the menu's) |
+| `BB_RENDER_RES` | =WxH: render resolution through the startup patch (compatibility) |
+| `BB_SAVE_LOG` | =1: the log and frame statistics also kept in logs/ |
+| `BB_SEAMLESSHUNT_TOMBS` | =1: keep Seamless Hunt's bloodstains and death visions (they crash the game; scripts/online.py) |
+| `BB_SHADER_PROGRESS` | =0: no shader compilation progress on screen |
+| `BB_SHADNET_NPID` | the shadNet account name (the launcher's) |
+| `BB_SHADNET_PASSWORD` | the shadNet account password (the launcher's) |
+| `BB_SHADNET_SERVER` | the shadNet server |
+| `BB_SHADNET_TOKEN` | the shadNet account token (the launcher's) |
+| `BB_SHADNET_WEBAPI` | the shadNet web API server |
+| `BB_SKIP_CPU_CHECK` | =1: skip the check of the CPU's bsr/bsf behaviour before the game starts |
+| `BB_SKIP_GAME_CHECK` | =1: start with game files that did not pass the check |
+| `BB_TEXTURE_QUALITY` | texture quality over bbport.ini's texture_quality |
+| `BB_THD_ONLINE_ID` | The Hunter's Dream online name (the launcher's) |
+| `BB_THD_TOKEN` | The Hunter's Dream account token (the launcher's) |
+| `BB_TROPHY_KEY` | the trophy data key (from the environment or the port's .env) |
+| `BB_UPNP` | =1: UPnP port forwarding for online play |
+| `BB_UPSCALER` | =none / fsr3 / fsr4 / dlss / ...: the upscaler over the menu's (scripts, A/B) |
+| `BB_UPSCALE_PRESET` | the upscaler quality preset (the menu's) |
+| `BB_USER_NAME` | the PS4 user name (default Hunter) |
+| `BB_WINDOW_RECT` | =x,y,w,h: local co-op, the window's place and size as fractions of its display, without borders |
 
-## Display & window
+## Tuning (235)
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_CJK_FONT` | path to a font file (unset: fontconfig's choice for zh-cn) | Font merged into the in-game menu font for Simplified Chinese texts; without one, fc-match picks a system font (Noto Sans CJK, WenQuanYi...), else Chinese text shows as boxes. | `gpu/shim/bbport_overlay.cpp:1145` |
-| `BB_DISPLAY` | monitor number (1, 2, ... in SDL order) or part of its name (unset: SDL's primary display) | **Launcher:** Graphics > Display > Monitor. The monitor the window and fullscreen go to (issue #69); `bb-gpu-capabilities --displays` lists them, and the log says which one was taken. No match: the primary one. | `gpu/shim/window.cpp:76`, `launcher/bbport_launcher.py:658` |
-| `BB_FULLSCREEN` | 1 or 0 (windowed) | **Launcher:** Graphics > Display > Fullscreen. Creates the game window fullscreen when the value starts with 1. Under gamescope (the Steam Deck's Game Mode) the window is always fullscreen. | `gpu/shim/window.cpp:183`, `launcher/bbport_launcher.py:653` |
-| `BB_GPU_ID` | Vulkan device index (-1: automatic ranking) | Which GPU the game uses, by its index in the Vulkan device list; out of range asserts. bb-gpu-capabilities follows it too. | `gpu/shim/core/emulator_settings.h:22`, `gpu/shadps4/video_core/renderer_vulkan/vk_instance.cpp:146`, `tools/gpu_capabilities.c:257` |
-| `BB_HDR` | 1/y/t or unset (off) | **Launcher:** Graphics > Display > Allow HDR (set only when on). Allows an HDR swapchain (the colour-space extension and an HDR surface format) when the display offers it. | `gpu/shim/core/emulator_settings.h:60`, `gpu/shadps4/video_core/renderer_vulkan/vk_swapchain.cpp:246`, `launcher/bbport_launcher.py:666` |
-| `BB_LIVE_RES` | 0 \| 1 (default: bbport.ini live_resolution, else off) | For output sizes other than 1080p: 1 = live resolution changes (guest at 1080p, host targets scaled at run time, change without restart; slower), 0 = startup resolution patch. Overrides bbport.ini live_resolution=0/1/auto. Outputs wider than 16:9 always take the startup patch. | `run.sh:75-122` |
-| `BB_MENU_LANGUAGE` | en, ru, es, it, fr, de, pt_BR, zh_CN (first two letters compared; unset: LC_ALL/LC_MESSAGES/LANG/LANGUAGE) | **Launcher:** the launcher's own language. Language of the in-game menu until one is chosen in it (bbport.ini menu_language wins). | `gpu/shim/bbport_settings.cpp:165`, `launcher/bbport_launcher.py:652` |
-| `BB_NVIDIA_EGL` | 0 = off (default on) | Packaged builds with the host NVIDIA driver: sets __EGL_VENDOR_LIBRARY_FILENAMES to the host's EGL vendor files, NVIDIA first (issue #107); 0 leaves it unchanged. | `launcher/bbport_vulkan.py:116-124` |
-| `BB_NVIDIA_LIB_DIR` | directory (default none) | Packaged builds: an extra directory searched for the host NVIDIA Vulkan driver library. | `launcher/bbport_vulkan.py:74-76` |
-| `BB_OUTPUT_RES` | WxH | **Internal** (run.sh exports it from bbport.ini output_res for non-1080p outputs without live resolution; unset again on restart). Output size the upscaler fills when the scene is rendered at a startup-patched size (BB_RENDER_RES); also passed to scripts/patches.py. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:199`, `run.sh:119`, `run.sh:190` |
-| `BB_PRESENT_MODE` | Mailbox, Fifo, FifoRelaxed, Immediate (Mailbox) | **Launcher:** Graphics > Display > Present mode. Vulkan present mode; a mode the driver lacks falls back to Fifo. Any other value logs an error and uses Mailbox. | `gpu/shim/core/emulator_settings.h:25`, `gpu/shadps4/video_core/renderer_vulkan/vk_swapchain.cpp:281`, `launcher/bbport_launcher.py:654` |
-| `BB_PRESENT_THREAD` | 0 = off; else on (on) | Swapchain work runs on a separate swap thread next to the present thread; 0 runs it on the present thread. | `gpu/shadps4/core/libraries/videoout/driver.cpp:76-81` |
-| `BB_RENDER_RES` | WxH (unset = live resolution path; scene at the menu's preset) | Explicitly sets the game's render resolution with a patch at start (the older path). Fixes the scene size: presets and resolution then need a restart, and TAA at another size is refused. Above 1920x1080 run.sh raises BB_DMEM_MB to 9152. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:208`, `run.sh:71`, `run.sh:119` |
-| `BB_UI_RES` | WxH (unset: 1920x1080) | **Internal** (run.sh exports it from `patches.py --print-scaled` for outputs wider than 16:9 on the startup patch, unless bbport.ini aspect_patch=0; unset again on restart). The game's UI coordinate space: 1080 high and as wide as the output's aspect ratio (2580x1080 for 3440x1440), the HUD canvas width patches.py writes (ultrawide_writes). The UI composition recognizes UI draws by this size and scales them to the output; scripts/hud_layout.py lays out the menu movies for it. | `gpu/shadps4/video_core/renderer_vulkan/ui_composition.h:24`, `run.sh:119-122`, `run.sh:124` |
-| `LC_ALL / LC_MESSAGES / LANG / LANGUAGE` | locale | In-game menu language when BB_MENU_LANGUAGE is unset; the launcher also derives its UI and game language from the system locale. | `gpu/shim/bbport_settings.cpp:151-163`, `launcher/bbport_i18n.py:5100-5126` |
-| `VK_ADD_DRIVER_FILES` | ICD JSON list | Packaged builds: prepended to the bundled driver list. | `launcher/bbport_vulkan.py:72-73` |
-| `VK_DRIVER_FILES` | ICD JSON list (default: loader's) | Vulkan loader's driver list. run.sh --software sets Lavapipe; packaged builds set it to the host NVIDIA ICD plus bundled Mesa unless you set it (or VK_ICD_FILENAMES) yourself; dropped when it points into Steam's pressure-vessel. | `run.sh:4-13`, `launcher/bbport_vulkan.py:66-80`, `packaging/bbport-entry.c:37-49` |
-| `VK_ICD_FILENAMES` | ICD JSON list | Older name of VK_DRIVER_FILES; if set, packaged builds leave driver selection alone. | `launcher/bbport_vulkan.py:66-67` |
-| `__EGL_VENDOR_LIBRARY_FILENAMES` | file list | If set, packaged builds do not replace it with the host's EGL vendor files (see BB_NVIDIA_EGL). | `launcher/bbport_vulkan.py:119` |
+Defaults to change on a machine where they misbehave, workarounds, and switches that turn a fix off for comparison.
 
-## Graphics & upscalers
+| Variable | What it does |
+|---|---|
+| `BB_ADB` | path of adb for BB_APP0_ADB (default: adb) |
+| `BB_ANTI_LAG` | =1: AMD Anti-Lag 2 through Mesa's layer (measured ~0 gain, #289) |
+| `BB_APP0_ADB` | =serial: the game's files fetched from a phone over adb on first open |
+| `BB_ASYNC_PIPELINE_THREADS` | =N: threads compiling pipelines in the background |
+| `BB_ASYNC_SUBMIT` | =0: the presenter submits the frame itself instead of a submit thread |
+| `BB_AUDIO` | =none: no audio device (headless runs) |
+| `BB_AUDIO_GAIN` | =N (0-8, default 1): the game's sound level on top of the fold to the device's channels |
+| `BB_AUTO_NOHIZ` | =0 (run.sh): no automatic RADV_DEBUG=nohiz on the GPUs that need it |
+| `BB_AVPLAYER_ASYNC_READY` | =1: movie StateReady on the controller thread, as before (crashed at 200+ FPS) |
+| `BB_BDA_DEDICATED_MB` | =N: buffers with GPU addresses get dedicated memory from N MiB |
+| `BB_BIND_MEMO` | =0: every resource binding takes the full path (no memo) |
+| `BB_BREADCRUMBS` | =0: no GPU breadcrumbs (what the GPU was drawing at a hang) |
+| `BB_CHUNK_TEXTURES` | =0: texture data copied instead of read in place from guest memory chunks |
+| `BB_CHUNK_UPLOADS` | =0: uploads through CPU staging instead of binding guest memory in place |
+| `BB_COMMIT_IMPORT_LOCKED` | =1: guest memory commits import under the lock |
+| `BB_COMPUTE_RELEASE_FLUSH` | =0: work before a compute release waits for the rest of the frame |
+| `BB_CONSTANTS_IN_PLACE` | =1: shader constants bound in place from guest memory instead of copied |
+| `BB_CONSTANT_RING_MB` | =N: size of the constant ring in MiB |
+| `BB_CONSTRAM_GPU_WAIT` | =0: a constant RAM dump does not wait for queued draws reading it (DoF artifacts #44) |
+| `BB_CONSTRAM_PIPE` | =0: a constant RAM dump waits for all queued draws |
+| `BB_COPY_DEST_GAP` | =bytes: merge gap of copy shader destinations (default 256) |
+| `BB_COPY_DEST_PRECISE` | =0: the whole bound destination of a copy shader counts as written |
+| `BB_COPY_FILTER_GATE` | =1 with BB_COPY_SKIP_SAME: the copy filter off while the draw recording thread is over 92% busy |
+| `BB_COPY_GPU_BUFFERS` | =0: command buffers decoded from guest memory instead of a copy per submission |
+| `BB_COPY_MERGE_KB` | =N: copy shader ranges closer than N KiB merged (default 64) |
+| `BB_COPY_PAGED_RANGES` | =0: copy shader ranges whole instead of by page |
+| `BB_COPY_SHADER_NATIVE` | =0: the copy shader's list read on the CPU |
+| `BB_COPY_SKIP_SAME` | =0: off (default on): of the game's copy shader calls only the copies that change their destinations run (checked on thread bb:CopyFilter) |
+| `BB_COPY_THREADS` | =N (0-16): threads for large guest memory copies |
+| `BB_CORE_RESERVE` | =0 / 1: keep the game's threads off a reserved core (Linux, SMT CPUs with 6+ cores) |
+| `BB_CRASH_GUARDS` | =0: without the guards of the game's own unchecked pointers that crashed players (scripts/crash_guards.py) |
+| `BB_DEAD_IMAGES` | =0: images of freed memory left to the collector instead of dropped on the GPU thread |
+| `BB_DEAD_IMAGES_LATE` | set: dead images dropped at the frame's end only, as before |
+| `BB_DETILE_SKIPPED` | =1: texture levels the quality setting leaves out are still detiled and read |
+| `BB_DIRECT_IMPORT_LOCKED` | =1: direct memory imports under the lock |
+| `BB_DIRECT_MEMORY_ACCESS` | =1: shadPS4's direct memory access mode of the shader translator |
+| `BB_DIRECT_SEGMENT` | =0: the presenter waits for the recording threads instead of taking its own command segment |
+| `BB_DISABLE_HTTPS` | =1: the game's HTTPS requests go out as plain HTTP (online) |
+| `BB_DRAW_PIPE` | =0 / N: the draw pipeline off, or its depth |
+| `BB_FAST_WRITER_FAULTS` | =1: fast path for guest write faults (off: a device loss on a GTX 1050) |
+| `BB_FAULT_WINDOW` | =KiB: window unprotected around a guest write fault (default 256) |
+| `BB_FFX_OWN_SHADERS` | =0: FSR frame generation with the packaged shaders instead of the port's own |
+| `BB_FG_ASYNC` | =1: FSR 3.1 frame generation on a second compute queue (no gain measured) |
+| `BB_FG_EARLY_RETIRE` | =0: with frame generation the frame counts as finished only after it |
+| `BB_FIXED_ARENA` | =1 / 0: force the fixed arena on or off (tests) |
+| `BB_FIX_CHARA_ID` | =0: without the character id guard fix |
+| `BB_FIX_HIT_COLLECTOR` | =0: without the hit collector overflow fix |
+| `BB_FIX_PLAY_TIME` | =0: without the play time fix at high frame rates |
+| `BB_FLIP_AHEAD` | =N (default 1, 0 off): the buffer shown before a flip goes back to the game that many flips early |
+| `BB_FLIP_RATE` | =N: the flip rate the game asks for replaced (0: every vblank; games without frame rate hooks) |
+| `BB_FRAMES_AHEAD` | =N (default 1): guest frames the command processor may run ahead of the GPU |
+| `BB_FRAME_HOOKS` | =0: the community's frame rate patches instead of the port's hooks |
+| `BB_FSR3_FP32` | =1: FSR 3.1 without its FP16 shader variants (#85) |
+| `BB_FSR3_WAVE32` | =1: FSR 3.1 without its wave64 shader variants (#85) |
+| `BB_FSR4_LINEAR` | =0: FSR 4 gets the encoded frame as before |
+| `BB_FSR4_OPT` | =0: FSR 4 v07 passes without the optimized set (opt/) |
+| `BB_FX_INIT_CLEAR` | =0: the effect buffers' initialization clears through the game's path |
+| `BB_GARLIC_VRAM` | =0 / 1: VRAM copies of the game's GPU memory off / on (default: on discrete GPUs) |
+| `BB_GC_BUDGET_MB` | =N: texture cache budget in MiB, as on integrated GPUs |
+| `BB_GC_IDLE_SECONDS` | =N (default 20): unused textures evicted after N seconds |
+| `BB_GC_KEEP_GPU_WRITTEN` | =0: the collector downloads and frees linear images the GPU wrote under mere memory pressure; default only past the critical mark and unused for a minute (#30) |
+| `BB_GC_LIVE_BUDGET` | =0: texture cache marks from the startup budget instead of the driver's current one |
+| `BB_GC_PRESSURE_IDLE_SECONDS` | =N (default 5): the same under memory pressure |
+| `BB_GC_SMALL_MARKS` | =P,C: pressure and critical marks in percent on small cards |
+| `BB_GPU_COMMAND_WRITES` | =0: GPU command writes not done in place |
+| `BB_GPU_DATA_CHECK` | =0: GPU-written data not checked before CPU reads (#122) |
+| `BB_GPU_LABELS` | =1 / 0: GPU-written labels on / off (default off on AMD GFX8) |
+| `BB_GPU_LABELS_PORTABLE` | =1: portable GPU label writes |
+| `BB_GPU_SPIN_US` | =N: microseconds the GPU thread spins before sleeping (default 200 with 12+ threads) |
+| `BB_GPU_TIMESTAMPS` | =0: timestamps written by the CPU instead of the GPU |
+| `BB_GPU_WRITES_IN_PLACE` | =1: GPU-written buffers in place with write tracking, as before |
+| `BB_GPU_WRITE_TWINS` | =1: VRAM twins of GPU-written guest pages |
+| `BB_GPU_WRITE_TWINS_MAX` | =N: pages with at most N GPU-written ranges get twins (default 1024) |
+| `BB_GUEST_HOOKS` | =0: no guest code hooks at all (aspect ratio, HUD, mouse, fixes) |
+| `BB_GUEST_LAZY` | =1: lazy guest memory with the layer's memory module (off: broke buffers) |
+| `BB_GUEST_MEMORY` | =dmabuf / host / private: how guest memory is shared with the GPU (default per vendor) |
+| `BB_GUEST_UNCACHED` | =1: guest memory only in memory types the GPU reads past its caches |
+| `BB_GUEST_VRAM` | =1 (experiment): direct memory in VRAM mapped through the PCI BAR |
+| `BB_GUEST_VRAM_RANGES` | =lo-hi,...: physical ranges for BB_GUEST_VRAM (default: the graphics heaps) |
+| `BB_GX_COMMAND_HEAP` | =0: without the larger GX command heap patch (patches.py) |
+| `BB_GX_QUERY_GUARD` | =0: without the GX query creation guard |
+| `BB_HEAP_GROW` | =0: the graphics heap whole from the start instead of growing on demand |
+| `BB_HEAP_GROW_AHEAD` | =N (default 2, 0 off): heap pieces made ahead |
+| `BB_HEAP_GROW_INITIAL_MB` | =N (default 512): heap memory backed from the start |
+| `BB_HEAP_GROW_PIECE_MB` | =N (default 320, at least 258): heap growth piece |
+| `BB_HEAP_SHRINK` | =0: the heap only grows |
+| `BB_HEAP_SHRINK_DELAY` | =seconds (default 60): a piece free this long is given back |
+| `BB_HEAP_TOP_HOOK` | =0: without the hook on allocations from the heap's top |
+| `BB_HIT_COLLECTOR_CAP` | =N (default 65536): hits per call before the overflow fix takes over |
+| `BB_HONEST_DRAIN_FLUSH` | =0: no flush when the GPU is on its last submission |
+| `BB_HONEST_FLIPS` | =1 (experiment): a flip completes once the GPU has finished the frame |
+| `BB_HONEST_FLUSH_US` | =N (default 2000): submissions batched over N microseconds while the GPU has work |
+| `BB_HONEST_IDLE_BACKLOG` | =bytes (default 64 KiB): queued draws that make an idle GPU get a flush |
+| `BB_HONEST_IDLE_FLUSH` | =0: no flush for an idle GPU |
+| `BB_HONEST_IDLE_US` | =N (default 200): microseconds of GPU idle before the guest may be waiting |
+| `BB_HOST_COPY_WAITS` | =all: host copies always wait, as before |
+| `BB_HOST_ONLY_DEFAULT` | =0: none of the game profile's allocations in host memory only |
+| `BB_HOT_EFFECTS` | =0: effect settings applied as patches at start instead of live |
+| `BB_HOT_PAGES` | =1: hot page tracking |
+| `BB_HOT_VERTEX_COPY` | =1: vertex data bound in place copied into VRAM once per submission (no reads over the bus per pass) |
+| `BB_IMAGE_RECYCLE_MB` | =N (default 256, 0 off): memory of freed images kept for reuse |
+| `BB_IMAGE_RECYCLE_SECONDS` | =N (default 90): recycled images older than this go |
+| `BB_IMAGE_SPARES` | =1 / 0: spare images made ahead on a thread (default on on Windows) |
+| `BB_IMAGE_SPARES_MB` | =N: memory for spare images |
+| `BB_IMAGE_TRAPS` | =0: no write traps on image memory |
+| `BB_IMPORT_GRANULE_MB` | =N (2..64, default 32): lazy guest memory import granule |
+| `BB_IMPORT_OVERLAP_MB` | =N: overlap budget of lazy imports |
+| `BB_INDIRECT_GUARD` | =0: indirect draw and dispatch counts used as the game gives them |
+| `BB_INDIRECT_GUARD_MAX` | =N (default 4M): indirect dispatch groups allowed in all |
+| `BB_INDIRECT_GUARD_MAX_VERTICES` | =N (default 64M): indirect draws over this run nothing |
+| `BB_INPLACE_TEXTURES` | =1: all texture data read in place (off: looked smeared) |
+| `BB_INTERP_INT_FIX` | =0 / 1: flat integer interpolation fix off / on (default: on where barycentrics exist) |
+| `BB_JOB_SLOT_FIX` | =0: without the render job slot leak fix |
+| `BB_KEEP_DECOMPRESS_DRAWS` | =1: the game's depth decompress passes are drawn |
+| `BB_KERNEL_CLAMP` | =0: without the effect kernel clamp fix |
+| `BB_KIT_RESTORE` | =0: the online kit's code changes are not restored |
+| `BB_LAYER_CPU_MARK_SECONDS` | =N (default 5, 0: until handed out): CPU marks of layer blocks expire after N seconds |
+| `BB_LAYER_DOMAINS` | =0: mirrors not per game allocation |
+| `BB_LAYER_GPU_WRITES` | =0 / 1 / 2: where GPU writes may land in VRAM copies (0 nowhere, 1 default) |
+| `BB_LAYER_MIRROR_FLOOR_PERCENT` | =N (max 90): VRAM budget share kept for mirrors |
+| `BB_LAYER_MIRROR_GROWTH_MB` | =N (default 64, 0 none): room a growing mirror gets |
+| `BB_LAYER_MIRROR_HEADROOM_MB` | =N (0: the whole floor): mirror headroom |
+| `BB_LAYER_READ_TRAPS` | =1: data the GPU wrote into a VRAM copy only is trapped for CPU reads |
+| `BB_LAYER_RELOAD_RESET` | =0: blocks reloaded in place keep their state, as before |
+| `BB_LAYER_STITCH` | =0: bindings across heap pieces from the arena, as before (exploding vertices) |
+| `BB_LAYER_UNMAP_RESET` | =0: unmapped blocks keep their state, as before |
+| `BB_LAYER_VOLATILE` | =1: volatile blocks |
+| `BB_LAYER_VOLATILE_IN_PASS` | =0: volatile blocks refreshed in render passes too, as before |
+| `BB_LAYER_WATCH` | =0: blocks with unannounced bytes get no watched VRAM copy |
+| `BB_LAYER_WRITE_TRAPS` | =0: no write traps on layer blocks |
+| `BB_LIGHT_GRID_HOOK` | =0: without the light grid hook |
+| `BB_LIGHT_GRID_OPT` | =1 / 0: light grid optimization on / off, over the setting (tests) |
+| `BB_LIVE_HYBRID` | =1: the startup resolution patch with live presets over it |
+| `BB_MEM_SEMAPHORE_ORDER` | =0: memory semaphores without ordering |
+| `BB_MIRROR_ALLOC_PERCENT` | =N (0 off): a mirror that would take device memory past N percent is refused |
+| `BB_MIRROR_COMPACT_AGE` | =N (default 30): mirrors younger than N seconds are left alone |
+| `BB_MIRROR_COMPACT_MB` | =N (default 64): mirror memory without valid blocks over this is given back |
+| `BB_MIRROR_COMPACT_SECONDS` | =N (default 1): mirror compaction interval |
+| `BB_MIRROR_FREE_BACKLOG_MB` | =N (default 128): retired mirror memory allowed to wait |
+| `BB_MIRROR_FREE_MB_PER_FRAME` | =N (default 64): mirror memory freed per frame |
+| `BB_MIRROR_MERGE_GROWTH` | =0: a mirror made over neighbours grows at the top only, as before |
+| `BB_MIRROR_POOL_MB` | =N: retired mirrors kept for new ones |
+| `BB_MIRROR_REPROMOTE_SECONDS` | =N (default 0): blocks sent back are not copied again that soon |
+| `BB_MIRROR_UNBOUND_SECONDS` | =N (0 never): blocks no binding named for N seconds leave VRAM |
+| `BB_MIRROR_VRAM_ONLY` | =1: mirrors in VRAM or not at all |
+| `BB_MOTION_LARGE` | =0: bone palettes of 16-64 KiB (the large beasts) get camera motion vectors only, not object motion |
+| `BB_MOTION_VERTICES_MI` | =N (1-8): object motion vertex buffer in Mi vertices |
+| `BB_NET_MODULE` | =path: the online module to load (default gpu/libbbnet20.so beside bb-probe) |
+| `BB_NP_COUNTRY` | =code: the online user's country (default us) |
+| `BB_NP_LANGUAGE` | =code: the online user's language (default en) |
+| `BB_NVIDIA_EGL` | =0: the launcher leaves the EGL vendor files as they are (#107) |
+| `BB_NVIDIA_LIB_DIR` | =dir: extra folder with NVIDIA's libraries for the package |
+| `BB_NVIDIA_MAILBOX` | set: keep Mailbox presentation on NVIDIA Windows instead of FIFO |
+| `BB_NV_POWER` | =0: leave the NVIDIA driver profile of bb-probe.exe alone (Windows; by default its power management mode is set to prefer maximum performance unless the user chose one) |
+| `BB_OCCLUSION_INTERVALS` | =0: occlusion samples counted all the time, not only while a query is open |
+| `BB_OCCLUSION_LABEL_ORDER` | =0: occlusion labels may go ahead |
+| `BB_OCCLUSION_QUERIES` | =0: a fixed occlusion result sequence instead of real queries |
+| `BB_OF_FAST` | =1: optical flow without a search on the finest level |
+| `BB_PACE_CATCHUP` | =1: frame pacing catches up after a late frame |
+| `BB_PAD_CENTER` | =lx,ly,rx,ry: the sticks' neutral position |
+| `BB_PAD_CENTER_CAL` | =0: no measurement of the sticks' neutral position |
+| `BB_PAD_DEADZONE_RADIAL` | =0: the sticks' dead zone per axis instead of round |
+| `BB_PAD_WORLD_DRAWS` | =N (default 150): a frame with this many draws counts as the world for pad timing |
+| `BB_PAGED_CROSSING` | =0: paged bindings only in windows |
+| `BB_PAGED_FORMATTED` | =0: formatted buffers never paged |
+| `BB_PAGED_HOLES` | =1 (experiment): paged reads skip memory the game never wrote |
+| `BB_PAGED_MIN_MB` | =N (default 64): bindings from this size are paged |
+| `BB_PENDING_SUMMARY` | =0: pending checks without the summary level |
+| `BB_PIPELINE_CACHE` | =0: no pipeline cache on disk |
+| `BB_PIPE_SIGNALS` | =0: the frame's cache work on the GPU thread instead of the recording thread |
+| `BB_PIPE_SPIN_US` | =N: microseconds the draw pipe's threads spin before sleeping |
+| `BB_PM4_RECOVER` | =0: a command buffer the game rewrote while read stops decoding, as before |
+| `BB_PM4_REPAIR` | =0: corrupt submitted command buffers decoded as they are |
+| `BB_PM4_WAIT_US` | =N (default 20000): command processor wait timeout in microseconds |
+| `BB_PRELOAD_BACKGROUND` | =0: cached pipelines loaded before the game starts instead of in the background |
+| `BB_PREP_WORKERS` | =N (0-16): draw preparation threads |
+| `BB_PRESENT_MODE` | =Mailbox / Fifo / Immediate: swapchain present mode (default Mailbox) |
+| `BB_PRESENT_THREAD` | =0: present on the vblank thread instead of its own |
+| `BB_PROMOTE_MB_PER_FRAME` | =N (0 none; default 32 on cards up to 4 GiB, else 256): VRAM copies per frame |
+| `BB_READBACKS` | =0 / 1 / 2: GPU readbacks off / relaxed (default) / precise |
+| `BB_READBACK_LINEAR` | =1: linear images read back to guest memory |
+| `BB_READBACK_QUEUE` | =0: no separate queue for readbacks |
+| `BB_REGS_FULL_RESET` | set: the whole register file reset, as before |
+| `BB_RENDER_RESOURCE_CACHE_MB` | =N (160: the game's own): the game's render resource cache size |
+| `BB_REPAIRED_DRAWS` | =1: repaired command buffers still draw |
+| `BB_REPAIRED_WAIT_MS` | =N (default 500): waits of repaired command buffers give up after this |
+| `BB_RESOLVE_WORKERS` | =N (0-4): threads that check and copy draw resources (stage 2) |
+| `BB_RING_DEDUP` | =0: off (default on): constants already in the constant ring with the same bytes bound there again, not copied over the bus once more |
+| `BB_SCENE_DEPTH_PROXIES` | =0: depth images read at the native size, not as reduced proxies |
+| `BB_SCENE_STENCIL_ZERO` | =0: no depth proxies where stencil export is missing, the scene stays native |
+| `BB_SCENE_UPSIZE` | =0: a scene larger than native drawn at the native size |
+| `BB_SCENE_WITHOUT_UI` | =0: cinematics without a UI pass are not finished as scenes |
+| `BB_SHADOWS` | =1: shadow copies of written buffers on discrete GPUs |
+| `BB_SKIP_EMPTY_DRAWS` | =1 (experiment): draws that write nothing are left out |
+| `BB_SKIP_NOOP_DRAWS` | =1: draws without effect left out (#352, no gain measured) |
+| `BB_SOUND_HACK` | =0: saves left untouched (no sound settings fix) |
+| `BB_SPEC_MATCH` | =0: shader specializations always built and compared |
+| `BB_STAGE_PRIORITY` | =0 (default) / 1 / 2: draw stage thread priority off / above normal / highest |
+| `BB_STAGING_KEEP_MB` | =N (default 512): upload staging kept when idle |
+| `BB_STAGING_VRAM_IDLE_MS` | =N (default 3000): VRAM staging given back after this long unused |
+| `BB_STREAM_BUFFER_MB` | =N: stream buffer size |
+| `BB_SUBMIT_AHEAD` | =N (default 2): a frame's first submissions go straight to the GPU |
+| `BB_SUBMIT_LOCK` | =frame: a frame's last submission decoded under the lock |
+| `BB_SWAPCHAIN_IMAGES` | =N: swapchain images |
+| `BB_TEXTURE_HELPER` | =0 / 1: spinning texture helper thread (default: with cores to spare) |
+| `BB_TEXTURE_UPLOAD_MB_PER_FRAME` | =N (default 32, 0 off): texture bytes uploaded a frame before new textures start small |
+| `BB_THD_AUTH` | The Hunter's Dream account service URL |
+| `BB_THD_P2P_ADDR` | our address for The Hunter's Dream peers (default: detected) |
+| `BB_THD_RULESET` | The Hunter's Dream ruleset (default vanilla) |
+| `BB_THD_SERVER` | The Hunter's Dream session service URL |
+| `BB_THD_STUN` | =host[:port] / off: STUN server (default: the server's host on 3478) |
+| `BB_THD_VERIFY_TLS` | =0: The Hunter's Dream TLS certificates not checked |
+| `BB_TILE_BIND_VRAM` | =0: tiled data read in place over the bus instead of from a VRAM copy |
+| `BB_TIMELINE_POLL_US` | =N (default 50): timeline semaphore poll interval |
+| `BB_UNIFIED_MEMORY` | =1 / 0: treat the GPU as unified memory or not (over the device type) |
+| `BB_VBAO_BLUR` | =N (default 2, 0: raw): VBAO denoise taps per side |
+| `BB_VBAO_BLUR_DEPTH` | =f (default 0.05): relative depth difference that stops the VBAO blur |
+| `BB_VBAO_BLUR_NORMAL` | =f (default 8, 0 ignores normals): how sharply the VBAO blur stops at normal changes |
+| `BB_VBAO_NORMALS` | =0: VBAO from depth only |
+| `BB_VBAO_POWER` | =f (default 1.5): VBAO strength |
+| `BB_VBAO_RADIUS` | =metres (default 1.5): VBAO radius |
+| `BB_VBAO_THICKNESS` | =metres (default 0.4): VBAO assumed thickness |
+| `BB_VERTEX_READ_COPY` | =1 (experimental): vertex data bound in place copied into VRAM for the vertices each draw reads (once per guest submission) |
+| `BB_VK_RECORD_THREAD` | =0: Vulkan commands recorded on the calling thread |
+| `BB_VK_RECORD_THREADS` | =N (1-8): Vulkan recording threads (default 2 from 8 hardware threads) |
+| `BB_VK_SEGMENT_KB` | =N (default 64): recording segment size |
+| `BB_VMA_BLOCK_MB` | =N (default 64): VMA block size |
+| `BB_VMA_DEDICATED_MB` | =N (default 4): images from this size get dedicated memory |
+| `BB_VRAM_FLOOR_IDLE_SECONDS` | =N (default 30): mirror floor idle time before textures make room |
+| `BB_VRAM_IDLE_SECONDS` | =N (default 60): VRAM copies unused this long are given back |
+| `BB_VRAM_LIMIT_MB` | =N: the driver's VRAM budget taken as at most N MiB |
+| `BB_VRAM_PRESSURE_IDLE_SECONDS` | =N (default 10): under pressure, VRAM groups unused this long go |
+| `BB_VRAM_PROMOTE_PERCENT` | =N (default 90): no new VRAM copies past this share of the budget |
+| `BB_VULKANINFO` | path of vulkaninfo for the launcher |
+| `BB_WORK_RETIRED` | =0: the recording thread and fences do not wait for retired work |
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_ANISO` | integer (16); 0 = the game's own samplers | Mipmapped linear samplers of graphics draws get this anisotropic filtering ratio instead of the PS4's (sharper floors, stairs and walls at grazing angles). | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:3595` |
-| `BB_AUTO_NOHIZ` | 0 = off (default 1) | On GCN 3–5 GPUs under RADV (Polaris, Vega and their APUs) run.sh sets RADV_DEBUG=nohiz to avoid black halos/missing geometry from depth compression; 0 disables that. Ignored if you set RADV_DEBUG yourself. | `run.sh:212` |
-| `BB_DLSS` | 0 = off; unset = on when available | NVIDIA DLSS through the optional bridge library (libbbport_dlss.so + NVIDIA's libnvidia-ngx-dlss). 0 disables it; without the libraries or on other GPUs nothing changes. | `gpu/shadps4/video_core/renderer_vulkan/vk_dlss.cpp:176`, `gpu/shadps4/video_core/renderer_vulkan/vk_dlss.h:8` |
-| `BB_FSR1` | 1/y/t or 0 (off) | shadPS4's FSR 1 pass in the presenter (spatial upscale of the final image); separate from the port's upscalers (bbport.ini upscaler). | `gpu/shim/core/emulator_settings.h:59`, `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:178` |
-| `BB_FSR411_DIR` | directory (unset = fsr4_411 next to run.sh) | **Internal** (run.sh sets it to <data>/fsr4_411 when that exists). Where the FSR 4.1.1 assets built by tools/fsr4cap/build_assets.sh are looked up. | `gpu/shadps4/video_core/renderer_vulkan/vk_fsr4.cpp:244`, `run.sh:34`, `launcher/bbport_launcher.py:463` |
-| `BB_FSR411_VARIANT` | int8 / fp8emu (unset = FP8 when the GPU supports it and its assets exist, else INT8) | Forces which FSR 4.1.1 model variant runs: int8 skips FP8; fp8emu uses the emulated-FP8 set (needs FP16 cooperative matrices). | `gpu/shadps4/video_core/renderer_vulkan/fsr411/fsr411.cpp:295` |
-| `BB_FSR4_DIR` | directory (fsr4_shaders) | Where the FSR 4 (v07) SPIR-V passes and weights from tools/fetch_fsr4_assets.sh are loaded from. | `gpu/shadps4/video_core/renderer_vulkan/vk_fsr4.cpp:26`, `gpu/shadps4/video_core/renderer_vulkan/vk_fsr4.h:7` |
-| `BB_FSR4_LINEAR` | 0 = off; unset/other = on | FSR 4 gets the game's tonemapped sRGB frame decoded to linear light and the output encoded again. 0 (or toggle bit 63): the encoded frame as before (A/B). | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1853` |
-| `BB_FSR4_OPT` | 0 = originals; unset/other = optimized | FSR 4 uses the fixed/faster passes from fsr4_shaders/opt/ (tools/fsr4_optimize.sh) when present. 0 keeps AMD's original passes. | `gpu/shadps4/video_core/renderer_vulkan/vk_fsr4.cpp:126` |
-| `BB_FSR_SHARPNESS` | number 0–2 (bbport.ini sharpness, default 0.5) | Upscaler sharpening (RCAS) strength; overrides the bbport.ini/menu value "sharpness" at start. Above 1 an extra sharpen pass adds the rest. | `gpu/shim/bbport_settings.cpp:199`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1276` |
-| `BB_INTEL_TONEMAP_FIX` | 0 \| 1 (default: on for Intel CPUs, off otherwise) | Applies the community "Intel Black Tonemap Fix" patch (tone mapping turns black on Intel CPUs, DLC areas most); 0/1 forces it off or on. | `scripts/patches.py:59-62`, `scripts/patches.py:100` |
-| `BB_INTERP_INT_FIX` | 1 = on, 0 = off (unset = on for GPUs without fragment-shader barycentrics, e.g. older NVIDIA/Pascal) | Forces the integer-interpolation workaround in translated shaders on or off. | `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:414` |
-| `BB_JITTER` | 0/1 (1; overrides bbport.ini jitter) | Camera jitter for the temporal upscalers. | `gpu/shim/bbport_settings.cpp:199`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:354` |
-| `BB_MOTION_LARGE` | 0 = off; unset/other = on | Large bone palettes (16–64 KiB, the large beasts) get object motion vectors like small skeletons. 0 leaves them to camera vectors as before. | `gpu/shadps4/video_core/renderer_vulkan/motion_history.h:46` |
-| `BB_OBJECT_MOTION` | 0/1 (bbport.ini object_motion, off by default) | Per-object motion vectors for the temporal upscaler: less ghosting on characters, about 10% FPS. The variable overrides bbport.ini at start. | `gpu/shim/bbport_settings.cpp:202`, `gpu/shadps4/video_core/renderer_vulkan/vk_object_motion.cpp:58` |
-| `BB_OCCLUSION_QUERIES` | 1 = on (off; BB_PM4_SELFTEST=1 also turns it on) | Opt-in: the game's occlusion queries become real Vulkan occlusion queries. Off: counters are a fixed "everything visible" sequence (the 0.3 model), because with an upscaler jittered tests made light glows flash. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:253` |
-| `BB_ZPASS_IN_ORDER` | 0 = off; unset/other = on | Without BB_OCCLUSION_QUERIES: the stand-in occlusion counts are written in order with the draws, after the DMA that zeroes the query's block, as on the PS4. Written ahead of it, the game's queries never finished and it made new ones until it read a null handle (issue #23). 0: written at decode, as before. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:588` |
-| `BB_RCAS` | 1/y/t or 0 (1) | RCAS sharpening in shadPS4's presenter FSR 1 pass (only with BB_FSR1); not the in-game Sharpening (RCAS) setting. | `gpu/shim/core/emulator_settings.h:65`, `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:182` |
-| `BB_RCAS_ATTENUATION` | integer, thousandths (250 = 0.25) | RCAS attenuation of shadPS4's presenter FSR 1 pass. | `gpu/shim/core/emulator_settings.h:26`, `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:184` |
-| `BB_REACTIVE` | 0/1 (bbport.ini reactive, off by default) | Reactive mask for the upscaler (opt-in): on Bloodborne's thin mist it trades trails for jitter shimmer. Overrides bbport.ini at start. | `gpu/shim/bbport_settings.cpp:200`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:954` |
-| `BB_REACTIVE_MAX` | 0-1 (0.9; overrides bbport.ini reactive_max) | Upper bound of the TAA reactive mask (never fully reactive). | `gpu/shim/bbport_settings.cpp:201`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1071` |
-| `BB_REACTIVE_SCALE` | 0-16 (1; overrides bbport.ini reactive_scale) | Reactive mask = relative colour change times this scale. | `gpu/shim/bbport_settings.cpp:200`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1071` |
-| `BB_REACTIVE_THRESHOLD` | 0-1 (0.2; overrides bbport.ini reactive_threshold) | Reactive mask is zero below this colour change. | `gpu/shim/bbport_settings.cpp:201`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1071` |
-| `BB_UPSCALER` | off / fsr3 / fsr4 / fsr411 / taa / dlss / none (unset = bbport.ini upscaler / in-game menu) | Overrides the upscaler chosen in bbport.ini/menu at start; any unknown value means off. none also disables the upscaler machinery entirely (no camera tracking, the menu cannot turn it on). scripts/patches.py only distinguishes fsr3 from everything else. | `gpu/shim/bbport_settings.cpp:192`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:190`, `scripts/patches.py:558` |
-| `BB_UPSCALE_PRESET` | 0 Native AA, 1 Quality, 2 Balanced, 3 Performance, 4 Ultra Performance (overrides bbport.ini preset) | Upscaler preset at start. Note: run.sh's startup render size still comes from bbport.ini; only `patches.py --print-preset-size` honours it. | `gpu/shim/bbport_settings.cpp:202`, `scripts/patches.py:560` |
-| `RADV_DEBUG` | RADV flags (run.sh may set nohiz) | Mesa RADV debug flags; if you set it, run.sh's automatic nohiz for GCN 3–5 (BB_AUTO_NOHIZ) is skipped. | `run.sh:212` |
+## Diagnostics (281)
 
-## Performance & memory
+Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame time; none is meant for playing.
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_ASYNC_PIPELINES` | 0 = off; anything else / unset = on | New graphics pipelines of passes drawn every frame compile on worker threads while their draws are skipped for a frame or two, instead of the game standing still for the driver. 0: compiled on the GPU thread, the game waits. | `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:734`, `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.h:212` |
-| `BB_ASYNC_PIPELINE_THREADS` | integer ≥1 (unset = CPU threads / 4, clamped 1–4) | Number of worker threads for BB_ASYNC_PIPELINES. | `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:643` |
-| `BB_ASYNC_SUBMIT` | 0 = off; unset/other = on | Submissions go out from the recording threads once their segments are recorded, instead of the GPU thread waiting for them (~65 µs each). Only with recording worker threads. | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:150` |
-| `BB_CONSTANTS_IN_PLACE` | 1 = on (off) | With BB_GUEST_IN_PLACE: small read-only buffers (constants) are read by the GPU where the game wrote them instead of being copied when the draw is decoded or recorded. Experiment toggle bit 1 inverts it at run time. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:507`, `gpu/shadps4/video_core/buffer_cache/buffer.h:57` |
-| `BB_CONSTRAM_PIPE` | 0 = off; unset/other = on | With the two-stage draw pipe: before the command processor writes guest memory with the CPU (constant RAM dump), it waits only for the queued packets that read those bytes, not all of them. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:900`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.h:114` |
-| `BB_COPY_GPU_BUFFERS` | first char 1/y/t = on; run.sh exports 1 when unset (code default without run.sh: off) | **Internal.** The command buffers of each submission are copied when the game submits them and decoded from the copy (the game reused that memory before the GPU thread got to it: "Unimplemented PM4 type 0" after loading a save). 0 decodes guest memory directly. | `run.sh:276`, `gpu/shim/core/emulator_settings.h:56`, `gpu/shadps4/video_core/amdgpu/liverpool.h:252` |
-| `BB_COPY_MERGE_KB` | integer KiB (64) | Maximum gap between buffer copies of the game's copy shader (HLE path) that are merged into one batch. | `gpu/shadps4/video_core/renderer_vulkan/vk_shader_hle.cpp:203` |
-| `BB_COPY_SHADER_NATIVE` | 0 = HLE; unset/other = native | With the game's memory in place, the game's buffer copy shader runs as itself (translated). 0: the copy list is read on the CPU and copied by the port (older HLE path). Experiment bit 2 inverts it at run time. | `gpu/shadps4/video_core/renderer_vulkan/vk_shader_hle.cpp:272` |
-| `BB_COPY_THREADS` | 0-16 (a quarter of the available hardware threads, 1-4) | Number of threads that split large guest memory copies. | `gpu/shim/bbport_copy.cpp:30`, `src/runtime_memory.c:738` |
-| `BB_DIRECT_SEGMENT` | 0 = off; unset/other = on | With BB_ASYNC_SUBMIT, commands recorded on the GPU thread (e.g. upscaler passes) get their own command-buffer segment instead of waiting for the recording threads (~90 µs). 0: the wait. | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:647` |
-| `BB_DMEM_MB` | MiB, 5056–16384 (default 5056; run.sh sets 9152 for render sizes above 1080p) | Direct memory size reported to the game (retail PS4: 5056 MiB); the resolution patches above 1080p need more or the game exits at start. | `src/runtime_memory.c:22-30`, `run.sh:132`, `run.sh:132` |
-| `BB_DRAW_PIPE` | 1 = on, 0 = off (unset = on with 8+ CPU threads) | **Launcher:** Advanced > Performance > "Two-stage GPU pipeline" (Auto/On/Off). Two-stage GPU command pipeline (decode and record on separate threads): 20–30% faster; turn off if unstable. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:830`, `launcher/bbport_launcher.py:671` |
-| `BB_FAULT_SKIP_TEXTURES` | 0 = off; unset/other = on | A write fault on a page no tracked image protects skips the texture cache lock (guest threads no longer wait 0.3–0.6 s behind texture uploads). 0: every fault takes the lock, as before. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:4339` |
-| `BB_FAULT_WINDOW` | KiB, clamped 4-1024 and rounded up to a power of two (256) | Size of the window unprotected around a guest write fault (write tracking), so neighbouring writes do not fault again. Window at or below one tracker page = feature off. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:691-698` |
-| `BB_FPS_LIMIT` | frames per second; 0 or unset = no limit | **Launcher:** Graphics > Frame rate > FPS limit (set only when > 0). Frames per second the present thread lets through. | `gpu/shim/core/emulator_settings.h:51`, `launcher/bbport_launcher.py:669` |
-| `BB_FRAMES_AHEAD` | integer ≥0 (1); 0 = no bound | The GPU command thread runs at most this many guest frames ahead of the GPU, so GPU-bound frames finish at an even rate instead of in bursts. | `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:479` |
-| `BB_GARLIC_VRAM` | 0 = off; any other value on (unset = on, except on integrated GPUs) | With the PC memory model, Garlic memory (what the GPU reads a lot: geometry, textures) gets a VRAM copy kept current like a default heap; 0 keeps it in place too. Ignored when the fixed arena is in use. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:474-479`, `2189-2192` |
-| `BB_GC_IDLE_SECONDS` | seconds, clamped 1-63 (20) | Texture collector: below the pressure mark an image is evicted once unused for this long (the textures of an area left behind). | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1396`, `1367-1371` |
-| `BB_GC_PRESSURE_IDLE_SECONDS` | seconds, clamped 0-63 (5) | Texture collector: under VRAM pressure an image is evicted once unused for this long (over the critical mark for 1 s first, then by submissions). | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1430-1439` |
-| `BB_GC_PRESSURE_PERCENT` | percent, clamped 10-75 (60) | Texture collector, dedicated GPUs below 8 GB: the pressure mark is at least this share of the budget (was 40 %, about what the game holds outside textures, so such cards were under pressure all session). The critical mark is unchanged. | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:62-76` |
-| `BB_GC_KEEP_GPU_WRITTEN` | 0 = off; else on (on) | Texture collector: images the GPU wrote stay in VRAM until past the critical mark and unused for a minute, linear ones like tiled ones (issue #30). 0: linear ones are downloaded and freed under mere pressure, as before. | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1504` |
-| `BB_GC_TILE_BACK` | 0 = off; else on (on) | Texture collector: past the critical mark, a GPU-written tiled image unused for a minute is tiled back into the game's memory before it is freed (issues #13, #14), unless that memory changed since the GPU began writing the image (the game's heap had reused it: written back, it broke the heap, a crash at 0x2085xxx, #25, #32, #35; GPU-written linear images freed past the critical mark are checked the same way, with either memory model); such an image is dropped. 0 = dropped unwritten as before, which left the Hunter's Dream black. Multisampled images are always dropped. | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1486-1521`, `201-284` |
-| `BB_GPU_COMMAND_WRITES` | 0 = off; unset/other = on | With BB_GUEST_IN_PLACE: the game's WRITE_DATA commands are performed by the GPU in stream order, as the PS4 command processor does, instead of a CPU store at decode time. 0: CPU store. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:212`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.h:204` |
-| `BB_GPU_LABELS` | 0 = off; 1 = on; unset = on except on AMD GFX8 (Polaris, RX 4xx/5xx) | With BB_GUEST_IN_PLACE and honest labels: end-of-pipe labels (fences) are written by the GPU itself into the game's memory. 0: by a CPU thread after the GPU. GFX8 stalled with GPU-written labels (upstream #203), so it gets the CPU's unless 1. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:301-316` |
-| `BB_GPU_SPIN_US` | microseconds, negative = 0 (200 with 12+ hardware threads, else 0) | The GPU command thread spins this long before sleeping when it runs out of work, so the next of the ~20 submissions of a frame is picked up without a condition-variable wake-up. 0 = no spinning (saves CPU on small machines). | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:163-171` |
-| `BB_GPU_TIMESTAMPS` | 0 = off; unset/other = on | With BB_GUEST_IN_PLACE: the game's GPU timestamps (100 MHz clock) are written by the GPU in stream order. 0: written by the CPU. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:290` |
-| `BB_GPU_WRITE_TWINS` | 1 = on; run.sh exports 1 when unset (code default without run.sh: off) | **Internal.** A guest write into a page holding bytes the GPU is still writing (counters, small compute outputs) does not wait for the GPU: the guest's bytes are kept as a "twin". Not with BB_READBACKS=2. | `run.sh:279`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:291-306` |
-| `BB_GPU_WRITE_TWINS_MAX` | bytes per page; run.sh exports 65536 when unset (code default without run.sh: 1024) | **Internal.** Only pages with at most this many GPU-written bytes get twins; larger outputs (vertices the CPU reads back, FaceGen) keep waiting for the GPU. | `run.sh:279`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:296`, `308-313` |
-| `BB_GUEST_GPU_MEMORY` | 1 = on (off; implied by BB_GUEST_IN_PLACE=1 on a capable GPU) | Guest direct memory comes from GPU-visible Vulkan chunks (dma-buf, or host import on NVIDIA) instead of the memfd, so the GPU reads the game's data in place. Disables BB_UFFD (dma-buf cannot be write-protected by userfaultfd). | `gpu/shim/bbport_guest_memory.cpp:700-718`, `gpu/shadps4/video_core/page_manager.cpp:723-728`, `run.sh:195` |
-| `BB_GUEST_IN_PLACE` | 1 = on, anything else = off | **Internal** (run.sh: = BB_PC_MODEL, forced 0 by BB_AS_0_3=1; set by hand overrides the memory model). The GPU uses the game's direct memory where it is (GPU-visible chunks) instead of copies in VRAM, and command-processor writes/labels/timestamps are done by the GPU in order. Part of the new memory model (BB_PC_MODEL=1). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:515`, `gpu/shadps4/video_core/buffer_cache/buffer.h:38`, `run.sh:239` |
-| `BB_GUEST_MEMORY` | dmabuf, host, or unset (AMD: dma-buf chunks; other GPUs: host memory import first) | How the game's direct memory is made GPU-visible in the new memory model: dma-buf chunks or imported host memory (VK_EXT_external_memory_host). `host` fails instead of falling back when import does not work. | `gpu/shim/bbport_guest_memory.cpp:668` |
-| `BB_GUEST_VRAM` | 1 or unset (off) | Experiment: the game's direct memory in VRAM the CPU maps through the PCI BAR (Resizable BAR), as GDDR is the PS4's one memory: no VRAM copies. | `gpu/shim/bbport_guest_memory.cpp:37` |
-| `BB_HONEST_FLUSH_US` | integer µs (2000; a header comment says 1000) | With honest labels: at the end of a guest submission, recorded work that signals wait for is submitted at most once per this interval while the GPU still has work. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:400` |
-| `BB_HONEST_IDLE_BACKLOG` | integer bytes (65536) | With honest labels: work is not submitted early "because the GPU is idle" while this many bytes of draws are still queued for the recording thread. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:416` |
-| `BB_HONEST_IDLE_FLUSH` | 0 = off; unset/other = on | With honest labels: signalled work is submitted at once when the GPU has finished everything submitted (instead of waiting for BB_HONEST_FLUSH_US). | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:412` |
-| `BB_HONEST_LABELS` | 1 = on (unset = on only with BB_GUEST_IN_PLACE) | Fences/labels (EOP, EOS, mem semaphores) are written once the GPU has finished the work before them, as the hardware does, instead of when that work is recorded. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:98`, `gpu/shadps4/video_core/amdgpu/liverpool.cpp:448` |
-| `BB_HOST_COPY_WAITS` | all (unset = only when needed) | **Internal** (run.sh sets all with BB_AS_0_3=1). all: before every guest write, wait for all host copies (the old 0.3 behaviour). Default: wait only when a host copy may still read the written range. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.h:130`, `run.sh:239` |
-| `BB_INDIRECT_GUARD` | 0 = off; unset/other = on | Guards indirect compute dispatches: implausible group counts (garbage from particle simulations that caused device lost) are zeroed and the dispatch skipped, and counted in the log. 0: the game's counts as they are. | `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_guard.cpp:57`, `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_guard.h:11` |
-| `BB_INDIRECT_DRAW_GUARD` | 0 = off; unset/other = on | Guards indirect draws: a vertex (or index) count times the instance count past BB_INDIRECT_DRAW_GUARD_MAX (garbage that would keep the GPU busy past the driver's timeout, issue #19) is zeroed and the draw skipped, and counted in the log. An open render pass is paused for the check and continued. 0: the game's arguments as they are. | `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_draw_guard.cpp:60`, `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_draw_guard.h:13` |
-| `BB_INDIRECT_DRAW_GUARD_MAX` | integer 1–4294967295, decimal or 0x hex (16777216); invalid keeps the default | Most vertices (or indices) times instances one indirect draw may run before BB_INDIRECT_DRAW_GUARD skips it. | `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_draw_guard.cpp:42` |
-| `BB_INDIRECT_GUARD_MAX` | integer 1–4294967295, decimal or 0x hex (4194304); invalid keeps the default | Most workgroups one indirect dispatch may launch before BB_INDIRECT_GUARD skips it. | `gpu/shadps4/video_core/renderer_vulkan/vk_indirect_guard.cpp:35` |
-| `BB_LAYER_MEMORY` | 1 = on, 0 = off (unset = chosen by the memory model per GPU) | The layer's memory module: the game's memory bound in place with VRAM copies, without sparse binding (NVIDIA's sparse binding stalls the GPU for seconds). 0: AMD's sparse arena. See BB_PC_MODEL. | `gpu/shim/bbport_guest_memory.cpp:546`, `run.sh:204` |
-| `BB_LAYER_MIRROR_FLOOR_PERCENT` | percent, max 90 (25) | Layer memory module: share of the driver's VRAM budget the VRAM mirrors keep against the texture collector; above it they yield to images, below it images yield. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:4001` |
-| `BB_LAYER_MIRROR_GROWTH_MB` | MiB; 0 = none (64) | Layer memory module: the most room a growing VRAM mirror gets above its current end. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:610-616` |
-| `BB_LAYER_RELOAD_RESET` | 0 = off; else on (on) | Layer memory module: a block the GPU once wrote in place that the loaders then write whole may have a VRAM copy again (dynamic blocks piled up over area loads and lamp travel, lowering the frame rate). 0: kept in place for good, as before. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2661` |
-| `BB_LAYER_UNMAP_RESET` | 0 = off; else on (on) | Layer memory module: blocks the game unmaps whole lose what kept them in place (CPU writes, GPU writes in place, failed watches); memory mapped there again starts as new. 0: as before. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:3373` |
-| `BB_LAYER_STITCH` | 0 = off; else on (on) | Layer memory module (the new memory model): a read not whole in one guest chunk (up to 16 MiB) is copied from its chunks, in order, into the stream buffer instead of being read from the arena, whose VRAM copy can be stale where the GPU wrote in place (exploding vertices, stretched railings in the Hunter's Dream). From upstream 0.7. 0: the arena, as before. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2474` |
-| `BB_LAYER_READ_TRAPS` | 1 = on (off) | What the GPU writes into a VRAM copy only is made no-access for the CPU until it is copied back, so the CPU never reads stale data. Off by default for now. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:1285` |
-| `BB_LAYER_WATCH` | 0 = off; else on (on; needs BB_LAYER_WRITE_TRAPS) | Layer memory module: blocks the CPU writes unannounced get VRAM copies too, write-trapped and uploaded again after the CPU's next write. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:410-424` |
-| `BB_PC_MODEL` | 1 = new \| 0 = 0.3 model (default: 1 on AMD GPUs, 0 elsewhere) | **Launcher:** Advanced → "Memory and translation model" (Auto leaves it to run.sh). Memory model: 1 = the GPU uses the game's memory in place and the command processor's work is translated (implies BB_GUEST_IN_PLACE=1); 0 = 0.3 model (VRAM copies, write tracking). A value in extra variables wins over "Auto". | `run.sh:212`, `run.sh:199`, `launcher/bbport_launcher.py:685` |
-| `BB_PC_MODEL_ANY_GPU` | 1 or unset (off) | Lets the new memory model's sparse arena run on non-AMD GPUs that would otherwise fall back to the 0.3 model (NVIDIA: rebinding memory held the GPU for seconds). | `gpu/shim/bbport_guest_memory.cpp:513`, `gpu/shim/bbport_guest_memory.h:35` |
-| `BB_PIPELINE_CACHE` | 1/y/t or 0 (1) | The port's pipeline cache: shaders are compiled again at startup from the stored list (warm-up). 0 turns it off. | `gpu/shim/core/emulator_settings.h:64`, `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_serialization.cpp:330` |
-| `BB_PIPE_SIGNALS` | 0 = off; unset/other = on (with honest labels and the draw pipe) | Fences, GPU-idle/frame signals and their submissions are handed to the draw recording thread as ordered tasks instead of draining it first (~15 waits a frame). | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:376`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.h:234` |
-| `BB_PIPE_SPIN_US` | integer µs ≥0 (200 with 12+ CPU threads, else 50) | How long the draw-pipe consumer spins waiting for work before sleeping. Lower values leave more CPU to the game on few-core machines (Steam Deck). | `gpu/shadps4/video_core/renderer_vulkan/vk_draw_pipe.h:209` |
-| `BB_PREP_WORKERS` | integer 0–16 (half the CPU threads, clamped 1–8) | Number of idle-priority worker threads that prepare draws speculatively ahead of the GPU thread (pipeline and resource selection). 0 = none. | `gpu/shadps4/video_core/renderer_vulkan/vk_draw_prep.cpp:54` |
-| `BB_PREUPLOAD` | 0 = off, 1 = rewritten memory already in VRAM only (no new VRAM), 2 = all of the game's GPU memory (~3 GB more VRAM); without run.sh unset = 0 | **Launcher:** Advanced > Performance > "Background pre-upload into VRAM" (run.sh exports 1 when unset). Background upload of the game's GPU memory into VRAM ahead of use: fewer hitches when areas load. Always off with BB_GUEST_IN_PLACE (the GPU reads the game's memory itself). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:386`, `run.sh:197`, `launcher/bbport_launcher.py:675` |
-| `BB_PREUPLOAD_MB` | integer MiB per frame (16) | Most memory the background pre-upload (BB_PREUPLOAD) puts into VRAM per frame. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1625` |
-| `BB_READBACKS` | 0 = off, 1 = relaxed, 2 = precise (1 = relaxed) | **Launcher:** Advanced > Performance > "GPU data readbacks by the CPU" (Relaxed = unset, Off = 0, Precise = 2). shadPS4's GPU readback mode. Relaxed by default: without readbacks FaceGen reads stale GPU-written vertices (vertex explosions). 2 also read-protects GPU-written pages and disables BB_GPU_WRITE_TWINS. | `gpu/shim/core/emulator_settings.h:27-29`, `launcher/bbport_launcher.py:673`, `524-525` |
-| `BB_READBACK_LINEAR` | 1/y/t or 0 (off) | shadPS4's readback of linear (untiled or narrow) images to guest memory. | `gpu/shim/core/emulator_settings.h:66`, `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:812` |
-| `BB_READBACK_QUEUE` | 0 = off; unset/other = on | Uses a separate compute/transfer queue to read back GPU data finished long ago, without waiting behind the queued frame. 0 turns it off. | `gpu/shadps4/video_core/renderer_vulkan/vk_instance.cpp:499` |
-| `BB_STAGING_KEEP_MB` | integer MiB (512) | How much of the staging upload ring is kept (and populated at startup) instead of being trimmed when idle; re-creating blocks during streaming bursts caused stutter. | `gpu/shadps4/video_core/renderer_vulkan/vk_staging_buffer_pool.cpp:27` |
-| `BB_SUBMIT_AHEAD` | integer >= 0 (2) | The first K submissions of a frame do not wait for the previous frame, so translation overlaps the GPU (1080p Yahar'gul: 101 -> 154 FPS). 8 or more leaked the game's heap; if the heap grows anyway K becomes 0 for the session. | `gpu/shadps4/core/libraries/gnmdriver/gnmdriver.cpp:134-149` |
-| `BB_TEXTURE_HELPER` | 1 = on, 0 = off (unset = off) | A spinning helper thread binds textures for the draw recording thread. Measured neutral on 16 threads, so opt-in. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:2195` |
-| `BB_UFFD` | first char 1 = on (run.sh: 0) | **Internal** (run.sh exports 0 when unset). Write tracking with userfaultfd write-protection instead of mprotect (no address-space write lock); falls back to mprotect if the kernel lacks it. Off by default: the Steam Deck crashed with it. Ignored with BB_GUEST_GPU_MEMORY=1. | `run.sh:272`, `gpu/shadps4/video_core/page_manager.cpp:545-551`, `723-737` |
-| `BB_VBLANK_HZ` | Hz; 0 or >120 = uncapped (60 if unset in the library) | **Internal** (run.sh derives it from BB_FPS (uncap 480, 90 90, else 60). Vblank rate. Above 120 Hz (or 0) a finished frame is presented at once instead of on the next vblank tick; 60/90 are the fixed-timestep presets. | `gpu/shim/core/emulator_settings.h:30`, `run.sh:280` |
-| `BB_VK_RECORD_THREAD` | 0 = off; unset/other = on | Vulkan commands are recorded on dedicated recording threads. 0 records on the calling thread (suspected in vertex explosions, issue #39). | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:120` |
-| `BB_VK_RECORD_THREADS` | integer 1–8 (3 with 12+ CPU threads, 2 with 8+, else 1) | Number of Vulkan recording threads; the command stream is cut into segments recorded in parallel. | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:97` |
-| `BB_VK_SEGMENT_KB` | integer KiB ≥1 (64) | Size of command-stream segments handed to the recording threads (~60 draws per 64 KiB). | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:127` |
-| `BB_VMA_BLOCK_MB` | integer MiB ≥1 (64; VMA's own default is 256) | Size of Vulkan memory allocator blocks. Smaller blocks are returned to the driver sooner when freed. | `gpu/shadps4/video_core/renderer_vulkan/vk_instance.cpp:906` |
-| `BB_VMA_DEDICATED_MB` | MiB; 0 = never (4) | Images of this size or more get dedicated memory, returned to the driver when freed (shared VMA blocks left ~0.9 GB of holes after texture evictions). | `gpu/shadps4/video_core/texture_cache/image.cpp:109-115` |
-| `BB_VRAM_IDLE_SECONDS` | seconds (60) | Mirrored (VRAM-copied) blocks not bound for this long go back in place. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:1831`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.h:414` |
-| `BB_VRAM_PRESSURE_IDLE_SECONDS` | seconds (3) | Near the critical VRAM mark, blocks no binding used directly for this long (an area left behind) go back in place first, longest unused first. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:903-913` |
-| `BB_VRAM_PRESSURE_PERCENT` | percent, max 95; 0 = off (85) | How full VRAM is against the driver's budget: "tight" from this percent, "full" 5 points above (fewer VRAM copies then). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2053` |
-| `BB_VRAM_PROMOTE_PERCENT` | percent (90) | Past this share of the driver's VRAM budget no new VRAM copies are made; candidates wait and are read in place meanwhile (issue #32: 8 GB cards). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:4015` |
-| `MESA_SHADER_CACHE_MAX_SIZE` | size (run.sh default 4G) | Mesa's shader cache size, larger than Mesa's default. | `run.sh:31` |
-| `__GL_SHADER_DISK_CACHE` | run.sh default 1 | NVIDIA's shader disk cache on (run.sh default; keeps compiled pipelines between sessions). | `run.sh:25-30` |
-| `__GL_SHADER_DISK_CACHE_SIZE` | bytes (run.sh default 10737418240) | NVIDIA's shader cache size (10 GiB by default here). | `run.sh:30` |
-| `__GL_SHADER_DISK_CACHE_SKIP_CLEANUP` | run.sh default 1 | NVIDIA's shader cache without its size cleanup (as Steam sets it). | `run.sh:29` |
+| Variable | What it does |
+|---|---|
+| `BB_ARENA_VRAM_ONLY` | =1 (tests): the arena in VRAM only, as NVIDIA's sparse buffers |
+| `BB_ATLAS_DEBUG` | =1: Hunter's Atlas logs what its game-state readers find |
+| `BB_ATLAS_QA` | =1: Hunter's Atlas's test commands (BB_MAP_TEST_CONTROL) may also send mouse, key and resize events |
+| `BB_ATLAS_QA_DEVICE` | =controller / keyboard: with BB_ATLAS_QA, the prompts Hunter's Atlas shows |
+| `BB_AUDIO_DUMP` | =dir: raw converted PCM per audio port |
+| `BB_AUDIO_STATS` | set: audio port statistics |
+| `BB_AUDIO_TRACE` | =1: Ajm instance configurations and jobs that fail |
+| `BB_AVPLAYER_TRACE` | =1: the game's movie player calls with results and times |
+| `BB_BARRIER_STATS` | =1: images whose subresource states cost the most |
+| `BB_BBSC_MEMSCAN` | set: BBSC finds its sites by scanning memory instead of the known addresses |
+| `BB_BBSC_PROBE` | =address: BBSC probe of that guest address |
+| `BB_BDA_LOG` | set: GPU addresses of buffer sources, to place a GPUVM fault |
+| `BB_BIG_ALLOC_STACKS` | =1: call stacks of device memory allocations of 64 MiB and more |
+| `BB_BREADCRUMB_READS` | =1 / 0: breadcrumbs of T# and V# reads everywhere / nowhere (default: NVIDIA only) |
+| `BB_BUFFER_STATS` | =1: how many frames behind the GPU is when a frame starts |
+| `BB_CAMERA_FRAME_LOG` | set: projection of every G-buffer pass's camera with its GPU frame |
+| `BB_CAMERA_INVERSE` | =own: motion vectors from the inverse of the view matrix instead of the game's stored one |
+| `BB_CAMERA_LOG` | set: camera position every 100 ms |
+| `BB_CAMERA_Y` | =up / down: force the camera's y direction for motion vectors |
+| `BB_CAMLOG` | set: camera yaw when it changes (#325) |
+| `BB_CAPTURE_DIR` | folder for frame captures (BB_CAPTURE_TRIGGER) |
+| `BB_CAPTURE_TRIGGER` | =file: creating that file records the next frame for the frame analyzer |
+| `BB_CE_STATS` | =1: what the constant engine's dumps feed |
+| `BB_CE_WAIT_LOG` | set: constant engine waits that were not satisfied |
+| `BB_CE_WATCH` | =hex address: constant RAM dumps and WRITE_DATA packets over that address |
+| `BB_CLOTH_STIFFNESS` | =value: cloth stiffness bound at any frame rate |
+| `BB_COMPILE_TRACE` | =1: every shader and pipeline compiled during the session |
+| `BB_CONSTRAM_WAIT_LOG` | set: constant RAM dumps that waited for the GPU, sampled |
+| `BB_COPY_SHADER_TRACE` | set: the copy shader's buffers every 2 s |
+| `BB_COPY_WHERE` | =1: the copy shader's sources and destinations per frame, VRAM or in place (log lines) |
+| `BB_DCB_STATS` | =1: structure of the graphics command buffers |
+| `BB_DEBUG_MOTION` | =1: motion vectors blended over the picture |
+| `BB_DISPATCH_LOG` | =1: the shape of each kind of compute dispatch, once |
+| `BB_DISPATCH_START_LOG` | set: dispatches with a nonzero thread group start |
+| `BB_DISPLAY_WATCH` | set: every draw into a display buffer with its sizes and state |
+| `BB_DISPLAY_WATCH_TARGET` | =hex address: also every draw into that color target |
+| `BB_DLSSG_CAMERA_MOTION` | =0: DLSS-G told the vectors have no camera motion |
+| `BB_DLSSG_DEPTH_INVERTED` | =1: DLSS-G told the depth is the other way round |
+| `BB_DLSSG_HUDLESS` | =0: DLSS-G gets no hudless frame |
+| `BB_DLSSG_MATRICES` | =0: DLSS-G gets no camera matrices |
+| `BB_DLSSG_MVEC_SCALE` | =f: DLSS-G motion vector scale (default 1) |
+| `BB_DLSSG_PREFILL` | =0: DLSS-G outputs not filled with the real frame first (black frames when it skips) |
+| `BB_DLSSG_SUBRECTS` | =0: DLSS-G gets no input sub-rectangles |
+| `BB_DRAW_WATCH` | =1: draws whose viewport, targets or textures differ from the previous frame's |
+| `BB_DRAW_WATCH_TEXTURES` | set: BB_DRAW_WATCH also lists bound textures |
+| `BB_DUMP_DIR` | =dir: where upscaler dumps go (default out/dump) |
+| `BB_DUMP_EVERY` | set: dump every frame while the trigger file exists |
+| `BB_DUMP_FRAMES` | =N: frames per upscaler dump (default 8) |
+| `BB_DUMP_GOT` | =offset: which host function a guest GOT slot calls |
+| `BB_DUMP_ONLY` | =name,name: dump only those upscaler images |
+| `BB_DUMP_SHADERS` | =1: translated shader programs written to the dump folder |
+| `BB_DUMP_TRIGGER` | =file: creating it dumps the upscaler's inputs and outputs |
+| `BB_DYNAMIC_STATE_ALWAYS` | =1: all dynamic state set again at every draw |
+| `BB_DYNSTATE_CHECK` | =1: the scissor each command buffer really has, and who set it |
+| `BB_EFFECT_DUMP` | set: the game's effect options objects every 10 s |
+| `BB_EXPERIMENT_CYCLE` | =bits,bits,...:seconds: the experiment bits step through the list, over and over (test builds) |
+| `BB_EXP_BARRIER_ALL` | set (experiment): a full memory barrier before every draw and dispatch |
+| `BB_EXP_BARRIER_TARGET` | =hex address (experiment): a full barrier before each draw into that target |
+| `BB_EXP_CONSTRAM_FINISH` | =1 (experiment): every constant RAM dump waits for all earlier GPU work |
+| `BB_EXP_COPY_SRC_SNAPSHOT` | set (experiment): copy shader sources snapshotted as with the old memory model |
+| `BB_EXP_CPU_READS_GPU_WAIT` | set (experiment): CPU-side reads also wait for the GPU, as before |
+| `BB_EXP_DMA_UNTRACKED` | set (experiment): stages reading memory through pointers count as unlisted reads |
+| `BB_EXP_EXTRA_BREAKS` | =N (experiment): the render pass ended before every Nth draw, to measure breaks |
+| `BB_EXP_FINISH_BEFORE_TARGET` | =hex address (experiment): the GPU finishes everything before a draw into that target |
+| `BB_EXP_FINISH_FRAMES` | set (experiment): the GPU finishes each frame before the next |
+| `BB_EXP_FLIP_FINISH` | set (experiment): the flip is signalled once the GPU has run the frame |
+| `BB_EXP_FLIP_LAG` | set (experiment): at most one frame in flight |
+| `BB_EXP_NOTED_GPU_WAIT` | set (experiment): constant RAM waits cover every read noted on stage A, as before |
+| `BB_EXP_NO_MEMORY_HOOKS` | set (experiment): no guest hooks for GPU allocations and copies |
+| `BB_EXP_NO_STREAM` | set (experiment): nothing goes through the stream buffer |
+| `BB_EXP_PAGED_IN_PLACE` | =1 (experiment): paged buffers bound in place |
+| `BB_EXP_TRANSIT_TARGET` | =hex address (experiment): that target goes through TransferSrcOptimal |
+| `BB_FAULT_WAIT` | =1: a fatal fault or a GPU library assertion leaves the process alive for a debugger (tools/debug_attach.sh) |
+| `BB_FENCE_DELAY_TEST` | =1 (test): every 200th fence comes 80 ms late |
+| `BB_FFX_FG_DEBUG` | =1: AMD's frame generation draws its tear lines and reset marks |
+| `BB_FG_DUMP_TRIGGER` | =file: creating it saves real and generated frames, raw |
+| `BB_FG_LUT` | =0: generated frames without the game's display LUT |
+| `BB_FG_PROFILE` | =1: GPU time of each FSR 3.1 frame generation pass |
+| `BB_FILE_TRACE` | =1: every guest path the game opens or checks (mods, missing files) |
+| `BB_FINAL_DUMP_TRIGGER` | =file: creating it saves the presented frame |
+| `BB_FI_CHECK` | =1: frame interpolation samples drawn as their difference to the SDK's |
+| `BB_FPS_PRINT` | =1: the present rate every 5 s, without BB_FRAME_STATS's cost |
+| `BB_FRAME_DT_SMOOTH` | =a (0..1): the game's frame step follows the measured frame time smoothed by a |
+| `BB_FRAME_GEN_ONLY` | set: only the generated frames are shown |
+| `BB_FRAME_LOG` | =path (with BB_FRAME_STATS): one line per flip |
+| `BB_FREE_CHECK` | =1: guest heap corruption diagnostic around the free list |
+| `BB_FSR411_POSTPASS` | =lds / orig: FSR 4.1.1 post pass variant |
+| `BB_FSR4_MODEL_CYCLE` | =N: the FSR 4 model switched to the next one every N frames |
+| `BB_FSR4_PROFILE` | =1: FSR 4.1.1 GPU time per pass every 300 frames |
+| `BB_FSR4_STATS` | =1: driver statistics of every FSR 4 pass (fsr4-bench --stats) |
+| `BB_GAME_ASSERT_STOP` | =1: the game's known harmless asserts stop it, as before |
+| `BB_GAME_HUGE` | =0 (tests): no huge pages for the game's image |
+| `BB_GAME_MENU_TRACE` | =1: how often the game asks for the port's menu texts |
+| `BB_GAME_PROFILE` | =none: no game profile (hooks, fixes), the plain runtime |
+| `BB_GARLIC_VRAM_RANGE` | =begin:end: VRAM copies only for guest addresses in that range |
+| `BB_GC_TRIGGER_MB` | =N: the texture collector starts at N MiB (tests) |
+| `BB_GNM_CENSUS` | =1: calls per Gnm function, printed |
+| `BB_GNM_CENSUS_FILE` | =path: every Gnm function's total calls written there |
+| `BB_GNM_CENSUS_RANGE` | =first:last: census only for those table indices (bisecting) |
+| `BB_GNM_NATIVE_ONLY` | =1: native Gnm observers without checksum analysis |
+| `BB_GNM_OBSERVE` | =1: submitted command buffers checked against the hooked API calls' packets |
+| `BB_GNM_RACE_STACKS` | =1: call stacks of racing Gnm command buffer writers |
+| `BB_GNM_TRACE` | =offset[:count]: arguments, caller and packets of that Gnm function |
+| `BB_GNM_WRITES_TRACE` | =1: recent Gnm builders overlapping a bad submitted buffer |
+| `BB_GPU_LOG` | =trace / debug / info / warning / error: GPU layer log level |
+| `BB_GPU_PROFILE_DRAWS` | =1: the GPU profiler times every draw |
+| `BB_GPU_PROFILE_TOP` | =N: the GPU profiler prints the N heaviest labels (default 30) |
+| `BB_GPU_WRITE_WATCH` | =hex address: GPU writes noted over the 64 KiB page holding it |
+| `BB_GUEST_HOOK_TRAPS` | =1: guest hooks stay int3 traps instead of native detours |
+| `BB_GUEST_WHOLE_CHUNKS` | =1 (tests): as if offset mappings failed (the NVIDIA path) |
+| `BB_GX_QUERY_FAIL` | =N: every Nth GX query creation fails as with a full heap |
+| `BB_HEAP_DUMP` | =addr,...: those guest objects and the ones they point to |
+| `BB_HEAP_FIND` | =hex value: once, 60 s in, where the game's data holds that value |
+| `BB_HEAP_HOOKS` | =0 (bisecting): the heap's ranges not reported |
+| `BB_HEAP_SITES` | =1: the game's malloc replacement sites |
+| `BB_HEAP_TRACE` | =1: which 16 MiB ranges the game's GPU allocators hand out, every 60 s |
+| `BB_HEAP_WALK` | =core,...: walk of the game's range allocator cores |
+| `BB_HLE_OFF` | =mask (experiment): 1 image copy, 2 metadata clear, 4 image clear run as real shaders |
+| `BB_HLE_STATS` | set: how often the compute shader substitutions fire |
+| `BB_HOST_ONLY` | =phys,... (experiment): those direct allocations in host memory only |
+| `BB_HUD_DX` | =f: another HUD shift |
+| `BB_IMAGE_CLEAR_LOG` | =1: why an image clear went to the real shader, once per reason |
+| `BB_IMAGE_COPY_LOG` | set: also why a large copy shader was not substituted |
+| `BB_IMAGE_SYNC_LOG` | set: images refreshed most per 5 s, with their flags |
+| `BB_IMAGE_WATCH` | =address: what happens to the image at that address |
+| `BB_IME_TEXT` | =text: the on-screen keyboard answers with that text at once (tests) |
+| `BB_IMITATE_NVIDIA` | =1 (tests on AMD): the port treats this GPU as NVIDIA's |
+| `BB_IMPORT_LOG` | set: lazy import requests per 10 s |
+| `BB_IMPORT_TRACE` | =lo-hi (MiB): who asked for imports starting there |
+| `BB_IMPORT_WRITTEN_BUDGET` | =1 (tests): written bindings under the import budget too, as before |
+| `BB_INPLACE_READ_CHECK` | =1: checks of the GPU's in-place reads of game memory |
+| `BB_LABEL_TRAP` | =1 / 2: with BB_FREE_CHECK, read-only label pages first |
+| `BB_LANG_TABLES` | set: the sell regions' language tables (#269) |
+| `BB_LAYER_CHECK` | =1: stop on a stale page table entry of the layer |
+| `BB_LAYER_MARK_LOG` | =lo-hi (hex): who marks layer blocks there as the CPU's |
+| `BB_LAYER_PAGED` | =0 (tests): huge bindings cut in place instead of the page table |
+| `BB_LAYER_PAGED_STATS` | set: paged bindings per shader every 5 s |
+| `BB_LAYER_PROBE` | =1: GPU writes kept in place because the CPU once wrote the block |
+| `BB_LAYER_VERIFY` | =1 / 2: verify the layer's mirrors (2: also those a paged binding reads) |
+| `BB_LAYER_WATCH_HOT` | =1 (experiment): often written blocks watched and uploaded after every write |
+| `BB_LAYER_WRITE_LOG` | set: large GPU writes kept in place, and the images near them |
+| `BB_LIST_UNRESOLVED` | =1 (porting another game): every unresolved import, once |
+| `BB_LOW_INFO_TEST` | set: test of the memory queries for the game's statics (#282) |
+| `BB_MAP_TEST_CONTROL` | =file: one command at a time for Hunter's Atlas's automated tests (open, close, zoom-in, area <id>, ...), removed once read |
+| `BB_MAP_TEST_TRACE` | =file: with BB_MAP_TEST_CONTROL, Hunter's Atlas writes its state there as JSON |
+| `BB_MEMORY_LOCK_REPORT_MS` | =N (default 20, 0 off): memory map lock holds longer than this, with the code |
+| `BB_MENU_KEYS_FILE` | =file (scripted tests): menu key tokens read from it |
+| `BB_MENU_POINTER_FILE` | =file (tests): menu pointer moves and clicks read from it |
+| `BB_MENU_POINTER_LOG` | =1: the signals of the in-menu check, with every change |
+| `BB_META_FIXED_BASE` | set: shader prediction from metadata at a fixed program base |
+| `BB_META_NO_SYNTH` | set: shader prediction without synthesized inputs |
+| `BB_META_RECIPE_FETCH` | set: shader prediction without generated fetch shaders |
+| `BB_MIRROR_TRACE` | set: mirror creation and growth |
+| `BB_MOD_TRACE` | =1: every file a mod replaces |
+| `BB_MOTION_SELECT_LOG` | =1: each G-buffer vertex shader once with the motion vector selection |
+| `BB_MOTION_TRACE` | =file: the frame after the file appears prints its motion draws |
+| `BB_MSG_TRACE` | =1: the game's text lookups per 2 s by category (#255) |
+| `BB_NGX_LOG` | =1 / 2: NVIDIA NGX log into the port's (2: verbose) |
+| `BB_NULL_GPU` | =1: no GPU work at all (tests) |
+| `BB_OBJECT_MOTION_ALL` | =1: the old broad object motion selection (A/B) |
+| `BB_OCCLUSION_READ_TRACE` | =1: the game's occlusion result reads |
+| `BB_OCCLUSION_SAMPLES` | =N: samples the game read, for N queries |
+| `BB_OCCLUSION_TRACE` | =N: the first N occlusion events with frame and render pass |
+| `BB_OVERLAY_OPEN` | set (tests): the port's menu open from the start, unfolded |
+| `BB_OVERLAY_TRACE` | =1: the menu's mouse buttons as SDL and ImGui see them |
+| `BB_PAD_CLOCK` | =wall: pad timestamps from the wall clock, as before |
+| `BB_PAD_FILE` | =file: scripted pad input for automated runs |
+| `BB_PAD_RECORD` | =file: F9 starts and stops recording the pad state into it |
+| `BB_PAD_REPLAY` | =file: plays a BB_PAD_RECORD recording |
+| `BB_PAD_TAP_TEST` | =ms: the right stick fully right for that long (#325) |
+| `BB_PAD_TRACE` | =1 / 2: gamepad buttons and touches as read (2: every sample) |
+| `BB_PAGED_COPY_CROSSING` | =0 (tests): copy programs paged for size alone are not paged |
+| `BB_PAGED_VERIFY` | =1: verify every block a paged binding reads |
+| `BB_PARTIAL_TRACE` | set: partial image refreshes |
+| `BB_PASS_BREAK_TRACE` | =1: what ended each render pass |
+| `BB_PASS_DUMP` | =addr,...: rows of those render targets at each display pass (with BB_PASS_DUMP_TRIGGER) |
+| `BB_PASS_DUMP_AT` | =hex address: BB_PASS_DUMP's images also before the first draw into that target |
+| `BB_PASS_DUMP_STEP` | =N (default 8): BB_PASS_DUMP every Nth row |
+| `BB_PASS_DUMP_TRIGGER` | =file: creating it starts BB_PASS_DUMP |
+| `BB_PENDING_STATS` | set: pending notes and granules a second, by level |
+| `BB_PIN_CLEAR_LOG` | set: large releases of GPU-pinned memory that were cleared |
+| `BB_PIPE_VERIFY` | =N: verify the draw pipe's results every Nth frame |
+| `BB_PM4_SELFTEST` | =1: tests of command processor packets Bloodborne never sends |
+| `BB_PM4_SELFTEST_STEPS` | =mask: the self test steps to run |
+| `BB_POOL_WATCH` | =1: watch of the game's pool corruption (#32) |
+| `BB_PRESENT_DUMP_COUNT` | =N: BB_PRESENT_DUMP_TRIGGER saves N consecutive frames |
+| `BB_PRESENT_DUMP_TRIGGER` | =file: creating it saves the presented frame with the UI |
+| `BB_PRESET_FILE` | =file: 'preset [output [upscaler [aspect]]]' read about once a second (scripted tests) |
+| `BB_PRODUCER_CHECK` | =1: command producer checks (the launcher's crash diagnostics) |
+| `BB_PROMPT_TRACE` | =1: key guide icon textures found for button prompts |
+| `BB_READBACK_LOG` | =path: the newest GPU-written bindings behind readbacks |
+| `BB_READ_SAMPLE` | =spec: sampling of which guest memory the CPU reads |
+| `BB_RECORDER_TRACE` | =1: most frequent command buffer callers every 2000 calls |
+| `BB_REGS_CHECK` | set: registers compared with the defaults after a reset |
+| `BB_RESIDENCY_MIX` | =1 / 2: bindings per kind every 2 s |
+| `BB_RESIDENCY_REPORT` | =file: when it appears, blocks bound in place and why they have no VRAM copy |
+| `BB_RESIDENCY_VRAM_LIMIT_MB` | =N (tests): pretend VRAM ends at N MiB |
+| `BB_RES_STATS` | =1: where bound shaders read their resource descriptors from |
+| `BB_RE_ADVANCE` | =1: probe of Scaleform's MovieImpl::Advance |
+| `BB_RE_ANALOG` | =1: probe of the analog getter |
+| `BB_RE_CAMERA` | =1: camera probe |
+| `BB_RE_CAMSTICK` | =1: probe of the camera stick getter |
+| `BB_RE_CAM_ADD` | =radians: turns the camera by that much (probe) |
+| `BB_RE_ENTRY` | =offset,...: entry probes at those guest offsets |
+| `BB_RE_GX_QUERY` | =1: first GX query creations and guard events with their thread |
+| `BB_RE_VIEWPORT` | =1: the game's viewport calls |
+| `BB_RE_WATCH` | =offset: hardware watchpoint on that guest offset |
+| `BB_RE_WATCH_ADDR` | =address: hardware watchpoint on that address |
+| `BB_RE_WATCH_AT` | =N (default 3000): watchpoint set after that many pad reads |
+| `BB_RE_WATCH_CAMANGLE` | =1: watch who writes the camera angle |
+| `BB_RE_WATCH_CAMIN` | =1: watchpoint on the camera input |
+| `BB_RE_WATCH_CAMSTATE` | =1: watch who reads the camera's aspect ratio |
+| `BB_RE_WATCH_FILE` | =file: watch the hex address written in it once it appears |
+| `BB_RE_WATCH_FOLLOW` | =N: follow the watched bytes through host copies N times |
+| `BB_RE_WATCH_INDEX` | =N (default 62): virtual input index for BB_RE_WATCH_VIRTUAL |
+| `BB_RE_WATCH_VIRTUAL` | =1: watchpoint on the virtual right stick X |
+| `BB_RE_ZERO_VIRTUAL` | =1: virtual inputs fed from the right stick's X get 0 |
+| `BB_RING_REASONS` | set: why small read-only bindings were not copied, per 5 s |
+| `BB_ROBUSTNESS` | =0 (experiment): buffer and image robustness off |
+| `BB_SAMPLE_ALL` | =1: every sampled address as module+offset |
+| `BB_SAMPLE_RANGE` | =lo-hi: guest offsets the sampler reports |
+| `BB_SAMPLE_REPORT_SECONDS` | =N: thread samples every N seconds |
+| `BB_SAMPLE_THREAD` | =name: where that thread runs, sampled |
+| `BB_SAVE_TRACE` | =1: every operation on save files |
+| `BB_SCENE_DEBUG` | =file: when it appears, where the scene image is accessed |
+| `BB_SCENE_NO_RESOLVE` | =file:line,...: those accesses read the native scene image |
+| `BB_SCENE_SAMPLED_RESOLVE` | =0: shader reads take the native scene image as it is |
+| `BB_SCENE_STENCIL_BITS` | =1 (tests): the eight-draw stencil reconstruction |
+| `BB_SECTIONS` | =1: timing of the draw recording thread's sections |
+| `BB_SECTIONS_SLOW` | =1 (with BB_SECTIONS): slow frames' sections at each flip |
+| `BB_SEQUENCE_DUMP_COUNT` | =N (default 16): images per BB_SEQUENCE_DUMP_TRIGGER |
+| `BB_SEQUENCE_DUMP_TRIGGER` | =file: creating it saves the next images shown (frame generation checks) |
+| `BB_SHADER_CAPTURE` | =dir: shader inputs captured there |
+| `BB_SKIP_PS` | =hash,...: draws with these pixel shaders left out |
+| `BB_SLOW_BIND_LOG` | =microseconds: image memory binds slower than this |
+| `BB_SPEC_MATCH_CHECK` | set: the built specialization must find the same one |
+| `BB_STALL_REPORT` | =0: no report when the queues stop making progress |
+| `BB_STALL_THREADS` | =0: a stall report covers the command thread only |
+| `BB_STREAM_STATS` | =1: what a frame streams |
+| `BB_TAA_DIAGNOSTICS` | set: TAA diagnostic image dumps |
+| `BB_TEST_VPAD` | =1 (tests): a virtual Xbox-like gamepad |
+| `BB_THD_TRACE` | =1: every The Hunter's Dream datagram and callback |
+| `BB_TICK_LOG` | set: ranges marked written by the GPU most often, per 5 s |
+| `BB_TILE_BACK_LOG` | set: which shader a 'Tile back' line is for |
+| `BB_TIMELINE` | =file: a timeline of frames on their way to the GPU |
+| `BB_TIMELINE_START` | =seconds (default 30): BB_TIMELINE starts recording this late |
+| `BB_TLS_WATCH` | =offset: who writes that static TLS variable of the main thread |
+| `BB_TOGGLE_FILE` | =file: experiment bits re-read every 250 ms |
+| `BB_TRACE_ADDR` | =addr:size: that range traced from the start (with BB_TRACE_SIZE) |
+| `BB_TRACE_CB` | =hash: how that shader's constant buffers were bound |
+| `BB_TRACE_CB_LIST` | =hash,...: BB_TRACE_CB for several shaders |
+| `BB_TRACE_CB_RANGE` | =lo-hi: constant buffer bindings over that range |
+| `BB_TRACE_GPU_INPUTS` | =vs hash: the traced draw's buffer ranges, dumped at the display pass |
+| `BB_TRACE_PIPELINE` | =vs hash: that draw's pipeline handle and push data |
+| `BB_TRACE_SEMA` | set: blocking semaphore waits (deadlocks) |
+| `BB_TRACE_SHADER` | =vs hash: that draw's counts and streams once a second |
+| `BB_TRACE_SIZE` | =bytes: bindings over GPU-written buffers of that size, counted |
+| `BB_TRACE_VERTEX_DATA` | set (with BB_TRACE_SHADER): the stream bytes whenever they change |
+| `BB_TROPHY_PREVIEW` | =id: at the game's first trophy call, that trophy's notice without recording it |
+| `BB_TROPHY_TEST` | =id: that trophy's announcement once, nothing recorded |
+| `BB_UI_DRAWS` | =file: while it exists, one frame's UI draws (another aspect ratio, or the upscaler's UI phase) logged with their targets, stencil, blend, clip rects and redirection |
+| `BB_UI_DRAWS_PS` | =hex pixel shader hash: BB_UI_DRAWS also dumps that shader's draws' vertex streams, first constant buffer and indices |
+| `BB_UI_TEXTURE_LOG` | =file: when it appears, the textures the UI binds over the next 2 s |
+| `BB_UI_TRACE` | set: draws of frames that ended without the output-size UI |
+| `BB_UI_TRIGGER_VS` | =hex hash: the vertex shader that starts the UI phase |
+| `BB_UPSCALE_BEFORE_CS` | =hex hash: upscale before that compute shader |
+| `BB_VERTEX_IN_PLACE` | =1: vertex data bound in place per frame, by why it has no VRAM copy, and what draws read of it (log lines) |
+| `BB_VK_MARKERS` | =1: the game's debug labels as Vulkan markers |
+| `BB_VK_VALIDATION` | =1: Vulkan validation layers |
+| `BB_VK_VALIDATION_SYNC` | =1: Vulkan synchronization validation |
+| `BB_VRAM_ACCESS_TRAP` | set: blocks moved to VRAM are closed to the CPU |
+| `BB_VRAM_TRAP_RANGE` | =addr:size: BB_VRAM_ACCESS_TRAP only over that range |
+| `BB_WAIT_LOG` | =file: the game's kernel waits written there |
+| `BB_WAIT_TRACE` | =1: where the time waiting for GPU ticks goes |
+| `BB_WARN_META_TEXTURE` | set: warn about textures read from metadata memory |
+| `BB_WATCH` | =addr:size: what the translator reads from that range |
+| `BB_WRITE_LOG` | =1: GPU writes to guest memory near a fault |
+| `BB_WRITE_SHADOWS` | =1: ranges the game's copy shader writes in place copied into VRAM after it, small read-only bindings read there (no gain measured) |
+| `BB_WRITE_SHADOW_TRACE` | =1: why BB_WRITE_SHADOWS lookups miss and who drops the copies (log lines) |
+| `BB_WRITE_VERIFY` | =1: page protection to catch writes nothing announced |
+| `BB_ZERO_SCAN` | =seconds: that long after the first mapping, how much direct memory is zero |
 
-| `BB_WINDOW_RECT` | x,y,w,h as fractions of the game's display, e.g. `0,0,1,0.5` (default off) | Local co-op: the window's place and size on the game's display (BB_DISPLAY), without borders, instead of fullscreen. Needs X11 (`SDL_VIDEO_DRIVER=x11`): Wayland lets no window place itself. | `gpu/shim/window.cpp` |
+## Internal (44)
 
-## Controls & input
+Passed between the launchers, run.py / run.sh and the game. Not meant to be set by hand.
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_GAMEPAD` | SDL GUID, part of the name, or the device path (`/dev/hidrawN`, `/dev/input/eventN`; the log's `gamepad connected` line shows it) (default: first controller) | **Launcher:** Controls → Gamepad → "Controller". Preferred controller, so wheels and other always-connected devices do not take over. The path tells two pads of the same model apart (local co-op). | `src/runtime_pad.c` (preferred_gamepad), `launcher/bbport_launcher.py:656` |
-| `BB_GAMEPAD_STRICT` | 1 (default off) | Local co-op: only the BB_GAMEPAD controller, never the first one or the one in use instead; with no BB_GAMEPAD, no controller at all. | `src/runtime_pad.c` (gamepad_strict) |
-| `BB_KEYBOARD` | 0 (default on) | Local co-op: this game ignores the keyboard and the mouse, and never takes the mouse. | `src/runtime_pad.c` (keyboard_enabled) |
-| `BB_PAD_BACKGROUND` | 1 (default off) | Local co-op: the controller keeps driving the game while another window has the focus, and the game keeps its sound then (bbport.ini's mute_unfocused is ignored). **Launcher:** the Multiplayer → Local tab sets it, with BB_WINDOW_RECT, BB_GAMEPAD, BB_GAMEPAD_STRICT, BB_KEYBOARD, BB_AUDIO and BB_DATA_DIR for each player (`launcher/bbport_coop.py`). | `gpu/shim/window.cpp`, `gpu/shim/bbgpu.cpp` (bbgpu_audio_muted) |
-| `BB_MOUSE_DEADZONE` | 0–100 of 127 (default 16) | Minimum right-stick deflection used for mouse look, so slow mouse movement still turns the camera past the game's dead zone. | `src/runtime_pad.c:883` |
-| `BB_JUMP_GAP_MS` / `BB_JUMP_TAP_MS` | ms, 0–1000 (70 / 70) | bbport.ini `keyboard_layout=0.6` (issue #33; **Launcher:** Controls → Keyboard and mouse → "Keyboard layout"): the jump from the keys, dodge while sprinting, is Circle let go for the gap, pressed for the tap, let go again, then held (the run goes on). | `src/runtime_pad.c` (keyboard_circle) |
-| `BB_MENU_POINTER` | 0 = off (default on) | The mouse as a pointer in the game's own menus (from bbport 0.6): the item under it gets the game's cursor, a left click confirms (or presses a slider's arrow), the right button goes back, the wheel moves up and down. While a game menu is open the window lets the mouse go and shows the cursor, and takes the mouse back after if it had it. Hooks the game's list update (checked byte for byte: another build leaves it off); BB_GUEST_HOOKS=0 turns it off too. | `gpu/games/bloodborne_menu_pointer.cpp:722`, `gpu/shim/bbport_guest_code_hooks.cpp`, `gpu/shim/window.cpp:332`, `src/runtime_pad.c:1199` |
-| `BB_PAD_CENTER` | lx,ly,rx,ry (default: measured) | Overrides the measured neutral position of each stick axis. | `src/runtime_pad.c:36`, `src/runtime_pad.c:122-127` |
-| `BB_PAD_CENTER_CAL` | 0 = off (default on) | Disables measuring each axis' neutral and travel (for third-party pads whose axes are biased). | `src/runtime_pad.c:37`, `src/runtime_pad.c:119` |
-| `BB_PAD_DEADZONE` | 0–126 (default 5) | **Launcher:** Controls → "Stick dead zone (%)" (percent × 127 / 100; written only when not 4 %). Inner stick dead zone, as shadPS4's analog_deadzone. | `src/runtime_pad.c:122`, `launcher/bbport_launcher.py:659` |
-| `BB_PAD_DEADZONE_OUTER` | 1–127 (default 127) | Outer stick dead zone: travel up to this value maps to full deflection (helps pads that never reach full). | `src/runtime_pad.c:35`, `src/runtime_pad.c:124` |
-| `BB_PAD_DEADZONE_RADIAL` | 0 = per axis (default round) | The dead zone is held to the stick's length, not each axis: a round dead zone, mapped from 0 at its edge keeping the direction, so a push close to one axis no longer snaps onto it (the idea is from Lantern Engine). 0 = per axis, as before. | `src/runtime_pad.c:127` |
-| `BB_PAD_LIGHTBAR` | RRGGBB hex colour, an optional leading # (unset: SDL's own, the player's colour) | **Launcher:** Controls → "Controller light bar colour" (set only when on). Every controller with a light bar (DualShock 4, DualSense) shows this colour, set when it is opened. | `src/runtime_pad.c:306`, `launcher/bbport_launcher.py:663`, `launcher/bbport_launcher.py:1503` |
-| `BB_PROMPTS` | playstation \| xbox \| switch \| keyboard (default playstation) | **Launcher:** Controls → Gamepad → "Button prompts" (Automatic follows the controller). Button prompts of the game's menus, made from the game's files at start. | `run.sh:136`, `scripts/menu_prompts.py:66`, `launcher/bbport_launcher.py:645` |
-| `BB_STEAM_INPUT_X11` | 0 = keep Wayland (default on) | Launched from Steam with Steam Input on a Wayland desktop, the game window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`): Steam sends its virtual controller's input only to a focused window it can see, and it sees only X11 windows (issue #12). Not when `SDL_VIDEO_DRIVER` is set. | `run.sh` |
-| `BB_STEAM_OVERLAY` | 1 = on (default 0) | **Launcher:** Setup → Game → "Steam overlay", under "Add to Steam" (saved as soon as it changes). Started from Steam, the game gets Steam's 64-bit `gameoverlayrenderer.so` in `LD_PRELOAD`, read from the nearest process above that still has it (the AppImage's sharun clears `LD_PRELOAD` in every program it runs), and nothing else Steam preloads. On a Wayland desktop the window goes through Xwayland (`SDL_VIDEO_DRIVER=x11`), since Steam draws its overlay only on X11 windows; not when `SDL_VIDEO_DRIVER` is set (issue #28). | `run.sh:370`, `launcher/bbport_launcher.py:701`, `launcher/bbport_launcher.py:1302` |
+| Variable | What it does |
+|---|---|
+| `BB_BUNDLED_VK_DRIVER_FILES` | the package's own Vulkan driver manifests (set by the launcher) |
+| `BB_BUNDLED_VK_LAYER_PATH` | the package's own Vulkan layers, found before the host's (set by the launcher) |
+| `BB_CLIENT_VERSION` | the online client's name for the server (bbport VERSION, set by run.py) |
+| `BB_DATA_DIR` | the port's data folder (set by run.py) |
+| `BB_DEBUG_KEEP` | =1: tools/debug_attach.sh leaves the process stopped after writing its report (--keep) |
+| `BB_DEBUG_OUT` | where tools/debug_attach.sh writes its report (set by the script) |
+| `BB_DLSS_DIR` | the DLSS bridge and NVIDIA's DLSS libraries' folder in place of bb-probe's (set by the AppImage without Nix) |
+| `BB_FSR411_OUT` | where the launcher's FSR 4.1.1 build puts its assets |
+| `BB_FSR4CAP_CLEAN` | =1: the FSR 4.1.1 build removes its work folder afterwards (set by the launcher) |
+| `BB_FSR4CAP_TOOLS` | the FSR 4.1.1 build's tools folder (set by the launcher) |
+| `BB_FSR4CAP_WORK` | the FSR 4.1.1 build's work folder (set by the launcher) |
+| `BB_GAMEPAD_STRICT` | =1 (local co-op): only the chosen gamepad, never another one instead |
+| `BB_GPU_USER_DIR` | the user folder as the GPU library and the online module see it (set by the runtime) |
+| `BB_HOST_VK_ADD_DRIVER_FILES` | the host's VK_ADD_DRIVER_FILES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_ADD_LAYER_PATH` | the host's VK_ADD_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_DRIVER_FILES` | the host's VK_DRIVER_FILES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_ICD_FILENAMES` | the host's VK_ICD_FILENAMES under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_IMPLICIT_LAYER_PATH` | the host's VK_IMPLICIT_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_HOST_VK_LAYER_PATH` | the host's VK_LAYER_PATH under Steam's pressure-vessel, kept for the log while the AppImage without Nix drops it |
+| `BB_IMAGE_SHAPES` | the package's image shapes list for spare images (set by run.py) |
+| `BB_INTERNAL_HEIGHT` | the game's internal screen height (default 1080; set by run.py) |
+| `BB_INTERNAL_WIDTH` | the game's internal screen width (default 1920; set by run.py) |
+| `BB_LIVE_RES` | =1: render resolution changes live (set by run.py) |
+| `BB_MODS_CONFIG` | the mods list (default <data>/mods.json) |
+| `BB_MODS_DIR` | the folder of enabled mods' files (set by run.py) |
+| `BB_MONITOR_SIZE` | =WxH: the monitor's size the startup patch was made for (set by the launcher) |
+| `BB_OUTPUT_RES` | =WxH: the output the startup patch was made for (set by run.py) |
+| `BB_PATCHES_CONFIG` | the patch choice file (default <data>/patches.json) |
+| `BB_PATCHES_DIR` | the patches folder (default <data>/patches) |
+| `BB_PKGEXTRACT` | pkgextract for the launcher's Install from PKG (the AppImage's copy) |
+| `BB_PREBUILT` | =1: packaged build, run.sh builds nothing (set by the AppImage) |
+| `BB_PRESENCE_DIR` | Discord Rich Presence's folder for this start (run.sh; scripts/discord_presence.py) |
+| `BB_PROBE` | path of bb-probe for run.py |
+| `BB_PROMPT_ART` | the Xbox and Switch button art for the live prompts, KG_*.rgba by style (scripts/prompt_art.py; set by run.sh) |
+| `BB_SAVEDATA_TITLE` | the saves' title id (set by the runtime), for BBSC's save folder before the game has written one |
+| `BB_SHADER_GAME_DIR` | the game's files the shader recipes' programs come from (set by run.py) |
+| `BB_SHADER_RECIPES` | the shader recipes pack (set by run.py) |
+| `BB_SKIP_NETWORK_CHOICE` | =1: no online choice at start (the launcher's) |
+| `BB_STALL_THREADS_DONE` | set by the port once all threads were reported |
+| `BB_STEAM_OVERLAY` | the Steam overlay's preload kept for the game (=0: off; set by the AppImage entry) |
+| `BB_TIMEOUT` | =seconds: run.py stops the game after this long (tests) |
+| `BB_TROPHY_DIR` | the trophy list and icons scripts/trophies.py prepared, where the earned ones are recorded (set by run.sh) |
+| `BB_USER_DIR` | the user folder (saves, settings; set by run.py) |
+| `BB_VBLANK_HZ` | =N (default 60, 0: 480): the guest vblank rate (1000 for uncapped; set by run.py) |
 
-## Audio
+## Build (15)
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_AUDIO` | none, or unset (sound on) | `none` keeps the game silent: the runtime uses a silent timer instead of an SDL audio device, and the trophy chime is off too. | `src/runtime_audio.c:83`, `gpu/shim/bbport_overlay.cpp:832` |
-| `BB_AUDIO_DUMP` | file path prefix (default off) | Writes the raw converted PCM of each audio port to <prefix>.port<N>.<ch>ch.<f32\|s16>. | `src/runtime_audio.c:252` |
-| `BB_AUDIO_GAIN` | float >0 and ≤8 (default 1.0) | Master gain applied to the game's audio output. | `src/runtime_audio.c:173` |
-| `BB_AUDIO_STATS` | any value = on (default off) | Per-port audio timing statistics (gaps between submissions) in the log. | `src/runtime_audio.c:251` |
-| `BB_AUDIO_TRACE` | 1 = on (default off) | Logs AJM decoder configurations and failing jobs, plus sound file opens and failed reads (missing game sounds). | `src/runtime_ajm.c:77`, `src/runtime_file.c:222` |
-| `BB_SOUND_HACK` | 0 = off (default on) | Bloodborne "sound hack": sets the flag at 0x204E of userdata0010 in each save before the game reads it, otherwise some sounds (e.g. weapon sounds) never play; 0 leaves saves untouched. | `src/runtime_savedata.c:72-79` |
+Read by the build and packaging scripts only.
 
-## Game & patches
+| Variable | What it does |
+|---|---|
+| `BB_FSR4CAP_CHECKED` | internal to tools/fsr4cap: the tools were checked |
+| `BB_FSR4CAP_FP8` | =1: also the FP8 FSR 4.1.1 variant through Proton's emulation; 0: never |
+| `BB_FSR4CAP_ON_HOST` | set: the FSR 4.1.1 capture runs without systemd-run |
+| `BB_FSR4CAP_RUNNER` | =steam: the FSR 4.1.1 capture uses Steam's runtime |
+| `BB_FSR4CAP_SHELL` | internal to tools/fsr4cap: already inside the nix shell with the tools |
+| `BB_FSR4CAP_SPOOF` | =0: the FSR 4.1.1 capture does not present an RDNA4 GPU to AMD's DLL |
+| `BB_FSR4CAP_UMU_SHELL` | internal to tools/fsr4cap: already inside the umu nix shell |
+| `BB_FSR4_DRIVER_MODELS` | FSR 4 driver models to build (default: navi2 lite) |
+| `BB_FSR4_TIERS` | FSR 4 v07 asset tiers to download (tools/fetch_fsr4_assets.sh) |
+| `BB_IN_NIX_SHELL` | internal to run.sh: already inside the nix shell |
+| `BB_LTO` | =1: link-time optimization (packaging) |
+| `BB_PACKAGE_FSR411` | =1: the AppImage carries FSR 4.1.1 models (never in public packages) |
+| `BB_PGO` | =generate / use: profile-guided optimization (CMake option) |
+| `BB_PGO_DIR` | the PGO profile folder (CMake option) |
+| `BB_PUBLISH_BRANCH` | =1: tools/publish_guide.sh publishes the players' guide from a branch other than main |
 
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_FPS` | uncap \| 60 \| 90 \| 30 (default uncap) | **Launcher:** Graphics → Frame rate → "Mode". Frame-rate patch: uncap = delta-time patch with 480 Hz vblank and sprint fix; 60/90 = fixed-timestep patches (90 adds the sprint fix); 30 = unpatched. Also picks BB_VBLANK_HZ when that is unset. | `run.sh:77`, `run.sh:77`, `scripts/patches.py:17-21` |
-| `BB_GAME_MENU` | 0, or unset (on) | 0 leaves the game's System menu as it is: no port pages (Display, Game effects, Game patches) built into the game's own menu. | `gpu/shim/bbport_game_menu.cpp:596`, `gpu/shim/bbport_game_menu.h:5` |
-| `BB_GESTURES_NO_MOTION` | 0 \| 1 (default 0) | **Launcher:** Controls → Gamepad → "Gestures menu without motion-control icons". Dommo's stripped-down gestures menu (no motion-control icons), made from the game's files at start. | `run.sh:137`, `scripts/menu_prompts.py:15`, `launcher/bbport_launcher.py:646` |
-| `BB_GX_COMMAND_HEAP` | 0 = off (default 1) | Patch that enlarges the game's two per-frame GX command heaps to 1 MiB (crashes when a frame fills the 256 KiB heap); 0 keeps the game's size. | `scripts/patches.py:83-91` |
-| `BB_LANGUAGE` | PS4 system language number: 0 Japanese, 1 English, 2 French, 3 Spanish, 4 German, 5 Italian, 8 Russian, ... (runtime default 1) | **Launcher:** Setup > Game language (Auto: from the desktop locale). The system language the runtime reports to the game; also picks the trophy names' language and the in-game menu's default language. | `src/runtime_services.c:70`, `gpu/shim/bbport_game_menu.cpp:104`, `launcher/bbport_launcher.py:649` |
-| `BB_MODS_ENABLED` | 0 \| 1 (default 1) | **Launcher:** Mods → Mods → "Load mods". Whether mods are merged into the game's files for this launch. | `run.sh:166`, `launcher/bbport_launcher.py:643` |
-| `BB_PATCHES` | patch names separated by ";" (default none) | Extra patch names (from patches/Bloodborne.xml) applied at start. | `run.sh:190`, `run.sh:190` |
-| `BB_CLOTH_TIME` | 0 = off (default on) | The cloth's time step follows the frame's at most 5% from one frame to the next and never above 1/30 s, so a stutter above 30 FPS no longer kicks capes and dresses (scripts/cloth_time.py). From Supermedo's port. | `scripts/patches.py:356`, `scripts/cloth_time.py` |
-| `BB_STEADY_CLOTH` | 0 = off (default on; also bbport.ini steady_cloth=0) | Cloth as on the PS4 at any frame rate: bend stiffness, damping and a time-corrected step as at 30 FPS, so capes no longer float and flare out at 60 and 120 FPS (scripts/cloth.py). Needs BB_CLOTH_TIME. From Supermedo's port. | `scripts/patches.py:361`, `scripts/cloth.py` |
-| `BB_FOLIAGE_TIME` | 0 = off (default on) | Swaying plants (the Hunter's Dream's flowers, Hemwick's lavender) move with the frame's time instead of a fixed step a frame: no faster sway at high frame rates, no jolts when frame times swing (scripts/foliage_time.py). From Supermedo's port. | `scripts/patches.py:364`, `scripts/foliage_time.py` |
-| `BB_AIR_DRAG` | 0 = off (default on) | Jumps as at 30 FPS at any frame rate: the air drag on a character's horizontal speed per second of 30 FPS, so jumps reach as far at 120 FPS as on the PS4 (scripts/air_drag.py). From Supermedo's port. | `scripts/patches.py:368`, `scripts/air_drag.py` |
-| `BB_EFFECT_TIME` | 0 = off (default on; only with the uncap and 90 presets) | Effects step in whole 1/60 s: with smaller steps their particles stopped expiring and piled up (Ebrietas' fight down to 45 FPS uncapped) (scripts/effect_time.py). From Supermedo's port. | `scripts/patches.py:372`, `scripts/effect_time.py` |
-| `BB_CRASH_GUARDS` | 0 = off (default on) | Guards where the game reads through a pointer it never checks: an online event without its data (a crash at guest offset 0x1eb56b7 on The Hunter's Dream after a server timeout) (scripts/crash_guards.py). From Supermedo's port. | `scripts/patches.py:377`, `scripts/crash_guards.py` |
-| `BB_REGION` | eu \| na \| empty (default: the dump's param.sfo) | **Launcher:** Setup → "Game region". The game's region for this launch; picks the regional text (e.g. Spanish from Spain or Latin American). | `run.sh:189`, `scripts/content_profile.py:3-5`, `launcher/bbport_launcher.py:650` |
-| `BB_SKIP_GAME_CHECK` | 1 = skip (default check) | Skips the check that the game files are the supported 1.09 dump (wrong eboot, missing update, broken extraction). | `scripts/game_check.py:11`, `scripts/game_check.py:72`, `scripts/prepare.py:288` |
-| `BB_SKIP_NETWORK_CHOICE` | 0 \| 1 (default 1) | **Launcher:** Multiplayer → Online → "Skip the "play online / offline" choice" (default on). Patch: the title screen goes straight to the main menu, online when online play is on (BB_ONLINE=1), as PLAY ONLINE on a PS4, offline otherwise; 0 shows the online/offline dialog. | `scripts/patches.py:73-80`, `launcher/bbport_launcher.py:664` |
-| `BB_TROPHY_KEY` | 32 hex characters (default none) | **Launcher:** Trophies → "Trophy key". The PS4 trophy key; decrypts trophy names and descriptions in the game's language (without it they are in English). | `run.sh:351`, `scripts/trophies.py:495`, `launcher/bbport_launcher.py:703` |
-| `BB_USER_NAME` | text (Hunter) | The PS4 user name reported to the game and the online module; also the default answer to a text-input dialog when the on-screen keyboard is unavailable. | `src/runtime_services.c:55`, `gpu/bbnet/include/core/user_manager.h:38` |
-
-## Saves & files
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BBSC_SAVE_DIR` | folder path; default unset | Folder holding userdata0000.. on hosts that keep saves elsewhere (bbhost); BBSC counts its slots as the active save and copies it in its save backups. On the port BBSC looks in ./user (working folder) otherwise. | `bbsc/emulator/src/core/bloodborne_re.cpp:5931`, `bbsc/emulator/src/core/bloodborne_re.cpp:14468` |
-| `BB_CONFIG` | path (run.sh: <data dir>/bbport.ini; the GPU library alone: ./bbport.ini) | **Internal** (run.sh default $BB_DATA_DIR/bbport.ini). Path of bbport.ini, the settings file read by the GPU library (in-game menu settings), the controls (key./pad. lines) and the launcher. | `run.sh:21`, `gpu/shim/bbport_settings.cpp:21`, `src/runtime_pad.c:574` |
-| `BB_DATA_DIR` | directory (default: the port directory; AppImage/Nix: $XDG_DATA_HOME/bbport) | **Internal.** Writable directory for generated files (out/), saves (user/), bbport.ini, mods, patches and logs. | `run.sh:16-18`, `launcher/bbport_launcher.py:56`, `packaging/appimage-sharun.sh:74` |
-| `BB_DLC_DIR` | directory (default none) | **Launcher:** Setup → "DLC folder". Folder with the dumped add-ons (one folder each, e.g. SPEXPANSIONDLC03); linked as <user>/addcont/<title id> so the runtime reports them installed. | `run.sh:178`, `launcher/bbport_launcher.py:640` |
-| `BB_GAME_DIR` | directory (default ../CUSA03173) | **Launcher:** Setup → "Game folder". The game's folder (eboot.bin, sce_module, …). | `run.sh:63-65`, `launcher/bbport_launcher.py:636`, `scripts/patches.py:541` |
-| `BB_GPU_USER_DIR` | directory | **Internal** (run.sh: defaults to BB_USER_DIR, else <data>/user). Where the GPU library keeps its caches (pipeline cache etc.) and the player's DLSS folder (<dir>/dlss). Set by run.sh before the GPU library loads. | `gpu/shadps4/common/path_util.cpp:88`, `gpu/shadps4/video_core/renderer_vulkan/vk_dlss.cpp:95`, `run.sh:24` |
-| `BB_MODS_CONFIG` | file (default <data>/mods.json) | **Launcher:** always set to <data>/mods.json. The mods list/configuration used by scripts/mods.py. | `run.sh:165`, `launcher/bbport_launcher.py:642` |
-| `BB_MODS_DIR` | directory (default <data>/mods) | **Launcher:** Mods → Mods → "Mods folder". Folder the mods are loaded from (also used by BB_MOD_TRACE). | `run.sh:165`, `launcher/bbport_launcher.py:641`, `src/runtime_file.c:390` |
-| `BB_PATCHES_CONFIG` | file (default <data>/patches.json) | **Launcher:** always set to <data>/patches.json. Configuration of the external patches. | `run.sh:192`, `launcher/bbport_launcher.py:648` |
-| `BB_PATCHES_DIR` | directory (default <data>/patches) | **Launcher:** Mods → Third-party patches → "Patches folder". Folder of external patch files. | `run.sh:192`, `launcher/bbport_launcher.py:647` |
-| `BB_USER_DIR` | folder path; default <data dir>/user (run.sh); BBSC falls back to ./user | **Launcher:** Setup > Saves > "Saves folder". User folder: saves, trophies, DLC links, host_overrides.json, bbsc/ logs. The launcher sets it only when a saves folder is chosen; also the default of BB_GPU_USER_DIR. | `launcher/bbport_launcher.py:638`, `run.sh:24`, `88`, `313`, `bbsc/emulator/mod/linux/bbsc_mod_linux.cpp:114` |
-
-## Hunter's Atlas (map)
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_ATLAS_ENABLED` | 1 or 0 (unset: the map's own `settings.ini`) | **Launcher:** Mods → Map (Hunter's Atlas) → "In-game map". The in-game map on or off; while set, the map's own switch in the game is greyed out. 0: none of its code runs. | `src/probe.c:626`, `gpu/shim/bbport_map.cpp:304` |
-| `BB_MAP_DIR` | folder (`navigation-map/maps`) | **Launcher:** the maps Hunter's Atlas generated. | `gpu/shim/bbport_map.cpp:294` |
-| `BB_MAP_ART_DIR` | folder (`<maps>/../art`) | **Launcher:** the map's pictures. | `gpu/shim/bbport_map_art.cpp:79` |
-| `BB_MAP_FONT` | file | **Launcher:** the font the map's names are drawn with. | `gpu/shim/bbport_overlay.cpp:1232` |
-| `BB_MAP_CATALOG` | file (`<maps>/../catalog.json`) | **Launcher:** names of places and items. | `gpu/shim/bbport_map.cpp:174` |
-| `BB_MAP_CONFIG` | file (`<maps>/../settings.ini`) | **Launcher:** the map's settings file. | `gpu/shim/bbport_map.cpp:295` |
-| `BB_MAP_TRAVEL_ENABLED` | 1 = on (off) | **Launcher:** "Travel to lamps from the map". | `gpu/shim/bbport_map_features.cpp:70`, `src/runtime_atlas_state.c:162` |
-| `BB_MAP_ITEMS_ENABLED` | 1 = on (off) | **Launcher:** "Items on the map". | `gpu/shim/bbport_map_features.cpp:70` |
-| `BB_MAP_FOG_ENABLED` | 1 = on (off; the launcher writes 0) | Areas not visited yet stay hidden. | `gpu/shim/bbport_map_features.cpp:70` |
-| `BB_MAP_NPC_MODE` | all \| new_dialogue \| hidden (all) | Which characters the map shows. | `gpu/shim/bbport_map_features.cpp:71` |
-| `BB_MAP_ITEM_CATEGORIES` | comma list (healing,insight,equipment,echoes) | Which items the map shows. | `gpu/shim/bbport_map_features.cpp:73` |
-| `BB_MAP_SOUND_GAIN` | 0–2 (0.024) | Volume of the map's sounds. | `src/runtime_audio.c:75` |
-| `BB_ATLAS_DEBUG` | 1 = on (off) | Logs what the map reads from the game's quick menu. | `src/runtime_map.c:107`, `gpu/shim/bbport_atlas_menu.cpp:35` |
-| `BB_ATLAS_QA` / `BB_ATLAS_QA_DEVICE` / `BB_MAP_TEST_CONTROL` / `BB_MAP_TEST_TRACE` | test hooks | Automated map tests. | `gpu/shim/bbport_map.cpp:388`, `gpu/shim/bbport_map.cpp:412`, `gpu/shim/bbport_map.cpp:412`, `gpu/shim/bbport_atlas_menu.cpp:70` |
-
-## Online & co-op
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_SEAMLESSHUNT_TOMBS` | 1 = keep (0) | **Launcher:** Multiplayer → Online → "Bloodstains on Seamless Hunt". Keeps bloodstains and death visions on Seamless Hunt's game server. Off by default: they crash the game with "Transaction failed" there (#10), so those requests are left unanswered and the game goes on without them. | `scripts/online.py:177`, `scripts/online.py:508` |
-| `BB_BRIDGE` | 1 = on (default 0) | **Launcher:** Multiplayer → Online → shadNet server "The Hunter's Dream". Uses bbbridge on this PC as the shadNet server: run.sh starts bbbridge-cli for the launch (or reuses one already listening on 127.0.0.1:31313) and stops it when the game ends. | `run.sh:308`, `scripts/online.py:159` |
-| `BB_CLIENT_VERSION` | text (shadPS4 bbport) | Client version string reported to the shadNet server, for a server whose clientversions.cfg expects another format. | `gpu/bbnet/shadps4/shadnet/client.cpp:542` |
-| `BB_COMMUNITY_SERVER` | host[:port] (launcher sets it when online) | **Launcher:** Multiplayer → Online → "Game server". The community game server (messages, bloodstains, phantoms) the game's own server traffic is redirected to. | `scripts/online.py:500`, `scripts/online.py:500` |
-| `BB_NP_COUNTRY` | country code (us) | Country reported for the PSN user by the online module. | `gpu/bbnet/include/core/user_manager.h:45` |
-| `BB_NP_LANGUAGE` | language code (en) | Language reported for the PSN user by the online module. | `gpu/bbnet/include/core/user_manager.h:46` |
-| `BB_ONLINE` | 1 or 0/unset (off) | **Launcher:** Multiplayer → Online (online play on). Online play: the runtime loads the online module (gpu/bbnet) and sends the game's network and PSN imports to it; run.sh then sets up the shadNet server, overrides, bbbridge and BBSC. | `src/runtime_net.c:26`, `gpu/bbnet/include/core/emulator_settings.h:83`, `run.sh:294` |
-| `BB_SHADNET_NPID` | online ID (empty: shadNet off) | **Launcher:** Multiplayer → Online (online ID; The Hunter's Dream: the Discord sign-in's). Online ID used to log in to the shadNet server; empty disables the shadNet user. | `gpu/bbnet/include/core/user_manager.h:41`, `scripts/online.py:162` |
-| `BB_SHADNET_PASSWORD` | text (empty) | **Launcher:** Multiplayer → Online (password). Password for the shadNet login. | `gpu/bbnet/include/core/user_manager.h:42`, `scripts/online.py:163` |
-| `BB_SHADNET_SERVER` | host:port (code fallback 127.0.0.1:31313) | **Launcher:** Multiplayer → Online (server); run.sh default play.seamlesshunt.com:31313 when online. shadNet server the online module connects to. | `gpu/bbnet/include/core/emulator_settings.h:85`, `run.sh:299`, `scripts/online.py:499` |
-| `BB_SHADNET_TOKEN` | text (empty) | Token passed with the shadNet login (np_handler); the launcher never sets it. | `gpu/bbnet/include/core/user_manager.h:43`, `gpu/bbnet/shadps4/core/libraries/np/np_handler.cpp:85` |
-| `BB_SHADNET_WEBAPI` | URL (code fallback http://127.0.0.1:31315) | **Launcher:** Multiplayer → Online (WebAPI); run.sh default http://<server host>:31315. shadNet WebAPI used for summon signs and the HTTP host overrides. | `gpu/bbnet/include/core/emulator_settings.h:86`, `run.sh:307`, `scripts/online.py:501` |
-| `BB_UPNP` | 1/y/t or 0 (1) | **Launcher:** Multiplayer → Online (UPnP); The Hunter's Dream forces 0. Opens the P2P UDP port on the router through UPnP (issue #121). | `gpu/bbnet/include/core/emulator_settings.h:88`, `gpu/bbnet/shadps4/core/libraries/network/p2p_sockets.cpp:239`, `scripts/online.py:164` |
-| `SHADPS4_BLOODBORNE_SEAMLESS_COOP` | non-empty and not "0" = on; default off | **Launcher:** Multiplayer → Online (own server + bbport.json online_seamless, no UI row). Online module: routes summon-messenger HTTP requests to the shadNet WebAPI (the server needs BloodborneSeamlessCoop=true). Inside libbbsc the same name is redirected to BBSC_MOD_SEAMLESS and ignored. | `gpu/bbnet/shadps4/core/libraries/network/http.cpp:814`, `805-808`, `scripts/online.py:184`, `bbsc/emulator/src/core/bloodborne_re.cpp:959` |
-| `SHADPS4_P2P_PORT` | 1-65535 (unset: a random port each time) | **Launcher:** Multiplayer → Online (P2P port; 0 = not set); The Hunter's Dream sets the bridge's port. Pins the local UDP port of the P2P transport (useful for a manual port forward); an invalid value stops the transport. | `gpu/bbnet/shadps4/core/libraries/network/p2p_sockets.cpp:201`, `scripts/online.py:166` |
-| `SHADPS4_P2P_RELAY` | 0/off, auto/direct, a.b.c.d:port, or unset (relay forced) | **Launcher:** set to 0 when seamless co-op is off or for The Hunter's Dream. UDP relay on the shadNet server's address (port 3478): unset sends every peer through it from the first frame; auto/direct = direct first, relay after 2 s; 0/off disables it; ip:port is a test override. | `gpu/bbnet/shadps4/core/libraries/network/p2p_sockets.cpp:586`, `scripts/online.py:157`, `scripts/online.py:157` |
-| `SHADPS4_P2P_RELAY_PORT` | 1-65535 (3478) | Port of the P2P UDP relay. | `gpu/bbnet/shadps4/core/libraries/network/p2p_sockets.cpp:594` |
-| `SSL_CERT_FILE` | CA bundle path (default: first found) | CA certificates for HTTPS when online; run.sh picks the system bundle if unset or unreadable. | `run.sh:302` |
-
-## Seamless co-op (BBSC)
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BBSC_MOD_HOOKS` | "0" off, anything else or unset on (mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Co-op hooks". Master switch that installs the BBSC co-op hooks (warps, world sync, Hunter's Dream, messages...); most other BBSC features need it. In libbbsc it stands in for SHADPS4_BLOODBORNE_RE_TRACE. | `bbsc/emulator/mod/mod.json:12`, `bbsc/emulator/src/core/bloodborne_re.cpp:962`, `bbsc/emulator/src/core/bloodborne_re.cpp:962` |
-| `BBSC_MOD_SEAMLESS` | "0" off, anything else or unset on (mod.json default true). Forced to 0 by libbbsc on a public game server. | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Seamless summon". Master switch for Wozzardman's seamless summon (summon without the vanilla signs and waits). In libbbsc it stands in for SHADPS4_BLOODBORNE_SEAMLESS_COOP. | `bbsc/emulator/mod/mod.json:11`, `bbsc/emulator/src/core/bloodborne_re.cpp:958`, `bbsc/emulator/mod/linux/bbsc_mod_linux.cpp:370` |
-| `BBSC_RELAY` | host[:port] (port default 20444); empty/unset: the game server address from the host_overrides file | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Relay address". BBSC relay server for warps and world sync. Unset: taken from SHADPS4_HTTP_HOST_OVERRIDES_JSON, else <user>/host_overrides.custom.json, then host_overrides.json. Launcher passes it only when non-empty. | `bbsc/emulator/mod/mod.json:41`, `bbsc/emulator/mod/bbsc_relay.cpp:123-160` |
-| `BBSC_SCALE_BOSS_HP` | integer percent; default 100 (code and mod.json); launcher range 0-300, the code clamps to 0-1000 | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Boss HP per guest (%)". Extra health for bosses, per guest. Needs SHADPS4_BBSC_SCALING; a summoned guest uses the host's numbers (sent over the relay). | `bbsc/emulator/mod/mod.json:34`, `bbsc/emulator/src/core/bloodborne_re.cpp:13515`, `bbsc/emulator/src/core/bloodborne_re.cpp:13515` |
-| `BBSC_SCALE_BOSS_STAGGER` | integer percent; default 20 (code and mod.json); launcher range 0-200, the code clamps to 0-1000 | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Boss stagger resistance per guest (%)". Bosses are harder to stagger, per guest. Needs SHADPS4_BBSC_SCALING; a summoned guest uses the host's numbers (sent over the relay). | `bbsc/emulator/mod/mod.json:37`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516` |
-| `BBSC_SCALE_DAMAGE` | integer percent; default 15 (code and mod.json); launcher range 0-200, the code clamps to 0-1000 | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Enemy damage per guest (%)". Extra damage for enemies and bosses, per guest. Needs SHADPS4_BBSC_SCALING; a summoned guest uses the host's numbers (sent over the relay). | `bbsc/emulator/mod/mod.json:35`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516` |
-| `BBSC_SCALE_ENEMY_HP` | integer percent; default 40 (code and mod.json); launcher range 0-300, the code clamps to 0-1000 | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Enemy HP per guest (%)". Extra health for normal enemies, per guest. Needs SHADPS4_BBSC_SCALING; a summoned guest uses the host's numbers (sent over the relay). | `bbsc/emulator/mod/mod.json:33`, `bbsc/emulator/src/core/bloodborne_re.cpp:13515`, `bbsc/emulator/src/core/bloodborne_re.cpp:13515` |
-| `BBSC_SCALE_ENEMY_STAGGER` | integer percent; default 15 (code and mod.json); launcher range 0-200, the code clamps to 0-1000 | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Enemy stagger resistance per guest (%)". Normal enemies are harder to stagger, per guest. Needs SHADPS4_BBSC_SCALING; a summoned guest uses the host's numbers (sent over the relay). | `bbsc/emulator/mod/mod.json:36`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516`, `bbsc/emulator/src/core/bloodborne_re.cpp:13516` |
-| `BBSC_SCALE_NPC_HUNTERS` | only "1" turns it on (default off; mod.json default false) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Scale NPC hunters". Henryk, Djura and the other hostile NPC hunters also get the enemy scaling (off = vanilla). | `bbsc/emulator/mod/mod.json:32`, `bbsc/emulator/src/core/bloodborne_re.cpp:13727` |
-| `BB_BBSC` | 1 = on (default 0) | **Launcher:** Multiplayer → Online → "Seamless co-op (BBSC)". Loads BBSC (libbbsc.so) into the game; only takes effect together with BB_ONLINE=1. | `run.sh:294`, `run.sh:294`, `scripts/bbsc.py:60` |
-| `SHADPS4_BBSC_AREA_LIST_CAP` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Asks the server for fewer messages and bloodstains per area: long lists crashed the game ("Panic 265"). | `bbsc/emulator/src/core/bbsc_persistence.h:49`, `bbsc/emulator/src/core/bloodborne_re.cpp` (CapBbscAreaListRequest) |
-| `SHADPS4_BBSC_BELLS_ANYWHERE` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Bells anywhere". The kit's bells ring anywhere, the Hunter's Dream included; role, Insight and being online still count. | `bbsc/emulator/mod/mod.json`, `bbsc/emulator/src/core/bbsc_persistence.h:52` |
-| `SHADPS4_BBSC_CINEMATIC` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | The camera that follows a co-op partner while you are dead (needs SHADPS4_BBSC_SPECTATE): Tab, E or left click the next hunter, Shift+Tab or Q the previous one, F a free camera and back, F1 off until the next death; R1/L1 and the sticks on a gamepad. On Linux the free filming camera (F1 at any time) is left out: every key and mouse button also reaches the game through bbport's pad. | `bbsc/emulator/src/core/bbsc_persistence.h:46`, `bbsc/emulator/src/core/bbsc_cinematic.cpp`, `bbsc/emulator/mod/linux/bbsc_mod_linux.cpp:751` |
-| `SHADPS4_BBSC_CONNECT_FIRST` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Cross-map summon". Cross-map summon: join first, then one load into the host's map. | `bbsc/emulator/mod/mod.json:13`, `bbsc/emulator/src/core/bbsc_persistence.h:33`, `bbsc/emulator/src/core/bloodborne_re.cpp:16788` |
-| `SHADPS4_BBSC_DEATH_PENALTY` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Bloodstain on death". A kept death (session not lost) still drops a bloodstain and the echoes. | `bbsc/emulator/mod/mod.json:25`, `bbsc/emulator/src/core/bbsc_persistence.h:27`, `bbsc/emulator/src/core/bloodborne_re.cpp:8171` |
-| `SHADPS4_BBSC_DREAM` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Hunter's Dream together". A guest uses the Doll, workshop and messengers in the host's Hunter's Dream. | `bbsc/emulator/mod/mod.json:16`, `bbsc/emulator/src/core/bbsc_persistence.h:26`, `bbsc/emulator/src/core/bloodborne_re.cpp:10086` |
-| `SHADPS4_BBSC_FIVE_HUNTERS` | "0" off, any other value on (default on; mod.json default true) Forced to 0 by libbbsc on a public game server. | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Five hunters". The host may summon up to 4 guests (5 hunters). | `bbsc/emulator/mod/mod.json:27`, `bbsc/emulator/src/core/bbsc_persistence.h:45`, `bbsc/emulator/src/core/bbsc_patch_tables.h:442`, `bbsc/emulator/src/core/bloodborne_re.cpp:15425`, `bbsc/emulator/mod/linux/bbsc_mod_linux.cpp:371` |
-| `SHADPS4_BBSC_FLOOR_GUARD` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Floor guard". No crash when a character's floor was unloaded. | `bbsc/emulator/mod/mod.json:30`, `bbsc/emulator/src/core/bbsc_persistence.h:25`, `bbsc/emulator/src/core/bloodborne_re.cpp:12704` |
-| `SHADPS4_BBSC_FREE_BELL` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Free Beckoning Bell". The Beckoning Bell costs no Insight. | `bbsc/emulator/mod/mod.json:26`, `bbsc/emulator/src/core/bbsc_persistence.h:44`, `bbsc/emulator/src/core/bloodborne_re.cpp:15751` |
-| `SHADPS4_BBSC_FULL_ECHOES` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Full echoes". A summoned guest is paid the host's rate of Blood Echoes, not half. | `bbsc/emulator/mod/mod.json:21`, `bbsc/emulator/src/core/bbsc_persistence.h:22`, `bbsc/emulator/src/core/bbsc_patch_tables.h:430` |
-| `SHADPS4_BBSC_GUEST_ITEMS` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Guest items". A guest picks up and keeps items in the host's world. | `bbsc/emulator/mod/mod.json:23`, `bbsc/emulator/src/core/bbsc_persistence.h:23`, `bbsc/emulator/src/core/bbsc_patch_tables.h:432`, `bbsc/emulator/src/core/bloodborne_re.cpp:6542` |
-| `SHADPS4_BBSC_INVADE_ANYWHERE` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Every world open to invaders (Bell Maiden SpEffect 9020). | `bbsc/emulator/src/core/bbsc_persistence.h:48`, `bbsc/emulator/src/core/bloodborne_re.cpp:14727` |
-| `SHADPS4_BBSC_LAMP` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Lamps in co-op". The host can use lamps during a session (lamp prompt works in co-op; only while hosting). | `bbsc/emulator/mod/mod.json:18`, `bbsc/emulator/src/core/bbsc_persistence.h:29`, `bbsc/emulator/src/core/bbsc_patch_tables.h:418` |
-| `SHADPS4_BBSC_LOAD_COVER` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Black fade on joins". The guest's summon/follow loads happen behind a black fade. | `bbsc/emulator/mod/mod.json:29`, `bbsc/emulator/src/core/bbsc_persistence.h:21`, `bbsc/emulator/src/core/bloodborne_re.cpp:7106` |
-| `SHADPS4_BBSC_MESSAGES` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Co-op texts". Co-op texts that fit seamless play (no "Returning to your world"). | `bbsc/emulator/mod/mod.json:28`, `bbsc/emulator/src/core/bbsc_persistence.h:32`, `bbsc/emulator/src/core/bloodborne_re.cpp:12762` |
-| `SHADPS4_BBSC_NO_FOG_WALLS` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "No co-op fog walls". Co-op area fog walls hidden; leaving the area is allowed. | `bbsc/emulator/mod/mod.json:17`, `bbsc/emulator/src/core/bbsc_persistence.h:31`, `bbsc/emulator/src/core/bbsc_patch_tables.h:424`, `bbsc/emulator/src/core/bloodborne_re.cpp:9821` |
-| `SHADPS4_BBSC_NO_HP_PENALTY` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "No guest HP cut". Removes the summoned guest's 30% max HP cut (effect 9006). | `bbsc/emulator/mod/mod.json:22`, `bbsc/emulator/src/core/bbsc_persistence.h:30`, `bbsc/emulator/src/core/bloodborne_re.cpp:9707` |
-| `SHADPS4_BBSC_P2P_CHANNEL` | a value starting with 0, f or F turns it off; else on (mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "P2P channel". Sends BBSC's own messages (follow, world sync, scaling, leaving) straight to the other players over the game's own connection when there is no BBSC relay; needed on public servers (The Hunter's Dream). | `bbsc/emulator/mod/mod.json:40`, `bbsc/emulator/mod/bbsc_channel.cpp:348-352` |
-| `SHADPS4_BBSC_PEERS` | npid=host:port,npid=host:port (unset) | Static peer map ("direct connection" mode, e.g. on Tailscale/Radmin/ZeroTier): a listed player's address wins over the server lookup. The port is that player's SHADPS4_P2P_PORT. | `gpu/bbnet/shadps4/core/libraries/np/np_matching2/np_matching2_signaling.cpp:112` |
-| `SHADPS4_BBSC_PEERS_JSON` | file path (<user dir>/bbsc_peers.json) | JSON file of static peers ({"NPID": "host:port"}); entries in SHADPS4_BBSC_PEERS win. | `gpu/bbnet/shadps4/core/libraries/np/np_matching2/np_matching2_signaling.cpp:113` |
-| `SHADPS4_BBSC_PERSIST` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Keeps the co-op session alive through loads and deaths (persistent-session patches). 0 disables them. | `bbsc/emulator/src/core/bbsc_persistence.h:38`, `bbsc/emulator/src/core/bbsc_persistence.cpp:125` |
-| `SHADPS4_BBSC_PERSIST_BOSS` | "0" off, any other non-empty value on; default off (not a default-on switch) | Persistent-session patch group "Boss": keeps the session through a boss clear. | `bbsc/emulator/src/core/bbsc_patch_tables.h:414`, `bbsc/emulator/src/core/bbsc_persistence.h:84-86` |
-| `SHADPS4_BBSC_PERSIST_HOSTDEAD` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Stay when the host dies". The guest keeps the session if the host dies. | `bbsc/emulator/mod/mod.json:19`, `bbsc/emulator/src/core/bbsc_persistence.h:42`, `bbsc/emulator/src/core/bbsc_patch_tables.h:422` |
-| `SHADPS4_BBSC_PERSIST_MATCHCHECK` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Ignores the post-load matching-check kick. | `bbsc/emulator/src/core/bbsc_persistence.h:39`, `bbsc/emulator/src/core/bbsc_patch_tables.h:416` |
-| `SHADPS4_BBSC_PERSIST_TASKS` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Keeps member tasks across a kept load. | `bbsc/emulator/src/core/bbsc_persistence.h:41`, `bbsc/emulator/src/core/bbsc_patch_tables.h:420` |
-| `SHADPS4_BBSC_REJOIN` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Guest rejoin / reinsert after a kept death. | `bbsc/emulator/src/core/bbsc_persistence.h:40`, `bbsc/emulator/src/core/bloodborne_re.cpp:3470` |
-| `SHADPS4_BBSC_SCALING` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Enemy scaling". Enemies and bosses get stronger (HP, damage, stagger) for every guest; replaces the game's own boss buff. Amounts: BBSC_SCALE_*. | `bbsc/emulator/mod/mod.json:31`, `bbsc/emulator/src/core/bbsc_persistence.h:47`, `bbsc/emulator/src/core/bbsc_patch_tables.h:436`, `bbsc/emulator/src/core/bloodborne_re.cpp:13515` |
-| `SHADPS4_BBSC_SHARED_PROGRESS` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Shared progress". When a guest goes home, bosses, shortcuts, doors and lamps the host has done are added to the guest's own world (adds only; NPC quests and the character untouched; saves backed up first). | `bbsc/emulator/mod/mod.json:38`, `bbsc/emulator/src/core/bbsc_persistence.h:17`, `bbsc/emulator/src/core/bloodborne_re.cpp:10791` |
-| `SHADPS4_BBSC_SKIP_LEAVE_LIMIT` | "0" off, any other non-empty value on; default off | Persistent-session patch group "LeaveLimit"; exact effect not described in code, see bbsc/emulator/src/core/bbsc_patch_tables.h:426. | `bbsc/emulator/src/core/bbsc_patch_tables.h:426` |
-| `SHADPS4_BBSC_SOLID_NPCS` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Solid NPCs". A guest sees NPCs solid, not as grey wandering ghosts. | `bbsc/emulator/mod/mod.json:24`, `bbsc/emulator/src/core/bbsc_persistence.h:24`, `bbsc/emulator/src/core/bbsc_patch_tables.h:434`, `bbsc/emulator/src/core/bloodborne_re.cpp:13934` |
-| `SHADPS4_BBSC_SPECTATE` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Respawn in place". A dead player respawns in place / spectates instead of leaving the session. | `bbsc/emulator/mod/mod.json:20`, `bbsc/emulator/src/core/bbsc_persistence.h:43`, `bbsc/emulator/src/core/bbsc_patch_tables.h:428`, `bbsc/emulator/src/core/bloodborne_re.cpp:3996` |
-| `SHADPS4_BBSC_TIMELINE` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | A short `bbsc-timeline-*.txt` of what happened in each game (joins, hosts, deaths, bosses) in `<user dir>/bbsc/logs`, next to `bbsc-mod-*.log`; the last 5 are kept. | `bbsc/emulator/src/core/bbsc_persistence.h:51`, `bbsc/emulator/src/core/bloodborne_re.cpp:1028`, `bbsc/emulator/mod/linux/bbsc_mod_linux.cpp` |
-| `SHADPS4_BBSC_WARP_JOIN` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | After a cross-map join, one more real reload (fixes lighting). | `bbsc/emulator/src/core/bbsc_persistence.h:34`, `bbsc/emulator/src/core/bloodborne_re.cpp:4503` |
-| `SHADPS4_BBSC_WARP_TOGETHER` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Warp together". The guest follows the host through lamp warps. | `bbsc/emulator/mod/mod.json:14`, `bbsc/emulator/src/core/bbsc_persistence.h:17`, `bbsc/emulator/src/core/bloodborne_re.cpp:4733` |
-| `SHADPS4_BBSC_WORLD_SYNC` | "0" off, any other value on (default on; mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "World sync". The guest loads the host's map with the host's world state (doors, bosses, lifts). | `bbsc/emulator/mod/mod.json:15`, `bbsc/emulator/src/core/bbsc_persistence.h:20`, `bbsc/emulator/src/core/bloodborne_re.cpp:5191` |
-| `SHADPS4_BBSC_WORLD_SYNC_ALL` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | With SHADPS4_BBSC_WORLD_SYNC, the guest takes the host's world flags for every area, not only the one the host is in. | `bbsc/emulator/src/core/bbsc_persistence.h:50`, `bbsc/emulator/src/core/bloodborne_re.cpp:5214` |
-| `SHADPS4_BLOODBORNE_RE_TRACE` | ignored by libbbsc (aliased to BBSC_MOD_HOOKS) | **No effect in this port.** In the BBSC emulator build this installed the BBSC hooks; in the port's libbbsc (BBSC_MOD) the name is redirected to BBSC_MOD_HOOKS, so setting it has no effect. | `bbsc/emulator/src/core/bloodborne_re.cpp:962`, `bbsc/emulator/src/core/bbsc_persistence.h:36` |
-
-## Discord
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_DISCORD` | 0 = off (default 1) | **Launcher:** Setup → "Discord status" (default on). Discord Rich Presence helper (scripts/discord_presence.py) that shows the area and co-op partners; 0 turns it off. | `run.sh:359`, `launcher/bbport_launcher.py:700` |
-| `SHADPS4_BBSC_DISCORD` | "0" or "false" off, else on (mod.json default true) | **Launcher:** Multiplayer > Online > Seamless co-op (BBSC) > BBSC settings > "Discord status". BBSC's own Discord status (area, boss fights, number of hunters). Read only by bbsc_discord.cpp, which the Linux libbbsc does not compile (bbsc/CMakeLists.txt), so it has no effect in this port; bbport's presence is BB_DISCORD. | `bbsc/emulator/mod/bbsc_discord.cpp:31-35`, `bbsc/CMakeLists.txt:22-29`, `bbsc/emulator/mod/mod.json:39` |
-
-## Diagnostics & logs
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_BREADCRUMBS` | 0 = off; unset/other = on | GPU breadcrumbs (VK_AMD_buffer_marker): on device lost the log says which draw/dispatch never finished. 0 turns them off. | `gpu/shadps4/video_core/renderer_vulkan/vk_breadcrumbs.cpp:59`, `gpu/shadps4/video_core/renderer_vulkan/vk_breadcrumbs.h:7` |
-| `BB_BUFFER_STATS` | 1 = on (off) | Prints every 5 s how buffer bindings reach the GPU by guest region (stream copies, arena bindings, re-uploaded bytes) and how many frames the GPU lags behind. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:984`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:4810` |
-| `BB_CAMERA_LOG` | any value = on (off) | Prints the camera position every 100 ms (for scripted movement tests at different frame rates). | `gpu/shadps4/video_core/renderer_vulkan/vk_camera_motion.cpp:296` |
-| `BB_CAPTURE_DIR` | directory (unset = current directory) | Where the frame analyzer (BB_CAPTURE_TRIGGER) writes frame_<time>.txt. | `gpu/shadps4/video_core/renderer_vulkan/vk_frame_capture.cpp:87` |
-| `BB_CAPTURE_TRIGGER` | file path (unset = off) | Frame analyzer: creating this file records the next full frame (every render pass with its targets, depth, draw count, shaders, textures, and compute dispatches) to a text file. | `gpu/shadps4/video_core/renderer_vulkan/vk_frame_capture.cpp:133`, `gpu/shadps4/video_core/renderer_vulkan/vk_frame_capture.h:2` |
-| `BB_CE_STATS` | 1 or unset (off) | Statistics of the constant engine's dumps (DumpConstRam per second, bytes, pages) and how often the translator reads memory a dump wrote in the last 100 ms. | `gpu/shim/bbport_ce_stats.h:1` |
-| `BB_COPY_SHADER_TRACE` | any value = on (off) | Logs the copy shader's buffers every 2 s. | `gpu/shadps4/video_core/renderer_vulkan/vk_shader_hle.cpp:161` |
-| `BB_DCB_STATS` | first char 1/y/t (off) | Structure of graphics command buffers (read-only scan, printed every 5 s): how many buffers, draws per buffer, state set before the first draw. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:1071`, `1383` |
-| `BB_DEBUG_MOTION` | 1 = on (off) | Blends the motion vectors as colors into the frame before it is shown. | `gpu/shadps4/video_core/renderer_vulkan/vk_camera_motion.cpp:78`, `gpu/shadps4/video_core/renderer_vulkan/vk_camera_motion.h:3` |
-| `BB_DUMP_DIR` | directory (out/dump) | Where the upscaler/present/final frame dumps (BB_DUMP_TRIGGER, BB_PRESENT_DUMP_TRIGGER, BB_FINAL_DUMP_TRIGGER) are written. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:91` |
-| `BB_DUMP_FRAMES` | integer ≥1 (8) | How many frames one BB_DUMP_TRIGGER dump records. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:70` |
-| `BB_DUMP_SHADERS` | 1/y/t or 0 (off) | shadPS4's shader dump: writes the translated shaders to disk. | `gpu/shim/core/emulator_settings.h:58`, `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:1332` |
-| `BB_DUMP_TRIGGER` | file path (unset = off) | Creating this file dumps the upscaler's images of the next BB_DUMP_FRAMES frames as raw files in BB_DUMP_DIR (temporal stability checks; tools/dump_view.py converts them). | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:56` |
-| `BB_FAULT_WAIT` | 1 or unset (off) | A fatal fault or a GPU-library assertion leaves the process alive and stopped in its handler, so a debugger can attach (bash tools/debug_attach.sh <pid>); a desktop notice says so. | `src/probe.c:150`, `gpu/shim/common/assert.cpp:12` |
-| `BB_FILE_TRACE` | 1 = on (default off) | Logs every guest path the game opens, stats or checks (mods, missing files). | `src/runtime_file.c:127-129` |
-| `BB_FINAL_DUMP_TRIGGER` | file path (unset = off) | Creating this file saves the next frame as presented (after FSR and post-processing) as final_<w>x<h> in BB_DUMP_DIR (used by tools/frame.sh KIND=final). | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:164`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.h:41` |
-| `BB_FRAME_LOG` | file path (unset = off) | With BB_FRAME_STATS: one CSV line per flip (frame time, waits, stage times, allocations…), to find what long frames (stutter) have in common. BB_SAVE_LOG=1 points it at logs/<time>.frames.csv. | `gpu/shadps4/core/libraries/videoout/driver.cpp:526`, `run.sh:47` |
-| `BB_FRAME_STATS` | Flag(): first char 1/y/t = on (off) | **Launcher:** Advanced > Developer > "Frame statistics in the log" (run.sh also sets it with BB_SAVE_LOG=1). Prints flip rate and frame-time spread (plus many internal counters) every 5 s. Without it a short summary line is printed every 30 s. | `gpu/shadps4/core/libraries/videoout/driver.cpp:380`, `launcher/bbport_launcher.py:679` |
-| `BB_FREE_CHECK` | 1 = on (off) | **Launcher:** Advanced > Developer > "Crash diagnostics" (together with BB_WRITE_LOG and BB_PRODUCER_CHECK). Diagnostic for the guest heap corruption at guest offset 0x263b8e7: every write the GPU emulation makes to guest memory is checked against the free list of the game's label pool, and a watcher thread reports corrupted free lists. Slightly slower. | `gpu/shim/bbport_free_check.h:2`, `gpu/shim/bbport_free_check.cpp:488-494`, `launcher/bbport_launcher.py:693` |
-| `BB_FSR4_PROFILE` | 1 = on (off) | FSR 4 / 4.1.1: GPU time per pass, printed every 300 frames. fsr4-bench sets it itself. | `gpu/shadps4/video_core/renderer_vulkan/fsr411/fsr411.cpp:280`, `gpu/tools/fsr4_bench.cpp:305` |
-| `BB_FSR4_STATS` | 1 or unset (off) | Prints the driver's per-pass statistics of the FSR 4 pipelines (registers, spills, instruction counts) when VK_KHR_pipeline_executable_properties is available; read by the patched FSR 4 provider, set by fsr4_bench --stats. | `gpu/patches/fsr-vulkan/0001-FSR-4-v07-provider-BB_FSR4_PROFILE-pass-timings-BB_F.patch:50`, `gpu/tools/fsr4_bench.cpp:307` |
-| `BB_GAME_MENU_TRACE` | 1 or unset (off) | How often the game asks for the port's menu texts (per 2 s). | `gpu/shim/bbport_game_menu.cpp:474` |
-| `BB_GARLIC_VRAM_RANGE` | begin,end (C integers, hex with 0x) (unset = whole address space) | Keeps VRAM copies only for guest addresses in [begin, end): for finding the block whose copy goes stale by halving the range. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2196` |
-| `BB_GNM_CENSUS` | 1 or unset (off) | Hooks the eboot's libGnm entry points, counts the calls per function and prints the busiest every 5 s. | `gpu/shim/bbport_gnm_hooks.h:4`, `gpu/shim/bbport_gnm_hooks.cpp:513` |
-| `BB_GNM_CENSUS_FILE` | file path (unset: no file) | With the Gnm census: writes every function's total calls so far (offset, calls, cb method, PM4) to this file. | `gpu/shim/bbport_gnm_hooks.cpp:437` |
-| `BB_GNM_CENSUS_RANGE` | first:last table indices (all) | Hooks only that range of the libGnm table (for bisecting). | `gpu/shim/bbport_gnm_hooks.cpp:543` |
-| `BB_GNM_OBSERVE` | 1 or unset (off) | Command buffer methods run through an observing stub; submissions are checked against the packets known API calls wrote (statistics in the census report). Also enables the hooks without BB_GNM_CENSUS. | `gpu/shim/bbport_gnm_hooks.cpp:69`, `gpu/shim/bbport_gnm_hooks.cpp:514` |
-| `BB_GNM_TRACE` | hex offset[:count] (count 40) | With the census or observer: prints the arguments, the caller and the packets written by the first `count` calls of the libGnm function at that offset. | `gpu/shim/bbport_gnm_hooks.cpp:84`, `gpu/shim/bbport_gnm_hooks.cpp:524` |
-| `BB_GPU_LOG` | trace, debug, info, warning, error, critical (warning) | Log level of the GPU library (shadPS4 log); unknown values mean warning. | `gpu/shim/common/logging/log.cpp:11`, `gpu/shim/common/logging/log.h:2` |
-| `BB_GPU_PROFILE` | 1 = on (off) | **Launcher:** Advanced > Developer > "GPU profile in the log". GPU time per render pass, dispatch and upscaler run, printed every 5 s (GPU ms per frame by label). | `gpu/shadps4/video_core/renderer_vulkan/vk_gpu_profiler.cpp:13`, `gpu/shadps4/video_core/renderer_vulkan/vk_gpu_profiler.h:2`, `launcher/bbport_launcher.py:697` |
-| `BB_HEAP_SITES` | 1 or unset (off) | Wraps the game's malloc replacement and counts live allocations per call site; prints the sites whose live bytes grew (what leaks when the guest heap runs out). Also patches the deferred object release to count failed registry checks. | `gpu/shim/bbport_heap_sites.cpp:2`, `gpu/shim/bbport_guest_hooks.cpp:48` |
-| `BB_HLE_STATS` | any value = on (off) | Logs how often the compute-shader substitutions (HLE) fire. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:2385` |
-| `BB_IMAGE_COPY_LOG` | any value = on (off) | Logs (first 40) the compute image copies the port recognizes and replaces. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:2950` |
-| `BB_IMAGE_SYNC_LOG` | set (any value) = on (off) | Logs image refreshes from memory the GPU wrote, and the images refreshed most per 5 s with their flags. | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:352`, `910-921` |
-| `BB_IMAGE_WATCH` | guest address (hex with 0x) (unset = off) | Prints how the image at that guest address is used (first 300 events). | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:334` |
-| `BB_LABEL_TRAP` | 1, 2, or unset (off); needs BB_FREE_CHECK=1 | Label trap of the free check: 1 makes pool pages with pending fence labels read-only (slow), 2 puts breakpoints on the guest allocator's release and the collector's done branch; a label block released before its fence landed is reported. | `gpu/shim/bbport_free_check.cpp:657`, `gpu/shim/bbport_free_check.h:49` |
-| `BB_LAYER_PAGED_STATS` | any value = on (off) | Prints paged buffer bindings per shader every 5 s (layer memory module). | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:3193` |
-| `BB_LAYER_WRITE_LOG` | set (any value) = on (off) | Layer memory module: logs large (1 MiB+) GPU writes kept in place, and the images near them. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:1234-1236` |
-| `BB_MOD_TRACE` | 1 = on (default off) | Logs the first 32 files the game opens from the mods folder. | `src/runtime_file.c:390-398` |
-| `BB_MOTION_SELECT_LOG` | 1 = on (off) | Logs each G-buffer vertex shader once with its buffer sizes and whether object motion selected it. | `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:900` |
-| `BB_OCCLUSION_READ_TRACE` | 1 = on (off) | Pages with occlusion counters become no-access after an event until the game's first access, to report whether results were on the CPU by then. | `gpu/shadps4/video_core/renderer_vulkan/vk_occlusion.cpp:392`, `gpu/shadps4/video_core/renderer_vulkan/vk_occlusion.h:61` |
-| `BB_OCCLUSION_TRACE` | integer N (0) | Logs the first N occlusion events with their frame and render pass. | `gpu/shadps4/video_core/renderer_vulkan/vk_occlusion.cpp:301` |
-| `BB_PASS_BREAK_TRACE` | 1 = on (off) | Every 5 s: who ended a render pass that began again with the same state (attachments stored and loaded again). | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:267`, `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.h:789` |
-| `BB_PRESENT_DUMP_COUNT` | integer ≥1 (1) | How many consecutive frames one BB_PRESENT_DUMP_TRIGGER saves. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:2229` |
-| `BB_PRESENT_DUMP_TRIGGER` | file path (unset = off) | Creating this file saves the completed display buffer (with the game's UI) as present_<w>x<h> in BB_DUMP_DIR; used by tools/frame.sh. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:2227`, `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:410` |
-| `BB_PRODUCER_CHECK` | 1 = on (off) | **Launcher:** Advanced > Developer > "Crash diagnostics" (also set by run.sh with BB_AS_0_3=1). Checks that only one thread at a time records into the scheduler (costs an atomic exchange per recorded command). | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.h:845`, `launcher/bbport_launcher.py:695`, `run.sh:239` |
-| `BB_READBACK_LOG` | file path (unset = off) | **Internal** (set by run.sh when BB_SAVE_LOG=1 to logs/<time>.readbacks.csv). CSV of every download of GPU-written buffer memory back to guest memory: who asked, where, how much, how long it took, how old the GPU's write was, whether the readback queue served it. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:138-160`, `run.sh:48` |
-| `BB_RECORDER_TRACE` | 1 = on (off) | Prints the most frequent direct command-buffer callers every 2000 calls. | `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.cpp:315`, `gpu/shadps4/video_core/renderer_vulkan/vk_scheduler.h:822` |
-| `BB_RESIDENCY_MIX` | 1 or 2 (off) | Prints bindings per kind (none, in place, mirror, mixed) and written, every 2 s; 2 also lists the in-place or mixed bindings with the most bytes (layer module). | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:106-110`, `162-164`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:459-465` |
-| `BB_RESIDENCY_REPORT` | trigger file path (unset = off) | When the file appears (checked once a second), reports the blocks bound in place in the last seconds and why they have no VRAM copy. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:3173` |
-| `BB_RES_STATS` | 1 = on (off) | Every 5 s: whether bound shaders read their resource descriptors from user-data registers or from tables in memory, per draw and dispatch. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:2317` |
-| `BB_SAMPLE_THREAD` | thread name (default off) | With frame stats: samples where that guest thread runs with SIGPROF and reports it. | `src/runtime_kernel.c:464`, `src/runtime_kernel.c:464` |
-| `BB_SAVE_LOG` | 1 = on (default off) | **Launcher:** Advanced → Developer → "Save the log and statistics to a file". Also writes this run's output to <data>/logs/<time>.log and turns on BB_FRAME_STATS with .frames.csv and .readbacks.csv next to it. | `run.sh:41-53`, `launcher/bbport_launcher.py:681` |
-| `BB_SAVE_TRACE` | 1 = on (default off) | Logs every operation on save files (/savedataN). | `src/runtime_file.c:224-225` |
-| `BB_SCENE_DEBUG` | file path (unset = off) | Once the file exists (it is consumed), prints for one frame why passes keep the native size and which scene targets are read at native size. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1644`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1644` |
-| `BB_SECTIONS` | 1 = on (off) | Time the draw recording thread spends per part of a draw (and ordered tasks by function), printed with the draw-pipe statistics. | `gpu/shim/bbport_sections.h:51`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1300` |
-| `BB_SYNC_TRACE` | set (any value) = on (off) | Prints each SyncForCpuRead (command-processor read of memory: drain and finish of the GPU work). | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:1363` |
-| `BB_TAA_DIAGNOSTICS` | integer 1–3 (unset = off) | TAA upscaler: selects a diagnostic output of the TAA shader, and with BB_DUMP_TRIGGER also dumps the TAA history images. Meaning of 1–3: see gpu/shadps4/video_core/host_shaders/taa.comp:16. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:797`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:1983` |
-| `BB_TAA_RESPONSIVE` | 1 = on (off) | TAA upscaler: history weights 0.88/0.75 instead of 0.98/0.85, so fewer trails behind moving things and a little more shimmer. Off by default until compared in game; from Mrsuss60's Windows port. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:814`, `gpu/shadps4/video_core/host_shaders/taa.comp:204` |
-| `BB_TILE_BACK_LOG` | set (any value) = on (off) | Logs each image written back into the game's memory because a texel buffer reads it, with the age of its last GPU write (first 400). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:3722` |
-| `BB_TIMELINE` | output file path (unset = off) | Records a timeline of the frame's way to the GPU (guest submissions and waits, decoding, Vulkan submissions, GPU completion); starts BB_TIMELINE_START seconds in, written once when the buffer is full (~15 s of play). | `gpu/shim/bbport_timeline.h:2-5`, `42` |
-| `BB_TIMELINE_START` | seconds (30) | With BB_TIMELINE=<file>: recording of the frame timeline starts this many seconds after the first event (and stops when the buffer is full, ~15 s). | `gpu/shim/bbport_timeline.h:4` |
-| `BB_TRACE_ADDR` | addr,size (C integers; size default 4096) (unset = off) | That guest range is traced from the start by the binding trace; only has an effect when BB_TRACE_SIZE is also set (non-zero). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2708` |
-| `BB_TRACE_SEMA` | any value = on (default off) | Logs every blocking semaphore wait (deadlock diagnosis). | `src/runtime_sema.c:69` |
-| `BB_TRACE_SHADER` | hex hash[,hash…] (unset = off) | For those shaders: the buffers they bind (address, size, read/written, whether in place or in VRAM, how often), printed every 5 s. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:3045` |
-| `BB_TRACE_SIZE` | bytes (C integer) (0 = off) | Bindings over GPU-written buffers of that size are counted by the path they take and reported every 5 s. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.h:318-320`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2703` |
-| `BB_UI_TRACE` | any value = on (off) | Logs the draws of frames that ended without the output-size UI (shown at the game's own size), and of one that had it. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.h:229`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:393` |
-| `BB_VK_MARKERS` | 1/y/t or 0 (off) | Vulkan debug markers for guest and host passes (for RenderDoc and similar tools). | `gpu/shim/core/emulator_settings.h:71`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:65` |
-| `BB_VK_VALIDATION` | 1/y/t or 0 (off) | **Launcher:** Advanced > Developer > Vulkan validation layers. Enables the Vulkan validation layers (much slower). | `gpu/shim/core/emulator_settings.h:74`, `gpu/shadps4/video_core/renderer_vulkan/vk_presenter.cpp:158`, `launcher/bbport_launcher.py:699` |
-| `BB_VK_VALIDATION_SYNC` | 1/y/t or 0 (off) | Synchronisation validation in the Vulkan validation layer (with BB_VK_VALIDATION). | `gpu/shim/core/emulator_settings.h:76`, `gpu/shadps4/video_core/renderer_vulkan/vk_platform.cpp:311` |
-| `BB_VRAM_ACCESS_TRAP` | set (any value) = on (off) | Blocks moved to VRAM are closed to the CPU (PROT_NONE); the first CPU access to each is recorded (code site, read or write) and the block opened again. Finds CPU readers of data the GPU writes in VRAM. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:3059` |
-| `BB_VRAM_TRAP_RANGE` | addr,size (C integers) (unset = all blocks) | With BB_VRAM_ACCESS_TRAP: only blocks over that range, re-armed for every packet, every access counted by site. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:3042` |
-| `BB_WAIT_LOG` | file (default off) | With BB_SAMPLE_THREAD/frame stats: writes per-frame wait sites (cond/mutex/sema/sleep, counts and ms) to this file. | `src/runtime_kernel.c:389` |
-| `BB_WAIT_TRACE` | 1 or unset (off) | Attributes each wait for GPU ticks (Scheduler::Wait) to its thread and call stack; the frame stats print the stacks that waited longest. | `gpu/shim/bbport_wait_trace.h:2` |
-| `BB_WARN_META_TEXTURE` | any value = on (off) | Logs a warning when a shader reads texture metadata as a texture. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:3347` |
-| `BB_WATCH` | addr,size (unset = off) | What the shader translator reads on the CPU from that guest range (user data pointing into it, constants copied from it), printed every 2 s. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1076` |
-| `BB_WRITE_LOG` | 1, 2, or unset/0 (off) | **Launcher:** Advanced > Developer > Crash diagnostics (with BB_FREE_CHECK, BB_PRODUCER_CHECK). Ring of the writes the GPU emulation makes to guest memory (fences, WriteData, DMA, downloads), dumped when the guest faults. 1 logs at the write itself (changes timing), 2 where the command thread decodes the fence or WriteData. | `gpu/shim/bbport_write_log.h:2`, `gpu/shim/bbport_write_log.cpp:37`, `launcher/bbport_launcher.py:694` |
-| `BB_WRITE_VERIFY` | 1 = on (off; only without write tracking) | Pages the GPU side watches are write-protected anyway to verify that every CPU write to them is announced. | `gpu/shadps4/video_core/buffer_cache/buffer.h:53`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:497-503` |
-| `MANGOHUD` | 1 = on (default off) | **Launcher:** Advanced → Developer → "MangoHud". MangoHud overlay. run.sh keeps it off if Steam's performance overlay (mangoapp) runs, and uses the system MangoHud instead of the bundled one when installed. | `run.sh:246`, `launcher/bbport_launcher.py:677` |
-| `SHADPS4_BBSC_TRACE_MAPS` | "0" off, any other non-empty value on; default off | Logs which maps are resident (and which one the player is in) whenever the set changes. | `bbsc/emulator/src/core/bloodborne_re.cpp:6305` |
-| `SHADPS4_BBSC_TRACE_WALLS` | "0" off, any other value on; default on (BBSC default-on switch, not in mod.json) | Logs which map objects get shown/made solid (fog walls). | `bbsc/emulator/src/core/bbsc_persistence.h:28`, `bbsc/emulator/src/core/bloodborne_re.cpp:8840` |
-| `SHADPS4_CAPTURE_BLOODBORNE_SUMMON` | non-empty and not "0" = on; default off | Online module writes capture files of summon-messenger HTTP requests (for collect-logs). Listed as default-on in BBSC but only the online module reads it. | `gpu/bbnet/shadps4/core/libraries/network/http.cpp:734`, `bbsc/emulator/src/core/bbsc_persistence.h:37` |
-| `VK_LOADER_LAYERS_DISABLE` | layer list | **Internal.** run.sh --software disables all implicit layers; with MANGOHUD=1 and a system MangoHud, run.sh adds the bundled MangoHud layer so only one overlay draws. | `run.sh:12`, `run.sh:255` |
-
-## Developer/tests
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BBSC_EMULATOR` | path | **No effect in this port.** Windows bbsc-launch only: another program to start instead of the emulator. Not built for the Linux port. | `bbsc/emulator/mod/bbsc_launch.cpp:263-268` |
-| `BBSC_URL_OVERRIDES` | 0 = off | **No effect in this port.** Windows bbsc.dll only (bbhost): turns off its own URL overrides. The Linux build leaves URL overrides to the online module and never reads it. | `bbsc/emulator/mod/bbsc_http.cpp:158`, `176-181` |
-| `BB_ASYNC_FENCES` | 1 = on; anything else off (off) | Experiment: an end-of-pipe fence is written once the guest memory copies on the copy threads are done instead of waiting for them. Measured slower (79 vs 83 FPS), so off. Ignored when honest labels are in use. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:476` |
-| `BB_AS_0_3` | 1 = on (default off) | **Launcher:** Advanced → Developer → "Synchronisation as in 0.3". Reverts what changed since the 0.3 release, for comparisons: run.sh forces BB_GUEST_IN_PLACE=0, BB_HOST_COPY_WAITS=all, BB_PRODUCER_CHECK=1 (overriding any value you set for those). | `run.sh:238`, `launcher/bbport_launcher.py:689` |
-| `BB_CAMERA_INVERSE` | own (unset = the game's stored inverse) | own: camera motion vectors use the inverse of the view matrix computed by the port instead of the one the game stores (A/B test; they agree to float precision). | `gpu/shadps4/video_core/renderer_vulkan/vk_camera_motion.cpp:281` |
-| `BB_CAMERA_Y` | up / down (unset = from the G-buffer viewport) | Forces the screen y sign used by camera motion vectors (for tests); normally the frame's G-buffer viewport decides. | `gpu/shadps4/video_core/renderer_vulkan/vk_camera_motion.cpp:314` |
-| `BB_CHUNK_TEXTURES` | 0 = off; else on (on) | A/B switch for the PC memory model (BB_GUEST_IN_PLACE): texture data is read by the GPU straight from the guest memory chunk it is in (no CPU copy, no VRAM buffer copy) when the range is contiguous. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:419`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.h:209` |
-| `BB_CHUNK_UPLOADS` | 0 = off; else on (on) | A/B switch for the PC memory model: VRAM copies are uploaded by GPU copies from the guest chunks; 0 = CPU staging instead. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:410` |
-| `BB_CONTENT_SKU` | full \| trial (default full) | AppContent SKU reported to the game (a probe setting, not a licence check). | `run.sh:189`, `scripts/content_profile.py:33` |
-| `BB_CP_DECODER` | 1 = on (off) | Opt-in: graphics command buffers are decoded by the translator's own decoder (gpu/cp) instead of shadPS4's packet walk. Off by default: the GPU thread spends ~7 % more per draw. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:906`, `gpu/shadps4/video_core/amdgpu/liverpool.h:111` |
-| `BB_CP_SHADOW` | 1 = on (off) | Self-check: the translator's own decoder (gpu/cp) also decodes every top-level graphics buffer in the shadow and the register files are compared; the first differences are printed. Off with the PM4 self-test or BB_CP_DECODER=1. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:1059-1108` |
-| `BB_DEBUG_KEEP` | 1 (set by tools/debug_attach.sh) | tools/debug_attach.py: keep the process stopped/attached after the dump; see tools/debug_attach.py:74. | `tools/debug_attach.py:74`, `tools/debug_attach.sh:18` |
-| `BB_DEBUG_OUT` | file (default stdout) | Output file of tools/debug_attach.py (gdb attach helper). | `tools/debug_attach.py:5` |
-| `BB_DIRECT_MEMORY_ACCESS` | 1/y/t or 0 (off) | shadPS4's direct memory access in shaders: when off, shaders that read memory themselves (uses_dma) get no DMA buffer. | `gpu/shim/core/emulator_settings.h:57`, `gpu/shadps4/shader_recompiler/ir/passes/shader_info_collection_pass.cpp:179` |
-| `BB_DUMP_GOT` | guest GOT offset (hex/dec) | With BB_SAMPLE_THREAD sampling: prints which host function a guest GOT slot calls. | `src/runtime_kernel.c:480` |
-| `BB_FENCE_DELAY_TEST` | 1 = on (off) | Experiment: holds every 200th fence back 80 ms, to test whether late labels corrupt the guest heap (the sequence numbers come from BB_FREE_CHECK=1). | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:407-414` |
-| `BB_FIXED_ARENA` | 1/0 forces on/off (unset = on when guest memory is host-imported, i.e. NVIDIA) | NVIDIA workaround for the sparse arena: the arena keeps the first binding of every block, so game data is read in place and never moved to VRAM. Not used with the layer memory module (BB_LAYER_MEMORY); only with BB_GUEST_IN_PLACE. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:435-457` |
-| `BB_FSR411_OUT` | directory (default fsr4_411 in the tree; launcher sets it) | **Internal.** Where tools/fsr4cap/build_assets.sh writes the FSR 4.1.1 asset set. | `tools/fsr4cap/build_assets.sh:37`, `launcher/bbport_launcher.py:480` |
-| `BB_FSR4CAP_CLEAN` | 1 = remove work folder (launcher sets it when packaged) | **Internal.** build_assets.sh removes its work folder after building FSR 4.1.1 assets. | `tools/fsr4cap/build_assets.sh:142`, `launcher/bbport_launcher.py:476` |
-| `BB_FSR4CAP_FP8` | auto \| 1 \| 0 (default auto) | FSR 4.1.1 capture: also record the DLL's FP8 matrix variant outside RDNA4 via GE-Proton's FP16 emulation (1), or never (0); auto records it only where the DLL uses it (RDNA4). | `tools/fsr4cap/capture_all.sh:10-15`, `tools/fsr4cap/capture_all.sh:176` |
-| `BB_FSR4CAP_RUNNER` | steam \| direct (default automatic) | FSR 4.1.1 capture: steam = use Steam's runtime even where umu-run would be used; direct = run Proton directly from the start. | `tools/fsr4cap/capture_all.sh:37`, `tools/fsr4cap/proton.sh:118-135` |
-| `BB_FSR4CAP_SPOOF` | 0 = off (default 1) | FSR 4.1.1 capture: when AMD's DLL offers only FSR 3/2 on this GPU, retry with the GPU reported as an RX 7800 XT. | `tools/fsr4cap/capture_all.sh:16-19`, `tools/fsr4cap/capture_all.sh:131` |
-| `BB_FSR4CAP_WORK` | directory (default out/fsr4cap; launcher sets <data>/fsr4cap when packaged) | **Internal.** Work folder of build_assets.sh (must be under $HOME for Steam's runtime). | `tools/fsr4cap/build_assets.sh:19-20`, `tools/fsr4cap/build_assets.sh:36`, `launcher/bbport_launcher.py:475` |
-| `BB_FSR4_TIERS` | space-separated list (default "1080 2160") | Which FSR 4 asset tiers tools/fetch_fsr4_assets.sh downloads. | `tools/fetch_fsr4_assets.sh:6`, `tools/fetch_fsr4_assets.sh:18` |
-| `BB_GAME_PROFILE` | none, or unset (by TITLE_ID) | `none` runs the game as an unknown one, without the Bloodborne profile (the code notes Bloodborne then crashes). | `gpu/games/game_profile.cpp:22`, `gpu/games/bloodborne.cpp:18` |
-| `BB_GC_BUDGET_MB` | MiB (unset = 0 = driver budget, integrated GPUs only) | Texture collector: applies the integrated-GPU rule (marks at 70/85/95 % of the budget) with this fixed budget on any GPU. For tests on a desktop. | `gpu/shadps4/video_core/texture_cache/texture_cache.cpp:1375-1386` |
-| `BB_GPU_DATA_CHECK` | 0 = off; else on (on) | With the PC memory model, GPU writes not finished yet and data the GPU wrote into a VRAM copy count as GPU-modified for CPU access checks (issue #122). 0 = not counted. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:1374-1382` |
-| `BB_GPU_LABELS_PORTABLE` | anything but 0 = on (off) | Writes GPU labels with portable Vulkan buffer updates even when VK_AMD_buffer_marker is available (testing the non-AMD path). | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:326` |
-| `BB_GPU_WRITES_IN_PLACE` | 1 = on (off) | With the PC memory model and no write tracking, GPU-written buffers are kept in the game's memory (in place) instead of VRAM; costs ~9 ms a frame over PCIe on an RX 7800 XT. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:1123-1132` |
-| `BB_GUEST_HOOKS` | 0 = off; else on (on) | Hooks in the game's own code from its profile (gpu/games): the memory hooks with the PC memory model, the fixes of the game's own bugs (BB_JOB_SLOT_FIX, BB_KERNEL_CLAMP) and the menu pointer (BB_MENU_POINTER) with either model. 0 = none, as for a game the port knows nothing about. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:572-583`, `gpu/shim/bbgpu.cpp:384-393`, `gpu/games/bloodborne.cpp:43-48` |
-| `BB_JOB_SLOT_FIX` | 0 = off (default on) | A render job that fails gives its pool slot back (the game kept it: Laurence's cinematic above 30 FPS emptied the pool and hung); also when a runner is destroyed holding one. | `gpu/shim/bbport_guest_hooks.cpp:450-477` |
-| `BB_KERNEL_CLAMP` | 0 = off (default on) | Raises the blur kernel's base sample count to 3 at the entry of 0xbbc3e0 (game data now and then gives 2: exception 0xa0020007). | `gpu/shim/bbport_guest_hooks.cpp:479-498` |
-| `BB_GX_QUERY_GUARD` | 0 = off (default on) | A GX occlusion query whose handle could not be created (the game does not look) is created again at its begin, or else not begun and not ended (its result: nothing visible), instead of the fault at 0x2169edc after a long session. Each failed creation is logged once a minute. From upstream 0.7 (PR #343 by whp199). | `gpu/shim/bbport_guest_hooks.cpp:655` |
-| `BB_RE_GX_QUERY` | 1 = on (off) | Logs the first GX occlusion query creations and query guard events with their thread. | `gpu/shim/bbport_guest_hooks.cpp:558` |
-| `BB_GX_QUERY_FAIL` | integer N (0) | Diagnostics: every N-th GX occlusion query creation fails as with a full heap, so the query guard's paths run in any session (2 reaches a scene). | `gpu/shim/bbport_guest_hooks.cpp:568` |
-| `BB_GUEST_HOOK_TRAPS` | 1 or unset (off) | Keeps the guest hooks as int3 traps instead of native detours. | `gpu/shim/bbport_guest_hooks.cpp:75`, `gpu/shim/bbport_guest_hooks.cpp:749` |
-| `BB_GUEST_WHOLE_CHUNKS` | 1 or unset (off) | Acts as if mapping a dma-buf at an offset failed (tests the NVIDIA path). | `gpu/shim/bbport_guest_memory.cpp:608` |
-| `BB_HEAP_HOOKS` | 0, or unset (on) | 0 (bisecting): the game heap's ranges are not reported to the GPU side. | `gpu/shim/bbport_guest_hooks.cpp:733` |
-| `BB_HLE_OFF` | bit mask, decimal or 0x hex (0): 1 = image copy, 2 = metadata clear, 4 = image clear | Experiment: the selected compute-shader substitutions (HLE) run as the game's own shaders instead. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:2389` |
-| `BB_HONEST_FLIPS` | 1 = on (off) | Experiment: a flip completes once the GPU has finished the frame (as on the PS4) instead of when the frame is queued. Did not help, so off. | `gpu/shadps4/core/libraries/videoout/driver.cpp:745-755` |
-| `BB_HONEST_IDLE_US` | microseconds (200) | With honest labels (BB_HONEST_LABELS): how long the GPU command thread waits idle before flushing unsubmitted work that fences may be waiting for. | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:136-146` |
-| `BB_HOT_PAGES` | 1 = on (off) | Opt-in: pages the guest writes again and again stay writable and are uploaded on every use instead of faulting. Off by default: in Hunter's Nightmare the set grew to ~14k pages and cost far more (33 FPS). | `gpu/shadps4/video_core/buffer_cache/region_manager.h:259-273` |
-| `BB_IMAGE_TRAPS` | 0 = off; else on (on, only with the PC memory model and no write tracking) | Pages under images are trapped for writes, so a write nobody announced still reaches the texture cache. 0 = announced writes only, as before. | `gpu/shadps4/video_core/page_manager.cpp:225-240` |
-| `BB_IME_TEXT` | text (default unset) | Answers every on-screen keyboard (IME) dialog at once with this text (automated runs). | `src/runtime_services.c:298` |
-| `BB_INPLACE_TEXTURES` | 1 = on (off) | A/B switch for the PC memory model: texture data bound in place whatever its memory type. Off by default: sampled data looked smeared and ghosted with it (2026-10-04). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:411`, `426-433` |
-| `BB_INTERNAL_HEIGHT` | pixels (1080) | Height of the video-out driver's internal screen (shadPS4 setting). See BB_RENDER_RES for the render size. | `gpu/shim/core/emulator_settings.h:24`, `gpu/shadps4/core/libraries/videoout/video_out.cpp:494` |
-| `BB_INTERNAL_WIDTH` | pixels (1920) | Width of the video-out driver's internal screen (shadPS4 setting). | `gpu/shim/core/emulator_settings.h:23`, `gpu/shadps4/core/libraries/videoout/video_out.cpp:493` |
-| `BB_LAYER_GPU_WRITES` | 0, 1 or 2 (1) | Layer memory module (BB_LAYER_MEMORY): where GPU writes may land in VRAM copies: 0 nowhere (in place), 1 in blocks the CPU has not written since they were handed out (render targets and other GPU-only data), 2 anywhere (gave exploding vertices and garbage textures). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.h:220-223`, `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:1209-1217` |
-| `BB_LAYER_PAGED` | 0 = off; else on (on) | Layer memory module (tests): 0 cuts huge bindings in place instead of going through the page table. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:1200-1207` |
-| `BB_LAYER_VOLATILE` | 1 = on (off) | Layer memory module: a range with a few unannounced ("volatile") blocks goes into one mirror anyway, those blocks refreshed for every binding that reads them. Off by default: the refreshes cost copies and render-pass breaks. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:58-70` |
-| `BB_LAYER_VOLATILE_IN_PASS` | 0 = off; else on (on) | Layer memory module: a read over volatile blocks inside an open render pass is bound in place instead of refreshing the mirror (a refresh copy ends the pass). 0 = refreshed in passes too (as before). | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:300-309` |
-| `BB_LAYER_WATCH_HOT` | 1 = on (off) | Experiment (layer memory module): blocks the CPU writes often are watched too and uploaded again after every write, as the 0.3 model does. Off: they go back in place (uploading them ended render passes). | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:428-438` |
-| `BB_LAYER_WRITE_TRAPS` | 0 = off; else on (on) | Layer memory module: blocks with a VRAM copy are write-protected so a write the game does not announce sends the block back in place before the next binding (else stale copies give exploding vertices and garbage textures). BB_LAYER_WATCH needs it. | `gpu/shadps4/video_core/buffer_cache/buffer_cache_layer.cpp:1386-1406` |
-| `BB_MEM_SEMAPHORE_ORDER` | 0 = off; else on (on, only with honest labels) | A MEM_SEMAPHORE signal is given once the GPU has finished the work before it, in stream order. 0 = signalled when decoded (as before). | `gpu/shadps4/video_core/amdgpu/liverpool.cpp:497-507` |
-| `BB_MENU_KEYS_FILE` | file path (unset: off) | Scripted menu tests: tokens in the file (toggle up down left right enter back l1 r1) are pressed one per frame when the file appears; it is then removed. | `gpu/shim/bbport_overlay.cpp:1087` |
-| `BB_MENU_POINTER_FILE` | file path (unset: off) | Scripted menu pointer tests: `x y [click\|right\|up\|down]` in the game's 1920x1080 stage pixels, applied when the file changes, as the mouse would; each item the pointer moves to is logged. | `gpu/games/bloodborne_menu_pointer.cpp:645` |
-| `BB_MENU_POINTER_LOG` | 1 (default off) | Logs each signal the menu pointer reads to tell a game menu is open (title, menu object, list focus) with the time it changed. | `gpu/games/bloodborne_menu_pointer.cpp:566` |
-| `BB_NULL_GPU` | 1/y/t or 0 (off) | shadPS4's null GPU: the command processor is not bound to the rasterizer, so nothing is drawn. | `gpu/shim/core/emulator_settings.h:61`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:75` |
-| `BB_OBJECT_MOTION_ALL` | 1 = on (off) | Keeps the old broad object-motion path (every candidate draw, without the bone-palette gate) for visual A/B tests. | `gpu/shadps4/video_core/renderer_vulkan/vk_pipeline_cache.cpp:921`, `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1705` |
-| `BB_STABLE_MOTION_HASH` | 1 = on (off) | Object motion: a draw's vertex streams are identified without their buffers' addresses, so streams the game rewrites into a ring buffer at a new address each frame keep one identity (steadier motion vectors); two objects laid out alike can share one. Off by default until compared; from Mrsuss60's Windows port. | `gpu/shadps4/video_core/renderer_vulkan/vk_draw_prep.h:44` |
-| `BB_OCCLUSION_LABEL_ORDER` | 0 = off; unset/other = on | With occlusion queries: results recorded before a label are written before it, as on the PS4. 0: labels may go ahead (statistics only). | `gpu/shadps4/video_core/renderer_vulkan/vk_occlusion.cpp:228` |
-| `BB_OCCLUSION_INTERVALS` | 0 = off; unset/other = on | With occlusion queries: samples are counted only while one of the game's queries is open (begin event seen, its end not yet), fewer query segments to copy (upstream 0.7: 164 → 189 FPS in its heaviest view). Events that do not pair up as begin and end turn it off for the session (logged). 0: counted all the time, as before. | `gpu/shadps4/video_core/renderer_vulkan/vk_occlusion.h:122` |
-| `BB_PACKAGE_FSR411` | 1 = include (build-time, default off) | Nix build: package the FSR 4.1.1 models (extracted from AMD's DLLs; never in a public package). | `packaging/default.nix:12-14` |
-| `BB_PAD_FILE` | file (default off) | Scripted input for automated runs: button names held while listed, lx=/ly=/rx=/ry= stick overrides, re-read when the file changes; token "replay" starts BB_PAD_REPLAY. | `src/runtime_pad.c:1021` |
-| `BB_CAM_TRACE` | file (default off) | Writes "ms yaw pitch" (radians) to this file whenever the camera turns, to measure how the game turns it for a stick input (with BB_PAD_FILE). Only with mouse_camera=stick in bbport.ini (the default is direct). | `gpu/shim/bloodborne_cam.cpp` (TraceTick) |
-| `BB_PAD_RECORD` | file (default off) | F9 starts/stops recording the pad state (gamepad or keyboard) to this file. | `src/runtime_pad.c:1066` |
-| `BB_PAD_REPLAY` | file (default off) | Plays a BB_PAD_RECORD recording back, started by the token "replay" in BB_PAD_FILE. | `src/runtime_pad.c:1098`, `src/runtime_pad.c:1098` |
-| `BB_PIPE_VERIFY` | integer N (0 = off) | Every Nth draw-pipe packet also carries the full register state, for verification. Exact check: see gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1177. | `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:822` |
-| `BB_PM4_SELFTEST` | 1 = on (off) | Self-test of command-processor packets Bloodborne never sends (occlusion queries, COPY_DATA, COND_EXEC, predication, MEM_SEMAPHORE, timestamps): injected ~40 s into the game and the results printed. Turns on BB_OCCLUSION_QUERIES. | `gpu/shadps4/video_core/amdgpu/pm4_selftest.cpp:221`, `gpu/shadps4/video_core/amdgpu/pm4_selftest.h:2` |
-| `BB_PM4_SELFTEST_STEPS` | bit mask (C integer, 0x allowed) (all steps) | PM4 self-test (BB_PM4_SELFTEST): which steps run (bit n = step n); others skipped. | `gpu/shadps4/video_core/amdgpu/pm4_selftest.cpp:250-254` |
-| `BB_PRESET_FILE` | file path holding a preset number (unset = off) | Read about once a second; switches the upscaler preset like the menu does (scripted tests of live preset changes). | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:323` |
-| `BB_PROBE` | path to a program; default bin/bb-probe (packaged) or out/bb-probe | Runs this instead of bb-probe, e.g. a gdb wrapper; bb-gpu-capabilities is then taken from its folder. | `run.sh:90`, `236-239` |
-| `BB_RESIDENCY_VRAM_LIMIT_MB` | MiB (unset = 0 = no limit) | Tests: VRAM counts as "full" after this many MiB of residency blocks, so blocks fall back to system memory read over the bus. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:1651-1656` |
-| `BB_SCENE_STENCIL_BITS` | 1 = on (off) | Forces reduced-size depth/stencil scene targets on GPUs without shader stencil export (e.g. Pascal), where they normally stay native (tests). | `gpu/shadps4/video_core/renderer_vulkan/vk_scene_resolution.cpp:25` |
-| `BB_DEPTH_MIN_FILTER` | 1 = on (off) | Reduced-size scene targets: depth-only targets are resampled by the shader, which keeps the nearest of each 2x2 when it downscales instead of one sample. Off by default until compared; from Mrsuss60's Windows port. | `gpu/shadps4/video_core/renderer_vulkan/vk_scene_resolution.cpp:63` |
-| `BB_SHADOWS` | 1 = on (off) | With the PC memory model on a discrete GPU, a read-only binding of data the CPU writes in place is copied once per submission into VRAM and bound there. Off by default: cost more than reading in place (48 -> 44 FPS). | `gpu/shadps4/video_core/buffer_cache/buffer_cache.h:305-309`, `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:2847` |
-| `BB_SKIP_CPU_CHECK` | 1 = skip (default check) | Skips the start-up check for the CPU features the game's code needs (AVX, BMI1, MOVBE, LZCNT, POPCNT); without them the game crashes with SIGILL. | `src/probe.c:45-52` |
-| `BB_SUBMIT_LOCK` | gpu \| ahead \| anything else (unset = frame/decode behaviour) | Submission lock mode with honest labels: unset/other = submissions are handed to the GPU first and return once the previous frame finished; gpu = the lock as before (wait for GPU idle); ahead = experiment, submissions never wait and sceGnmSubmitDone(F) waits for frame F-1. Only "gpu" and "ahead" are compared in code. | `gpu/shadps4/core/libraries/gnmdriver/gnmdriver.cpp:92-130`, `gpu/shadps4/core/libraries/gnmdriver/gnmdriver.h:229` |
-| `BB_TEST_STAGE` | integer | **Test only.** Used only inside tests/test_run_settings.py's fake probe. | `tests/test_run_settings.py:45` |
-| `BB_TIMEOUT` | seconds, 0 = none (run.sh default 0) | Watchdog: run.sh passes it as bb-probe --timeout; the process is stopped after that many seconds. | `run.sh:404`, `src/probe.c:381-437` |
-| `BB_TOGGLE_FILE` | file path (unset = off) | The file holds "N [M]", re-read every 250 ms: N is a bit mask of optimizations switched off while the game runs, M temporary experiment bits (A/B without restarting). Bits listed in src/runtime_memory.c and gpu/shim/bbport_toggles.h. | `src/runtime_memory.c:774`, `src/runtime_memory.c:774`, `gpu/shim/bbport_toggles.h:1` |
-| `BB_TROPHY_PREVIEW` | trophy id (default off) | At the game's first trophy call, shows that trophy's notice without recording it, to check how it looks. | `src/runtime_services.c:399` |
-| `BB_UI_TRIGGER_VS` | hex shader hash (0x34e8a281) | Vertex shader hash that marks the UI/movie phase of a frame for the upscaler. | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:196`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.h:225` |
-| `BB_UPSCALE_BEFORE_CS` | hex shader hash (0x9a9cf8a9) | Compute shader hash before which the upscaler runs on the scene color (the post-processing combine pass). | `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.cpp:193`, `gpu/shadps4/video_core/renderer_vulkan/vk_temporal_upscaler.h:207` |
-| `BB_VRAM_LIMIT_MB` | integer MiB (0 = no limit) | Tests: the driver's VRAM budget is taken as at most N MiB, so the texture collector and VRAM copies behave as on a smaller card. Allocations themselves are not limited. | `gpu/shadps4/video_core/renderer_vulkan/vk_instance.cpp:39` |
-| `BB_WORK_RETIRED` | 0 = off; else on (on) | GPU idle (sceGnmSubmitDone not blocking) also requires the draw recording thread and its deferred fences to be done; 0 = only submissions counted (Steam Deck crashes noted). | `gpu/shadps4/video_core/amdgpu/liverpool.h:141-150`, `gpu/shadps4/core/libraries/gnmdriver/gnmdriver.cpp:94` |
-| `BB_WRITE_TRACKING` | 1 = on (off; on anyway without the PC memory model) | Forces page write tracking (protection) back on with the PC memory model (BB_GUEST_IN_PLACE), where it is otherwise off. | `gpu/shadps4/video_core/buffer_cache/buffer_cache.cpp:487-495`, `gpu/shadps4/video_core/buffer_cache/buffer.h:48` |
-| `SHADPS4_BBSC_NO_FAST_SIGN` | — | **No effect in this port.** Named only in the vanilla-emulator stub of SwitchEnabled; never read by libbbsc. | `bbsc/emulator/src/core/bbsc_persistence.h:59-67` |
-| `SHADPS4_BBSC_NO_GUEST_HOOKS` | "0" off, any other non-empty value on; default off | Isolation switch: skips the per-tick guest pre-match warp, deferred reload and responder re-ring (byte patches stay installed). | `bbsc/emulator/src/core/bloodborne_re.cpp:16170` |
-| `SHADPS4_BBSC_NO_PLACEMENT_HEADER` | — | **No effect in this port.** Named only in the vanilla-emulator stub of SwitchEnabled (counts as set when BBSC is not built in); never read by libbbsc. | `bbsc/emulator/src/core/bbsc_persistence.h:59-67` |
-| `SHADPS4_BBSC_PHANTOM_FLAGS` | "0" off, any other non-empty value on; default off | Re-enables an experiment writing the phantom creation flags onto the guest (made the guest invisible and immune to damage). | `bbsc/emulator/src/core/bloodborne_re.cpp:3813` |
-| `SHADPS4_BBSC_REINSERT` | joined \| leftjoined; unset, empty or 0: off (default) | Experimental: after a kept session end, replays the room members once the stage load is consumed; "leftjoined" also announces them as left first. | `bbsc/emulator/src/core/bloodborne_re.cpp:3396` |
-| `SHADPS4_BBSC_REINSERT_DELAY_MS` | milliseconds; default 6000 | Delay before the experimental SHADPS4_BBSC_REINSERT replay runs. | `bbsc/emulator/src/core/bloodborne_re.cpp:3427` |
-| `SHADPS4_BBSC_REJOIN_V6` | "0" off, any other non-empty value on; default off | Restores the older v6 deferred rejoin path instead of the default v7. | `bbsc/emulator/src/core/bloodborne_re.cpp:3474` |
-| `SHADPS4_P2P_SAME_HOST` | any value but 0 (off) | Two instances on one machine: the peer given as this network's own public address is reached through loopback. | `gpu/bbnet/shadps4/core/libraries/network/p2p_sockets.cpp:65` |
-
-## Internal
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BB_SAVEDATA_TITLE` | title id | **Set by the runtime**, not by you: the save folder's title id, for BBSC's save path (`BBSC_SAVE_DIR`). | `src/runtime_savedata.c:106` |
-| `BB_AUTO_RENDER_RES` | 1 or unset | **Internal** (run.sh sets it with BB_RENDER_RES/BB_OUTPUT_RES). Marks BB_RENDER_RES/BB_OUTPUT_RES as chosen by run.sh from bbport.ini output_res (startup patch); run.sh drops them (and BB_UI_RES) on an in-game restart so they are recomputed, and the menu shows the matching hint. | `run.sh:68-70`, `run.sh:119`, `gpu/shim/bbport_overlay.cpp:442` |
-| `BB_BBSC_LIB` | path to libbbsc.so; default out/bbsc/libbbsc.so or BB_BBSC_PACKAGED_LIB | **Internal.** Library bb-probe loads into the game for seamless co-op. run.sh unsets it unless BB_BBSC=1 and BB_ONLINE=1, then resolves it (an explicit value is kept as an override). | `src/probe.c:340`, `run.sh:341`, `287-295` |
-| `BB_BBSC_PACKAGED_LIB` | path (set by the AppImage entry) | **Internal.** Location of the packaged libbbsc.so; run.sh falls back to it when BB_BBSC_LIB is unset, the launcher uses it to know BBSC is available. | `packaging/appimage-sharun.sh:73`, `run.sh:341`, `launcher/bbport_launcher.py:573` |
-| `BB_BRIDGE_CLI` | path (default out/bbbridge/bbbridge-cli; AppImage sets its copy) | **Internal.** The bbbridge-cli binary used for The Hunter's Dream. | `run.sh:313`, `launcher/bbport_launcher.py:580`, `packaging/appimage-sharun.sh:71` |
-| `BB_BUNDLED_VK_DRIVER_FILES` | colon-separated ICD list (set by the Nix wrapper) | **Internal.** The package's own Mesa ICDs; bbport_vulkan.py puts them in VK_DRIVER_FILES (after the host NVIDIA ICD if one is found). | `launcher/bbport_vulkan.py:71`, `packaging/default.nix:215` |
-| `BB_DLSS_DIR` | directory (unset = next to bb-probe) | **Internal.** Where the DLSS bridge (libbbport_dlss.so) and NVIDIA's libnvidia-ngx-dlss are looked up. The AppImage entry sets it to its own dlss folder. | `gpu/shadps4/video_core/renderer_vulkan/vk_dlss.cpp:61`, `packaging/appimage-sharun.sh:69`, `launcher/bbport_launcher.py:448` |
-| `BB_FSR4CAP_CHECKED` | 1 (set by the script itself) | **Internal.** build_assets.sh marks that the DLL check already ran (re-exec guard). | `tools/fsr4cap/build_assets.sh:49-51` |
-| `BB_FSR4CAP_ON_HOST` | 1 (set by the script itself) | **Internal.** capture_all.sh re-runs itself on the host through systemd-run; this marks the re-run. | `tools/fsr4cap/capture_all.sh:47`, `tools/fsr4cap/capture_all.sh:62` |
-| `BB_FSR4CAP_SHELL` | 1 (set by the script itself) | **Internal.** build_assets.sh re-exec guard inside nix-shell (missing build tools). | `tools/fsr4cap/build_assets.sh:65-68` |
-| `BB_FSR4CAP_TOOLS` | directory (launcher sets it when bundled) | **Internal.** Folder holding prebuilt dxil-spirv and fsr4cap.exe, so build_assets.sh needs no MinGW toolchain. | `tools/fsr4cap/build_assets.sh:13`, `tools/fsr4cap/build_assets.sh:38`, `launcher/bbport_launcher.py:479` |
-| `BB_FSR4CAP_UMU_SHELL` | 1 (set by the script itself) | **Internal.** capture_all.sh re-exec guard inside a nix-shell with umu-launcher (NixOS). | `tools/fsr4cap/capture_all.sh:40-44` |
-| `BB_HOST_<NAME>` | set by the packaged entry | **Internal.** Copies of host variables the packaged entry dropped (LD_PRELOAD, LD_LIBRARY_PATH, GTK_*, pressure-vessel VK_* …), kept only for the log. | `packaging/bbport-entry.c:19-28`, `packaging/appimage-sharun.sh:73-79` |
-| `BB_IN_NIX_SHELL` | 1 (set by run.sh) | **Internal.** run.sh re-exec guard when it re-runs itself inside nix-shell. | `run.sh:37-39` |
-| `BB_NET_MODULE` | path (AppImage sets its copy; default gpu/libbbnet.so beside bb-probe) | **Internal.** The online module (libbbnet.so) the runtime dlopens. | `src/runtime_net.c:43-50`, `packaging/appimage-sharun.sh:70`, `launcher/bbport_launcher.py:596` |
-| `BB_PKGEXTRACT` | path (AppImage sets its copy) | **Internal.** pkgextract binary for "Install from PKG". | `scripts/pkg_install.py:50-51`, `launcher/bbport_launcher.py:587`, `packaging/appimage-sharun.sh:72` |
-| `BB_PREBUILT` | 1 (AppImage/Nix wrapper) | **Internal.** Packaged build: binaries are installed next to run.sh, nothing is built and no nix-shell is used; the launcher stores data in BB_DATA_DIR. | `run.sh:14`, `run.sh:284`, `launcher/bbport_launcher.py:55`, `packaging/appimage-sharun.sh:66` |
-| `BB_PRESENCE_DIR` | directory (run.sh: out/presence, new each start) | **Internal** (run.sh, when Discord is on). Where the game writes the current area (`area`) and co-op partners (`coop`) for the Discord Rich Presence helper. | `run.sh:360`, `src/runtime_file.c:317`, `gpu/bbnet/shadps4/core/libraries/np/np_signaling/np_signaling_state.cpp:248` |
-| `BB_TROPHY_DIR` | directory (run.sh sets it) | **Internal.** Trophy list and icons prepared by scripts/trophies.py; trophies are recorded there and shown in the overlay. | `run.sh:354`, `src/runtime_services.c:335` |
-| `BB_VULKANINFO` | path (default vulkaninfo) | **Internal.** vulkaninfo binary used by bbport_vulkan.py --vulkan-info (packaged builds set their copy). | `launcher/bbport_vulkan.py:199`, `packaging/appimage-sharun.sh:68` |
-| `DISABLE_GAMESCOPE_WSI` | 1 (set by the packaged entry) | **Internal.** Set when Steam's pressure-vessel Vulkan variables were dropped, turning off the host's gamescope WSI layer. | `packaging/bbport-entry.c:61-63`, `packaging/appimage-sharun.sh:87` |
-| `DISABLE_MANGOHUD` | 1 (set by run.sh) | **Internal.** Set when Steam's performance overlay already draws MangoHud. | `run.sh:250` |
-| `DISABLE_VK_LAYER_VALVE_steam_fossilize_1` | 1 (set by the Nix entry) | **Internal.** Disables Steam's fossilize Vulkan layer in the Nix package. | `packaging/bbport-entry.c:65` |
-| `DISABLE_VK_LAYER_VALVE_steam_overlay_1` | 1 (set by the Nix entry) | **Internal.** Disables Steam's overlay Vulkan layer (a host library) in the Nix package. | `packaging/bbport-entry.c:64` |
-| `GSK_RENDERER` | launcher default cairo | **Internal.** GTK renderer of the launcher window (setdefault: your value wins). | `launcher/bbport_launcher.py:38` |
-| `PYTHON` | path (default python3 on PATH) | **Internal.** Python used by run.sh for its scripts (the AppImage/Nix set their own). | `run.sh:54-62`, `packaging/appimage-sharun.sh:67` |
-| `SHADPS4_HTTP_HOST_OVERRIDES_JSON` | path to a JSON file; unset: <user>/host_overrides.json | **Internal.** Host-overrides file (game URL rewrites) for the online module and BBSC's relay lookup. run.sh writes it from scripts/online.py whenever Online is on, overwriting any value given. | `run.sh:315`, `gpu/bbnet/shadps4/core/libraries/network/http.cpp:336-343`, `bbsc/emulator/mod/bbsc_relay.cpp:150-156` |
-
-## Not read by the game
-
-These names look like game variables but are read only by the BBSC server's Docker image (`tools/bbsc-server`); putting them in the launcher has no effect.
-
-| Variable | Values (default) | What it does | Where |
-|---|---|---|---|
-| `BBSC_BBHOST` | 0 = off (default 1) | Server-side (tools/bbsc-server Docker image): 0 starts it without its bbhost-compatible service (TCP 18671, UDP 3478). Not a game variable. | `tools/bbsc-server/entrypoint.sh:16-18` |
-| `BBSC_HOST` | address (required) | Server-side (tools/bbsc-server): the address players reach the BBSC game server at. Not a game variable. | `tools/bbsc-server/entrypoint.sh:2-14` |
-| `BBSC_SHADNET` | address (default BBSC_HOST) | Server-side (tools/bbsc-server): the shadNet server the BBSC server talks to. Not a game variable. | `tools/bbsc-server/entrypoint.sh:3-7` |
-
-## Known quirks
-
-- **`BB_UPSCALER` is read in three places.**
-  - The GPU library takes `off`/`fsr3`/`fsr4`/`fsr411`/`taa`/`dlss` (anything else means off).
-  - `none` also switches off the upscaler machinery entirely.
-  - `scripts/patches.py` only tells `fsr3` from the rest when it sizes the startup render patch.
-  - `BB_UPSCALE_PRESET` is likewise ignored by `run.sh`'s startup size, which follows bbport.ini.
-- **Two defaults.**
-  - `BB_PREUPLOAD`, `BB_COPY_GPU_BUFFERS`, `BB_GPU_WRITE_TWINS` and `BB_GPU_WRITE_TWINS_MAX`: `run.sh`
-    exports a value different from the code's built-in default. The tables give both.
-  - `BB_SHADNET_SERVER`/`BB_SHADNET_WEBAPI`: the code falls back to `127.0.0.1`, `run.sh` to
-    Seamless Hunt's `play.seamlesshunt.com`.
-  - `BB_TIMEOUT`: bb-probe's own default is 10 s, but `run.sh` passes 0 (no watchdog).
-- **Two names.** Inside libbbsc, `SHADPS4_BLOODBORNE_RE_TRACE` is redirected to `BBSC_MOD_HOOKS`, and
-  `SHADPS4_BLOODBORNE_SEAMLESS_COOP` to `BBSC_MOD_SEAMLESS` (`bloodborne_re.cpp:942-955`).
-  `SHADPS4_BLOODBORNE_SEAMLESS_COOP` keeps a separate meaning in the online module (summons through
-  the WebAPI).
-- **BBSC switches not in mod.json** have no launcher toggle, but they are on by default and can be
-  turned off with `=0`:
-  - `SHADPS4_BBSC_WARP_JOIN`, `PERSIST`, `PERSIST_MATCHCHECK`, `PERSIST_TASKS` and `REJOIN`;
-  - `CINEMATIC` (F1 free camera) and `INVADE_ANYWHERE`;
-  - `TRACE_WALLS`, a log.
-- **BBSC scaling:** the launcher limits `BBSC_SCALE_*` to 0–300/0–200, but the code clamps to 0–1000.
-- **Variables that need another one:**
-  - `BB_TRACE_ADDR` needs `BB_TRACE_SIZE`.
-  - `BB_LABEL_TRAP` needs `BB_FREE_CHECK=1`.
-  - `BB_TIMELINE_START` needs `BB_TIMELINE`.
-  - `BB_GNM_TRACE` and `BB_GNM_CENSUS_RANGE` need `BB_GNM_CENSUS` or `BB_GNM_OBSERVE`.
-  - `BB_FSR1`, `BB_RCAS` and `BB_RCAS_ATTENUATION` drive shadPS4's old FSR 1 presenter pass, not the
-    port's upscaler or its sharpening.
-- **No effect in the Linux port:**
-  - `SHADPS4_BBSC_DISCORD`: `bbsc_discord.cpp` is not built, although the launcher still writes it.
-  - `BBSC_URL_OVERRIDES` and `BBSC_EMULATOR`: Windows only.
-  - `SHADPS4_BBSC_NO_PLACEMENT_HEADER` and `SHADPS4_BBSC_NO_FAST_SIGN`: never read.
-  - `SHADPS4_BLOODBORNE_RE_TRACE`: aliased, see above.
-  - `SHADPS4_BBSC_INTRO` is named in a comment (`bbsc_persistence.h`) and never read.
-
-## Undocumented
-
-These variables are read, but the code does not say clearly enough what every value does:
-
-- `SHADPS4_BBSC_SKIP_LEAVE_LIMIT`: enables the persistent-session patch group "LeaveLimit"; its
-  effect is not described (`bbsc/emulator/src/core/bbsc_patch_tables.h:426`).
-- `BB_TAA_DIAGNOSTICS`: the meaning of values 1–3 is in the shader
-  (`gpu/shadps4/video_core/host_shaders/taa.comp:16`).
-- `BB_PIPE_VERIFY`: the exact check is in `gpu/shadps4/video_core/renderer_vulkan/vk_rasterizer.cpp:1177`.
-- `BB_DEBUG_KEEP`: used only by `tools/debug_attach.py:74`.
