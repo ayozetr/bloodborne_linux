@@ -10,14 +10,12 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [here](../BBPORT.md). |
 | [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes. |
 | [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): video memory on 4 GB cards, crash and freeze fixes, fewer stutters while areas load, stick options, save import and the version selector. |
-| [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler, and the online code. |
-| [Wozzardman/shadp2p](https://github.com/Wozzardman/shadp2p) | The network and PSN libraries for online play. |
+| [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler they started from, and the online code: shadPS4 0.20's network, NP and shadNet libraries, put together for bbport by Awaken ([gpu/bbnet20](../gpu/bbnet20)). |
 | [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([hosting your own server](SERVER.md)). |
-| [MaskZeus/bbbridge](https://github.com/MaskZeus/bbbridge) | Co-op on The Hunter's Dream's pool ([bbbridge/](../bbbridge/)). |
-| [Classmg22/BBSC](https://github.com/Classmg22/BBSC) | Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon ([bbsc/](../bbsc/)). |
+| [Classmg22/BBSC](https://github.com/Classmg22/BBSC) | Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon ([gpu/bbnet20/bbsc](../gpu/bbnet20/bbsc), its game server in [scripts/bbsc_gameserver](../scripts/bbsc_gameserver)). |
 | [fhody125-web/NoDreamForHunter](https://github.com/fhody125-web/NoDreamForHunter) | The base of BBSC's game server. |
 | [MikeTat1988/HuntersAtlas](https://github.com/MikeTat1988/HuntersAtlas) | Hunter's Atlas: the fullscreen in-game map, its quick-menu tile, lamp travel and the map generator ([tools/hunters-atlas](../tools/hunters-atlas)), which runs with Grimrukh's [soulstruct](https://github.com/Grimrukh/soulstruct). |
-| [The Hunter's Dream](https://thehuntersdream.com) | The online server, by droogie and its team; droogie's bbhost also brought fast loading after a death or travel. |
+| [The Hunter's Dream](https://thehuntersdream.com) | The online server, by droogie and its team; droogie's [bbhost](https://github.com/droogie/bbhost) is the base of its backend in the online module ([gpu/bbnet20/thd](../gpu/bbnet20/thd)) and brought fast loading after a death or travel. |
 | [IFreemz/shadPS4-Bloodborne-DLSS-FSR](https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR) | The groundwork for DLSS, and the FSR 4 model without trails. |
 | [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS) | DLSS. |
 | [FireBurn/FSR-Vulkan](https://github.com/FireBurn/FSR-Vulkan) | FSR 3.1, with the AMD FidelityFX SDK. |
@@ -27,6 +25,16 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 | [GoldHEN_Patch_Repository](https://github.com/GoldHEN/GoldHEN_Patch_Repository) | Game patches by Kyo, Lance McDonald, auser1337, illusion, emoose and the Bloodborne community: high frame rates, resolution, ultrawide and more. |
 | [Nexus Mods: mod 30](https://www.nexusmods.com/bloodborne/mods/30) | Dommo's Xbox and Switch button prompts and stripped-down gestures menu, uploaded by goomab ([assets/menu_prompts](../assets/menu_prompts)). |
 | [Nexus Mods: mod 537](https://www.nexusmods.com/bloodborne/mods/537) | Abken's KBM Icons Generator, which showed which textures keyboard prompts need (after [mod 460](https://www.nexusmods.com/bloodborne/mods/460)). |
+
+## bbport 0.7's contributors
+
+This fork is built on bbport 0.7, which took pull requests and outside work from Qiming-Liu,
+AndiMajore, adds39939, iannitram, maiconjsv, whp199, DominickCobb-rs, Sarxzer, wheat32,
+ArenaMMORPG, guutol (Luís Gustavo P. Bomfim), redditor69, SrShadowy and Teefpyre, Supermedo and
+Awaken, and in earlier releases SrDeTs, IgorWarzocha, itachi-re, Bainianzzz, hideoneric,
+guitaripod, unTanana, andrR89, JuanraCM, SaeedShow, msisovic, AyrtonSanabio, axpico, Aryxa,
+Obrikash and noelmiller. What each one did:
+[bbport's list](https://github.com/deadinside28/bloodborne_pc/blob/master/docs/CONTRIBUTORS_0.7.md).
 
 ## People
 
@@ -42,7 +50,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
   bindings, freezes in memory allocation and draw preparation, index buffers of indirect draws,
   ZPASS queries in order, and camera motion vectors without NaN.
 - **[Classmg22](https://github.com/Classmg22)** (CLS_AMG): BBSC, Seamless Co-op.
-- **[MaskZeus](https://github.com/MaskZeus)**: bbbridge.
+- **[MaskZeus](https://github.com/MaskZeus)**: bbbridge, which brought The Hunter's Dream's co-op to the releases before 0.70-linux.
 - **[Wozzardman](https://github.com/Wozzardman)**: the online libraries and the co-op server.
 - **[droogie](https://github.com/droogie)**: The Hunter's Dream server, and fast loading (bbhost).
 - **[fhody125-web](https://github.com/fhody125-web)**: NoDreamForHunter, the base of BBSC's game server.
