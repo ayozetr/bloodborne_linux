@@ -2,7 +2,7 @@
 
 Bells and summons go through a shadNet server. shadPS4's public one (`srv.shadps4.net`) no longer
 accepts bbport builds, and the public pools for bbport are Seamless Hunt (the default) and The
-Hunter's Dream's, through bbbridge (the launcher's **Multiplayer → Online** tab; [README](../README.md#online-play)). A group of friends
+Hunter's Dream's (the launcher's **Multiplayer → Online** tab; [README](../README.md#online-play)). A group of friends
 can also run their own server:
 [shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) by Wozzardman, the shadNet server with
 that UDP port working and a summon service of its own.

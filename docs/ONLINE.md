@@ -27,21 +27,20 @@ back). Messages, ghosts and summon signs are not affected.
 ## The Hunter's Dream (with bbhost's players)
 
 Choose **The Hunter's Dream (with bbhost players)** in the launcher's **Multiplayer → Online** tab.
-[bbbridge](../bbbridge/README.md) by MaskZeus starts with the game, stands in for a shadNet server
-on this computer and talks to The Hunter's Dream the way bbhost does, its relay included, so no
-router port is needed. The account is The Hunter's Dream's, kept in `user/bbbridge` (no password):
+The game's online module talks to The Hunter's Dream itself, the way bbhost does (from bbport 0.7):
+nothing else runs next to the game. Its account is your Discord sign-in, the same one bbhost uses:
 
-- **Sign in with Discord**: the launcher shows a code and opens The Hunter's Dream's page; approve
-  it there. The account is the same one bbhost uses.
-- **Without Discord**: type a name and **Create**. Keep the recovery code the launcher shows:
-  with the name, it brings the account back on another computer (**Recover**).
+1. Press **Sign in with Discord**. The launcher shows a code, copies it and opens The Hunter's
+   Dream's page.
+2. On that page, press *Sign in with Discord to link* and sign in; back on the page, enter the code
+   in the code field (not in *Sign in with a code from the game*).
 
-The game's play log (its own telemetry) stays blocked, so The Hunter's Dream's live map does not
-show you.
+No password is kept: the launcher keeps the sign-in's token with its settings. **Sign out** forgets
+it. **Test** checks The Hunter's Dream's game server and its co-op service. Seamless co-op (BBSC)
+is not available there.
 
-**This connection is unofficial.** The Hunter's Dream's team has not approved bbbridge, and they
-do not support bbport: report problems here ([issues](https://github.com/ayozetr/bloodborne_linux/issues)),
-not to The Hunter's Dream's support.
+Report problems here ([issues](https://github.com/ayozetr/bloodborne_linux/issues)), not to The
+Hunter's Dream's support.
 
 ## Your own server
 
@@ -64,11 +63,13 @@ when the game started, the game keeps trying in the background.
 [BBSC](https://github.com/Classmg22/BBSC) (Bloodborne Seamless Co-op, by CLS_AMG) keeps a co-op
 session going through deaths, lamps, areas, bosses and the Hunter's Dream, for up to 5 hunters:
 the guest follows the host through lamps, sees the host's world (doors, bosses, lifts), keeps the
-items and echoes it gets, and enemies get stronger for every guest. It runs inside the game
-(`bbsc/`, loaded as `libbbsc.so`). It is new, and its own author marks much of it as untested.
+items and echoes it gets, and enemies get stronger for every guest. It runs inside the game's
+online module (`gpu/bbnet20/bbsc`, BBSC 0.0.2 from bbport 0.7). It is new, and its own author
+marks much of it as untested.
 
-1. In the launcher's **Multiplayer → Online** tab, turn on BBSC in the **Seamless co-op (BBSC)** group. **BBSC settings** has its
-   options (the same as in BBSC's Windows launcher); the defaults are BBSC's.
+1. In the launcher's **Multiplayer → Online** tab, **Enable BBSC** in the **Seamless co-op (BBSC)**
+   group (on by default). While it is on, BBSC's bells replace the game's; turned off, the game's
+   come back the next time the character is loaded (the save is copied to `save-backups` first).
 2. Every player of the session needs BBSC, the same version: on Linux this port, on Windows
    BBSC's package for the Windows port (its *BBport* release). A player without it plays the
    normal game.
@@ -76,14 +77,11 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
    - **BBSC's game server** (Seamless Hunt's, which comes with it, or your group's,
      [hosted with it](SERVER.md#seamless-co-op-bbsc)): everything, summons across areas and 5 hunters included. Set it as the
      **Game server** of the Online tab.
-   - **The Hunter's Dream**: the session stays together (deaths, lamps, bosses), but summons are
-     the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
-     Its messages go straight between the players.
+   - **The Hunter's Dream** has no BBSC: the normal game's co-op, with bbhost's players.
 
    With BBSC and BBSC's game server, two players who cannot reach each other directly (CGNAT,
    strict routers, two games on one PC) are connected through that server's UDP relay (port
-   3478); `SHADPS4_P2P_RELAY=0` turns it off. Without BBSC, and on The Hunter's Dream (bbbridge
-   relays by itself), the relay is off.
+   3478); `SHADPS4_P2P_RELAY=0` turns it off.
 
 BBSC gives every character its own items, which cost no Insight: the **Hunt Bell** (call other
 players), the **Kin Bell** (join another player), the **Bloodlust Bell** (invade), the **Duel Bell**
