@@ -11,6 +11,8 @@
 extern __thread sigjmp_buf *runtime_fault_recover;
 /* Restarts the game (in-game settings menu, render resolution change). */
 void runtime_restart(void);
+/* The floating-point state a PS4 gives its threads (runtime_thread.c). */
+void runtime_orbis_fpu(void);
 #define ABI __attribute__((sysv_abi))
 /* The clock of the runtime's condition variable deadlines: monotonic on Linux; winpthreads'
  * conditions take only CLOCK_REALTIME deadlines. */
