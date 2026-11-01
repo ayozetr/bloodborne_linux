@@ -51,7 +51,13 @@ EFFECTS={
     'skip_intro':(None,'Skip Intro'),
     'debug_camera':(None,'Restore Debug Camera'),
     'debug_menu':(None,'Restore Debug Menu (READ NOTES)'),
+    # Loading and smoothness (from droogie/bbhost); the first two are on unless turned off.
+    'tweak_quick_reentry':(None,'Quick Re-entry'),
+    'tweak_fast_deflate':(None,'Fast Run-time Deflate'),
+    'tweak_post_processors':(None,'All Resource Post-Processors In Play'),
 }
+# Effects on when bbport.ini does not name them (files from before they existed).
+DEFAULT_ON={'tweak_quick_reentry','tweak_fast_deflate'}
 # Intel CPUs: the game's tone mapping turns black (DLC areas most; reported as darker than on the
 # PS4): the game code runs natively, and Intel's approximate float instructions differ from the
 # PS4's AMD CPU, so a block the game gates on a computed flag never runs. The community fix runs
@@ -194,9 +200,9 @@ def effect_patches(settings, env=os.environ):
     settings=dict(settings,effect_game_aa='1' if game_aa else '0')
     if fxaa and not hot: names.append(FORCE_FXAA)
     for key,(off,on) in EFFECTS.items():
-        if key not in settings: continue
+        if key not in settings and key not in DEFAULT_ON: continue
         if hot and key in HOT_EFFECTS: continue
-        name=on if settings[key]=='1' else off
+        name=on if settings.get(key,'1')=='1' else off
         if name: names.append(name)
     lod=MODEL_LOD.get(settings.get('model_lod','0'))
     if lod: names.append(lod)

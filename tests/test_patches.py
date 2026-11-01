@@ -17,6 +17,8 @@ from patches import (EBOOT_BASE, OUTPUT_SIZE, RESOLUTION_TEMPLATE, SCENE_HEIGHT,
 
 XML = ROOT / 'patches/Bloodborne.xml'
 SEGMENTS = [(0, 0x6000000)]
+# The loading patches that are on by default (patches.DEFAULT_ON), turned off where a test counts others.
+LOADING_OFF = {'tweak_quick_reentry': '0', 'tweak_fast_deflate': '0'}
 
 
 def immediate(writes, address):
@@ -91,19 +93,30 @@ class NativeUiTests(unittest.TestCase):
         self.assertIsNone(scaled_sizes({'output_res': '1280x720', 'upscaler': 'taa', 'preset': '3'}))
 
 
+class LoadingPatchTests(unittest.TestCase):
+    def test_bbhost_loading_patches_on_unless_turned_off(self):
+        on = ['Quick Re-entry', 'Fast Run-time Deflate']
+        self.assertEqual(effect_patches({}, {}), on)
+        self.assertEqual(effect_patches({'tweak_quick_reentry': '0'}, {}), on[1:])
+        self.assertEqual(effect_patches({'tweak_post_processors': '1'}, {}),
+                         on + ['All Resource Post-Processors In Play'])
+        self.assertEqual(len(compile_patches(XML, on + ['All Resource Post-Processors In Play'],
+                                             '01.09', SEGMENTS)), 3)
+
+
 class DebugPatchTests(unittest.TestCase):
     def test_ssr_uses_complete_startup_patch_with_live_effects(self):
         for env in ({}, {'BB_HOT_EFFECTS': '0'}):
-            names = effect_patches({'effect_ssr': '1'}, env)
+            names = effect_patches({'effect_ssr': '1', **LOADING_OFF}, env)
             writes = dict(compile_patches(XML, names, '01.09', SEGMENTS))
             # Replace both dimension-halving instructions before allocation.
             self.assertEqual(writes[0x22c428d], bytes.fromhex('0f1f4000'))
             self.assertEqual(len(writes), 10)
-            self.assertEqual(effect_patches({'effect_ssr': '0'}, env), [])
-        self.assertEqual(effect_patches({'effect_bloom': '0'}, {}), [])
+            self.assertEqual(effect_patches({'effect_ssr': '0', **LOADING_OFF}, env), [])
+        self.assertEqual(effect_patches({'effect_bloom': '0', **LOADING_OFF}, {}), [])
 
     def test_camera_patch_is_optional_and_compatible_with_fps_and_debug_menu(self):
-        self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0'}), [])
+        self.assertEqual(effect_patches({'debug_camera': '0', 'debug_menu': '0', **LOADING_OFF}), [])
         camera = effect_patches({'debug_camera': '1'})
         writes = compile_patches(XML, camera, '01.09', SEGMENTS)
         self.assertGreater(len(writes), 0)
