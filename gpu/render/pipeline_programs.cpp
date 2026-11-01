@@ -20,6 +20,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <optional>
 #include <fstream>
 #include <thread>
 #include <unordered_set>
@@ -36,6 +37,7 @@ extern char** environ;
 
 #include "bbport_sections.h"
 #include "bbport_toggles.h"
+
 #include "buffers/buffer_cache.h"
 #include "common/hash.h"
 #include "common/scope_exit.h"
@@ -64,6 +66,9 @@ extern char** environ;
 #include "vulkan/instance.h"
 #include "vulkan/shader_module.h"
 #include "render/pipeline_cache_internal.h"
+
+// common/assert.cpp: the hook a failed check calls before stopping (SpeculativeAssertExit below).
+extern void (*g_assert_speculative_exit)();
 
 namespace Vulkan {
 
@@ -258,6 +263,26 @@ bool PipelineCache::ProgramDecodes(const Shader::ShaderParams& params, HwStage s
     return bad < 0;
 }
 
+// bbport (0xCydral, Linux fork): a check that fails while a speculative read has its recovery
+// point armed (draw preparation ahead of the GPU thread specializing a shader from descriptors the
+// game may still be rewriting) ends that attempt like a fault does, and the GPU thread prepares the
+// draw in order. Anywhere else the assertion still stops (common/assert.cpp).
+namespace {
+void SpeculativeAssertExit() {
+    sigjmp_buf* const recover = runtime_fault_recover;
+    if (!recover) {
+        return;
+    }
+    runtime_fault_recover = nullptr;
+    std::fputs("GPU: speculative draw preparation abandoned after the check above; the GPU "
+               "thread prepares this draw in order\n",
+               stderr);
+    siglongjmp(*recover, 1);
+}
+[[maybe_unused]] const bool speculative_assert_hook =
+    (::g_assert_speculative_exit = SpeculativeAssertExit, true);
+} // namespace
+
 PipelineCache::Result PipelineCache::LookUpProgram(PipelineSelection& sel,
                                                    const Shader::RuntimeInfo& runtime_info,
                                                    const Shader::ShaderParams& params,
@@ -285,16 +310,32 @@ PipelineCache::Result PipelineCache::LookUpProgram(PipelineSelection& sel,
         return {};
     }
     runtime_fault_recover = &recover;
-    info.RefreshFlatBuf();
-    if (info.has_fetch_shader &&
-        !FetchCodeDecodes(Shader::Gcn::GetFetchShaderCode(info, info.fetch_shader_sgpr_base))) {
+    // bbport (0xCydral, Linux fork): a C++ exception from the same data (a container over its
+    // capacity, an empty optional) escaped the worker and ended the process through
+    // std::terminate: it is treated like a fault. A fault's jump out of the try block does not
+    // unwind, so it is unaffected.
+    std::optional<Shader::StageSpecialization> spec;
+    try {
+        info.RefreshFlatBuf();
+        if (info.has_fetch_shader &&
+            !FetchCodeDecodes(Shader::Gcn::GetFetchShaderCode(info, info.fetch_shader_sgpr_base))) {
+            runtime_fault_recover = nullptr;
+            worker.failed = true; // the GPU thread reads back what the GPU wrote, or skips the draw
+            return {};
+        }
+        spec.emplace(info, runtime_info, profile, binding);
+    } catch (const std::exception& e) {
         runtime_fault_recover = nullptr;
-        worker.failed = true; // the GPU thread reads back what the GPU wrote, or skips the draw
+        static std::atomic<u32> logged{0};
+        if (logged.fetch_add(1, std::memory_order_relaxed) < 8) {
+            LOG_WARNING(Render_Vulkan, "Draw preparation ahead of the GPU thread stopped: {}",
+                        e.what());
+        }
+        worker.failed = true;
         return {};
     }
-    const auto spec = Shader::StageSpecialization(info, runtime_info, profile, binding);
     runtime_fault_recover = nullptr;
-    const auto it = std::ranges::find(program->modules, spec, &Program::Module::spec);
+    const auto it = std::ranges::find(program->modules, *spec, &Program::Module::spec);
     if (it == program->modules.end()) {
         worker.failed = true;
         return {};
