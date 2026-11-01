@@ -102,6 +102,14 @@ protected:
     const Shader::Profile& profile;
     vk::UniquePipeline pipeline;
     vk::UniquePipelineLayout pipeline_layout;
+
+public:
+    /// bbport: false when the driver could not create the pipeline (its draws are skipped).
+    bool IsValid() const noexcept {
+        return static_cast<bool>(pipeline);
+    }
+
+protected:
     vk::UniqueDescriptorSetLayout desc_layout;
     std::array<const Shader::Info*, Shader::MaxStageTypes> stages{};
     bool uses_push_descriptors{};

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include <algorithm>
 #include <atomic>
+#include <cstdio>
 #include <utility>
 
 #include <boost/container/small_vector.hpp>
@@ -49,8 +50,16 @@ vk::UniquePipeline CheckPipeline(Result result, bool preloading, const char* kin
         throw Serialization::CorruptData{fmt::format("cached {} pipeline rejected by the driver: {}",
                                                      kind, vk::to_string(result.result))};
     }
-    ASSERT_MSG(result.result == vk::Result::eSuccess, "Failed to create {} pipeline: {}", kind,
-               vk::to_string(result.result));
+    // bbport (Linux fork, after Supermedo/bloodborne_pc 188c1f6): a driver that cannot build one
+    // pipeline ("ErrorUnknown" on some AMD and older drivers) stopped the game here (code 23). The
+    // pipeline stays empty instead, and the draws or dispatches that use it are skipped
+    // (PipelineCache): a missing effect rather than a closed game.
+    if (result.result != vk::Result::eSuccess) {
+        std::printf("GPU: the driver could not create a %s pipeline (%s): its draws are skipped\n",
+                    kind, vk::to_string(result.result).c_str());
+        std::fflush(stdout);
+        return {};
+    }
     return std::move(result.value);
 }
 
@@ -255,7 +264,9 @@ ComputePipeline::ComputePipeline(const Instance& instance, Scheduler& scheduler,
     pipeline = CheckPipeline(instance.GetDevice().createComputePipelineUnique(pipeline_cache,
                                                                               pipeline_ci),
                              preloading, "compute");
-    SetObjectName(instance.GetDevice(), *pipeline, "Compute Pipeline {}", debug_name);
+    if (pipeline) {
+        SetObjectName(instance.GetDevice(), *pipeline, "Compute Pipeline {}", debug_name);
+    }
 }
 
 ComputePipeline::~ComputePipeline() = default;
@@ -583,7 +594,9 @@ GraphicsPipeline::GraphicsPipeline(
     };
     pipeline = CheckPipeline(device.createGraphicsPipelineUnique(pipeline_cache, pipeline_ci),
                              preloading, "graphics");
-    SetObjectName(device, *pipeline, "Graphics Pipeline {}", debug_name);
+    if (pipeline) {
+        SetObjectName(device, *pipeline, "Graphics Pipeline {}", debug_name);
+    }
 }
 
 GraphicsPipeline::~GraphicsPipeline() = default;

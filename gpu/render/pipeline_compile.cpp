@@ -233,8 +233,14 @@ const GraphicsPipeline* PipelineCache::GetGraphicsPipeline(const DrawIndirectPar
                                               sel.graphics_key, *pipeline_cache, sel.infos,
                                               sel.runtime_infos, sel.fetch_shader, sel.modules,
                                               sdata, false);
-    PipelineStore::SaveGraphics(sel.graphics_key, pipeline_hash, sdata);
     sel.fetch_shader.reset();
+    // bbport: the driver could not create it. The empty entry keeps the key from compiling again
+    // on every draw (they are skipped); it is not saved, so the next start tries anew.
+    if (!slot->IsValid()) {
+        slot.reset();
+        return nullptr;
+    }
+    PipelineStore::SaveGraphics(sel.graphics_key, pipeline_hash, sdata);
     return slot.get();
 }
 
@@ -311,6 +317,10 @@ const GraphicsPipeline* PipelineCache::CompileInBackground(const PipelineSelecti
 
 const GraphicsPipeline* PipelineCache::FinishPipeline(const GraphicsPipelineKey& key,
                                                       PendingPipeline& job) {
+    if (!job.pipeline || !job.pipeline->IsValid()) {
+        graphics_pipelines[key].reset(); // bbport: as GetGraphicsPipeline, skipped and not saved
+        return nullptr;
+    }
     if (!job.saved) {
         PipelineStore::SaveGraphics(key, std::hash<GraphicsPipelineKey>{}(key), job.sdata);
     }
@@ -379,6 +389,10 @@ const ComputePipeline* PipelineCache::GetComputePipeline() {
         it.value() = std::make_unique<ComputePipeline>(instance, scheduler, desc_heap, profile,
                                                        *pipeline_cache, compute_key, *sel.infos[0],
                                                        sel.modules[0], sdata, false);
+        if (!it.value()->IsValid()) { // bbport: as for graphics pipelines
+            it.value().reset();
+            return nullptr;
+        }
         PipelineStore::SaveCompute(compute_key, sdata);
     }
     return it->second.get();
