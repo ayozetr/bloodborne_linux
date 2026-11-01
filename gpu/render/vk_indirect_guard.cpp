@@ -19,6 +19,29 @@
 namespace Vulkan {
 
 namespace {
+
+/// bbport (0xCydral, Linux fork): BB_INDIRECT_GUARD_MAX and _MAX_VERTICES. A value that is not a
+/// number from 1 to 4294967295 keeps the default: strtoul gave 0 for it, and the shader then
+/// skipped every indirect dispatch or draw without a word.
+u32 PositiveLimit(const char* name, u32 fallback) {
+    const char* text = bb_env(name);
+    if (!text || !*text) {
+        return fallback;
+    }
+    char* end = nullptr;
+    const unsigned long long value = std::strtoull(text, &end, 0);
+    if (*end != '\0' || value == 0 || value > 0xFFFFFFFFull) {
+        std::printf("Indirect guard: %s=\"%s\" is not a number from 1 to 4294967295, keeping the "
+                    "default %u\n",
+                    name, text, fallback);
+        return fallback;
+    }
+    return static_cast<u32>(value);
+}
+
+} // namespace
+
+namespace {
 struct Push {
     u32 max_count[3];
     u32 first;
@@ -67,8 +90,7 @@ IndirectGuard::IndirectGuard(const Instance& instance_, Scheduler& scheduler_)
     for (u32 i = 0; i < 3; ++i) {
         max_count[i] = limits.maxComputeWorkGroupCount[i];
     }
-    const char* max = bb_env("BB_INDIRECT_GUARD_MAX");
-    max_total = max && *max ? static_cast<u32>(std::strtoul(max, nullptr, 0)) : 1u << 22;
+    max_total = PositiveLimit("BB_INDIRECT_GUARD_MAX", 1u << 22);
 
     std::array<vk::DescriptorSetLayoutBinding, 3> bindings{};
     for (u32 i = 0; i < bindings.size(); ++i) {
@@ -105,8 +127,7 @@ IndirectGuard::IndirectGuard(const Instance& instance_, Scheduler& scheduler_)
     checked_draws = std::make_unique<VideoCore::Buffer>(instance, 0, NumDrawSlots * 20,
                                                         VideoCore::MemoryType::DeviceLocal,
                                                         "Indirect draw arguments");
-    const char* max_v = bb_env("BB_INDIRECT_GUARD_MAX_VERTICES");
-    max_vertices = max_v && *max_v ? static_cast<u32>(std::strtoul(max_v, nullptr, 0)) : 1u << 26;
+    max_vertices = PositiveLimit("BB_INDIRECT_GUARD_MAX_VERTICES", 1u << 26);
     const auto draw_module = CompileSPV(INDIRECT_DRAW_GUARD_COMP, device);
     draw_pipeline = Check(device.createComputePipelineUnique(
         {}, vk::ComputePipelineCreateInfo{
