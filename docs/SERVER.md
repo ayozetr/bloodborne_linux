@@ -157,7 +157,7 @@ Windows players set the same server, WebAPI and account in the Windows port's la
 
 For [BBSC](ONLINE.md#seamless-co-op-bbsc) with everything on (summons across areas, 5 hunters),
 the group also runs BBSC's game server next to shadNet. It is in this repository,
-`bbsc/server/gameserver/bbsc_gameserver.py` (Python 3, nothing to install), and it takes the
+`scripts/bbsc_gameserver/bbsc_gameserver.py` (Python 3, nothing to install), and it takes the
 place of The Hunter's Dream for messages, bloodstains and the server list.
 
 1. Turn on shadNet's seamless mode: run the shadNet container again with
@@ -177,7 +177,7 @@ place of The Hunter's Dream for messages, bloodstains and the server list.
 
    `BBSC_SHADNET` is the shadNet server's address when it is on another computer. Messages,
    bloodstains and its logs live in the `bbsc-data` volume. Without Docker:
-   `python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z`.
+   `python3 scripts/bbsc_gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z`.
 
 | Port | Protocol | What |
 |---|---|---|
