@@ -83,6 +83,13 @@ original_game=$game
 # camera's field of view scaled, a layer under the mods (a mod's own camera table wins). Optional:
 # without it the game keeps its own (scripts/fov.py).
 ui_mods=$("$PYTHON" scripts/fov.py "$game" --out "$out/fov" --config "$BB_CONFIG") || ui_mods=
+# Seamless co-op's kit items (the Hunt, Kin, Bloodlust and Duel Bells, the Parting Blank) get their
+# names from BBSC while it runs; with Seamless co-op off (or The Hunter's Dream, which has no BBSC)
+# this layer names them in the game's item texts, in slots the game leaves empty, so a save made
+# with BBSC shows them by name (scripts/bbsc_kit_texts.py). Optional, like the others.
+bbsc_on=0; [[ ${BB_BBSC:-0} == 1 && ${BB_ONLINE:-0} == 1 && ${BB_NET_BACKEND:-} != thd ]] && bbsc_on=1
+kit_layer=$("$PYTHON" scripts/bbsc_kit_texts.py "$game" --out "$out/bbsc-kit" --bbsc "$bbsc_on") || kit_layer=
+if [[ -n $kit_layer ]]; then ui_mods=${ui_mods:+$ui_mods:}$kit_layer; fi
 game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
     --mods-dir "${BB_MODS_DIR:-$data/mods}" --config "${BB_MODS_CONFIG:-$data/mods.json}" \
     --enabled "${BB_MODS_ENABLED:-1}" --ui-mods "$ui_mods" \
