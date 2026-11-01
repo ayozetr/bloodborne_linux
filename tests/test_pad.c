@@ -238,5 +238,27 @@ int main(void) {
         m.right_x=200; m.right_y=56; camera_diagonal(&m); assert(m.right_x==200 && m.right_y==56); /* 80% */
         pad_camera_diagonal=0;
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options");
+    /* keyboard_layout=classic: the Linux fork's keys (Space Cross, Left Shift Circle, Enter
+     * Options, arrows the camera, IJKL the d-pad); without it 0.7's (Space the dodge). */
+    {
+        char classic_path[]="/tmp/bbport-classic-XXXXXX";
+        const int fd=mkstemp(classic_path);
+        assert(fd>=0);
+        const char text[]="keyboard_layout=classic\n";
+        assert(write(fd,text,sizeof(text)-1)==(ssize_t)(sizeof(text)-1));
+        close(fd);
+        const char *saved=getenv("BB_CONFIG");
+        char saved_copy[512]; snprintf(saved_copy,sizeof saved_copy,"%s",saved ? saved : "");
+        setenv("BB_CONFIG",classic_path,1);
+        load_bindings();
+        assert(layout_classic && bindings[IN_CROSS].keys[0]==SDL_SCANCODE_SPACE);
+        assert(bindings[IN_CIRCLE].keys[0]==SDL_SCANCODE_LSHIFT && bindings[IN_DODGE].key_count==0);
+        assert(bindings[IN_OPTIONS].keys[0]==SDL_SCANCODE_RETURN && bindings[IN_UP].keys[0]==SDL_SCANCODE_I);
+        assert(bindings[IN_LOOK_LEFT].keys[0]==SDL_SCANCODE_LEFT);
+        unlink(classic_path);
+        setenv("BB_CONFIG",saved_copy,1);
+        load_bindings();
+        assert(!layout_classic && bindings[IN_DODGE].keys[0]==SDL_SCANCODE_SPACE);
+    }
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options, classic keyboard layout");
 }

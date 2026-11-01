@@ -43,9 +43,35 @@ typedef struct { int key_count, pad_count; int keys[MAX_BIND]; int mods[MAX_BIND
 static Binding bindings[IN_COUNT];
 static int bindings_ready;
 
+/* keyboard_layout=classic (bbport.ini; the Linux fork's launcher, Controls): the fork's own keys
+ * up to 0.51-linux.20 instead of the layout below (Dark Souls III's on PC):
+ *   WASD left stick, arrow keys right stick, Space Cross, Left Shift Circle (dodge, run), E Square,
+ *   Q Triangle, 1 L1, 3 R1, R L2, F R2, Z L3, C R3, Enter Options (also in a game menu), Tab left
+ *   touchpad, Backspace right touchpad, IJKL d-pad, Left Alt walk. Mouse: Left R1, Right L2,
+ *   Middle R3, X1 R2, X2 L1, the wheel the d-pad's up/down. */
+static int layout_classic;
 static void bind_defaults(void) {
-    /* The header comment's layout. */
+    /* The header comment's layout, or the classic one. */
     enum { NONE=-1, SHIFT=SDL_SCANCODE_LSHIFT };
+    static const struct { int input; int key; int mod; } classic[]={
+        {IN_CROSS,SDL_SCANCODE_SPACE,NONE}, {IN_CIRCLE,SDL_SCANCODE_LSHIFT,NONE},
+        {IN_SQUARE,SDL_SCANCODE_E,NONE}, {IN_TRIANGLE,SDL_SCANCODE_Q,NONE},
+        {IN_L1,SDL_SCANCODE_1,NONE}, {IN_R1,SDL_SCANCODE_3,NONE}, {IN_L2,SDL_SCANCODE_R,NONE},
+        {IN_R2,SDL_SCANCODE_F,NONE}, {IN_L3,SDL_SCANCODE_Z,NONE}, {IN_R3,SDL_SCANCODE_C,NONE},
+        {IN_OPTIONS,SDL_SCANCODE_RETURN,NONE}, {IN_TOUCHPAD,SDL_SCANCODE_TAB,NONE},
+        {IN_TOUCHPAD_RIGHT,SDL_SCANCODE_BACKSPACE,NONE},
+        {IN_UP,SDL_SCANCODE_I,NONE}, {IN_DOWN,SDL_SCANCODE_K,NONE}, {IN_LEFT,SDL_SCANCODE_J,NONE},
+        {IN_RIGHT,SDL_SCANCODE_L,NONE},
+        {IN_MOVE_UP,SDL_SCANCODE_W,NONE}, {IN_MOVE_DOWN,SDL_SCANCODE_S,NONE},
+        {IN_MOVE_LEFT,SDL_SCANCODE_A,NONE}, {IN_MOVE_RIGHT,SDL_SCANCODE_D,NONE},
+        {IN_LOOK_UP,SDL_SCANCODE_UP,NONE}, {IN_LOOK_DOWN,SDL_SCANCODE_DOWN,NONE},
+        {IN_LOOK_LEFT,SDL_SCANCODE_LEFT,NONE}, {IN_LOOK_RIGHT,SDL_SCANCODE_RIGHT,NONE},
+        {IN_WALK,SDL_SCANCODE_LALT,NONE},
+        {IN_R1,MOUSE_KEY+SDL_BUTTON_LEFT,NONE}, {IN_L2,MOUSE_KEY+SDL_BUTTON_RIGHT,NONE},
+        {IN_R3,MOUSE_KEY+SDL_BUTTON_MIDDLE,NONE}, {IN_R2,MOUSE_KEY+SDL_BUTTON_X1,NONE},
+        {IN_L1,MOUSE_KEY+SDL_BUTTON_X2,NONE},
+        {IN_UP,MOUSE_WHEEL_UP,NONE}, {IN_DOWN,MOUSE_WHEEL_DOWN,NONE},
+    };
     static const struct { int input; int key; int mod; } keys[]={
         {IN_DODGE,SDL_SCANCODE_SPACE,NONE}, {IN_SPRINT,SHIFT,NONE}, {IN_CROSS,SDL_SCANCODE_F,NONE},
         {IN_WALK,SDL_SCANCODE_LALT,NONE},
@@ -80,9 +106,12 @@ static void bind_defaults(void) {
         {IN_LEFT,SDL_GAMEPAD_BUTTON_DPAD_LEFT}, {IN_RIGHT,SDL_GAMEPAD_BUTTON_DPAD_RIGHT},
     };
     memset(bindings,0,sizeof bindings);
-    for (size_t i=0;i<sizeof(keys)/sizeof(*keys);++i) {
-        Binding *b=&bindings[keys[i].input];
-        b->mods[b->key_count]=keys[i].mod; b->keys[b->key_count++]=keys[i].key;
+    const size_t key_count=layout_classic ? sizeof(classic)/sizeof(*classic) : sizeof(keys)/sizeof(*keys);
+    for (size_t i=0;i<key_count;++i) {
+        const int input=layout_classic ? classic[i].input : keys[i].input;
+        Binding *b=&bindings[input];
+        b->mods[b->key_count]=layout_classic ? classic[i].mod : keys[i].mod;
+        b->keys[b->key_count++]=layout_classic ? classic[i].key : keys[i].key;
     }
     for (size_t i=0;i<sizeof(pads)/sizeof(*pads);++i) {
         Binding *b=&bindings[pads[i].input]; b->pad[b->pad_count++]=pads[i].button;
@@ -120,6 +149,16 @@ static int pad_camera_diagonal;
 /* Motion emulation (apply_motion): -1 unknown yet, from bbport.ini pad_motion; BB_PAD_MOTION wins. */
 static int motion_enabled = -1;
 static void load_bindings(void) {
+    /* The layout first: the key.<input> lines replace its defaults. */
+    layout_classic=0;
+    const char *config=bb_env("BB_CONFIG");
+    FILE *lf=config ? fopen(config,"r") : NULL;
+    if (lf) {
+        char text[512];
+        while (fgets(text,sizeof text,lf))
+            if (!strncmp(text,"keyboard_layout=",16)) layout_classic=!strncmp(text+16,"classic",7);
+        fclose(lf);
+    }
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_invert_x=0; mouse_sensitivity=1.0f; prompt_forced=-1;
     pad_round_gate=1; pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0; pad_camera_diagonal=0;
@@ -400,7 +439,7 @@ static void apply_keyboard(PadData *d, const bool *k) {
     else if (!menu) options_latched=1;
     for (int i=IN_CROSS;i<=IN_RIGHT;++i) {
         if (i==IN_TOUCHPAD || i==IN_TOUCHPAD_RIGHT || !key_down(k,i)) continue;
-        d->buttons |= (i==IN_OPTIONS && menu && !options_latched) ? BTN_CIRCLE : input_buttons[i];
+        d->buttons |= (i==IN_OPTIONS && menu && !options_latched && !layout_classic) ? BTN_CIRCLE : input_buttons[i];
     }
     if (keyboard_circle(k,d->timestamp,menu)) d->buttons|=BTN_CIRCLE;
     if (key_down(k,IN_TOUCHPAD)) touch_click(d,0);

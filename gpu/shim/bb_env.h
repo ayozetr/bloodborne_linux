@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2026 bbport contributors
 // SPDX-License-Identifier: GPL-2.0-or-later
 // bbport: the port's environment variables (BB_*), read through here only. Every name is listed,
-// with what it does, in bb_env_vars.def next to this file (docs/ENVIRONMENT.md is made from it by
-// scripts/env_vars.py; tests/test_env_vars.py fails on a name read here and missing there, or listed
-// there and read nowhere). C and C++.
+// with what it does, in bb_env_vars.def next to this file (scripts/env_vars.py --doc prints it;
+// tests/test_env_vars.py fails on a name read here and missing there, or listed there and read
+// nowhere). C and C++.
 #ifndef BB_ENV_H
 #define BB_ENV_H
 
