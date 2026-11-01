@@ -51,6 +51,9 @@ printf '%s%s %s %s\n' "$(git rev-parse --short=8 HEAD)" "$(git diff --quiet HEAD
 cp -r scripts patches fsr4_shaders launcher "$d/"
 mkdir -p "$d/tools"
 cp -r tools/fsr4cap "$d/tools/"
+# Hunter's Atlas's map generator and art: the launcher's Prepare maps runs it (bbport_atlas_maps.py).
+cp -r tools/hunters-atlas "$d/tools/"
+rm -rf "$d/tools/hunters-atlas/__pycache__"
 find "$d" -name __pycache__ -type d -prune -exec rm -rf {} +
 ln -s ../../bin "$d/bin"
 

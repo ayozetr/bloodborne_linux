@@ -34,7 +34,9 @@ SCRIPT_FILES = ('run.py', 'run.sh', 'build.sh')
 SCRIPT_DIRS = ('launcher', 'scripts', 'tools', 'packaging')
 SCRIPT_SKIP = ('__pycache__', 'win-bench', 'ffx')
 # BB_* names in the code that are not environment variables (macros, include guards).
-NOT_VARIABLES = {'BB_ENV', 'BB_ENV_H'}
+# BB_PATH: Soulstruct's Bloodborne folder setting in Hunter's Atlas's generator
+# (tools/hunters-atlas/soulstruct_local_config.py), not read from the environment.
+NOT_VARIABLES = {'BB_ENV', 'BB_ENV_H', 'BB_PATH'}
 
 ENTRY = re.compile(r'^BB_ENV\((BB_[A-Z0-9_]+), ([A-Z]+), "((?:[^"\\]|\\.)*)"\)$')
 
