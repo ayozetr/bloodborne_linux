@@ -3,8 +3,9 @@
 The port reads a few hundred `BB_*` environment variables. Some are for players (upscaler, frame
 rate, controls); most are diagnostics and developer switches. The list below is every one the code
 reads, from the port's own registry (`gpu/shim/bb_env_vars.def`); `tests/test_env_vars.py` fails
-when the code and the registry disagree, so it stays complete. Regenerate it with
-`python3 scripts/env_vars.py --doc`.
+when the code and the registry disagree, so it stays complete. Everything from "Every `BB_*`
+variable" on is the output of `python3 scripts/env_vars.py --doc` (without its title); the sections
+above it are written by hand.
 
 ## How to set them
 
@@ -54,7 +55,7 @@ at its start (`Environment:` in the log) and warns about `BB_*` names it does no
 `=1: ...` / `=0: ...` / `=N: ...` say what that value does; `set: ...` means any value
 turns it on (even `0`).
 
-## Settings (105)
+## Settings (106)
 
 What players and the launchers set. The menu, bbport.ini and the launcher write most of them; set one by hand to override them.
 
@@ -156,6 +157,7 @@ What players and the launchers set. The menu, bbport.ini and the launcher write 
 | `BB_SHADNET_WEBAPI` | the shadNet web API server |
 | `BB_SKIP_CPU_CHECK` | =1: skip the check of the CPU's bsr/bsf behaviour before the game starts |
 | `BB_SKIP_GAME_CHECK` | =1: start with game files that did not pass the check |
+| `BB_STEAM_INPUT_X11` | =0: keep the native Wayland window when Steam made a virtual controller for the game (default: Xwayland, so Steam Input reaches it) |
 | `BB_TEXTURE_QUALITY` | texture quality over bbport.ini's texture_quality |
 | `BB_THD_ONLINE_ID` | The Hunter's Dream online name (the launcher's) |
 | `BB_THD_TOKEN` | The Hunter's Dream account token (the launcher's) |

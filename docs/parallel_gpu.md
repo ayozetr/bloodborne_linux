@@ -1,5 +1,9 @@
 # Parallel GPU command processing — design notes
 
+> Design notes from when this work was planned, kept for their reasoning. bbport 0.7 has one
+> memory model and its own renderer, and some switches named here (`BB_UFFD`) no longer exist; the
+> current list is in [ENVIRONMENT.md](ENVIRONMENT.md).
+
 Goal: remove the single-core bottleneck of the emulated GPU command processor
 (`shadPS4:GpuCommandProcessor`, ~100% of one core while the rest of the CPU idles).
 

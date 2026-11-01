@@ -1,5 +1,9 @@
 # Our own translator instead of shadPS4: structure and order of work (2026-10-10)
 
+> Design notes from when this work was planned, kept for their reasoning. bbport 0.7 has one
+> memory model and its own renderer, and some switches named here (`BB_CP_SHADOW` and `BB_CP_DECODER`) no longer exist; the
+> current list is in [ENVIRONMENT.md](ENVIRONMENT.md).
+
 Goal: move away from emulation and from shadPS4 code. We want our own PS4 command translator and
 our own graphics renderer that scale to other games (everything specific to one game lives in its
 profile, `gpu/games/`) and behave the same on AMD and NVIDIA. After that comes shadnet (online play).

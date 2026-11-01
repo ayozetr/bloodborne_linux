@@ -283,7 +283,7 @@ DEFAULTS = {
     # Seamless Hunt's bloodstains and death visions, off by default: they crash the game there
     # (scripts/online.py, SEAMLESSHUNT_TOMBS).
     "online_seamlesshunt_tombs": False,
-    "online_p2p_port": 0,  # 0: a random port each time (SHADPS4_P2P_PORT)
+    "online_p2p_port": 0,  # 0: the online module's own, 3658 (BB_P2P_PORT)
     "online_seamless": False,
     # The Hunter's Dream: its address ("": thehuntersdream.com) and the Discord sign-in's account.
     "thd_server": "",

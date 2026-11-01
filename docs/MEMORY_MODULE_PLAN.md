@@ -1,5 +1,9 @@
 # Layer memory module: PS4 GPU addresses without sparse (plan, 2026-10-09)
 
+> Design notes from when this work was planned, kept for their reasoning. bbport 0.7 has one
+> memory model and its own renderer, and some switches named here (`BB_PC_MODEL`) no longer exist; the
+> current list is in [ENVIRONMENT.md](ENVIRONMENT.md).
+
 ## Why
 
 The new memory model keeps game memory in a single sparse arena and moves blocks between game

@@ -6,7 +6,7 @@ and then the players' games connect to each other. Linux and Windows players can
 everyone needs the game at version 1.09 and the same pool.
 
 > **shadPS4's public shadNet server no longer accepts bbport builds**: it signs the game out
-> right after the login ("This shadNet server doesn't accept your shadPS4 build" in the log), and
+> right after the login ("The shadNet server doesn't accept this shadPS4 build" in the log), and
 > the launcher says so. The pools for bbport are Seamless Hunt (the default), The Hunter's Dream's and a server of your own.
 
 ## Seamless Hunt
@@ -117,11 +117,12 @@ Tailscale ([hosting your own server](SERVER.md)) it goes through Tailscale: turn
 section. Otherwise each player has to be reachable from the Internet:
 
 1. **The router.** With **UPnP** on (the default), the game opens its port on the router itself:
-   the log says `UPNP: mapped UDP port <port>`. A router without UPnP needs a port forward by
-   hand (UDP, the pinned port below, to your computer's LAN address).
-2. **Pin the port** when you open it by hand or in a firewall: **Co-op port (UDP)** in the
-   Online tab, for example 3658 (0, the default, is a random port each time). The log then says
-   `P2P transport ready: UDP physical_port=3658`.
+   the log says `P2P on UDP port <port>: asking the router to forward it (UPnP)`. A router
+   without UPnP needs a port forward by hand (UDP, the port below, to your computer's LAN
+   address).
+2. **The port** to open by hand or in a firewall is UDP 3658, the PS4's own, which the game uses
+   by default (**Co-op port (UDP)** in the Online tab: 0 keeps it). The log says
+   `P2P transport on UDP port 3658`.
 3. **Open it in the firewall.** UPnP opens the port on the router only, not in this computer's
    firewall. With ufw or firewalld on, the launcher's **Multiplayer → Online** tab says
    so and gives the commands. For ufw:
@@ -141,9 +142,7 @@ Run with `BB_GPU_LOG=info` in the extra variables for the online details. In a s
 
 | Line | Meaning |
 |---|---|
-| `Logged in npid='...'` | The shadNet login worked. |
+| `signed in npid='...'` | The shadNet login worked. |
 | `summon_messenger/create` | Your sign is placed (helper). |
 | `summon_messenger/get`, `sceNpMatching2CreateJoinRoom`, `summon_messenger/request` | The host found the sign, made the room and sent the summon. |
-| `peer '...' endpoint unresolved` | shadNet has no address for the other player: its UDP port did not answer. |
-| `Online: the shadNet server ... does not accept this build` | The server refuses bbport (shadPS4's public one): use Seamless Hunt, The Hunter's Dream or your own server. |
-| `event=0(DEAD)` | The connection gave up. |
+| `signed out by the server` | The server refuses this build (shadPS4's public one): use Seamless Hunt, The Hunter's Dream or your own server. |
