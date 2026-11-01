@@ -658,6 +658,9 @@ bool Source::GetVideoData(AvPlayerFrameInfoEx& info) {
         video.current.reset();
     }
     video.current = video.frames.Pop();
+    if (!video.current) {
+        return false; // bbport (emurphy04, Linux fork): cleared since the peek (the player stopped)
+    }
     info = video.current->info;
     return true;
 }
