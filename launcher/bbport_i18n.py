@@ -8,6 +8,16 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Удерживать 0,8 с':
+        'Hold for 0.8 s',
+    'Удерживать 2 с':
+        'Hold for 2 s',
+    'Выключено (только Insert)':
+        'Off (Insert only)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Port menu from the controller (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        'How long to hold L3 + R3 to open the in-game menu; Insert always opens it',
     'Мягкие': 'Relaxed',
     'Точные': 'Precise',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Default: no tearing and low latency; the GPU works harder',
@@ -1005,6 +1015,16 @@ EN = {
 }
 
 PT_BR = {
+    'Удерживать 0,8 с':
+        'Segurar por 0,8 s',
+    'Удерживать 2 с':
+        'Segurar por 2 s',
+    'Выключено (только Insert)':
+        'Desativado (só Insert)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Menu do port pelo controle (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        'Quanto tempo segurar L3 + R3 para abrir o menu no jogo; Insert sempre o abre',
     'Мягкие': 'Relaxadas',
     'Точные': 'Precisas',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Padrão: sem tearing e com pouca latência; a GPU trabalha mais',
@@ -2061,6 +2081,16 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Удерживать 0,8 с':
+        'Mantener 0,8 s',
+    'Удерживать 2 с':
+        'Mantener 2 s',
+    'Выключено (только Insert)':
+        'Desactivado (solo Insert)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Menú del port con el mando (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        'Cuánto mantener L3 + R3 para abrir el menú en el juego; Insert siempre lo abre',
     'Мягкие': 'Relajadas',
     'Точные': 'Precisas',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Por defecto: sin cortes en la imagen y con poco retraso; la GPU trabaja más',
@@ -3030,6 +3060,16 @@ ES = {
 
 # Italian.
 IT = {
+    'Удерживать 0,8 с':
+        'Tieni premuto 0,8 s',
+    'Удерживать 2 с':
+        'Tieni premuto 2 s',
+    'Выключено (только Insert)':
+        'Disattivato (solo Insert)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Menu del port dal controller (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        'Per quanto tenere premuti L3 + R3 per aprire il menu nel gioco; Insert lo apre sempre',
     'Мягкие': 'Rilassate',
     'Точные': 'Precise',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Predefinito: niente tearing e bassa latenza; la GPU lavora di più',
@@ -3999,6 +4039,16 @@ IT = {
 
 # French.
 FR = {
+    'Удерживать 0,8 с':
+        'Maintenir 0,8 s',
+    'Удерживать 2 с':
+        'Maintenir 2 s',
+    'Выключено (только Insert)':
+        'Désactivé (Insert uniquement)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Menu du port à la manette (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        "Durée de maintien de L3 + R3 pour ouvrir le menu en jeu ; Insert l'ouvre toujours",
     'Мягкие': 'Souples',
     'Точные': 'Précises',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Par défaut : pas de déchirement et peu de latence ; le GPU travaille davantage',
@@ -4968,6 +5018,16 @@ FR = {
 
 # German.
 DE = {
+    'Удерживать 0,8 с':
+        '0,8 s halten',
+    'Удерживать 2 с':
+        '2 s halten',
+    'Выключено (только Insert)':
+        'Aus (nur Insert)',
+    'Меню порта с геймпада (L3 + R3)':
+        'Port-Menü per Controller (L3 + R3)',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        'Wie lange L3 + R3 gehalten werden, um das Menü im Spiel zu öffnen; Insert öffnet es immer',
     'Мягкие': 'Locker',
     'Точные': 'Präzise',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': 'Standard: kein Tearing und geringe Latenz; die GPU arbeitet mehr',
@@ -5937,6 +5997,16 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Удерживать 0,8 с':
+        '按住 0.8 秒',
+    'Удерживать 2 с':
+        '按住 2 秒',
+    'Выключено (только Insert)':
+        '关闭（仅 Insert）',
+    'Меню порта с геймпада (L3 + R3)':
+        '手柄打开移植菜单（L3 + R3）',
+    'Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда':
+        '按住 L3 + R3 多久打开游戏内菜单；Insert 始终可以打开',
     'Мягкие': '宽松',
     'Точные': '精确',
     'По умолчанию: без разрывов и с малой задержкой; видеокарта работает больше': '默认：无画面撕裂，延迟低；显卡负载更高',

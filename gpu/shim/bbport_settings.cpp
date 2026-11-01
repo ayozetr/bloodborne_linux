@@ -74,6 +74,8 @@ void Set(Values& v, const std::string& key, const std::string& value) {
         v.debug_view = std::clamp(i, 0, DebugViewCount - 1);
     } else if (key == "show_fps") {
         v.show_fps = i != 0;
+    } else if (key == "menu_pad_hold_ms") {
+        v.menu_pad_hold_ms = std::clamp(i, 0, 5000);
     } else if (key == "vbao") {
         v.vbao = i != 0;
     } else if (key == "camera_speed_x") {

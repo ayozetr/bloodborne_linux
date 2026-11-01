@@ -66,6 +66,13 @@ bbport.ini works too.
 *Quit to Desktop* switch of earlier Linux versions is gone with it, and a third-party *Exit Game*
 patch is no longer needed.
 
+## The port's menu opens by accident with L3 + R3
+
+From bbport 0.7, L3 + R3 opens the port's menu only when both are held for 0.8 seconds, so pressing
+them in a fight (lock-on and camera reset) no longer opens it. **Controls → Port menu from the
+controller** can make it 2 seconds, or turn it off so that only Insert on the keyboard opens the
+menu. Closing it with L3 + R3 always works.
+
 ## The controller does nothing when the game is started from Steam
 
 With Steam Input on, Steam hides the controller and the game gets Steam's virtual one, whose input

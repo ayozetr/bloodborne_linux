@@ -169,6 +169,9 @@ struct Values {
     std::atomic<float> reactive_max{0.9f};
     std::atomic<int> debug_view{DebugNone};
     std::atomic<bool> show_fps{false};
+    /// How long L3+R3 is held to open this menu, in ms (#304, ayozetr/bloodborne_linux#38);
+    /// 0: L3+R3 does not open it (Insert only). Set from the launcher.
+    std::atomic<int> menu_pad_hold_ms{800};
     // GT-VBAO ambient occlusion in place of the game's SSAO (needs effect_ssao on)
     std::atomic<bool> vbao{false};
     /// The right stick's camera turn (#208): [0] vertical (the pitch), [1] horizontal (the yaw), as

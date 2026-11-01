@@ -82,11 +82,14 @@ std::mutex imgui_mutex; // the ImGui context: window thread (input) and present 
 bool initialized = false;
 std::atomic<bool> menu_open{false};
 bool l3_down = false, r3_down = false;
-// Issue #304: L3+R3 opens the menu only when held (OpenHoldMs), not when both sticks are pressed in
-// a fight (lock-on and camera reset); closing is immediate. The hold starts at `l3r3_since`
-// (steady clock ns, 0: not held) and is checked at each present (Visible); `open_requested` opens
-// it in Render, under the ImGui lock.
-constexpr long long OpenHoldMs = 800;
+// Issue #304: L3+R3 opens the menu only when held (menu_pad_hold_ms, 800 by default), not when both
+// sticks are pressed in a fight (lock-on and camera reset); closing is immediate. 0 leaves L3+R3 to
+// the game (ayozetr/bloodborne_linux#38: PvP). The hold starts at `l3r3_since` (steady clock ns,
+// 0: not held) and is checked at each present (Visible); `open_requested` opens it in Render,
+// under the ImGui lock.
+long long OpenHoldMs() {
+    return BbSettings::Get().menu_pad_hold_ms.load(std::memory_order_relaxed);
+}
 std::atomic<long long> l3r3_since{0};
 std::atomic<bool> open_requested{false};
 long long NowNs() {
@@ -1215,7 +1218,7 @@ bool HandleEvent(const SDL_Event& event) {
                 SetOpen(false);
                 return true;
             }
-            if (down && l3r3_since.load() == 0) {
+            if (down && l3r3_since.load() == 0 && OpenHoldMs() > 0) {
                 l3r3_since = NowNs(); // the game sees the press too (a fight goes on)
             }
         } else {
@@ -1308,7 +1311,7 @@ bool Visible() {
         open_requested = true;
     }
     if (const long long since = l3r3_since.load();
-        since != 0 && !menu_open && NowNs() - since >= OpenHoldMs * 1'000'000) {
+        since != 0 && !menu_open && NowNs() - since >= OpenHoldMs() * 1'000'000) {
         l3r3_since = 0;
         open_requested = true;
     }

@@ -40,7 +40,7 @@ seamless co-op, the Steam Deck, and what to do when something goes wrong.
 - **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
 - **Trophies and the platinum**, with a notice in the game like on the PS4.
 - **Add to Steam** in one click, and **Discord Rich Presence** with your area and co-op partners.
-- **Launcher and in-game menu** (L3 + R3 or Insert) in English, Spanish, French, German, Italian,
+- **Launcher and in-game menu** (Insert, or hold L3 + R3) in English, Spanish, French, German, Italian,
   Portuguese, Russian and Simplified Chinese.
 - **AppImage** ready for any distribution and the Steam Deck, which **updates itself** from the
   launcher (and can go back to an earlier release).

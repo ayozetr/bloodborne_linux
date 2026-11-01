@@ -122,6 +122,9 @@ NGX_FG_PREFIX = "libnvidia-ngx-dlssg.so."
 FRAME_GENS = [("Выключена", "off"), ("DLSS 2x (NVIDIA RTX 40/50)", "dlss2"),
               ("DLSS 3x (NVIDIA RTX 50)", "dlss3"), ("DLSS 4x (NVIDIA RTX 50)", "dlss4")]
 # bbport.ini low_latency: NVIDIA Reflex with DLSS frame generation, AMD Anti-Lag 2 elsewhere.
+# How long L3+R3 is held to open the in-game menu (bbport.ini menu_pad_hold_ms; 0: Insert only).
+MENU_PAD_HOLDS = [("Удерживать 0,8 с", "800"), ("Удерживать 2 с", "2000"),
+                  ("Выключено (только Insert)", "0")]
 LOW_LATENCIES = [("Включена", "on"), ("Включена + Boost", "boost"), ("Выключена", "off")]
 # Game effects (patches applied at start): bbport.ini key, title, default.
 EFFECTS = [
@@ -339,6 +342,7 @@ INI_DEFAULTS = {
     "mouse_sensitivity": "1.00",
     "mouse_invert_y": "0",
     "mouse_invert_x": "0",
+    "menu_pad_hold_ms": "800",
     "camera_speed_x": "1.00",
     "camera_speed_y": "1.00",
     "keyboard_layout": "0.7",
@@ -1498,6 +1502,13 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.deadzone_row.set_value(number(self.settings["pad_deadzone"], 4, int, "settings.json",
                                            "pad_deadzone"))
         controls.add(self.deadzone_row)
+        # L3+R3 opens the port's menu only when held (bbport_overlay.cpp); in PvP both sticks get
+        # pressed by accident (#38).
+        self.menu_pad_row = combo_row(
+            tr("Меню порта с геймпада (L3 + R3)"),
+            tr("Сколько удерживать L3 + R3, чтобы открыть меню в игре; Insert открывает его всегда"),
+            MENU_PAD_HOLDS, self.ini.get("menu_pad_hold_ms", "800"))
+        controls.add(self.menu_pad_row)
         # The light bar of a DualShock 4 or DualSense (runtime_pad.c: BB_PAD_LIGHTBAR).
         self.lightbar_row = Adw.ActionRow(
             title=tr("Цвет световой полосы геймпада"),
@@ -2474,6 +2485,7 @@ class LauncherWindow(Adw.ApplicationWindow):
             "mouse_invert_x": "1" if self.mouse_invert_x_row.get_active() else "0",
             **{key: f"{row.get_value():.2f}" for key, row in self.camera_speed_rows.items()},
             "keyboard_layout": combo_value(self.keyboard_layout_row),
+            "menu_pad_hold_ms": combo_value(self.menu_pad_row),
             **{key: "1" if row.get_active() else "0" for key, row in self.stick_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.effect_rows.items()},
             **{key: "1" if row.get_active() else "0" for key, row in self.cheat_rows.items()},
