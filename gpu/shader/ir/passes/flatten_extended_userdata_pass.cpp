@@ -339,12 +339,15 @@ public:
             // The pointer itself was not copied.
             return;
         }
-        if (!PushTable(table_off_dw)) {
+        Xbyak::Label null_table, pop_table;
+        if (!PushTable(table_off_dw, null_table)) {
             LOG_ERROR(Render_Recompiler, "Failed to compute offset for SRT walker");
             return;
         }
         OffsetReads* const reads = ReadsThrough(table);
         ASSERT(reads);
+        // The subtree's slots are the ones assigned from here on, its children's included.
+        const u16 first_slot = next_slot;
         // Contiguous in the guest table, contiguous in the flat buffer.
         for (const auto& [off_dw, read] : *reads) {
             if (off_dw.IsImmediate()) {
@@ -366,6 +369,21 @@ public:
                 Visit(off_dw, read);
             }
         }
+        // bbport (Linux fork, from nick24051998's change in Supermedo's port): a table the game
+        // left null in this draw zeroes its subtree's slots here (rep stosd: rdi, ecx, eax; rdi
+        // is restored below) instead of faulting on each load and having the fault handler
+        // supply zero: a signal per draw, thousands in Ebrietas' area. A pointer that is not null
+        // but bad still goes through the handler.
+        c.jmp(pop_table, Xbyak::CodeGenerator::T_NEAR);
+        c.L(null_table);
+        if (const u32 count = u32(next_slot - first_slot); count != 0) {
+            c.lea(rdi, ptr[rsi + (u32(first_slot) << 2)]);
+            c.mov(ecx, count);
+            c.xor_(eax, eax);
+            c.rep();
+            c.stosd();
+        }
+        c.L(pop_table);
         c.pop(rdi);
     }
 
@@ -375,8 +393,9 @@ private:
         return it != pointer_reads.end() ? &it->second : nullptr;
     }
 
-    /// Saves the current table and loads the 48-bit pointer at `off_dw` of it.
-    bool PushTable(const IR::Value& off_dw) {
+    /// Saves the current table and loads the 48-bit pointer at `off_dw` of it; a null one jumps
+    /// to `null_table`.
+    bool PushTable(const IR::Value& off_dw, Xbyak::Label& null_table) {
         c.push(rdi);
         if (off_dw.IsImmediate()) {
             c.mov(rdi, ptr[rdi + (off_dw.U32() << 2)]);
@@ -391,6 +410,7 @@ private:
         }
         c.mov(r10, 0xFFFFFFFFFFFFULL);
         c.and_(rdi, r10);
+        c.jz(null_table, Xbyak::CodeGenerator::T_NEAR);
         return true;
     }
 
