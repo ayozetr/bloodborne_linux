@@ -388,10 +388,38 @@ fi
 # Steam overlay (#77, #217: Shift+Tab, Remote Play, the controller's Steam Input layout): the
 # packaged entry (packaging/bbport-entry.c) keeps Steam's preload out of the launcher and names it
 # in BB_STEAM_OVERLAY; the game alone loads it, with its Vulkan layer. BB_STEAM_OVERLAY=0: off.
+# bbport (Linux fork): the sharun AppImage has no such entry, and sharun clears LD_PRELOAD in every
+# program of the package: when Steam started the game and nothing named the overlay, Steam's
+# 64-bit library is read from the nearest process above that still has it in its preload.
+if [[ ${BB_STEAM_OVERLAY:-} != 0 && ! -f ${BB_STEAM_OVERLAY:-} && -n ${SteamGameId:-} ]]; then
+    pid=$$
+    while [[ ! -f ${BB_STEAM_OVERLAY:-} && $pid -gt 1 ]]; do
+        preload=
+        while IFS= read -r -d '' variable; do
+            [[ $variable == LD_PRELOAD=* ]] && preload+=" ${variable#*=}"
+        done 2>/dev/null < "/proc/$pid/environ" || true
+        for library in ${preload//:/ }; do
+            [[ $library == */ubuntu12_64/gameoverlayrenderer.so && -f $library ]] && BB_STEAM_OVERLAY=$library
+        done
+        { stat=$(< "/proc/$pid/stat"); } 2>/dev/null || break
+        stat=${stat##*) }
+        read -r _ pid _ <<< "$stat"
+    done
+    [[ -f ${BB_STEAM_OVERLAY:-} ]] ||
+        echo "Steam overlay: Steam's 64-bit gameoverlayrenderer.so not found among the processes above" >&2
+fi
 if [[ -n ${BB_STEAM_OVERLAY:-} && $BB_STEAM_OVERLAY != 0 && -f $BB_STEAM_OVERLAY ]]; then
     export LD_PRELOAD=$BB_STEAM_OVERLAY ENABLE_VK_LAYER_VALVE_steam_overlay_1=1
+    # sharun (the AppImage) passes LD_PRELOAD on only with this.
+    export SHARUN_ALLOW_LD_PRELOAD=1
     unset DISABLE_VK_LAYER_VALVE_steam_overlay_1
     echo "Steam overlay: $BB_STEAM_OVERLAY"
+    # Steam draws its overlay only on windows it can see: on a Wayland desktop, X11 ones (as
+    # Steam Input above).
+    if [[ -z ${SDL_VIDEO_DRIVER:-} && -n ${WAYLAND_DISPLAY:-} && -n ${DISPLAY:-} ]]; then
+        echo "Window: X11 (Xwayland), so Steam's overlay shows on it"
+        export SDL_VIDEO_DRIVER=x11
+    fi
 fi
 probe_args=("$out/boot-linked.bin" --content-profile "$out/content.bin" --patches "$out/patches.bin" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
 if [[ -n ${mod_game:-} ]]; then
