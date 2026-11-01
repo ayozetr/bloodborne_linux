@@ -1,0 +1,148 @@
+/* The players' guide: "Hunter's Dream" theme over MkDocs Material's dark scheme. Moonlit
+   blue-grey; IM Fell English for headings and menus, EB Garamond for reading (IM Fell has only
+   old-style figures: 1 and 0 read as ı and o in versions and values). No artwork or typeface from
+   the game. */
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400&display=swap");
+
+[data-md-color-scheme="slate"] {
+  --hd-bg: #0f1218;
+  --hd-bg-raised: #12161e;
+  --hd-line: #2a3140;
+  --hd-text: #d4d9e2;
+  --hd-muted: #a9b3c4;
+  --hd-bright: #f2f4f8;
+  --hd-moon: #e4eaf5;
+  --hd-blood: #e0a0a0;
+
+  --md-default-bg-color: var(--hd-bg);
+  --md-default-fg-color: var(--hd-text);
+  --md-default-fg-color--light: var(--hd-muted);
+  --md-default-fg-color--lighter: #6f7a8c;
+  --md-default-fg-color--lightest: var(--hd-line);
+  --md-primary-fg-color: #141924;
+  --md-primary-fg-color--dark: #1a2030;
+  --md-primary-fg-color--light: #2a3140;
+  --md-primary-bg-color: var(--hd-bright);
+  --md-accent-fg-color: #ffffff;
+  --md-typeset-a-color: #b9c8e6;
+  --md-code-bg-color: #0a0d12;
+  --md-code-fg-color: #c8d3e6;
+  --md-footer-bg-color: #0b0d12;
+  --md-footer-bg-color--dark: #08090d;
+  --md-text-font-family: "EB Garamond", Georgia, serif;
+  --md-code-font-family: "JetBrains Mono", monospace;
+}
+
+body, input { font-family: "EB Garamond", Georgia, serif; font-variant-numeric: lining-nums; }
+.md-typeset { font-size: .92rem; line-height: 1.65; }
+.md-typeset code, .md-typeset pre { font-family: "JetBrains Mono", monospace; }
+
+/* Headings, the header and the navigation in the small-capitals cut. */
+.md-typeset h1, .md-typeset h2, .md-typeset h3, .md-typeset h4,
+.md-header__title, .md-nav__title, .md-tabs__link, .md-nav__item--section > .md-nav__link {
+  font-family: "IM Fell English SC", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+.md-typeset h1 { color: var(--hd-bright); font-family: "IM Fell English", Georgia, serif; }
+.md-typeset h2 { color: var(--hd-bright); border-bottom: 1px solid var(--hd-line); padding-bottom: .2em; }
+.md-typeset h3 { color: #c4cfe2; }
+
+.md-header { background: rgba(15, 18, 24, .85); backdrop-filter: blur(6px); border-bottom: 1px solid var(--hd-line); box-shadow: none; }
+.md-sidebar--primary .md-nav__link--active { color: #fff; }
+/* The phone drawer: its repository strip and title in the theme's colours, not Material's blue. */
+.md-nav__source { background-color: #1a2030; }
+.md-nav--primary .md-nav__title[for="__drawer"] { background-color: #141924; }
+.md-sidebar--primary .md-nav__link--active::before { content: "✦ "; color: #9fb0d0; }
+.md-nav__link:hover, .md-typeset a:hover { color: #fff; }
+
+/* Admonitions: quiet frames instead of Material's bright ones. */
+.md-typeset .admonition, .md-typeset details {
+  background: rgba(160, 180, 215, .06);
+  border: 1px solid #2f3a4f !important;
+  border-radius: 4px;
+  box-shadow: none;
+  font-size: .85rem;
+}
+.md-typeset .admonition-title, .md-typeset summary {
+  background: transparent !important;
+  font-family: "IM Fell English SC", Georgia, serif;
+  color: #c4cfe2;
+}
+.md-typeset .admonition-title::before, .md-typeset summary::before { background-color: #9fb0d0 !important; }
+.md-typeset .warning, .md-typeset .danger { border-color: #5a3a3a !important; background: rgba(170, 80, 80, .08); }
+.md-typeset .warning > .admonition-title, .md-typeset .danger > .admonition-title { color: var(--hd-blood); }
+.md-typeset .warning > .admonition-title::before, .md-typeset .danger > .admonition-title::before { background-color: var(--hd-blood) !important; }
+
+.md-typeset table:not([class]) { border: 1px solid var(--hd-line); font-size: .8rem; }
+/* Reference tables (ENVIRONMENT.md): names whole, and every column wide enough to read. */
+.md-typeset table:not([class]) td:first-child code { white-space: nowrap; word-break: normal; }
+.md-typeset table:not([class]) td:nth-child(2) { min-width: 6rem; }
+.md-typeset table:not([class]) td:nth-child(3) { min-width: 15rem; }
+.md-typeset table:not([class]) td:nth-child(4) { min-width: 7rem; }
+/* Wider pages than Material's 61rem: the reference tables have four columns. */
+.md-grid { max-width: 90rem; }
+.md-typeset table:not([class]) td code { word-break: break-word; }
+.md-typeset table:not([class]) th { background: var(--hd-bg-raised); font-family: "IM Fell English SC", Georgia, serif; font-weight: 400; }
+
+/* Home page: the moon and the mist (overrides/home.html). */
+.hd-hero {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 7rem 1rem 6.5rem;
+  background:
+    radial-gradient(circle at 78% 22%, #eef2f9 0 42px, rgba(220, 228, 244, .35) 43px, rgba(200, 212, 236, .10) 110px, transparent 210px),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(160, 175, 205, .22), transparent 70%),
+    linear-gradient(#1c2335, var(--hd-bg) 75%);
+}
+.hd-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 160px;
+  background: linear-gradient(transparent, rgba(190, 200, 220, .10) 60%, var(--hd-bg));
+}
+.hd-hero__content { position: relative; z-index: 1; }
+.hd-hero h1 { margin: 0; font: 400 clamp(2.4rem, 6vw, 4.4rem) "IM Fell English", Georgia, serif; color: var(--hd-bright); }
+.hd-hero p { margin: .9rem 0 0; color: #b8c2d3; font-style: italic; font-size: 1.3rem; }
+.hd-buttons { display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+.hd-button {
+  padding: .75rem 1.75rem;
+  font: 1.1rem "IM Fell English SC", Georgia, serif;
+  color: #e9edf3 !important;
+  border: 1px solid rgba(220, 228, 240, .45);
+  border-radius: 2px;
+  background: rgba(15, 18, 24, .55);
+  transition: background .2s, border-color .2s;
+}
+.hd-button:hover { background: rgba(255, 255, 255, .1); border-color: rgba(240, 244, 250, .8); }
+.hd-button--primary { background: rgba(228, 234, 245, .92); color: #141822 !important; border-color: transparent; }
+.hd-button--primary:hover { background: #fff; }
+
+.hd-home { max-width: 54rem; margin: 0 auto; }
+.hd-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.2rem 0 2rem; }
+.hd-card {
+  display: block;
+  border: 1px solid var(--hd-line);
+  background: rgba(160, 180, 215, .05);
+  padding: 1.1rem 1.2rem;
+  border-radius: 4px;
+  color: var(--hd-text) !important;
+  transition: border-color .2s, background .2s;
+}
+.hd-card:hover { border-color: #5b6a86; background: rgba(160, 180, 215, .09); }
+.hd-card strong { display: block; font: 1.25rem "IM Fell English SC", Georgia, serif; font-weight: 400; color: #dfe5ef; margin-bottom: .3rem; }
+.hd-card span { color: var(--hd-muted); font-size: .85rem; }
+
+@media screen and (max-width: 44.9375em) {
+  /* A smaller moon in the corner: in the middle it covered the title. */
+  .hd-hero {
+    padding: 4.5rem 1rem 4rem;
+    background:
+      radial-gradient(circle at 86% 11%, #eef2f9 0 22px, rgba(220, 228, 244, .35) 23px, rgba(200, 212, 236, .10) 60px, transparent 120px),
+      radial-gradient(ellipse 70% 40% at 50% 100%, rgba(160, 175, 205, .22), transparent 70%),
+      linear-gradient(#1c2335, var(--hd-bg) 75%);
+  }
+  .hd-cards { grid-template-columns: 1fr; }
+}

@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: Copyright 2026 bbport contributors
 # SPDX-License-Identifier: GPL-2.0-or-later
 """The port's environment variables (gpu/shim/bb_env_vars.def): the list against the code, and
-docs/ENVIRONMENT.md made from it.
+the whole list as a Markdown table. docs/ENVIRONMENT.md is the Linux fork's own guide to them,
+written by hand; the list here is the complete one.
 
     python3 scripts/env_vars.py --check   # names read but not listed, or listed and read nowhere
-    python3 scripts/env_vars.py --doc     # writes docs/ENVIRONMENT.md
+    python3 scripts/env_vars.py --doc     # prints every variable, by kind, as Markdown
 """
 import argparse
 import re
@@ -13,7 +14,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEF = ROOT / 'gpu/shim/bb_env_vars.def'
-DOC = ROOT / 'docs/ENVIRONMENT.md'
 
 KINDS = {
     'SETTING': ('Settings', 'What players and the launchers set. The menu, bbport.ini and the launcher '
@@ -100,8 +100,8 @@ def check():
 def document():
     listed = registry()
     lines = ['# Environment variables', '',
-             'Every `BB_*` variable the port reads, by kind. Made by `scripts/env_vars.py --doc` from',
-             '`gpu/shim/bb_env_vars.def`; edit that list, not this file. The game prints the variables set',
+             'Every `BB_*` variable the port reads, by kind, from `gpu/shim/bb_env_vars.def`',
+             '(`scripts/env_vars.py --doc`). The game prints the variables set',
              'at its start (`Environment:` in the log) and warns about `BB_*` names it does not know.', '',
              '`=1: ...` / `=0: ...` / `=N: ...` say what that value does; `set: ...` means any value',
              'turns it on (even `0`).', '']
@@ -116,14 +116,13 @@ def document():
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--check', action='store_true', help='the list against the code')
-    parser.add_argument('--doc', action='store_true', help='write docs/ENVIRONMENT.md')
+    parser.add_argument('--doc', action='store_true', help='print every variable as Markdown')
     args = parser.parse_args()
     ok = True
     if args.check or not args.doc:
         ok = check()
     if args.doc:
-        DOC.write_text(document(), encoding='utf-8')
-        print(f'Wrote {DOC.relative_to(ROOT)}')
+        print(document())
     return 0 if ok else 1
 
 

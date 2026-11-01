@@ -16,9 +16,10 @@ class EnvVarsTests(unittest.TestCase):
             ok = env_vars.check()
         self.assertTrue(ok, out.getvalue())
 
-    def test_document_is_current(self):
-        self.assertEqual((ROOT / 'docs/ENVIRONMENT.md').read_text(encoding='utf-8'), env_vars.document(),
-                         'run: python3 scripts/env_vars.py --doc')
+    def test_document_lists_every_variable(self):
+        document = env_vars.document()
+        for name in env_vars.registry():
+            self.assertIn(f'`{name}`', document)
 
 
 if __name__ == '__main__':

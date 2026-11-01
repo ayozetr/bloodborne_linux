@@ -3,7 +3,7 @@
 // bbport: every environment variable the port reads (BB_*), with what it does: one
 //     BB_ENV(NAME, KIND, "what it does")
 // per variable, by kind and name. The C/C++ code reads them through bb_env.h; scripts/env_vars.py
-// makes docs/ENVIRONMENT.md from this list and tests/test_env_vars.py checks it against the code
+// prints this list as Markdown (--doc) and tests/test_env_vars.py checks it against the code
 // (a variable read but not listed, or listed but read nowhere, fails it). The game prints the ones
 // set at start and names any other BB_* in its environment (a typo).
 //
