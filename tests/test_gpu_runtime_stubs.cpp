@@ -53,3 +53,24 @@ int runtime_pad_button(const char*) { return -1; }
 int runtime_file_host_path(const char*, char*, size_t) { return -1; }
 void runtime_re_watch(uint64_t) {}
 }
+// The guest memory, heap growth, files and saves services the renderer library gained since
+// (none of them is reached without a guest).
+extern "C" {
+int runtime_extra_direct_map(uint64_t, uint64_t, void**) { return -1; }
+const char* runtime_file_user_dir(void) { return "."; }
+void* runtime_low_map(size_t, int) { return nullptr; }
+int runtime_memory_commit(uint64_t, uint64_t) { std::abort(); }
+void runtime_memory_commit_ahead(uint64_t, uint64_t) { std::abort(); }
+int runtime_memory_decommit(uint64_t, uint64_t) { std::abort(); }
+int runtime_memory_deferred(uint64_t*, uint64_t*) { return 0; }
+void runtime_memory_discard_direct(uint64_t, uint64_t) { std::abort(); }
+void runtime_memory_note_pinned(uint64_t, uint64_t) {}
+int runtime_memory_pool_fd(void) { return -1; }
+void runtime_memory_set_grow(const uint64_t*, uint64_t) {}
+void runtime_memory_set_guest_chunk_free(void (*)(uint64_t, uint64_t)) {}
+void runtime_memory_set_guest_chunk_private(int (*)(uint64_t, uint64_t, void*)) {}
+void runtime_memory_set_guest_lazy(int) {}
+void runtime_memory_set_host_only_allocations(uint64_t) {}
+void runtime_memory_trap_stats(uint64_t* a, uint64_t* b, uint64_t* c, uint64_t* d) { *a = *b = *c = *d = 0; }
+int runtime_savedata_active_slot(char*, size_t) { return -1; }
+}
