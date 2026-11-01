@@ -57,9 +57,8 @@ Whether a mod works with Bloodborne 1.09 is up to its author.
 A shadPS4-style folder next to the game folder, `<game folder>-mods/dvdroot_ps4/...` (for
 example `CUSA03173-mods` next to `CUSA03173`), is loaded too, before the mods in the list. You
 can also choose a folder that holds `dvdroot_ps4` directly as the mods folder: it is then loaded
-as one mod. **Load mods** turns all of them off. The launcher's button prompts and gestures
-menu work the same way, as files laid under the mods; they are settings of their own and stay
-on when mods are off.
+as one mod. **Load mods** turns all of them off. The field of view works the same way, as files
+laid under the mods; it is a setting of its own and stays on when mods are off.
 
 ### How it works
 

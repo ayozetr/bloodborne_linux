@@ -1,0 +1,156 @@
+[
+ {
+  "tag_name": "0.51-linux.6",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.6",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-14T23:30:35Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 241642707,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.6/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.51-linux.5",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.5",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-14T12:25:38Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 240841635,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.5/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "test-issue5-2",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/test-issue5-2",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-14T12:03:49Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 240842160,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/test-issue5-2/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.51-linux.4",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.4",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-13T09:52:27Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 240812144,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.4/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.51-linux.3",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.3",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-13T00:29:21Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 234947503,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.3/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "test-issue5-1",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/test-issue5-1",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-13T21:33:06Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 240775054,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/test-issue5-1/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "test-issue1-1",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/test-issue1-1",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-12T09:02:01Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 234929108,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/test-issue1-1/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.51-linux.2",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.2",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-11T15:58:21Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 234917251,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.2/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.51-linux.1",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.51-linux.1",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-11T01:54:24Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 234915406,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.51-linux.1/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.5-linux.1",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.5-linux.1",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-10T20:40:14Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 235115370,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.5-linux.1/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ },
+ {
+  "tag_name": "0.4-linux.1",
+  "html_url": "https://github.com/ayozetr/bloodborne_linux/releases/tag/0.4-linux.1",
+  "prerelease": false,
+  "draft": false,
+  "published_at": "2026-10-10T02:52:55Z",
+  "assets": [
+   {
+    "name": "Bloodborne-bbport-x86_64.AppImage",
+    "size": 358077224,
+    "browser_download_url": "https://github.com/ayozetr/bloodborne_linux/releases/download/0.4-linux.1/Bloodborne-bbport-x86_64.AppImage"
+   }
+  ]
+ }
+]

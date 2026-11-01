@@ -41,8 +41,9 @@ The log says why, on a line starting with `DLSS:`.
 
 ## Spanish shows the Latin American text (or the other way round)
 
-The game picks a language's regional text by the dump's region. Choose it in **Setup → Game
-region**: *Europe* for Spanish from Spain, *The Americas* for Latin American Spanish.
+The game picks a language's regional text by the dump's region and the system language. Choose the
+text you want in **Setup → Game text language**: *Español* for Spanish from Spain, *Español
+(Latinoamérica)* for Latin American Spanish. **Voice language** does the same for the voices.
 
 ## The game crashes after playing a while, on a card with little VRAM
 
@@ -53,34 +54,17 @@ other programs that use the GPU (browsers, video players, other games).
 
 ## The picture is stretched on an ultrawide screen
 
-**Graphics → Display → Output resolution** lists 2560×1080, 3440×1440, 3840×1600 and 5120×2160
-(21:9) and 3840×1080 and 5120×1440 (32:9); any other size written as `output_res=WxH` in
-bbport.ini works too. The view gets wider instead of stretched: the game's camera, its HUD and the
-lock-on and health-bar markers are patched at start for the screen's own aspect ratio. **HUD
-position** moves health, items and Blood Echoes from the centred 16:9 area (as on a 16:9 screen)
-to the screen edges, and menu backdrops cover the whole width. These sizes need the startup patch:
-changing them in the game restarts it, and TAA (which needs live resolution changes) leaves them
-stretched. `aspect_patch=0` in bbport.ini turns the wider view off.
+Choose the screen's shape in **Graphics → Display → Aspect ratio** (*Auto* follows the output
+resolution): 4:3, 16:10, 16:9, 21:9 or 32:9. The view gets wider (or taller) instead of stretched,
+and the HUD keeps to the screen's edges; it changes live, in the game's *Display* menu too.
+**Output resolution** *Auto* is the monitor's own; any other size written as `output_res=WxH` in
+bbport.ini works too.
 
-## Quit to Desktop is missing from the menus, or shows another name
+## Exit to desktop
 
-**Mods → Menus and debugging → Quit to Desktop in the title and System menus** (also in the in-game
-menu; on by default) adds the entry to the title menu and to the System menu. The title entry
-closes the game at once; the System entry runs the game's own *Exit Game* first (it saves, and
-its confirmation asks to quit to the desktop), and the game closes when it is back at the intro
-or the title screen. The log then says `Runtime: Quit to Desktop`, and the game ends with exit
-code 0, as when the window is closed.
-
-- No entry, and the log says `Quit to Desktop: ...; the game starts without it` or
-  `Patches: ... Quit to Desktop skipped`: the menu texts could not be made from the game's files,
-  or the game's executable is not the 1.09 code the entry was made for.
-- A third-party *Exit Game (title menu)* patch (`Bloodborne_exit_game.xml` in the patches folder)
-  also adds a way out to the title menu. When it changes any of the code Quit to Desktop changes,
-  that patch is kept and Quit to Desktop's code is left out (`another patch writes ...` in the
-  log): the System menu has no entry then. Quit to Desktop does the same and saves first from
-  the System menu, so turn that patch off.
-- A mod that replaces `msg/<language>/menu.msgbnd.dcx` (a translation) is laid over Quit to
-  Desktop's texts: the entries keep that mod's names (*Opinion Box*, *Language*).
+**Exit to desktop** is in the game's System menu and on the title screen, from bbport 0.7. The
+*Quit to Desktop* switch of earlier Linux versions is gone with it, and a third-party *Exit Game*
+patch is no longer needed.
 
 ## The controller does nothing when the game is started from Steam
 
@@ -93,11 +77,10 @@ log says `Window: X11 (Xwayland), so Steam Input reaches the game`). On older re
 
 ## The Steam overlay does not open in the game
 
-Steam's overlay (Shift+Tab, its FPS counter, F12 screenshots) is off by default: turn on **Steam
-overlay** under **Add to Steam** in the launcher, then start the game from Steam. The log then says
-`Steam overlay: …/ubuntu12_64/gameoverlayrenderer.so`, and on a Wayland desktop also
-`Window: X11 (Xwayland), so Steam's overlay shows on it`: Steam draws its overlay only on X11
-windows. If it says the library was not found, the game was not started by Steam.
+Steam's overlay (Shift+Tab, its FPS counter, F12 screenshots) needs the game started from Steam,
+with **Steam overlay** on under **Add to Steam** in the launcher (on by default). The log then says
+`Steam overlay: …/ubuntu12_64/gameoverlayrenderer.so`. Without that line, the game was not started
+by Steam.
 
 ## The camera turns much faster on diagonals
 

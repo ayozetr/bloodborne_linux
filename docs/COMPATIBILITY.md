@@ -46,8 +46,8 @@ On Linux (CachyOS, NVIDIA GeForce RTX 3060), with the US release (`CUSA00900`):
   messenger add-ons), from the launcher's DLC folder.
 - A dump whose `eboot.bin` had Lance McDonald's 60 fps patch baked in: the launcher reports it,
   and the clean 1.09 `eboot.bin` runs.
-- Both regional texts through *Game region*: Spanish from Spain (Europe) and Latin American
-  Spanish (the Americas).
+- Every text and voice language the files have, through *Game text language* and *Voice
+  language*: Spanish from Spain and Latin American Spanish among them.
 
 The European Game of the Year edition (`CUSA03173`) is the release the original bbport is
 developed and tested with.

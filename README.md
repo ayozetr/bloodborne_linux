@@ -29,12 +29,14 @@ seamless co-op, the Steam Deck, and what to do when something goes wrong.
 - **In-game map** (Hunter's Atlas): a fullscreen map with where you are, lamps and items, and fast
   travel to the lamps you've found.
 - **Frame rate unlocked** (up to 120 FPS) or capped at **30, 60 or 90**. Resolutions from
-  **720p to 4K**, and **ultrawide** (21:9, 32:9, [how](docs/TROUBLESHOOTING.md#the-picture-is-stretched-on-an-ultrawide-screen)).
-- **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA.
+  **720p to 4K**, and any **aspect ratio** (4:3 to 32:9 ultrawide, [how](docs/TROUBLESHOOTING.md#the-picture-is-stretched-on-an-ultrawide-screen)).
+- **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA, and
+  **frame generation** (FSR 3.1, or DLSS on GeForce RTX 40 and newer).
 - **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
-  game**, and **keyboard and mouse**, with a direct 1:1 mouse camera, keys you can rebind
-  (or bbport 0.6's Dark Souls III-style layout) and the mouse as a pointer in the game's menus.
-- **Quit to Desktop** from the game's title and System menus (it saves first).
+  game**, and **keyboard and mouse**, with keys you can rebind (bbport 0.7's Dark Souls
+  III-style layout, or the classic one of earlier Linux versions) and the mouse as a pointer in the
+  game's menus.
+- **Exit to desktop** from the game's title and System menus.
 - **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
 - **Trophies and the platinum**, with a notice in the game like on the PS4.
 - **Add to Steam** in one click, and **Discord Rich Presence** with your area and co-op partners.
@@ -68,9 +70,8 @@ in the **Status** row (every line should get a check mark):
 
 - **Seamless Hunt** (the default): the community server of Seamless Co-op (BBSC), with players on
   the Windows port. Make an account from the launcher with **Create** ([docs/ONLINE.md](docs/ONLINE.md#seamless-hunt)).
-- **The Hunter's Dream**: sign in with Discord, or create an account with just a name. You play
-  with bbhost's players. This connection is unofficial: report problems here, not to The Hunter's
-  Dream.
+- **The Hunter's Dream**: sign in with Discord. You play with bbhost's players
+  ([docs/ONLINE.md](docs/ONLINE.md#the-hunters-dream-with-bbhosts-players)).
 - **Your own server**: for your group, with Docker and Tailscale ([docs/SERVER.md](docs/SERVER.md)).
 - **Seamless Co-op (BBSC)**, in the same tab: every player needs it, and summons across areas need
   its game server, which your own server can run ([docs/ONLINE.md](docs/ONLINE.md#seamless-co-op-bbsc)).

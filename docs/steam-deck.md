@@ -33,5 +33,5 @@ the controller itself. [More](TROUBLESHOOTING.md#the-controller-does-nothing-whe
 ## The Steam overlay
 
 Shift+Tab, Steam's FPS counter and F12 screenshots need **Steam overlay**, under *Add to Steam* in
-the launcher (off by default), and the game started from Steam.
+the launcher (on by default), and the game started from Steam.
 [More](TROUBLESHOOTING.md#the-steam-overlay-does-not-open-in-the-game).
