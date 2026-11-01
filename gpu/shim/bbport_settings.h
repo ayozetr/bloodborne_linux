@@ -165,6 +165,8 @@ struct Values {
     /// native look detour (games/bloodborne/hooks_camera.cpp) multiplies the turn by the four floats as
     /// they are; [2] and [3] stay 1.
     alignas(16) std::atomic<float> camera_speed[4]{1.0f, 1.0f, 1.0f, 1.0f};
+    /// Silent while the window does not have focus (bbgpu_audio_muted).
+    std::atomic<bool> mute_unfocused{false};
     /// The settings menu's position (fraction of the screen), -1 until it is moved.
     std::atomic<float> menu_x{-1.0f}, menu_y{-1.0f};
     // FSR 4 checks (menu): the provider's auto exposure, the jitter sign it is given.

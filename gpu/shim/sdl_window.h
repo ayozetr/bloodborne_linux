@@ -40,6 +40,8 @@ public:
     void TakeMouse(double& dx, double& dy, int& wheel_up, int& wheel_down);
     /// The window holds the mouse (relative mode) for looking around.
     bool MouseCaptured() const { return mouse_captured.load(std::memory_order_relaxed); }
+    /// bbport: whether the window has keyboard focus (mute_unfocused). Any thread.
+    bool IsFocused() const { return focused.load(std::memory_order_relaxed); }
     /// mouse_look=0: a click does not take the mouse.
     static void EnableMouseLook(bool enabled) { mouse_look.store(enabled, std::memory_order_relaxed); }
     /// From any thread: the window thread takes the mouse at its next poll (unless a menu or a
@@ -66,6 +68,7 @@ private:
     int wheel_up{}, wheel_down{};
     std::atomic<bool> mouse_captured{false};
     std::atomic<bool> capture_requested{false};
+    std::atomic<bool> focused{true};
     static inline std::atomic<bool> mouse_look{true};
     SDL_Window* window{};
     WindowSystemInfo window_info{};

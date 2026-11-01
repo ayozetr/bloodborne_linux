@@ -370,6 +370,10 @@ extern "C" int bbgpu_overlay_captures_input(void) {
     return BbOverlay::CapturesInput() ? 1 : 0;
 }
 
+extern "C" int bbgpu_audio_muted(void) {
+    return g_window && BbSettings::Get().mute_unfocused && !g_window->IsFocused() ? 1 : 0;
+}
+
 extern "C" void bbgpu_mouse_take(double* dx, double* dy, int* wheel_up, int* wheel_down) {
     double x = 0, y = 0;
     int up = 0, down = 0;

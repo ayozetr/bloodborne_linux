@@ -32,6 +32,9 @@ int bbgpu_text_input_begin(const char *initial_utf8, const char *prompt_utf8);
 int bbgpu_text_input_poll(char *out_utf8, uint64_t size);
 /* 1 while the in-game settings menu is open: the game's pad input is held neutral. */
 int bbgpu_overlay_captures_input(void);
+/* 1 while the game should be silent: bbport.ini mute_unfocused is on and the window does not
+ * have focus. Safe from any thread (the audio ports read it for every buffer). */
+int bbgpu_audio_muted(void);
 /* Mouse look (runtime_pad.c): the window takes the mouse when it is clicked (relative mode) and
  * lets it go on F1, losing focus or the menu opening. take: motion (pixels) and wheel notches
  * since the last call, reset; captured: 1 while the window holds it; enable: mouse_look=0 in

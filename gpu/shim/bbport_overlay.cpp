@@ -372,6 +372,7 @@ void Menu() {
 
     ImGui::SeparatorText(BbSettings::MenuText("Other", "Прочее"));
     Checkbox(BbSettings::MenuText("FPS counter in corner", "Счётчик FPS в углу"), s.show_fps);
+    Checkbox(BbSettings::MenuText("Mute in the background", "Без звука в фоне"), s.mute_unfocused);
     ShadersSection();
 
     ImGui::Spacing();
