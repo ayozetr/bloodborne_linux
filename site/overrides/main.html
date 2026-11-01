@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{# The site is dark already: Dark Reader would recolour it (the light Download button came out
+   dark), so it is told to leave it alone. #}
+{% block extrahead %}
+  <meta name="darkreader-lock">
+{% endblock %}

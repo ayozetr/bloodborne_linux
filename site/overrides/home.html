@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+
+{# The home page: the moon-and-mist hero above the page's own content (docs/index.md). #}
+{% block hero %}
+<section class="hd-hero">
+  <div class="hd-hero__content">
+    <h1>Bloodborne for Linux</h1>
+    <p>Welcome home, good hunter. Here is how to play, alone or together.</p>
+    <div class="hd-buttons">
+      <a class="hd-button hd-button--primary" href="https://github.com/ayozetr/bloodborne_linux/releases/latest">Download</a>
+      <a class="hd-button" href="{{ 'getting-started/' | url }}">Read the guide</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+  <div class="hd-home">{{ page.content }}</div>
+{% endblock %}

@@ -43,3 +43,5 @@ param.sfo
 /CUSA*/
 # The launcher's icon (shipped)
 !launcher/bloodborne.png
+# The players' guide, built by mkdocs (mkdocs.yml)
+_site/
