@@ -152,8 +152,7 @@ void TextureCache::UntrackImageTail(ImageId image_id) {
 
 void TextureCache::MarkAsMaybeDirty(ImageId image_id, Image& image) {
     if (image.hash == 0) {
-        image.hash = XXH3_64bits(std::bit_cast<const u8*>(image.info.guest_address),
-                                 image.info.guest_size);
+        image.hash = MaybeDirtyHash(image.info);
     }
     image.flags |= ImageFlagBits::MaybeCpuDirty;
     UntrackImage(image_id);

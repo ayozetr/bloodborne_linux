@@ -24,12 +24,13 @@
 
 namespace VideoCore {
 
+// bbport (0xCydral, from yumlevi/bloodborne_pc 43fcf95; Linux fork): the same range when an image
+// is marked maybe dirty (MarkAsMaybeDirty) and when it is refreshed or judged by the collector:
+// the whole image. The refresh hashed only its first 8x8 texels against the marking's whole-image
+// hash, so the two never matched, and stale guest memory was uploaded over small images the GPU
+// had written (a black character preview, a missing loading-screen item picture).
 u64 TextureCache::MaybeDirtyHash(const ImageInfo& info) {
-    const u32 w = std::min(info.size.width, 8u);
-    const u32 h = std::min(info.size.height, 8u);
-    const u32 bytes = (info.props.is_block ? (w + 3) / 4 : w) *
-                      (info.props.is_block ? (h + 3) / 4 : h) * (info.num_bits / 8);
-    return XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), bytes);
+    return XXH3_64bits(std::bit_cast<const u8*>(info.guest_address), info.guest_size);
 }
 
 namespace {
@@ -359,7 +360,7 @@ void TextureCache::RefreshImage(Image& image, bool partial_ok) {
     BbStats::Timer timer{BbStats::t_refresh};
     const ImageInfo& info = image.info;
 
-    // Maybe written (a page under it was, not it): compared by its first 8x8 texels.
+    // Maybe written (a page under it was, not it): compared by its hash (MaybeDirtyHash).
     if (True(image.flags & ImageFlagBits::MaybeCpuDirty) &&
         False(image.flags & ImageFlagBits::CpuDirty)) {
         const u64 hash = MaybeDirtyHash(info);

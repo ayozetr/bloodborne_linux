@@ -336,8 +336,8 @@ private:
         DeleteImage(image_id);
     }
 
-    /// The hash a "maybe written" image is compared by: its first 8x8 texels in the game's memory
-    /// (texture_cache_upload.cpp).
+    /// The hash a "maybe written" image is compared by: the whole image in the game's memory, at
+    /// marking and at refresh alike (texture_cache_upload.cpp).
     static u64 MaybeDirtyHash(const ImageInfo& info);
 
     // Memory (texture_cache_memory.cpp).
