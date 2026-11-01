@@ -20,6 +20,20 @@
 namespace Vulkan {
 
 namespace {
+/// bbport (Linux fork): records `regions` as one command per 64 KiB of them. A deferred command's
+/// data shares a 128 KiB recording chunk with it (Scheduler::ReserveRecordData), and a download
+/// of the buffer cache can carry far more regions than that (178563 copies, 4.3 MB, loading an
+/// area on NVIDIA): the check stopped the game (exit 23).
+template <typename T, typename Record>
+void RecordInSlices(Scheduler& scheduler, std::span<const T> regions, Record&& record) {
+    constexpr std::size_t PerCommand = 64 * 1024 / sizeof(T);
+    for (std::size_t at = 0; at < regions.size(); at += PerCommand) {
+        record(scheduler.RecordData(regions.subspan(at, std::min(PerCommand, regions.size() - at))));
+    }
+}
+} // namespace
+
+namespace {
 
 using Stage = vk::PipelineStageFlagBits2;
 using AccessBit = vk::AccessFlagBits2;
@@ -263,9 +277,10 @@ void Runtime::CopyBuffer(const VideoCore::Buffer* src, const VideoCore::Buffer* 
     if (needs_flush) {
         FlushBarriers();
     }
-    scheduler.Record([src = src->Handle(), dst = dst->Handle(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBuffer(src, dst, u32(regions.size()), regions.data());
+    RecordInSlices(scheduler, copies, [&](auto regions) {
+        scheduler.Record([src = src->Handle(), dst = dst->Handle(), regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBuffer(src, dst, u32(regions.size()), regions.data());
+        });
     });
     if (resume) {
         profiler->Resume(resume);
@@ -304,9 +319,10 @@ void Runtime::CopyFromGuestChunk(vk::Buffer src, const VideoCore::Buffer* dst,
     if (needs_flush) {
         FlushBarriers();
     }
-    scheduler.Record([src, dst = dst->Handle(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBuffer(src, dst, u32(regions.size()), regions.data());
+    RecordInSlices(scheduler, copies, [&](auto regions) {
+        scheduler.Record([src, dst = dst->Handle(), regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBuffer(src, dst, u32(regions.size()), regions.data());
+        });
     });
     for (const auto& copy : copies) {
         AccessBuffer(dst, copy.dstOffset, copy.size, Stage::eCopy, AccessBit::eTransferWrite);
@@ -347,10 +363,11 @@ void Runtime::UploadImage(VideoCore::Image* dst, const VideoCore::Buffer* src,
     if (needs_flush) {
         FlushBarriers();
     }
-    scheduler.Record([src = src->Handle(), image = dst->GetImage(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyBufferToImage(src, image, Layout::eTransferDstOptimal, u32(regions.size()),
-                                 regions.data());
+    RecordInSlices(scheduler, copies, [&](auto regions) {
+        scheduler.Record([src = src->Handle(), image = dst->GetImage(), regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyBufferToImage(src, image, Layout::eTransferDstOptimal, u32(regions.size()),
+                                     regions.data());
+        });
     });
     for (const auto& copy : copies) {
         AccessBuffer(src, copy.bufferOffset, BufferImageCopySize(copy, dst->info.pixel_format),
@@ -374,10 +391,11 @@ void Runtime::DownloadImage(VideoCore::Image* src, const VideoCore::Buffer* dst,
     if (needs_flush) {
         FlushBarriers();
     }
-    scheduler.Record([image = src->GetImage(), dst = dst->Handle(),
-                      regions = scheduler.RecordData(copies)](vk::CommandBuffer cmdbuf) {
-        cmdbuf.copyImageToBuffer(image, Layout::eTransferSrcOptimal, dst, u32(regions.size()),
-                                 regions.data());
+    RecordInSlices(scheduler, copies, [&](auto regions) {
+        scheduler.Record([image = src->GetImage(), dst = dst->Handle(), regions](vk::CommandBuffer cmdbuf) {
+            cmdbuf.copyImageToBuffer(image, Layout::eTransferSrcOptimal, dst, u32(regions.size()),
+                                     regions.data());
+        });
     });
     for (const auto& copy : copies) {
         AccessBuffer(dst, copy.bufferOffset, BufferImageCopySize(copy, src->info.pixel_format),
