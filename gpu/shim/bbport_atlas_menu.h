@@ -14,4 +14,6 @@ void Draw();
 bool HandleMouse(const SDL_Event& e);
 uint32_t RoutePad(uint32_t buttons,uint8_t lx,uint8_t ly,uint8_t rx,uint8_t ry);
 void Reset();
+/// bbport: hides the tile (fading out) until the game's menu has closed (a lamp travel).
+void HideUntilMenuCloses();
 }
