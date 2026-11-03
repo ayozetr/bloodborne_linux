@@ -26,16 +26,37 @@ It depends on the server:
 
 - On **Seamless Hunt** (or your own server with BBSC's game server), seamless co-op works fully:
   summons across areas and up to 5 hunters.
-- On **The Hunter's Dream**, BBSC keeps the session together, but summons are the normal game's:
-  both hunters must be in the **same area**, the area's boss must still be alive in the host's world,
-  and your levels must be within range.
+- On **The Hunter's Dream** there is no seamless co-op: summons are the normal game's, with the
+  Beckoning Bell and the Small Resonant Bell. Both hunters must be in the **same area**, the area's
+  boss must still be alive in the host's world, and your levels must be within range (or use the
+  same password).
 
 [Seamless co-op on each server](ONLINE.md#seamless-co-op-bbsc).
 
 ## Do I need to open ports on my router?
 
-No. With seamless co-op (BBSC) on, Seamless Hunt relays players who cannot reach each other
-directly, and The Hunter's Dream's bridge relays by itself. Only [your own server](SERVER.md) needs a few ports, through Tailscale.
+Usually not: with **UPnP** on (the default) the game opens its port on the router by itself, and
+with seamless co-op (BBSC) on Seamless Hunt relays players who cannot reach each other directly. A
+router without UPnP, or a firewall on your computer, needs UDP 3658 opened
+([ports](ONLINE.md#ports)). With [your own server](SERVER.md), Tailscale takes care of it.
+
+## How do I use the in-game map?
+
+In the launcher, **Mods → Map (Hunter's Atlas)**: turn on **In-game map** and press **Prepare**
+once. It makes the maps from your own game files (it downloads about 200 MB of tools the first
+time). In the game, choose **Map** in the quick menu (its fourth tile), press **M**, or with a
+controller open the game's menu and click the right stick (R3). The port's menu (Insert, or hold
+L3 + R3) changes the key and the controller shortcut.
+**Travel to lamps from the map** and **Items on the map** are in the same launcher group.
+
+## How do I get FSR 4.1.2 (INT8, for RDNA2 and the Steam Deck)?
+
+FSR 4.1.2's models are built from AMD's own files, which can't be shipped here. In
+**Graphics → Upscaler**, on **FSR 4.1.2 from AMD's driver**, press **Choose a file…** and pick
+AMD's Adrenalin 26.10.1 or newer installer (the `.exe`) or the `amdxcffx64.dll` inside it. It also
+needs AMD's FSR 4.1.x upscaler DLL (`amd_fidelityfx_upscaler_dx12.dll`, from OptiScaler or a game
+with FSR 4.1): if you built FSR 4.1.1 before, it uses that one, otherwise it asks for it. It takes
+about 4 minutes. In the game, the port's menu chooses the model (INT8 RDNA2 or INT8 Lite).
 
 ## How do I get a log on the Steam Deck?
 

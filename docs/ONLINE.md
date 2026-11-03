@@ -67,7 +67,7 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
 online module (`gpu/bbnet20/bbsc`, BBSC 0.0.2 from bbport 0.7). It is new, and its own author
 marks much of it as untested.
 
-1. In the launcher's **Multiplayer → Online** tab, **Enable BBSC** in the **Seamless co-op (BBSC)**
+1. In the launcher's **Multiplayer → Online** tab, **Turn on BBSC** in the **Seamless co-op (BBSC)**
    group (on by default). While it is on, BBSC's bells replace the game's; turned off, the game's
    come back the next time the character is loaded (the save is copied to `save-backups` first).
    **BBSC settings**, folded under it, has BBSC's own options: what the guest shares with the host,

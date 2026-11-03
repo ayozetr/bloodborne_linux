@@ -13,7 +13,7 @@ This also works when the game is started from Steam or from the Steam Deck's Gam
 option on once in the launcher, and every session saves its log.
 
 The log's first line says which version ran, and for a test build which one
-(`bbport Linux 0.51-linux.18, build 626ec908 fix/issue1-lamp-blur 2026-10-29`).
+(`bbport Linux 0.70-linux.1, build 74b1a308 HEAD 2026-11-03 (bbport 0.7)`).
 
 ## Sending it
 

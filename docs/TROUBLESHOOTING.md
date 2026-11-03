@@ -27,17 +27,16 @@ To move a save, close the game, back up both folders, and copy the `savedata` fo
 
 ## DLSS is "not supported by this GPU"
 
-The log says why, on a line starting with `DLSS:`.
+The log says why, on a line `DLSS: unavailable (...)`; the game then uses another upscaler.
 
 - DLSS needs a GeForce RTX (20 series or newer) and NVIDIA's own driver; it does not work with
-  NVK.
-- The 0.4-linux.1 AppImage ships a modified copy of NVIDIA's DLSS library, which the driver
-  refuses (`Feature requirement query failed: 0xbad00012`): update to 0.5-linux.1 or newer.
+  NVK (`not an NVIDIA GPU`, or `this GPU or driver does not support DLSS`).
+- `NVIDIA NGX initialization failed`: update the driver, and check that NVIDIA's CUDA/UVM module
+  is loaded (`sudo modprobe nvidia_uvm`; the `nvidia-modprobe` package loads it when needed). With
+  Secure Boot, a module signing key that is not enrolled stops it (`Key was rejected by service`).
+- DLSS Frame Generation needs a GeForce RTX 40 or newer; on older cards the log says so and DLSS
+  itself still works.
 - From the repository, DLSS needs `bash tools/build_dlss.sh` once after `build.sh`.
-- If the log says `Device creation with DLSS extensions failed`, NVIDIA's CUDA/UVM
-  module is missing: the game then uses FSR 3.1. Load it with `sudo modprobe nvidia_uvm` (the
-  `nvidia-modprobe` package loads it when needed); with Secure Boot, a module signing key that
-  is not enrolled stops it (`Key was rejected by service`).
 
 ## Spanish shows the Latin American text (or the other way round)
 
