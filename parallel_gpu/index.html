@@ -1689,6 +1689,11 @@
 
 
 <h1 id="parallel-gpu-command-processing-design-notes">Parallel GPU command processing — design notes<a class="headerlink" href="#parallel-gpu-command-processing-design-notes" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Design notes from when this work was planned, kept for their reasoning. bbport 0.7 has one
+memory model and its own renderer, and some switches named here (<code>BB_UFFD</code>) no longer exist; the
+current list is in <a href="../ENVIRONMENT/">ENVIRONMENT.md</a>.</p>
+</blockquote>
 <p>Goal: remove the single-core bottleneck of the emulated GPU command processor
 (<code>shadPS4:GpuCommandProcessor</code>, ~100% of one core while the rest of the CPU idles).</p>
 <h2 id="measurements-bloodborne-hunters-nightmare-70-fps-bb_dcb_stats1">Measurements (Bloodborne, Hunter's Nightmare, ~70 FPS, <code>BB_DCB_STATS=1</code>)<a class="headerlink" href="#measurements-bloodborne-hunters-nightmare-70-fps-bb_dcb_stats1" title="Permanent link">&para;</a></h2>

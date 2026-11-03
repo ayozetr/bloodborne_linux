@@ -1129,7 +1129,7 @@ and then the players' games connect to each other. Linux and Windows players can
 everyone needs the game at version 1.09 and the same pool.</p>
 <blockquote>
 <p><strong>shadPS4's public shadNet server no longer accepts bbport builds</strong>: it signs the game out
-right after the login ("This shadNet server doesn't accept your shadPS4 build" in the log), and
+right after the login ("The shadNet server doesn't accept this shadPS4 build" in the log), and
 the launcher says so. The pools for bbport are Seamless Hunt (the default), The Hunter's Dream's and a server of your own.</p>
 </blockquote>
 <h2 id="seamless-hunt">Seamless Hunt<a class="headerlink" href="#seamless-hunt" title="Permanent link">&para;</a></h2>
@@ -1147,20 +1147,19 @@ are off by default, as in Seamless Hunt's package (<strong>Bloodstains on Seamle
 back). Messages, ghosts and summon signs are not affected.</p>
 <h2 id="the-hunters-dream-with-bbhosts-players">The Hunter's Dream (with bbhost's players)<a class="headerlink" href="#the-hunters-dream-with-bbhosts-players" title="Permanent link">&para;</a></h2>
 <p>Choose <strong>The Hunter's Dream (with bbhost players)</strong> in the launcher's <strong>Multiplayer → Online</strong> tab.
-<a href="https://github.com/ayozetr/bloodborne_linux/blob/main/bbbridge/README.md">bbbridge</a> by MaskZeus starts with the game, stands in for a shadNet server
-on this computer and talks to The Hunter's Dream the way bbhost does, its relay included, so no
-router port is needed. The account is The Hunter's Dream's, kept in <code>user/bbbridge</code> (no password):</p>
-<ul>
-<li><strong>Sign in with Discord</strong>: the launcher shows a code and opens The Hunter's Dream's page; approve
-  it there. The account is the same one bbhost uses.</li>
-<li><strong>Without Discord</strong>: type a name and <strong>Create</strong>. Keep the recovery code the launcher shows:
-  with the name, it brings the account back on another computer (<strong>Recover</strong>).</li>
-</ul>
-<p>The game's play log (its own telemetry) stays blocked, so The Hunter's Dream's live map does not
-show you.</p>
-<p><strong>This connection is unofficial.</strong> The Hunter's Dream's team has not approved bbbridge, and they
-do not support bbport: report problems here (<a href="https://github.com/ayozetr/bloodborne_linux/issues">issues</a>),
-not to The Hunter's Dream's support.</p>
+The game's online module talks to The Hunter's Dream itself, the way bbhost does (from bbport 0.7):
+nothing else runs next to the game. Its account is your Discord sign-in, the same one bbhost uses:</p>
+<ol>
+<li>Press <strong>Sign in with Discord</strong>. The launcher shows a code, copies it and opens The Hunter's
+   Dream's page.</li>
+<li>On that page, press <em>Sign in with Discord to link</em> and sign in; back on the page, enter the code
+   in the code field (not in <em>Sign in with a code from the game</em>).</li>
+</ol>
+<p>No password is kept: the launcher keeps the sign-in's token with its settings. <strong>Sign out</strong> forgets
+it. <strong>Test</strong> checks The Hunter's Dream's game server and its co-op service. Seamless co-op (BBSC)
+is not available there.</p>
+<p>Report problems here (<a href="https://github.com/ayozetr/bloodborne_linux/issues">issues</a>), not to The
+Hunter's Dream's support.</p>
 <h2 id="your-own-server">Your own server<a class="headerlink" href="#your-own-server" title="Permanent link">&para;</a></h2>
 <p>Its owner creates the account (<a href="../SERVER/">hosting your own server</a>), or you make it with <strong>Create</strong> under
 <strong>Account</strong> when the server lets anyone register.</p>
@@ -1179,11 +1178,16 @@ when the game started, the game keeps trying in the background.</p>
 <p><a href="https://github.com/Classmg22/BBSC">BBSC</a> (Bloodborne Seamless Co-op, by CLS_AMG) keeps a co-op
 session going through deaths, lamps, areas, bosses and the Hunter's Dream, for up to 5 hunters:
 the guest follows the host through lamps, sees the host's world (doors, bosses, lifts), keeps the
-items and echoes it gets, and enemies get stronger for every guest. It runs inside the game
-(<code>bbsc/</code>, loaded as <code>libbbsc.so</code>). It is new, and its own author marks much of it as untested.</p>
+items and echoes it gets, and enemies get stronger for every guest. It runs inside the game's
+online module (<code>gpu/bbnet20/bbsc</code>, BBSC 0.0.2 from bbport 0.7). It is new, and its own author
+marks much of it as untested.</p>
 <ol>
-<li>In the launcher's <strong>Multiplayer → Online</strong> tab, turn on BBSC in the <strong>Seamless co-op (BBSC)</strong> group. <strong>BBSC settings</strong> has its
-   options (the same as in BBSC's Windows launcher); the defaults are BBSC's.</li>
+<li>In the launcher's <strong>Multiplayer → Online</strong> tab, <strong>Turn on BBSC</strong> in the <strong>Seamless co-op (BBSC)</strong>
+   group (on by default). While it is on, BBSC's bells replace the game's; turned off, the game's
+   come back the next time the character is loaded (the save is copied to <code>save-backups</code> first).
+   <strong>BBSC settings</strong>, folded under it, has BBSC's own options: what the guest shares with the host,
+   five hunters, enemy scaling and its percentages per guest, shared progress and the rest; only
+   the ones changed from BBSC's defaults are passed to the game.</li>
 <li>Every player of the session needs BBSC, the same version: on Linux this port, on Windows
    BBSC's package for the Windows port (its <em>BBport</em> release). A player without it plays the
    normal game.</li>
@@ -1191,23 +1195,21 @@ items and echoes it gets, and enemies get stronger for every guest. It runs insi
 <li><strong>BBSC's game server</strong> (Seamless Hunt's, which comes with it, or your group's,
      <a href="../SERVER/#seamless-co-op-bbsc">hosted with it</a>): everything, summons across areas and 5 hunters included. Set it as the
      <strong>Game server</strong> of the Online tab.</li>
-<li><strong>The Hunter's Dream</strong>: the session stays together (deaths, lamps, bosses), but summons are
-     the normal game's: BBSC turns its own summon changes and the 5 hunters off on public servers.
-     Its messages go straight between the players.</li>
+<li><strong>The Hunter's Dream</strong> has no BBSC: the normal game's co-op, with bbhost's players.</li>
 </ol>
 <p>With BBSC and BBSC's game server, two players who cannot reach each other directly (CGNAT,
    strict routers, two games on one PC) are connected through that server's UDP relay (port
-   3478); <code>SHADPS4_P2P_RELAY=0</code> turns it off. Without BBSC, and on The Hunter's Dream (bbbridge
-   relays by itself), the relay is off.</p>
+   3478); <code>SHADPS4_P2P_RELAY=0</code> turns it off.</p>
 <p>BBSC gives every character its own items, which cost no Insight: the <strong>Hunt Bell</strong> (call other
 players), the <strong>Kin Bell</strong> (join another player), the <strong>Bloodlust Bell</strong> (invade), the <strong>Duel Bell</strong>
 (PvP on and off during co-op) and the <strong>Parting Blank</strong> (end co-op). It takes the game's Beckoning
 Bell, Small Resonant Bell and Silencing Blank out of the inventory, and they do not come back when
 BBSC is turned off; BBSC's own items stay, with their names (scripts/bbsc_kit_texts.py), and work again
 when it is back on. Before changing anything it backs the saves up to <code>user/bbsc/save-backups/</code>:
-copy a character's save from there to play it without BBSC with its old bells. Its texts follow the game's language (Spanish, French, German, Italian,
-Portuguese and Russian; English otherwise). <strong>F8</strong> puts you back on the ground if you get stuck
-inside another player.</p>
+copy a character's save from there to play it without BBSC with its old bells. Its texts follow the
+language the game shows its text in (<em>Game text language</em> in the launcher, else the system's):
+Spanish, French, German, Italian, Portuguese and Russian; English otherwise. <strong>F8</strong> puts you back
+on the ground if you get stuck inside another player.</p>
 <p><strong>Not yet tested with more than one player on Linux:</strong> one player alone works (its items, deaths,
 lamps, the Hunter's Dream). Report what you find with the log.</p>
 <p>Its log is in <code>user/bbsc/logs/</code> (in the AppImage, <code>~/.local/share/bbport/user/bbsc/logs/</code>), and
@@ -1228,11 +1230,12 @@ Tailscale (<a href="../SERVER/">hosting your own server</a>) it goes through Tai
 section. Otherwise each player has to be reachable from the Internet:</p>
 <ol>
 <li><strong>The router.</strong> With <strong>UPnP</strong> on (the default), the game opens its port on the router itself:
-   the log says <code>UPNP: mapped UDP port &lt;port&gt;</code>. A router without UPnP needs a port forward by
-   hand (UDP, the pinned port below, to your computer's LAN address).</li>
-<li><strong>Pin the port</strong> when you open it by hand or in a firewall: <strong>Co-op port (UDP)</strong> in the
-   Online tab, for example 3658 (0, the default, is a random port each time). The log then says
-   <code>P2P transport ready: UDP physical_port=3658</code>.</li>
+   the log says <code>P2P on UDP port &lt;port&gt;: asking the router to forward it (UPnP)</code>. A router
+   without UPnP needs a port forward by hand (UDP, the port below, to your computer's LAN
+   address).</li>
+<li><strong>The port</strong> to open by hand or in a firewall is UDP 3658, the PS4's own, which the game uses
+   by default (<strong>Co-op port (UDP)</strong> in the Online tab: 0 keeps it). The log says
+   <code>P2P transport on UDP port 3658</code>.</li>
 <li><strong>Open it in the firewall.</strong> UPnP opens the port on the router only, not in this computer's
    firewall. With ufw or firewalld on, the launcher's <strong>Multiplayer → Online</strong> tab says
    so and gives the commands. For ufw:
@@ -1255,7 +1258,7 @@ behind CG-NAT too.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>Logged in npid='...'</code></td>
+<td><code>signed in npid='...'</code></td>
 <td>The shadNet login worked.</td>
 </tr>
 <tr>
@@ -1267,16 +1270,8 @@ behind CG-NAT too.</p>
 <td>The host found the sign, made the room and sent the summon.</td>
 </tr>
 <tr>
-<td><code>peer '...' endpoint unresolved</code></td>
-<td>shadNet has no address for the other player: its UDP port did not answer.</td>
-</tr>
-<tr>
-<td><code>Online: the shadNet server ... does not accept this build</code></td>
-<td>The server refuses bbport (shadPS4's public one): use Seamless Hunt, The Hunter's Dream or your own server.</td>
-</tr>
-<tr>
-<td><code>event=0(DEAD)</code></td>
-<td>The connection gave up.</td>
+<td><code>signed out by the server</code></td>
+<td>The server refuses this build (shadPS4's public one): use Seamless Hunt, The Hunter's Dream or your own server.</td>
 </tr>
 </tbody>
 </table>

@@ -1203,7 +1203,7 @@
 <h1 id="hosting-your-own-co-op-server">Hosting your own co-op server<a class="headerlink" href="#hosting-your-own-co-op-server" title="Permanent link">&para;</a></h1>
 <p>Bells and summons go through a shadNet server. shadPS4's public one (<code>srv.shadps4.net</code>) no longer
 accepts bbport builds, and the public pools for bbport are Seamless Hunt (the default) and The
-Hunter's Dream's, through bbbridge (the launcher's <strong>Multiplayer → Online</strong> tab; <a href="https://github.com/ayozetr/bloodborne_linux/blob/main/README.md#online-play">README</a>). A group of friends
+Hunter's Dream's (the launcher's <strong>Multiplayer → Online</strong> tab; <a href="https://github.com/ayozetr/bloodborne_linux/blob/main/README.md#online-play">README</a>). A group of friends
 can also run their own server:
 <a href="https://github.com/Wozzardman/shadnet-p2p">shadnet-p2p</a> by Wozzardman, the shadNet server with
 that UDP port working and a summon service of its own.</p>
@@ -1360,7 +1360,7 @@ means summons cannot connect: check that the server is running and that its log 
 <h2 id="seamless-co-op-bbsc">Seamless co-op (BBSC)<a class="headerlink" href="#seamless-co-op-bbsc" title="Permanent link">&para;</a></h2>
 <p>For <a href="../ONLINE/#seamless-co-op-bbsc">BBSC</a> with everything on (summons across areas, 5 hunters),
 the group also runs BBSC's game server next to shadNet. It is in this repository,
-<code>bbsc/server/gameserver/bbsc_gameserver.py</code> (Python 3, nothing to install), and it takes the
+<code>scripts/bbsc_gameserver/bbsc_gameserver.py</code> (Python 3, nothing to install), and it takes the
 place of The Hunter's Dream for messages, bloodstains and the server list.</p>
 <ol>
 <li>Turn on shadNet's seamless mode: run the shadNet container again with
@@ -1378,7 +1378,7 @@ docker<span class="w"> </span>logs<span class="w"> </span>bbsc-server
 </code></pre></div>
 <p><code>BBSC_SHADNET</code> is the shadNet server's address when it is on another computer. Messages,
    bloodstains and its logs live in the <code>bbsc-data</code> volume. Without Docker:
-   <code>python3 bbsc/server/gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z</code>.</p>
+   <code>python3 scripts/bbsc_gameserver/bbsc_gameserver.py --shadnet 100.x.y.z --host 100.x.y.z</code>.</p>
 <table>
 <thead>
 <tr>

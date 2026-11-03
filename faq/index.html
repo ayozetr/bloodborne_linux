@@ -664,6 +664,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-do-i-use-the-in-game-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I use the in-game map?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-get-fsr-412-int8-for-rdna2-and-the-steam-deck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I get FSR 4.1.2 (INT8, for RDNA2 and the Steam Deck)?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-do-i-get-a-log-on-the-steam-deck" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1103,6 +1125,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-do-i-use-the-in-game-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I use the in-game map?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-get-fsr-412-int8-for-rdna2-and-the-steam-deck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I get FSR 4.1.2 (INT8, for RDNA2 and the Steam Deck)?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-do-i-get-a-log-on-the-steam-deck" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1162,14 +1206,31 @@ servers had it, so a sign can take over half a minute to show up.</p>
 <ul>
 <li>On <strong>Seamless Hunt</strong> (or your own server with BBSC's game server), seamless co-op works fully:
   summons across areas and up to 5 hunters.</li>
-<li>On <strong>The Hunter's Dream</strong>, BBSC keeps the session together, but summons are the normal game's:
-  both hunters must be in the <strong>same area</strong>, the area's boss must still be alive in the host's world,
-  and your levels must be within range.</li>
+<li>On <strong>The Hunter's Dream</strong> there is no seamless co-op: summons are the normal game's, with the
+  Beckoning Bell and the Small Resonant Bell. Both hunters must be in the <strong>same area</strong>, the area's
+  boss must still be alive in the host's world, and your levels must be within range (or use the
+  same password).</li>
 </ul>
 <p><a href="../ONLINE/#seamless-co-op-bbsc">Seamless co-op on each server</a>.</p>
 <h2 id="do-i-need-to-open-ports-on-my-router">Do I need to open ports on my router?<a class="headerlink" href="#do-i-need-to-open-ports-on-my-router" title="Permanent link">&para;</a></h2>
-<p>No. With seamless co-op (BBSC) on, Seamless Hunt relays players who cannot reach each other
-directly, and The Hunter's Dream's bridge relays by itself. Only <a href="../SERVER/">your own server</a> needs a few ports, through Tailscale.</p>
+<p>Usually not: with <strong>UPnP</strong> on (the default) the game opens its port on the router by itself, and
+with seamless co-op (BBSC) on Seamless Hunt relays players who cannot reach each other directly. A
+router without UPnP, or a firewall on your computer, needs UDP 3658 opened
+(<a href="../ONLINE/#ports">ports</a>). With <a href="../SERVER/">your own server</a>, Tailscale takes care of it.</p>
+<h2 id="how-do-i-use-the-in-game-map">How do I use the in-game map?<a class="headerlink" href="#how-do-i-use-the-in-game-map" title="Permanent link">&para;</a></h2>
+<p>In the launcher, <strong>Mods → Map (Hunter's Atlas)</strong>: turn on <strong>In-game map</strong> and press <strong>Prepare</strong>
+once. It makes the maps from your own game files (it downloads about 200 MB of tools the first
+time). In the game, choose <strong>Map</strong> in the quick menu (its fourth tile), press <strong>M</strong>, or with a
+controller open the game's menu and click the right stick (R3). The port's menu (Insert, or hold
+L3 + R3) changes the key and the controller shortcut.
+<strong>Travel to lamps from the map</strong> and <strong>Items on the map</strong> are in the same launcher group.</p>
+<h2 id="how-do-i-get-fsr-412-int8-for-rdna2-and-the-steam-deck">How do I get FSR 4.1.2 (INT8, for RDNA2 and the Steam Deck)?<a class="headerlink" href="#how-do-i-get-fsr-412-int8-for-rdna2-and-the-steam-deck" title="Permanent link">&para;</a></h2>
+<p>FSR 4.1.2's models are built from AMD's own files, which can't be shipped here. In
+<strong>Graphics → Upscaler</strong>, on <strong>FSR 4.1.2 from AMD's driver</strong>, press <strong>Choose a file…</strong> and pick
+AMD's Adrenalin 26.10.1 or newer installer (the <code>.exe</code>) or the <code>amdxcffx64.dll</code> inside it. It also
+needs AMD's FSR 4.1.x upscaler DLL (<code>amd_fidelityfx_upscaler_dx12.dll</code>, from OptiScaler or a game
+with FSR 4.1): if you built FSR 4.1.1 before, it uses that one, otherwise it asks for it. It takes
+about 4 minutes. In the game, the port's menu chooses the model (INT8 RDNA2 or INT8 Lite).</p>
 <h2 id="how-do-i-get-a-log-on-the-steam-deck">How do I get a log on the Steam Deck?<a class="headerlink" href="#how-do-i-get-a-log-on-the-steam-deck" title="Permanent link">&para;</a></h2>
 <p>Turn on <em>Advanced → Developer → Save the log and statistics to a file</em> once in Desktop Mode; Game
 Mode sessions then save theirs too. <a href="../logs/">Getting a log</a>.</p>

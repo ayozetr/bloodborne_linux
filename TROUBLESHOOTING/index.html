@@ -608,10 +608,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quit-to-desktop-is-missing-from-the-menus-or-shows-another-name" class="md-nav__link">
+  <a href="#exit-to-desktop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quit to Desktop is missing from the menus, or shows another name
+        Exit to desktop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ports-menu-opens-by-accident-with-l3-r3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The port's menu opens by accident with L3 + R3
       
     </span>
   </a>
@@ -1147,10 +1158,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quit-to-desktop-is-missing-from-the-menus-or-shows-another-name" class="md-nav__link">
+  <a href="#exit-to-desktop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quit to Desktop is missing from the menus, or shows another name
+        Exit to desktop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ports-menu-opens-by-accident-with-l3-r3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The port's menu opens by accident with L3 + R3
       
     </span>
   </a>
@@ -1279,54 +1301,41 @@ a file and <strong>Copy</strong> puts it on the clipboard.</p>
 </ul>
 <p>To move a save, close the game, back up both folders, and copy the <code>savedata</code> folder over.</p>
 <h2 id="dlss-is-not-supported-by-this-gpu">DLSS is "not supported by this GPU"<a class="headerlink" href="#dlss-is-not-supported-by-this-gpu" title="Permanent link">&para;</a></h2>
-<p>The log says why, on a line starting with <code>DLSS:</code>.</p>
+<p>The log says why, on a line <code>DLSS: unavailable (...)</code>; the game then uses another upscaler.</p>
 <ul>
 <li>DLSS needs a GeForce RTX (20 series or newer) and NVIDIA's own driver; it does not work with
-  NVK.</li>
-<li>The 0.4-linux.1 AppImage ships a modified copy of NVIDIA's DLSS library, which the driver
-  refuses (<code>Feature requirement query failed: 0xbad00012</code>): update to 0.5-linux.1 or newer.</li>
+  NVK (<code>not an NVIDIA GPU</code>, or <code>this GPU or driver does not support DLSS</code>).</li>
+<li><code>NVIDIA NGX initialization failed</code>: update the driver, and check that NVIDIA's CUDA/UVM module
+  is loaded (<code>sudo modprobe nvidia_uvm</code>; the <code>nvidia-modprobe</code> package loads it when needed). With
+  Secure Boot, a module signing key that is not enrolled stops it (<code>Key was rejected by service</code>).</li>
+<li>DLSS Frame Generation needs a GeForce RTX 40 or newer; on older cards the log says so and DLSS
+  itself still works.</li>
 <li>From the repository, DLSS needs <code>bash tools/build_dlss.sh</code> once after <code>build.sh</code>.</li>
-<li>If the log says <code>Device creation with DLSS extensions failed</code>, NVIDIA's CUDA/UVM
-  module is missing: the game then uses FSR 3.1. Load it with <code>sudo modprobe nvidia_uvm</code> (the
-  <code>nvidia-modprobe</code> package loads it when needed); with Secure Boot, a module signing key that
-  is not enrolled stops it (<code>Key was rejected by service</code>).</li>
 </ul>
 <h2 id="spanish-shows-the-latin-american-text-or-the-other-way-round">Spanish shows the Latin American text (or the other way round)<a class="headerlink" href="#spanish-shows-the-latin-american-text-or-the-other-way-round" title="Permanent link">&para;</a></h2>
-<p>The game picks a language's regional text by the dump's region. Choose it in <strong>Setup → Game
-region</strong>: <em>Europe</em> for Spanish from Spain, <em>The Americas</em> for Latin American Spanish.</p>
+<p>The game picks a language's regional text by the dump's region and the system language. Choose the
+text you want in <strong>Setup → Game text language</strong>: <em>Español</em> for Spanish from Spain, <em>Español
+(Latinoamérica)</em> for Latin American Spanish. <strong>Voice language</strong> does the same for the voices.</p>
 <h2 id="the-game-crashes-after-playing-a-while-on-a-card-with-little-vram">The game crashes after playing a while, on a card with little VRAM<a class="headerlink" href="#the-game-crashes-after-playing-a-while-on-a-card-with-little-vram" title="Permanent link">&para;</a></h2>
 <p>On a 6 GB card the texture cache can run out of video memory: the log then repeats
 <code>Texture cache: memory pressure, ... (critical ...)</code>. Lower what uses VRAM: a 60 FPS limit,
 a lower output resolution, lower <strong>Model detail</strong> in the game's <em>Display</em> settings, and close
 other programs that use the GPU (browsers, video players, other games).</p>
 <h2 id="the-picture-is-stretched-on-an-ultrawide-screen">The picture is stretched on an ultrawide screen<a class="headerlink" href="#the-picture-is-stretched-on-an-ultrawide-screen" title="Permanent link">&para;</a></h2>
-<p><strong>Graphics → Display → Output resolution</strong> lists 2560×1080, 3440×1440, 3840×1600 and 5120×2160
-(21:9) and 3840×1080 and 5120×1440 (32:9); any other size written as <code>output_res=WxH</code> in
-bbport.ini works too. The view gets wider instead of stretched: the game's camera, its HUD and the
-lock-on and health-bar markers are patched at start for the screen's own aspect ratio. <strong>HUD
-position</strong> moves health, items and Blood Echoes from the centred 16:9 area (as on a 16:9 screen)
-to the screen edges, and menu backdrops cover the whole width. These sizes need the startup patch:
-changing them in the game restarts it, and TAA (which needs live resolution changes) leaves them
-stretched. <code>aspect_patch=0</code> in bbport.ini turns the wider view off.</p>
-<h2 id="quit-to-desktop-is-missing-from-the-menus-or-shows-another-name">Quit to Desktop is missing from the menus, or shows another name<a class="headerlink" href="#quit-to-desktop-is-missing-from-the-menus-or-shows-another-name" title="Permanent link">&para;</a></h2>
-<p><strong>Mods → Menus and debugging → Quit to Desktop in the title and System menus</strong> (also in the in-game
-menu; on by default) adds the entry to the title menu and to the System menu. The title entry
-closes the game at once; the System entry runs the game's own <em>Exit Game</em> first (it saves, and
-its confirmation asks to quit to the desktop), and the game closes when it is back at the intro
-or the title screen. The log then says <code>Runtime: Quit to Desktop</code>, and the game ends with exit
-code 0, as when the window is closed.</p>
-<ul>
-<li>No entry, and the log says <code>Quit to Desktop: ...; the game starts without it</code> or
-  <code>Patches: ... Quit to Desktop skipped</code>: the menu texts could not be made from the game's files,
-  or the game's executable is not the 1.09 code the entry was made for.</li>
-<li>A third-party <em>Exit Game (title menu)</em> patch (<code>Bloodborne_exit_game.xml</code> in the patches folder)
-  also adds a way out to the title menu. When it changes any of the code Quit to Desktop changes,
-  that patch is kept and Quit to Desktop's code is left out (<code>another patch writes ...</code> in the
-  log): the System menu has no entry then. Quit to Desktop does the same and saves first from
-  the System menu, so turn that patch off.</li>
-<li>A mod that replaces <code>msg/&lt;language&gt;/menu.msgbnd.dcx</code> (a translation) is laid over Quit to
-  Desktop's texts: the entries keep that mod's names (<em>Opinion Box</em>, <em>Language</em>).</li>
-</ul>
+<p>Choose the screen's shape in <strong>Graphics → Display → Aspect ratio</strong> (<em>Auto</em> follows the output
+resolution): 4:3, 16:10, 16:9, 21:9 or 32:9. The view gets wider (or taller) instead of stretched,
+and the HUD keeps to the screen's edges; it changes live, in the game's <em>Display</em> menu too.
+<strong>Output resolution</strong> <em>Auto</em> is the monitor's own; any other size written as <code>output_res=WxH</code> in
+bbport.ini works too.</p>
+<h2 id="exit-to-desktop">Exit to desktop<a class="headerlink" href="#exit-to-desktop" title="Permanent link">&para;</a></h2>
+<p><strong>Exit to desktop</strong> is in the game's System menu and on the title screen, from bbport 0.7. The
+<em>Quit to Desktop</em> switch of earlier Linux versions is gone with it, and a third-party <em>Exit Game</em>
+patch is no longer needed.</p>
+<h2 id="the-ports-menu-opens-by-accident-with-l3-r3">The port's menu opens by accident with L3 + R3<a class="headerlink" href="#the-ports-menu-opens-by-accident-with-l3-r3" title="Permanent link">&para;</a></h2>
+<p>From bbport 0.7, L3 + R3 opens the port's menu only when both are held for 0.8 seconds, so pressing
+them in a fight (lock-on and camera reset) no longer opens it. <strong>Controls → Port menu from the
+controller</strong> can make it 2 seconds, or turn it off so that only Insert on the keyboard opens the
+menu. Closing it with L3 + R3 always works.</p>
 <h2 id="the-controller-does-nothing-when-the-game-is-started-from-steam">The controller does nothing when the game is started from Steam<a class="headerlink" href="#the-controller-does-nothing-when-the-game-is-started-from-steam" title="Permanent link">&para;</a></h2>
 <p>With Steam Input on, Steam hides the controller and the game gets Steam's virtual one, whose input
 Steam sends only to the window it sees focused. On a Wayland desktop Steam sees only X11 windows,
@@ -1335,11 +1344,10 @@ log says <code>Window: X11 (Xwayland), so Steam Input reaches the game</code>). 
 <code>SDL_VIDEO_DRIVER=x11 %command% --play</code> in the shortcut's launch options (keep <code>--play</code> after
 <code>%command%</code>), or turn Steam Input off for the shortcut: the game reads the controller itself.</p>
 <h2 id="the-steam-overlay-does-not-open-in-the-game">The Steam overlay does not open in the game<a class="headerlink" href="#the-steam-overlay-does-not-open-in-the-game" title="Permanent link">&para;</a></h2>
-<p>Steam's overlay (Shift+Tab, its FPS counter, F12 screenshots) is off by default: turn on <strong>Steam
-overlay</strong> under <strong>Add to Steam</strong> in the launcher, then start the game from Steam. The log then says
-<code>Steam overlay: …/ubuntu12_64/gameoverlayrenderer.so</code>, and on a Wayland desktop also
-<code>Window: X11 (Xwayland), so Steam's overlay shows on it</code>: Steam draws its overlay only on X11
-windows. If it says the library was not found, the game was not started by Steam.</p>
+<p>Steam's overlay (Shift+Tab, its FPS counter, F12 screenshots) needs the game started from Steam,
+with <strong>Steam overlay</strong> on under <strong>Add to Steam</strong> in the launcher (on by default). The log then says
+<code>Steam overlay: …/ubuntu12_64/gameoverlayrenderer.so</code>. Without that line, the game was not started
+by Steam.</p>
 <h2 id="the-camera-turns-much-faster-on-diagonals">The camera turns much faster on diagonals<a class="headerlink" href="#the-camera-turns-much-faster-on-diagonals" title="Permanent link">&para;</a></h2>
 <p>With the right stick pushed all the way, the game switches to its fast turn (about twice the
 speed), and it does so on diagonals too, not only straight sideways. That is how the game turns on

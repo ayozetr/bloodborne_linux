@@ -1077,6 +1077,11 @@
 
 
 <h1 id="layer-memory-module-ps4-gpu-addresses-without-sparse-plan-2026-10-09">Layer memory module: PS4 GPU addresses without sparse (plan, 2026-10-09)<a class="headerlink" href="#layer-memory-module-ps4-gpu-addresses-without-sparse-plan-2026-10-09" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Design notes from when this work was planned, kept for their reasoning. bbport 0.7 has one
+memory model and its own renderer, and some switches named here (<code>BB_PC_MODEL</code>) no longer exist; the
+current list is in <a href="../ENVIRONMENT/">ENVIRONMENT.md</a>.</p>
+</blockquote>
 <h2 id="why">Why<a class="headerlink" href="#why" title="Permanent link">&para;</a></h2>
 <p>The new memory model keeps game memory in a single sparse arena and moves blocks between game
 memory and VRAM by rebinding (<code>vkQueueBindSparse</code>). On NVIDIA (Linux, drivers ≥ 555), the bind

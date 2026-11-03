@@ -697,6 +697,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bbport-07s-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bbport 0.7's contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#people" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -991,6 +1002,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bbport-07s-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bbport 0.7's contributors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#people" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1050,31 +1072,23 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 </tr>
 <tr>
 <td><a href="https://github.com/Supermedo/bloodborne_pc">Supermedo/bloodborne_pc</a></td>
-<td>The Windows port: online play, DLSS, the cheats page, Add to Steam, the icon, the direct mouse camera, ultrawide, Quit to Desktop, the keyboard sprint and many fixes.</td>
+<td>The Windows port: online play, the cheats page, Add to Steam, the field of view, the game's audio at full level and many fixes.</td>
 </tr>
 <tr>
 <td><a href="https://github.com/Awakenchan/LanternEngine">Awakenchan/LanternEngine</a> (formerly BloodBorneButPc)</td>
-<td>Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): video memory on 4 GB cards, crash and freeze fixes, fewer stutters while areas load, stick options, save import and the version selector.</td>
+<td>Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): crash fixes, stick options, the controller in use, save import, the version selector, and renderer fixes (vertex inputs, index buffers, camera motion vectors).</td>
 </tr>
 <tr>
 <td><a href="https://github.com/shadps4-emu/shadPS4">shadPS4</a></td>
-<td>The renderer and shader recompiler, and the online code.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/Wozzardman/shadp2p">Wozzardman/shadp2p</a></td>
-<td>The network and PSN libraries for online play.</td>
+<td>The renderer and shader recompiler they started from, and the online code: shadPS4 0.20's network, NP and shadNet libraries, put together for bbport by Awaken (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/gpu/bbnet20">gpu/bbnet20</a>).</td>
 </tr>
 <tr>
 <td><a href="https://github.com/Wozzardman/shadnet-p2p">Wozzardman/shadnet-p2p</a></td>
 <td>The shadNet server for a group's own co-op server (<a href="../SERVER/">hosting your own server</a>).</td>
 </tr>
 <tr>
-<td><a href="https://github.com/MaskZeus/bbbridge">MaskZeus/bbbridge</a></td>
-<td>Co-op on The Hunter's Dream's pool (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/bbbridge">bbbridge/</a>).</td>
-</tr>
-<tr>
 <td><a href="https://github.com/Classmg22/BBSC">Classmg22/BBSC</a></td>
-<td>Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/bbsc">bbsc/</a>).</td>
+<td>Seamless Co-op, by CLS_AMG, with Wozzardman's seamless summon (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/gpu/bbnet20/bbsc">gpu/bbnet20/bbsc</a>, its game server in <a href="https://github.com/ayozetr/bloodborne_linux/tree/main/scripts/bbsc_gameserver">scripts/bbsc_gameserver</a>).</td>
 </tr>
 <tr>
 <td><a href="https://github.com/fhody125-web/NoDreamForHunter">fhody125-web/NoDreamForHunter</a></td>
@@ -1086,11 +1100,11 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 </tr>
 <tr>
 <td><a href="https://thehuntersdream.com">The Hunter's Dream</a></td>
-<td>The online server, by droogie and its team; droogie's bbhost also brought fast loading after a death or travel.</td>
+<td>The online server, by droogie and its team; droogie's <a href="https://github.com/droogie/bbhost">bbhost</a> is the base of its backend in the online module (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/gpu/bbnet20/thd">gpu/bbnet20/thd</a>) and brought fast loading after a death or travel.</td>
 </tr>
 <tr>
 <td><a href="https://github.com/IFreemz/shadPS4-Bloodborne-DLSS-FSR">IFreemz/shadPS4-Bloodborne-DLSS-FSR</a></td>
-<td>The groundwork for DLSS, and the FSR 4 model without trails.</td>
+<td>The FSR 4 model without trails.</td>
 </tr>
 <tr>
 <td><a href="https://github.com/NVIDIA/DLSS">NVIDIA DLSS SDK</a></td>
@@ -1110,7 +1124,7 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 </tr>
 <tr>
 <td><a href="https://github.com/herumi/xbyak">herumi/xbyak</a>, <a href="https://github.com/fmtlib/fmt">fmtlib/fmt</a></td>
-<td>Used by BBSC's Linux build.</td>
+<td>Used by the shader translator and the online module.</td>
 </tr>
 <tr>
 <td><a href="https://github.com/GoldHEN/GoldHEN_Patch_Repository">GoldHEN_Patch_Repository</a></td>
@@ -1120,67 +1134,62 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 <td><a href="https://www.nexusmods.com/bloodborne/mods/30">Nexus Mods: mod 30</a></td>
 <td>Dommo's Xbox and Switch button prompts and stripped-down gestures menu, uploaded by goomab (<a href="https://github.com/ayozetr/bloodborne_linux/tree/main/assets/menu_prompts">assets/menu_prompts</a>).</td>
 </tr>
-<tr>
-<td><a href="https://www.nexusmods.com/bloodborne/mods/537">Nexus Mods: mod 537</a></td>
-<td>Abken's KBM Icons Generator, which showed which textures keyboard prompts need (after <a href="https://www.nexusmods.com/bloodborne/mods/460">mod 460</a>).</td>
-</tr>
 </tbody>
 </table>
+<h2 id="bbport-07s-contributors">bbport 0.7's contributors<a class="headerlink" href="#bbport-07s-contributors" title="Permanent link">&para;</a></h2>
+<p>This fork is built on bbport 0.7, which took pull requests and outside work from Qiming-Liu,
+AndiMajore, adds39939, iannitram, maiconjsv, whp199, DominickCobb-rs, Sarxzer, wheat32,
+ArenaMMORPG, guutol (Luís Gustavo P. Bomfim), redditor69, SrShadowy and Teefpyre, Supermedo and
+Awaken, and in earlier releases SrDeTs, IgorWarzocha, itachi-re, Bainianzzz, hideoneric,
+guitaripod, unTanana, andrR89, JuanraCM, SaeedShow, msisovic, AyrtonSanabio, axpico, Aryxa,
+Obrikash and noelmiller. What each one did:
+<a href="https://github.com/deadinside28/bloodborne_pc/blob/master/docs/CONTRIBUTORS_0.7.md">bbport's list</a>.</p>
 <h2 id="people">People<a class="headerlink" href="#people" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><a href="https://github.com/deadinside28">deadinside28</a></strong>: bbport, the port this whole project is built on.</li>
-<li><strong><a href="https://github.com/Supermedo">Supermedo</a></strong>: online play, DLSS, the cheats page, Add to Steam,
-  the icon, and many fixes from the Windows port.</li>
+<li><strong><a href="https://github.com/deadinside28">deadinside28</a></strong>: bbport, the port this whole project is built on,
+  and 0.6's menu pointer and keyboard layout.</li>
+<li><strong><a href="https://github.com/Supermedo">Supermedo</a></strong>: online play, the cheats page, Add to Steam, and many
+  fixes from the Windows port.</li>
 <li><strong><a href="https://github.com/0xCydral">0xCydral</a></strong>: gathered and adapted dozens of fixes (crashes while
   loading, black images, the upscaler, the performance line in the log).</li>
-<li><strong><a href="https://github.com/Awakenchan">Awakenchan</a></strong>: video memory on 4 GB cards and crash fixes,
-  fewer stutters while areas load, stick options, the controller in use, save import, the
-  version selector, occlusion counters in command order, vertex shaders with the right
-  bindings, freezes in memory allocation and draw preparation, index buffers of indirect draws,
-  and ZPASS queries in order.</li>
+<li><strong><a href="https://github.com/Awakenchan">Awakenchan</a></strong>: crash fixes (flips, descriptors, page faults),
+  stick options, the controller in use, save import, the version selector, vertex shaders with
+  the right bindings, stale vertex inputs read again, index buffers of indirect draws, and camera
+  motion vectors without NaN.</li>
 <li><strong><a href="https://github.com/Classmg22">Classmg22</a></strong> (CLS_AMG): BBSC, Seamless Co-op.</li>
-<li><strong><a href="https://github.com/MaskZeus">MaskZeus</a></strong>: bbbridge.</li>
-<li><strong><a href="https://github.com/Wozzardman">Wozzardman</a></strong>: the online libraries and the co-op server.</li>
+<li><strong><a href="https://github.com/Wozzardman">Wozzardman</a></strong>: the server for a group's own co-op, and BBSC's seamless summon.</li>
 <li><strong><a href="https://github.com/droogie">droogie</a></strong>: The Hunter's Dream server, and fast loading (bbhost).</li>
 <li><strong><a href="https://github.com/fhody125-web">fhody125-web</a></strong>: NoDreamForHunter, the base of BBSC's game server.</li>
 <li><strong><a href="https://github.com/MikeTat1988">MikeTat1988</a></strong>: Hunter's Atlas, the fullscreen in-game map.</li>
-<li><strong><a href="https://github.com/IFreemz">IFreemz</a></strong>: the groundwork for DLSS, and FSR 4 without trails.</li>
+<li><strong><a href="https://github.com/IFreemz">IFreemz</a></strong>: the FSR 4 model without trails.</li>
 <li><strong><a href="https://github.com/FireBurn">FireBurn</a></strong>: FSR 3.1.</li>
-<li><strong><a href="https://github.com/Jhony-Jhansen">Jhony-Jhansen</a></strong>: keyboard movement and the direct mouse camera.</li>
-<li><strong><a href="https://github.com/mcrib884">mcrib884</a></strong>: the bbmouse mouse camera, the basis of the direct camera.</li>
-<li><strong><a href="https://github.com/HatsyRei">HatsyRei</a></strong>: the keyboard walk key (in Mrsuss60's port).</li>
+<li><strong><a href="https://github.com/Jhony-Jhansen">Jhony-Jhansen</a></strong>: keyboard movement (the last of two opposite keys wins).</li>
+<li><strong><a href="https://github.com/cassioKenji">cassioKenji</a></strong>: the keyboard sprint measurements.</li>
 <li><strong><a href="https://github.com/msisovic">msisovic</a></strong>: why loading hung after a lamp travel (guest thread handles above 40 bits).</li>
 <li><strong><a href="https://github.com/axpico">axpico</a></strong>: with VRAM full, the game waits for evicted textures to be freed instead of closing.</li>
-<li><strong><a href="https://github.com/pmwork-personal">pmwork-personal</a></strong>: ultrawide monitors without a stretched picture.</li>
-<li><strong><a href="https://github.com/emurphy04">emurphy04</a></strong>: ultrawide output and the HUD position, Quit to
-  Desktop in the game's menus, and a video player crash when it stops.</li>
-<li><strong><a href="https://github.com/cassioKenji">cassioKenji</a></strong>: the keyboard sprint measurements.</li>
-<li><strong><a href="https://github.com/jpramosjp">jpramosjp</a></strong>: summons through the public shadNet server.</li>
+<li><strong><a href="https://github.com/emurphy04">emurphy04</a></strong>: a video player crash when it stops, the field of
+  view, and an online crash guard.</li>
 <li><strong><a href="https://github.com/yumlevi">yumlevi</a></strong>: the black character preview, the loading screen's
-  picture and the texture cache's memory.</li>
-<li><strong><a href="https://github.com/devilismyfriend">devilismyfriend</a></strong>: the texture cache frees video memory in time.</li>
+  picture, and a crash on an unreadable shader program.</li>
 <li><strong><a href="https://github.com/GoncaloLobo0">GoncaloLobo0</a></strong>: crashes while loading areas.</li>
-<li><strong><a href="https://github.com/bmy">bmy</a></strong>: the interface outside 1080p, motion vectors for the large
-  beasts, and a memory fault.</li>
-<li><strong><a href="https://github.com/Mrsuss60">Mrsuss60</a></strong>: crashes when loading some maps, and the gestures
-  menu from the keyboard.</li>
+<li><strong><a href="https://github.com/bmy">bmy</a></strong>: motion vectors for the large beasts, and a memory fault.</li>
+<li><strong><a href="https://github.com/Mrsuss60">Mrsuss60</a></strong>: the gestures menu from the keyboard, a deleted
+  image's slot, and the log of failed memory reservations.</li>
 <li><strong><a href="https://github.com/SrShadowy">SrShadowy</a></strong>: the on-screen keyboard for the character's name,
   and the shader compiling notice.</li>
-<li><strong><a href="https://github.com/Obrikash">Obrikash</a></strong>: the game starts when DLSS cannot be used.</li>
 <li><strong><a href="https://github.com/Qiming-Liu">Qiming-Liu</a></strong>: the Simplified Chinese translation.</li>
 <li><strong><a href="https://github.com/andrecabralgit">andrecabralgit</a></strong>: the game's audio at full level.</li>
 <li><strong><a href="https://github.com/Jgamrot">Jgamrot</a></strong>: the in-game menu's checkboxes and sliders.</li>
 <li><strong><a href="https://github.com/GerasimosKan">GerasimosKan</a></strong>: trophy names without the key, and the
   sound when one is earned.</li>
 <li><strong><a href="https://github.com/artemkaVG">artemkaVG</a></strong>: a stencil buffer fix.</li>
-<li><strong><a href="https://github.com/Vorshim92">Vorshim92</a></strong>: staying signed in on the public shadNet server.</li>
-<li><strong><a href="https://github.com/parsifal295">parsifal295</a></strong>: quitting from the menu with a controller,
-  the menu within the screen, and the touchpad halves on Xbox pads.</li>
+<li><strong><a href="https://github.com/parsifal295">parsifal295</a></strong>: the touchpad halves on Xbox pads.</li>
 <li><strong><a href="https://github.com/AyrtonSanabio">AyrtonSanabio</a></strong>: the in-game menu's language without the launcher.</li>
 <li><strong><a href="https://github.com/Aryxa">Aryxa</a></strong>: DLSS in the AppImage on NVIDIA.</li>
 <li><strong><a href="https://github.com/AndiMajore">AndiMajore</a></strong>: crash debugging (<code>BB_FAULT_WAIT</code>).</li>
-<li><strong><a href="https://github.com/AwesomeObserver">AwesomeObserver</a></strong>: large recorded command groups, and
-  the swapchain after display changes.</li>
+<li><strong><a href="https://github.com/iannitram">iannitram</a></strong>: FSR 3.1 without colour noise on the Ryzen Z1 (ROG Ally, Legion Go).</li>
+<li><strong><a href="https://github.com/whp199">whp199</a></strong>: the GX occlusion query guard against the 0x2169edc crash.</li>
+<li><strong><a href="https://github.com/nick24051998">nick24051998</a></strong>: the SRT walker without faults on null tables.</li>
 </ul>
 <h2 id="help-and-testing">Help and testing<a class="headerlink" href="#help-and-testing" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1193,18 +1202,20 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 <li><strong><a href="https://github.com/Monochrome0907">Monochrome0907</a></strong>: which effects freeze loading screens on NVIDIA.</li>
 <li><strong><a href="https://github.com/bruxis">bruxis</a></strong>: the log that showed why Steam Input did not reach the game.</li>
 <li><strong><a href="https://github.com/shauryasagar">shauryasagar</a></strong> and <strong><a href="https://github.com/ZeroSTF">ZeroSTF</a></strong>: the Hunter's Dream going black after long sessions.</li>
-<li><strong><a href="https://github.com/popcar2">popcar2</a></strong>: Quit to Desktop with online play on, and ideas for the launcher.</li>
+<li><strong><a href="https://github.com/popcar2">popcar2</a></strong>: ideas for the launcher.</li>
 <li><strong><a href="https://github.com/shaneo88">shaneo88</a></strong>: shadPS4's patch file in the patches folder.</li>
 <li><strong><a href="https://github.com/n3vrs0ft">n3vrs0ft</a></strong>: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.</li>
 <li><strong><a href="https://github.com/cappp">cappp</a></strong>: the "Transaction failed" crash on Seamless Hunt.</li>
 <li><strong><a href="https://github.com/simo1730">simo1730</a></strong>: the Trophies page not finding the dump's files.</li>
-<li><strong><a href="https://github.com/Nahnahchi">Nahnahchi</a></strong>: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models and a crash on the Steam Deck.</li>
+<li><strong><a href="https://github.com/Nahnahchi">Nahnahchi</a></strong>: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures and crashes in the game's memory manager.</li>
 <li><strong><a href="https://github.com/thomasgarafano1">thomasgarafano1</a></strong>: Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix.</li>
 <li><strong><a href="https://github.com/TacticalBill">TacticalBill</a></strong>: marking trophies already earned on the PS4.</li>
 <li><strong><a href="https://github.com/holydingus">holydingus</a></strong>: BBSC's items not given to a new character.</li>
 <li><strong><a href="https://github.com/OPGZ2">OPGZ2</a></strong>: the launcher's blank window at start.</li>
 <li><strong><a href="https://github.com/kuday248">kuday248</a></strong>: settings from the in-game menu that the launcher overwrote.</li>
 <li><strong><a href="https://github.com/BlazinKarp">BlazinKarp</a></strong>: the Steam overlay in the game.</li>
+<li><strong><a href="https://github.com/molnar-a">molnar-a</a></strong>: a crash on the Steam Deck after lamp travel, and testing the fix.</li>
+<li><strong><a href="https://github.com/Aman9das">Aman9das</a></strong>: asking for bbport 0.6's keyboard layout.</li>
 </ul>
 
 
