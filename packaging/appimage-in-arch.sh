@@ -34,5 +34,8 @@ docker run --rm --network host --user "$(id -u):$(id -g)" -e HOME=/home/builder 
         bash tools/build_dlss.sh
         bash packaging/appimage-sharun.sh'
 mkdir -p dist
-cp "$work/src/dist/Bloodborne-bbport-x86_64.AppImage" dist/
+# Renamed into place: an AppImage of the last build that is still open keeps running from the
+# old file (copying over it would change the image under its mount).
+cp "$work/src/dist/Bloodborne-bbport-x86_64.AppImage" dist/.Bloodborne-bbport-x86_64.AppImage.new
+mv -f dist/.Bloodborne-bbport-x86_64.AppImage.new dist/Bloodborne-bbport-x86_64.AppImage
 sha256sum dist/Bloodborne-bbport-x86_64.AppImage
