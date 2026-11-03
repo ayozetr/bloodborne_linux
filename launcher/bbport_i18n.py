@@ -8,6 +8,7 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': 'Keyboard movement: of two opposite keys, the one pressed last wins',
     'Проекты, на которых он основан': 'Projects it builds on',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "The co-op server for your own group, and BBSC's seamless summon",
@@ -1036,6 +1037,7 @@ EN = {
 }
 
 PT_BR = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': 'Movimento pelo teclado: de duas teclas opostas, vence a última pressionada',
     'Проекты, на которых он основан': 'Projetos em que se baseia',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'O servidor de cooperativo para o seu próprio grupo e a invocação contínua do BBSC',
@@ -2123,6 +2125,7 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': 'Movimiento con teclado: de dos teclas opuestas, gana la última pulsada',
     'Проекты, на которых он основан': 'Proyectos en los que se basa',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'El servidor de cooperativo para tu propio grupo y la invocación sin cortes de BBSC',
@@ -3123,6 +3126,7 @@ ES = {
 
 # Italian.
 IT = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': "Movimento da tastiera: di due tasti opposti vince l'ultimo premuto",
     'Проекты, на которых он основан': 'Progetti su cui si basa',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "Il server cooperativo per il proprio gruppo e l'evocazione continua di BBSC",
@@ -4123,6 +4127,7 @@ IT = {
 
 # French.
 FR = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': 'Déplacement au clavier : de deux touches opposées, la dernière enfoncée l’emporte',
     'Проекты, на которых он основан': "Projets sur lesquels il s'appuie",
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "Le serveur de coopération pour votre propre groupe et l'invocation continue de BBSC",
@@ -5123,6 +5128,7 @@ FR = {
 
 # German.
 DE = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': 'Tastaturbewegung: von zwei gegenüberliegenden Tasten gewinnt die zuletzt gedrückte',
     'Проекты, на которых он основан': 'Projekte, auf denen es aufbaut',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'Der Koop-Server für die eigene Gruppe und BBSCs nahtlose Beschwörung',
@@ -6123,6 +6129,7 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Движение с клавиатуры: из двух противоположных клавиш побеждает нажатая последней': '键盘移动：两个相反方向键同时按下时，以最后按下的为准',
     'Проекты, на которых он основан': '所基于的项目',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         '自建合作服务器，以及 BBSC 的无缝召唤',

@@ -263,6 +263,60 @@ int main(void) {
         load_bindings();
         assert(!layout_classic && bindings[IN_DODGE].keys[0]==SDL_SCANCODE_SPACE);
     }
+    /* Keyboard movement: opposite keys, the last pressed wins (or cancel out with
+     * stick_socd=neutral). */
+    {
+        assert(key_direction(0,1,0)==-1);
+        assert(key_direction(0,1,1)==1);  /* D pressed last */
+        assert(key_direction(0,0,1)==1);
+        assert(key_direction(0,1,1)==-1); /* now A is the last */
+        assert(key_direction(0,0,0)==0);
+        stick_socd_last=0;
+        assert(key_direction(0,1,1)==0);
+        stick_socd_last=1;
+    }
+    /* The movement keys as the stick (cassioKenji's measurements): the square gate, at most 30
+     * degrees a read toward the keys' direction, a half turn through forward, a release held
+     * 60 ms. */
+    {
+        int x, y; uint64_t t=10000000;
+        assert(key_move(0,-1,t,&x,&y) && x==0 && y==-127);              /* W */
+        t+=16000; key_move(-1,-1,t,&x,&y);                               /* W+A: one step of 14.4 */
+        assert(y==-127 && x<-25 && x>-40);
+        for (int i=0;i<10;++i) { t+=16000; key_move(-1,-1,t,&x,&y); }
+        assert(x==-127 && y==-127);                                      /* the square's corner */
+        t+=200000; key_move(-1,-1,t,&x,&y); t+=200000; key_move(-1,0,t,&x,&y);
+        assert(x==-127 && y>-127 && y<0);                                /* toward A: 30 degrees at most */
+        for (int i=0;i<10;++i) { t+=16000; key_move(-1,0,t,&x,&y); }
+        assert(x==-127 && y==0);
+        t+=16000; key_move(1,0,t,&x,&y);                                 /* A -> D: through forward */
+        assert(y<0);
+        t+=20000; assert(key_move(0,0,t,&x,&y) && y<0);                  /* released: held */
+        t+=100000; assert(!key_move(0,0,t,&x,&y));
+        stick_circular=1;
+        t+=16000; key_move(-1,-1,t,&x,&y);
+        assert(x==-90 && y==-90);                                        /* round gate */
+        stick_circular=0;
+        t+=200000; key_move(0,0,t,&x,&y);
+    }
+    /* keyboard_movement=0.7 and the stick options are read from bbport.ini. */
+    {
+        char movement_path[]="/tmp/bbport-movement-XXXXXX";
+        const int fd=mkstemp(movement_path);
+        assert(fd>=0);
+        const char text[]="keyboard_movement=0.7\nstick_socd=neutral\nstick_circular=1\n";
+        assert(write(fd,text,sizeof(text)-1)==(ssize_t)(sizeof(text)-1));
+        close(fd);
+        const char *saved=getenv("BB_CONFIG");
+        char saved_copy[512]; snprintf(saved_copy,sizeof saved_copy,"%s",saved ? saved : "");
+        setenv("BB_CONFIG",movement_path,1);
+        load_bindings();
+        assert(key_movement_07 && !stick_socd_last && stick_circular);
+        unlink(movement_path);
+        setenv("BB_CONFIG",saved_copy,1);
+        load_bindings();
+        assert(!key_movement_07 && stick_socd_last && !stick_circular);
+    }
     /* button_prompts=switch: another gamepad's prompts, with a Nintendo pad's art and labels. */
     {
         char prompts_path[]="/tmp/bbport-prompts-XXXXXX";
@@ -282,5 +336,5 @@ int main(void) {
         load_bindings();
         assert(prompt_forced==-1);
     }
-    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options, classic keyboard layout, Switch prompts");
+    puts("PASS: pad ABI, debug camera chord, left/right clicks, SDL touch coordinates, overlay capture, controls, mouse, stick neutral, round gate and dead zone, stick options, classic keyboard layout, keyboard movement, Switch prompts");
 }

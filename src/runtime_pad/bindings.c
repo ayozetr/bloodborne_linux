@@ -146,6 +146,12 @@ static int pad_swap_sticks, pad_invert_look_x, pad_invert_look_y;
 /* pad_camera_diagonal=1 (bbport.ini) evens out the camera stick's diagonals (see camera_diagonal;
  * default: as the game turns them, as on a PS4). */
 static int pad_camera_diagonal;
+/* Keyboard movement (bbport.ini). keyboard_movement=0.7 moves with bbport 0.7's ramped stick
+ * (key_stick); by default the Linux fork's (key_move, cassioKenji's measurements). For the
+ * latter, stick_socd=neutral makes opposite keys held together cancel out (default: the one
+ * pressed last wins) and stick_circular=1 keeps a diagonal within a round gate (default: the
+ * square). */
+static int key_movement_07, stick_socd_last=1, stick_circular;
 /* key.<input>= / pad.<input>= lines of the settings file. */
 /* Motion emulation (apply_motion): -1 unknown yet, from bbport.ini pad_motion; BB_PAD_MOTION wins. */
 static int motion_enabled = -1;
@@ -163,6 +169,7 @@ static void load_bindings(void) {
     bind_defaults();
     mouse_look=1; mouse_invert_y=0; mouse_invert_x=0; mouse_sensitivity=1.0f; prompt_forced=-1;
     pad_round_gate=1; pad_swap_sticks=pad_invert_look_x=pad_invert_look_y=0; pad_camera_diagonal=0;
+    key_movement_07=0; stick_socd_last=1; stick_circular=0;
     const char *path=bb_env("BB_CONFIG");
     FILE *f=path ? fopen(path,"r") : NULL;
     if (!f) return;
@@ -185,6 +192,9 @@ static void load_bindings(void) {
             else if (!strncmp(line,"pad_invert_look_x=",18)) pad_invert_look_x=atoi(value)!=0;
             else if (!strncmp(line,"pad_invert_look_y=",18)) pad_invert_look_y=atoi(value)!=0;
             else if (!strncmp(line,"pad_camera_diagonal=",20)) pad_camera_diagonal=atoi(value)!=0;
+            else if (!strncmp(line,"keyboard_movement=",18)) key_movement_07=!strncmp(value,"0.7",3);
+            else if (!strncmp(line,"stick_socd=",11)) stick_socd_last=strncmp(value,"neutral",7)!=0;
+            else if (!strncmp(line,"stick_circular=",15)) stick_circular=atoi(value)!=0;
             else if (!strncmp(line,"mouse_sensitivity=",18)) {
                 const float v=strtof(value,NULL);
                 if (v>=0.05f && v<=20.0f) mouse_sensitivity=v;
@@ -383,6 +393,62 @@ static int key_stick(KeyStick *st, uint64_t now, int left, int right, int up, in
     return 1;
 }
 static KeyStick move_stick, look_stick;
+
+/* The direction of one stick axis from its two keys: -1, 0 or 1. Opposite keys held together
+ * gave the centre, so switching A <-> D (both down for a moment) let go of the stick and ended a
+ * sprint; the one pressed last wins, unless stick_socd=neutral. From João Pedro Valadares's
+ * keyboard movement in Supermedo/bloodborne_pc. */
+static int key_direction(int axis, int negative, int positive) {
+    static int was_negative[2], was_positive[2], last[2];
+    if (negative && !was_negative[axis]) last[axis]=-1;
+    if (positive && !was_positive[axis]) last[axis]=1;
+    was_negative[axis]=negative; was_positive[axis]=positive;
+    if (negative && positive) return stick_socd_last ? last[axis] : 0;
+    return positive-negative;
+}
+/* The movement keys as the left stick, the Linux fork's way. Measured by cassioKenji
+ * (Supermedo/bloodborne_pc#74): the game picks walk or run by the larger stick axis, so a
+ * diagonal stays on the square (the larger axis all the way at every angle; on a round gate W+A
+ * is 90 of 127 each); and it ends a sprint when the stick turns 45 degrees or more between two
+ * reads, so the direction turns toward the keys' at 900 degrees a second, at most 30 degrees a
+ * read, a half turn (A <-> D, W <-> S) going through forward (or through the right when both
+ * ways are sideways). A released key keeps the last direction for 60 ms, so letting go of one
+ * key just before the next is no neutral read. After Supermedo's 4b930b1. Returns 0 when no
+ * movement key is held (nor just released). */
+#define KEY_TURN_RATE (900.0*M_PI/180.0)
+#define KEY_MAX_STEP (30.0*M_PI/180.0)
+#define KEY_HALF_TURN (170.0*M_PI/180.0)
+#define KEY_RELEASE_HOLD_US 60000u
+static int key_move(int move_x, int move_y, uint64_t now, int *out_x, int *out_y) {
+    static double angle; static uint64_t at, released_at; static int active, last_x, last_y;
+    if (!move_x && !move_y) {
+        if (active && now-released_at<KEY_RELEASE_HOLD_US) { *out_x=last_x; *out_y=last_y; return 1; }
+        active=0;
+        return 0;
+    }
+    const double target=atan2((double)move_y,(double)move_x);
+    if (active) {
+        const double diff=fmod(target-angle+3.0*M_PI,2.0*M_PI)-M_PI; /* -pi..pi, shortest way */
+        const double step=fmin(KEY_TURN_RATE*(double)(now-at)/1e6,KEY_MAX_STEP);
+        double dir=diff>0 ? 1.0 : -1.0;
+        if (fabs(diff)>KEY_HALF_TURN) {
+            /* Half way round counter-clockwise is angle+pi/2; forward is y < 0. */
+            const double hy=sin(angle+M_PI/2.0), hx=cos(angle+M_PI/2.0);
+            dir=hy<-1e-9 ? 1.0 : hy>1e-9 ? -1.0 : hx>0 ? 1.0 : -1.0;
+        }
+        if (fabs(diff)<=step) angle=target;
+        else angle=atan2(sin(angle+dir*step),cos(angle+dir*step));
+    } else {
+        angle=target;
+    }
+    active=1; at=now; released_at=now;
+    const double c=cos(angle), sn=sin(angle);
+    const double k=stick_circular ? 127.0 : 127.0/fmax(fabs(c),fabs(sn));
+    const long x=lround(c*k), y=lround(sn*k);
+    last_x=*out_x=(int)(x<-127 ? -127 : x>127 ? 127 : x);
+    last_y=*out_y=(int)(y<-127 ? -127 : y>127 ? 127 : y);
+    return 1;
+}
 /* Circle from the keyboard. Dodge (Space) is a short press whatever the key does: held, it would
  * be the run (the game tells a tap from a hold by the time). Sprint (Left Shift) holds Circle: the
  * run. Both together, Space while Shift is held, is the jump: Circle let go for a moment and pressed
@@ -448,8 +514,17 @@ static void apply_keyboard(PadData *d, const bool *k) {
     if (key_down(k,IN_L2)) d->l2=255;
     if (key_down(k,IN_R2)) d->r2=255;
     /* A gamepad's stick is kept while no key moves it. */
-    key_stick(&move_stick,d->timestamp,key_down(k,IN_MOVE_LEFT),key_down(k,IN_MOVE_RIGHT),
-              key_down(k,IN_MOVE_UP),key_down(k,IN_MOVE_DOWN),&d->left_x,&d->left_y);
+    const int left=key_down(k,IN_MOVE_LEFT), right=key_down(k,IN_MOVE_RIGHT);
+    const int up=key_down(k,IN_MOVE_UP), down=key_down(k,IN_MOVE_DOWN);
+    if (key_movement_07) {
+        key_stick(&move_stick,d->timestamp,left,right,up,down,&d->left_x,&d->left_y);
+    } else {
+        int stick_x, stick_y;
+        if (key_move(key_direction(0,left,right),key_direction(1,up,down),d->timestamp,&stick_x,&stick_y)) {
+            d->left_x=(uint8_t)(128+stick_x);
+            d->left_y=(uint8_t)(128+stick_y);
+        }
+    }
     /* Walk (default Left Alt, held): the left stick at 40%, the game's walking pace, from the move
      * keys or a gamepad's stick (FromSoftware's PC ports bind it the same way). */
     if (key_down(k,IN_WALK)) {

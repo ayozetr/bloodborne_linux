@@ -34,8 +34,9 @@ seamless co-op, the Steam Deck, and what to do when something goes wrong.
   **frame generation** (FSR 3.1, or DLSS on GeForce RTX 40 and newer).
 - **Any controller:** PlayStation, Xbox and Switch pads with their own **button prompts in the
   game**, and **keyboard and mouse**, with keys you can rebind (bbport 0.7's Dark Souls
-  III-style layout, or the classic one of earlier Linux versions) and the mouse as a pointer in the
-  game's menus.
+  III-style layout, or the classic one of earlier Linux versions), movement keys that keep a
+  sprint through turns (the last of two opposite keys wins; `keyboard_movement=0.7` in
+  `bbport.ini` for bbport 0.7's ramped stick) and the mouse as a pointer in the game's menus.
 - **Exit to desktop** from the game's title and System menus.
 - **Cheats and gameplay tweaks:** never die, stealth, camera distance, ragdoll physics and more.
 - **Trophies and the platinum**, with a notice in the game like on the PS4.

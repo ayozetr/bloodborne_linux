@@ -54,6 +54,8 @@ Obrikash and noelmiller. What each one did:
 - **[MikeTat1988](https://github.com/MikeTat1988)**: Hunter's Atlas, the fullscreen in-game map.
 - **[IFreemz](https://github.com/IFreemz)**: the FSR 4 model without trails.
 - **[FireBurn](https://github.com/FireBurn)**: FSR 3.1.
+- **[Jhony-Jhansen](https://github.com/Jhony-Jhansen)**: keyboard movement (the last of two opposite keys wins).
+- **[cassioKenji](https://github.com/cassioKenji)**: the keyboard sprint measurements.
 - **[msisovic](https://github.com/msisovic)**: why loading hung after a lamp travel (guest thread handles above 40 bits).
 - **[axpico](https://github.com/axpico)**: with VRAM full, the game waits for evicted textures to be freed instead of closing.
 - **[emurphy04](https://github.com/emurphy04)**: a video player crash when it stops, the field of
