@@ -27,7 +27,10 @@ import uuid
 # "bloodborne").
 CLIENT_ID = '1558176258121269389'
 REPO_URL = 'https://github.com/ayozetr/bloodborne_linux'
-REPO_TEXT = 'github.com/ayozetr/bloodborne_linux'
+# Shown when the art is hovered. Discord wraps that text at spaces only, in a narrow box: the
+# whole URL was cut off ("github.com/ayozetr/bloodbor"), so the repository goes on a line of its
+# own, short enough to fit. The button below opens it.
+REPO_TEXT = 'ayozetr/bloodborne_linux'
 HANDSHAKE, FRAME, CLOSE = 0, 1, 2
 # The areas by map (map/mapstudio/mXX_YY_...): the names of Smithbox's Bloodborne map aliases
 # (github.com/vawser/Smithbox, MIT). The Chalice Dungeons (m29) are one name.
@@ -139,7 +142,7 @@ def activity(online, start, area=None, partners=()):
         'timestamps': {'start': start},
         # The image's tooltip names the repository, and a button opens it (Discord shows the
         # buttons to the other people looking at the profile, not to the player).
-        'assets': {'large_image': 'bloodborne', 'large_text': f'Bloodborne · native Linux port · {REPO_TEXT}'},
+        'assets': {'large_image': 'bloodborne', 'large_text': f'Bloodborne on Linux · {REPO_TEXT} on GitHub'},
         'buttons': [{'label': 'Get the Linux port', 'url': REPO_URL}],
     }
     if area_name(area):
