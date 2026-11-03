@@ -28,7 +28,8 @@ seamless co-op, the Steam Deck, and what to do when something goes wrong.
   **local co-op** (split screen), 2 to 4 players on one PC, each with their own controller.
 - **In-game map** (Hunter's Atlas): a fullscreen map with where you are, lamps and items, and fast
   travel to the lamps you've found.
-- **Frame rate unlocked** (up to 120 FPS) or capped at **30, 60 or 90**. Resolutions from
+- **Frame rate unlocked** (up to 120 FPS recommended; the game's movement can break above it)
+  or capped at **30, 60 or 90**, and changed while you play from the in-game menu. Resolutions from
   **720p to 4K**, and any **aspect ratio** (4:3 to 32:9 ultrawide, [how](docs/TROUBLESHOOTING.md#the-picture-is-stretched-on-an-ultrawide-screen)).
 - **Upscaling:** AMD **FSR 3.1** and **FSR 4**, NVIDIA **DLSS** (GeForce RTX) and TAA, and
   **frame generation** (FSR 3.1, or DLSS on GeForce RTX 40 and newer).
