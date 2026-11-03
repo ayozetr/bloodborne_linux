@@ -6,7 +6,8 @@ changes since the previous release. Third-party work is credited in the line tha
 
 - Tag: `<upstream bbport version>-linux.<n>` (e.g. `0.4-linux.1`).
 - Title: `bbport Linux <tag>`.
-- Asset: `dist/Bloodborne-bbport-x86_64.AppImage` (`bash build.sh && bash packaging/appimage-sharun.sh`).
+- Asset: `dist/Bloodborne-bbport-x86_64.AppImage`, built with `bash packaging/appimage-in-arch.sh` (plain
+  Arch Linux in Docker, so that it starts on processors without AVX2).
 
 ```markdown
 <One or two sentences: what this release is and which upstream bbport it is based on.>
