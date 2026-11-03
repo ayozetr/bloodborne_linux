@@ -8,6 +8,7 @@ the launcher has no translation for it).
 import os
 
 EN = {
+    'Проекты, на которых он основан': 'Projects it builds on',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "The co-op server for your own group, and BBSC's seamless summon",
     'Модель FSR 4 без шлейфов за персонажами':
@@ -1035,6 +1036,7 @@ EN = {
 }
 
 PT_BR = {
+    'Проекты, на которых он основан': 'Projetos em que se baseia',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'O servidor de cooperativo para o seu próprio grupo e a invocação contínua do BBSC',
     'Модель FSR 4 без шлейфов за персонажами':
@@ -2121,6 +2123,7 @@ PT_BR = {
 
 # Spanish (Spain).
 ES = {
+    'Проекты, на которых он основан': 'Proyectos en los que se basa',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'El servidor de cooperativo para tu propio grupo y la invocación sin cortes de BBSC',
     'Модель FSR 4 без шлейфов за персонажами':
@@ -3120,6 +3123,7 @@ ES = {
 
 # Italian.
 IT = {
+    'Проекты, на которых он основан': 'Progetti su cui si basa',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "Il server cooperativo per il proprio gruppo e l'evocazione continua di BBSC",
     'Модель FSR 4 без шлейфов за персонажами':
@@ -4119,6 +4123,7 @@ IT = {
 
 # French.
 FR = {
+    'Проекты, на которых он основан': "Projets sur lesquels il s'appuie",
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         "Le serveur de coopération pour votre propre groupe et l'invocation continue de BBSC",
     'Модель FSR 4 без шлейфов за персонажами':
@@ -5118,6 +5123,7 @@ FR = {
 
 # German.
 DE = {
+    'Проекты, на которых он основан': 'Projekte, auf denen es aufbaut',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         'Der Koop-Server für die eigene Gruppe und BBSCs nahtlose Beschwörung',
     'Модель FSR 4 без шлейфов за персонажами':
@@ -6117,6 +6123,7 @@ DE = {
 
 # Simplified Chinese.
 ZH_CN = {
+    'Проекты, на которых он основан': '所基于的项目',
     'Сервер для своего кооператива и бесшовный призыв BBSC':
         '自建合作服务器，以及 BBSC 的无缝召唤',
     'Модель FSR 4 без шлейфов за персонажами':

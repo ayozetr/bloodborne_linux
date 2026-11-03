@@ -3270,37 +3270,41 @@ class LauncherWindow(Adw.ApplicationWindow):
                             subtitle=tr("Версия {}").format(bbport_update.VERSION_TEXT))
         app.add_prefix(Gtk.Image(file=str(PORT_DIR / "launcher" / "bloodborne.png"), pixel_size=48))
         about.add(app)
-        for title, subtitle, url, icon in (
-                (tr("Этот проект"), bbport_update.REPOSITORY_URL, bbport_update.REPOSITORY_URL,
-                 "github-symbolic"),
-                (tr("Руководство для игроков"), bbport_update.GUIDE_URL, bbport_update.GUIDE_URL,
-                 "help-browser-symbolic"),
-                (tr("Основано на bbport от deadinside28"), bbport_update.UPSTREAM_URL,
-                 bbport_update.UPSTREAM_URL, "github-symbolic"),
-                (tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,
-                 bbport_update.WINDOWS_URL, "github-symbolic"),
-                # Its NOTICE asks for this attribution, as written, in the about screen.
-                ("Lantern Engine by Awaken", LANTERN_ENGINE_URL, LANTERN_ENGINE_URL,
-                 "github-symbolic"),
-                (tr("Лицензия"), tr("GNU GPL v3 или новее · Файлы игры не входят."),
-                 bbport_update.LICENSE_URL, "application-certificate-symbolic")):
+        def link_row(title, subtitle, url, icon):
             row = Adw.ActionRow(title=title, subtitle=subtitle, activatable=True)
             row.add_prefix(themed_icon(icon))
             row.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
             row.connect("activated", lambda _row, link=url: self.open_uri(link))
-            about.add(row)
+            return row
+
+        about.add(link_row(tr("Этот проект"), bbport_update.REPOSITORY_URL,
+                           bbport_update.REPOSITORY_URL, "github-symbolic"))
+        about.add(link_row(tr("Руководство для игроков"), bbport_update.GUIDE_URL,
+                           bbport_update.GUIDE_URL, "help-browser-symbolic"))
         support = Adw.ActionRow(title=tr("Поддержать проект"), subtitle="ko-fi.com/ayozetr",
                                 activatable=True)
         support.add_prefix(Gtk.Image(icon_name="emblem-favorite-symbolic"))
         support.add_suffix(Gtk.Image(icon_name="adw-external-link-symbolic"))
         support.connect("activated", lambda _row: self.open_uri(bbport_update.KOFI_URL))
         about.add(support)
+        about.add(link_row(tr("Лицензия"), tr("GNU GPL v3 или новее · Файлы игры не входят."),
+                           bbport_update.LICENSE_URL, "application-certificate-symbolic"))
         thanks = Adw.ActionRow(title=tr("Благодарности"), subtitle=tr("Без них ничего этого не было бы"),
                                activatable=True)
         thanks.add_prefix(Gtk.Image(icon_name="system-users-symbolic"))
         thanks.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
         thanks.connect("activated", lambda _row: self.show_thanks())
         about.add(thanks)
+        projects = Adw.ExpanderRow(title=tr("Проекты, на которых он основан"))
+        projects.add_prefix(themed_icon("github-symbolic"))
+        projects.add_row(link_row(tr("Основано на bbport от deadinside28"), bbport_update.UPSTREAM_URL,
+                                  bbport_update.UPSTREAM_URL, "github-symbolic"))
+        projects.add_row(link_row(tr("Порт для Windows от Supermedo"), bbport_update.WINDOWS_URL,
+                                  bbport_update.WINDOWS_URL, "github-symbolic"))
+        # Its NOTICE asks for this attribution, as written, in the about screen.
+        projects.add_row(link_row("Lantern Engine by Awaken", LANTERN_ENGINE_URL, LANTERN_ENGINE_URL,
+                                  "github-symbolic"))
+        about.add(projects)
         page.add(about)
 
         updates = Adw.PreferencesGroup(title=tr("Обновления"))
