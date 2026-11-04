@@ -55,7 +55,7 @@ at its start (`Environment:` in the log) and warns about `BB_*` names it does no
 `=1: ...` / `=0: ...` / `=N: ...` say what that value does; `set: ...` means any value
 turns it on (even `0`).
 
-## Settings (106)
+## Settings (107)
 
 What players and the launchers set. The menu, bbport.ini and the launcher write most of them; set one by hand to override them.
 
@@ -98,6 +98,7 @@ What players and the launchers set. The menu, bbport.ini and the launcher write 
 | `BB_GAMEPAD` | =SDL GUID or part of the name: the controller to use (the launcher's) |
 | `BB_GAME_DIR` | the game's folder (with eboot.bin) |
 | `BB_GAME_MENU` | =0: no port pages in the game's System menu |
+| `BB_GESTURES_NO_MOTION` | =1: the gestures menu without the motion-control icons (Dommo's mod; the launcher's switch) |
 | `BB_GPU_ID` | =N: the GPU to use, by Vulkan index (the launcher's) |
 | `BB_GPU_PROFILE` | =1: GPU profiler: time per labelled pass in the log (the launcher's) |
 | `BB_HDR` | =1: HDR output allowed |
@@ -155,7 +156,7 @@ What players and the launchers set. The menu, bbport.ini and the launcher write 
 | `BB_SHADNET_SERVER` | the shadNet server |
 | `BB_SHADNET_TOKEN` | the shadNet account token (the launcher's) |
 | `BB_SHADNET_WEBAPI` | the shadNet web API server |
-| `BB_SKIP_CPU_CHECK` | =1: skip the check of the CPU's bsr/bsf behaviour before the game starts |
+| `BB_SKIP_CPU_CHECK` | =1: skip the check of the processor's instructions (AVX, BMI1, LZCNT...) before the game starts |
 | `BB_SKIP_GAME_CHECK` | =1: start with game files that did not pass the check |
 | `BB_STEAM_INPUT_X11` | =0: keep the native Wayland window when Steam made a virtual controller for the game (default: Xwayland, so Steam Input reaches it) |
 | `BB_TEXTURE_QUALITY` | texture quality over bbport.ini's texture_quality |
@@ -410,7 +411,7 @@ Defaults to change on a machine where they misbehave, workarounds, and switches 
 | `BB_VULKANINFO` | path of vulkaninfo for the launcher |
 | `BB_WORK_RETIRED` | =0: the recording thread and fences do not wait for retired work |
 
-## Diagnostics (281)
+## Diagnostics (282)
 
 Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame time; none is meant for playing.
 
@@ -572,6 +573,7 @@ Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame t
 | `BB_MOD_TRACE` | =1: every file a mod replaces |
 | `BB_MOTION_SELECT_LOG` | =1: each G-buffer vertex shader once with the motion vector selection |
 | `BB_MOTION_TRACE` | =file: the frame after the file appears prints its motion draws |
+| `BB_MOVBE_TRAP` | =file: the movbe at the image offsets listed there (tools/movbe_sites.py) made ud2 and run by the port, as on a processor without MOVBE |
 | `BB_MSG_TRACE` | =1: the game's text lookups per 2 s by category (#255) |
 | `BB_NGX_LOG` | =1 / 2: NVIDIA NGX log into the port's (2: verbose) |
 | `BB_NULL_GPU` | =1: no GPU work at all (tests) |

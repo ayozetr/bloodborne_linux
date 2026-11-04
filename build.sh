@@ -118,6 +118,8 @@ if [[ ${1:-} == --test ]]; then
     out/pad-atlas-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -I. -Isrc tests/test_runtime.c "${runtime[@]}" out/libatrac9.a -lm "${gpu[@]}" "${libraries[@]}" -o out/runtime-test
     out/runtime-test
+    "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -Isrc tests/test_movbe.c src/runtime_movbe.c -o out/movbe-test
+    out/movbe-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -Isrc tests/test_file_mods.c src/runtime_remote.c -o out/file-mods-test
     out/file-mods-test
     "$CC" -std=c11 -O2 -g -Wall -Wextra -Werror -pthread -I. -Isrc tests/test_sema.c "${runtime[@]}" out/libatrac9.a -lm "${gpu[@]}" "${libraries[@]}" -o out/sema-test

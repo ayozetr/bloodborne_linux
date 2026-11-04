@@ -14,6 +14,7 @@
 #include "runtime_trophy.h"
 #include "runtime_map.h"
 #include "runtime_atlas_state.h"
+#include "runtime_movbe.h"
 #include "gpu/bbgpu.h"
 #if !defined(__x86_64__) || !defined(__GNUC__)
 #error This prototype requires x86-64 GCC or Clang (including MinGW).
@@ -100,8 +101,12 @@ static void print_environment(void) {
 /* The game's code was compiled for the PS4's CPU (AMD Jaguar) and runs as it is: AVX, BMI1
  * (andn/bextr/blsr/tzcnt), MOVBE, LZCNT and POPCNT, thousands of each in eboot.bin. A CPU without
  * them stops at the first one with SIGILL (exit code 132, issue #26), and lzcnt/tzcnt even run as
- * bsr/bsf there, with other results. Said before the game starts; BB_SKIP_CPU_CHECK=1 skips it. */
+ * bsr/bsf there, with other results. Said before the game starts; BB_SKIP_CPU_CHECK=1 skips it.
+ * MOVBE alone is no obstacle: the port runs those itself (runtime_movbe.c), so AMD's FX
+ * processors, which lack only that one, play (issue #39). */
 static void check_cpu(void) {
+    if (!runtime_movbe_supported())
+        printf("CPU: no MOVBE; the port runs the game's movbe itself (runtime_movbe.c)\n");
     const char *skip = bb_env("BB_SKIP_CPU_CHECK");
     if (skip && !strcmp(skip, "1")) return;
     unsigned a, b, c, d, leaf1_c = 0, leaf7_b = 0, ext1_c = 0;
@@ -115,7 +120,7 @@ static void check_cpu(void) {
         avx = (lo & 6) == 6; /* the OS saves SSE and AVX state */
     }
     const struct { int present; const char *name; } features[] = {
-        {avx, "AVX"}, {(leaf7_b & bit_BMI) != 0, "BMI1"}, {(leaf1_c & bit_MOVBE) != 0, "MOVBE"},
+        {avx, "AVX"}, {(leaf7_b & bit_BMI) != 0, "BMI1"},
         {(ext1_c & bit_LZCNT) != 0, "LZCNT"}, {(leaf1_c & bit_POPCNT) != 0, "POPCNT"},
         {(leaf1_c & bit_SSE4_2) != 0, "SSE4.2"},
     };
@@ -129,7 +134,8 @@ static void check_cpu(void) {
     fprintf(stderr,
             "ERROR: this CPU lacks %s. Bloodborne's code was compiled for the PS4's CPU and uses "
             "these instructions directly: it needs an Intel Haswell (4th generation Core, 2013) or "
-            "newer, or an AMD Ryzen. BB_SKIP_CPU_CHECK=1 starts anyway.\n", missing);
+            "newer, or an AMD FX-4300, 6300 or 8300 series (Piledriver) or newer. "
+            "BB_SKIP_CPU_CHECK=1 starts anyway.\n", missing);
     exit(1);
 }
 static uint64_t read64(FILE *f) {
@@ -244,6 +250,23 @@ void bb_fault_wait(const char *what) {
 #endif
 }
 static void fault(int sig, siginfo_t *info, void *context) {
+#ifndef _WIN32
+    /* A movbe on a processor without MOVBE (AMD FX, issue #39): run by the port, the game goes on. */
+    if (sig == SIGILL) {
+        greg_t *g = ((ucontext_t *)context)->uc_mcontext.gregs;
+        static const int order[16] = {REG_RAX, REG_RCX, REG_RDX, REG_RBX, REG_RSP, REG_RBP, REG_RSI, REG_RDI,
+                                      REG_R8,  REG_R9,  REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15};
+        uint64_t regs[16], rip = (uint64_t)g[REG_RIP];
+        if (rip - (uintptr_t)image < 0x10000000) {
+            for (int i = 0; i < 16; ++i) regs[i] = (uint64_t)g[order[i]];
+            if (runtime_movbe_fault(regs, &rip)) {
+                for (int i = 0; i < 16; ++i) g[order[i]] = (greg_t)regs[i];
+                g[REG_RIP] = (greg_t)rip;
+                return;
+            }
+        }
+    }
+#endif
     /* GPU page tracking (write-protected guest pages) is resolved first. */
     if (gpu_enabled && sig == SIGSEGV && bbgpu_handle_fault(context, info->si_addr)) return;
     /* A speculative guest memory read (runtime_memory.c) failed: resume its recovery point. */
@@ -810,6 +833,9 @@ int main(int argc, char **argv) {
             runtime_atlas_state_bind(image, size);
         }
     }
+#ifndef _WIN32
+    runtime_movbe_bind(image, size); /* BB_MOVBE_TRAP (testing): movbe made ud2 */
+#endif
 #ifdef _WIN32
     patch_guest_tls(segments, ns);
 #endif
