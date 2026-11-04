@@ -99,6 +99,13 @@ void runtime_file_report(void);
 void runtime_file_configure(const char *app0, const char *user);
 int runtime_file_mount(const char *guest, const char *host);
 void runtime_file_unmount(const char *guest);
+/* Exit to desktop from the world (runtime_services.c): armed by the game menu's entry, the game
+ * closes once it is back at the title with its save written. */
+void runtime_quit_arm(int on);
+void runtime_quit_at_title(void);
+void runtime_quit_on_open(const char *guest);
+void runtime_quit_on_save_done(void);
+int runtime_savedata_mounted(void);
 int runtime_file_translate(const char *guest, char *out, size_t size);
 int64_t runtime_file_open(const char *path, int flags, int mode);
 int64_t runtime_file_close(int fd);

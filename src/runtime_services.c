@@ -17,6 +17,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <SDL3/SDL_events.h>
 
 #define USER_ID 1
 #define ORBIS_OK 0
@@ -132,6 +133,50 @@ static ABI int32_t system_status(unsigned char *status) {
 static ABI int32_t system_event(void *event) { (void)event; return SYSTEM_NO_EVENT; }
 static ABI int32_t hide_splash(void) { note("SystemService: splash screen hidden"); return 0; }
 static ABI int32_t launch_browser(void) { note("SystemService: web browser request ignored (offline)"); return 0; }
+/* Exit to desktop in the world (gpu/shim/bbport_game_menu.cpp): the System menu's entry runs the
+ * game's Exit Game, which saves and leaves the world, and arms the quit here. The game closes
+ * once it is back at the title: when the intro logos start loading (a menu/logo_ file opens) or
+ * the title menu is built (its texts: runtime_quit_at_title), with no save data mounted, or after
+ * the last save unmounts. The game's own Exit Game disarms it, and so do two minutes without
+ * getting there (the question answered No). Closing is the window's own close (SDL_EVENT_QUIT:
+ * the window thread ends the process with exit code 0). */
+#define QUIT_ARMED_SECONDS 120
+static int quit_waiting;
+static time_t quit_armed;
+static pthread_mutex_t quit_lock=PTHREAD_MUTEX_INITIALIZER;
+static void quit_game(void) {
+    note("Exit to desktop: the game is saved and back at the title, closing");
+    fflush(stdout);
+    SDL_Event quit={.type=SDL_EVENT_QUIT};
+    if (!SDL_PushEvent(&quit)) printf("Runtime: Exit to desktop: %s\n",SDL_GetError());
+}
+static int quit_ready(void) { return quit_armed && time(NULL)-quit_armed<QUIT_ARMED_SECONDS; }
+void runtime_quit_arm(int on) {
+    pthread_mutex_lock(&quit_lock);
+    if (on || quit_armed || quit_waiting) note(on ? "Exit to desktop: armed (Exit Game saves first)" : "Exit to desktop: disarmed");
+    __atomic_store_n(&quit_armed,on ? time(NULL) : 0,__ATOMIC_RELAXED);
+    quit_waiting=0;
+    pthread_mutex_unlock(&quit_lock);
+}
+static void quit_at_title(void) {
+    if (!__atomic_load_n(&quit_armed,__ATOMIC_RELAXED)) return; /* the usual case: one load */
+    pthread_mutex_lock(&quit_lock);
+    if (quit_ready()) {
+        __atomic_store_n(&quit_armed,0,__ATOMIC_RELAXED);
+        /* A save still writing finishes first (runtime_quit_on_save_done). */
+        if (runtime_savedata_mounted()) quit_waiting=1; else quit_game();
+    }
+    pthread_mutex_unlock(&quit_lock);
+}
+void runtime_quit_at_title(void) { quit_at_title(); }
+void runtime_quit_on_open(const char *guest) {
+    if (guest && strstr(guest,"/menu/logo_")) quit_at_title();
+}
+void runtime_quit_on_save_done(void) {
+    pthread_mutex_lock(&quit_lock);
+    if (quit_waiting && !runtime_savedata_mounted()) { quit_waiting=0; quit_game(); }
+    pthread_mutex_unlock(&quit_lock);
+}
 
 /* ---- NetCtl / Net / Http / Ssl: no network ---- */
 static int32_t net_errno;
