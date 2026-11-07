@@ -59,6 +59,17 @@ and the HUD keeps to the screen's edges; it changes live, in the game's *Display
 **Output resolution** *Auto* is the monitor's own; any other size written as `output_res=WxH` in
 bbport.ini works too.
 
+## Fullscreen opens on the wrong monitor, or drops back to a window
+
+With several monitors, choose the one to play on in **Display → Monitor**: the port's *Primary*
+is the one the system reports first, which on Wayland is not always the one KDE or GNOME show as
+primary. On Wayland a program cannot place its own window, so the compositor may open it on
+another monitor first and then move it; when that leaves it as a plain window, the port asks for
+fullscreen again during the first seconds (the log says
+`Display: the compositor left the window out of fullscreen, asked again`). If it still ends up
+windowed, add `SDL_VIDEO_DRIVER=x11` under **Advanced → Developer → Extra variables**: through
+Xwayland the window places itself.
+
 ## Exit to desktop
 
 **Exit to desktop** is in the game's System menu and on the title screen, from bbport 0.7. The

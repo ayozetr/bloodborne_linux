@@ -223,8 +223,8 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
     if (gamescope && !(fullscreen && fullscreen[0] == '1')) {
         std::printf("Display: gamescope: fullscreen\n");
     }
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN,
-                           !placed && (gamescope || (fullscreen && fullscreen[0] == '1')));
+    fullscreen_wanted = !placed && (gamescope || (fullscreen && fullscreen[0] == '1'));
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, fullscreen_wanted);
     // Issue #234: the swapchain at the display's pixels on a scaled desktop (Wayland 200%), not at
     // the logical size stretched by the compositor. Sizes below are read in pixels already.
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
@@ -249,6 +249,7 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
         window_info.render_surface = reinterpret_cast<void*>(SDL_GetNumberProperty(wp, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0));
     } else if (driver && !std::strcmp(driver, "wayland")) {
         window_info.type = WindowSystemType::Wayland;
+        fullscreen_since_ms = SDL_GetTicks();
         window_info.display_connection = SDL_GetPointerProperty(wp, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
         window_info.render_surface = SDL_GetPointerProperty(wp, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
     } else {
@@ -519,7 +520,34 @@ bool WindowSDL::PollEvents() {
     }
     pointer_shown = pointer;
     UpdateCursor();
+    FixFullscreen();
     return is_open;
+}
+
+// Issue #39: on Wayland a program cannot place its window. With several monitors KWin can map
+// it on another one first (the one SDL calls primary, not KDE's) and move it to the monitor
+// asked for, and the window is left there as a plain window. Asked again, fullscreen holds (as
+// KDE's own shortcut did). Only in the first seconds and a few times: there is no fullscreen
+// toggle in the game, but the desktop's own shortcuts must keep working after that.
+void WindowSDL::FixFullscreen() {
+    constexpr u64 FirstMs = 10000, BetweenMs = 1000;
+    constexpr int MaxTries = 3;
+    if (!fullscreen_wanted || !fullscreen_since_ms || fullscreen_tries >= MaxTries) {
+        return;
+    }
+    const u64 now = SDL_GetTicks();
+    if (now - fullscreen_since_ms > FirstMs) {
+        fullscreen_since_ms = 0; // past the start: the desktop decides from here
+        return;
+    }
+    if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) || now - fullscreen_tried_ms < BetweenMs) {
+        return;
+    }
+    fullscreen_tried_ms = now;
+    ++fullscreen_tries;
+    std::printf("Display: the compositor left the window out of fullscreen, asked again (%d of %d)\n",
+                fullscreen_tries, MaxTries);
+    SDL_SetWindowFullscreen(window, true);
 }
 
 // Issue #3: the OS cursor over the game. Hidden in fullscreen, and in a window after 3 s without

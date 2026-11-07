@@ -60,6 +60,11 @@ private:
     u64 last_mouse_motion_ms{}; ///< SDL_GetTicks of the last mouse motion (UpdateCursor)
     bool cursor_hidden{};
     u64 capture_settle_ms{}; ///< mouse motion before this (SDL_GetTicks) is not looking around
+    /// Issue #39: fullscreen asked again on Wayland when the compositor did not keep it (FixFullscreen).
+    bool fullscreen_wanted{};
+    u64 fullscreen_since_ms{}, fullscreen_tried_ms{};
+    int fullscreen_tries{};
+    void FixFullscreen();
     bool pointer_shown{};        ///< a game module's pointer menu is open (bbgpu_pointer_wanted)
     bool released_for_pointer{}; ///< the mouse was let go for it: taken back after
     void CaptureMouse(bool capture);
