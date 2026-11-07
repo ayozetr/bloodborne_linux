@@ -251,9 +251,23 @@ ImageId TextureCache::FindImage(ImageDesc& desc, bool exact_fmt) {
         if (exact_fmt && info.pixel_format != resolved.guest_info.pixel_format) {
             image_id = {}; // the very format is needed
         } else if (resolved.guest_info.resources < info.resources) {
+            // bbport (Linux fork): which images, and whether the dropped one held what the GPU
+            // drew (then lost: the new image is read from guest memory). Issue #25: a texture
+            // garbled until the game was restarted.
+            const ImageInfo& had = resolved.guest_info;
+            LOG_WARNING(Render_Vulkan,
+                        "Image overlap resolve failed: wanted {:#x}+{:#x} {}x{} {} levels {} layers {}; "
+                        "dropped {:#x}+{:#x} {}x{} {} levels {} layers {}{}",
+                        info.guest_address, info.guest_size, info.size.width, info.size.height,
+                        vk::to_string(info.pixel_format), info.resources.levels, info.resources.layers,
+                        had.guest_address, had.guest_size, had.size.width, had.size.height,
+                        vk::to_string(had.pixel_format), had.resources.levels, had.resources.layers,
+                        True(resolved.flags & ImageFlagBits::GpuModified)
+                            ? (resolved.SafeToDownload() ? ", drawn by the GPU (its contents are lost)"
+                                                         : ", drawn by the GPU, then written")
+                            : "");
             FreeImage(image_id); // picked up wrongly
             image_id = {};
-            LOG_WARNING(Render_Vulkan, "Image overlap resolve failed");
         }
     }
     if (!image_id) {
