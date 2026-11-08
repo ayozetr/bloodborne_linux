@@ -71,6 +71,7 @@ bool Interacting(){return visible || BbMap::IsOpen() || runtime_map_menu_open();
 bool UsesControllerGlyphs(){const char* qa=bb_env("BB_ATLAS_QA_DEVICE");return bb_env("BB_ATLAS_QA")&&qa?std::strcmp(qa,"controller")==0:bool(controller);}
 bool UsesPlayStationGlyphs(){const auto type=SDL_GetGamepadTypeForID(last_controller.load());return type==SDL_GAMEPAD_TYPE_PS3||type==SDL_GAMEPAD_TYPE_PS4||type==SDL_GAMEPAD_TYPE_PS5;}
 bool Focused(){return focused;}
+bool Hovered(){return hovered;}
 void Suppress(bool value){suppressed=value;if(value){visible=false;state.Reset();}}
 void Reset(){state.Reset();focused=false;visible=false;hovered=false;mouse_held=false;map_previous=0;}
 void Tick(){Refresh();if(BbMap::IsOpen()&&!runtime_map_menu_open()&&state.focused){BbMap::Close();Reset();}}

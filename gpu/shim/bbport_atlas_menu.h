@@ -8,6 +8,8 @@ bool Interacting();
 bool UsesControllerGlyphs();
 bool UsesPlayStationGlyphs();
 bool Focused();
+/// The pointer is over the tile (the game's own menu pointer leaves its clicks to it).
+bool Hovered();
 void Suppress(bool value);
 void Tick();
 void Draw();

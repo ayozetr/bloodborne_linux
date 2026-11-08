@@ -41,6 +41,7 @@
 
 #include "bbgpu.h"
 #include "bbport_guest_code_hooks.h"
+#include "bbport_atlas_menu.h"
 #include "bbport_overlay.h"
 #include "bbport_toggles.h"
 #include "common/types.h"
@@ -520,24 +521,35 @@ void PS4_SYSV_ABI OnListUpdate(std::uint64_t, const Core::GuestRegisterSnapshot*
         }
         return;
     }
+    static const bool trace = bb_env("BB_MENU_POINTER_FILE") != nullptr;
     if ((!moved && !clicked) || pad_steering.load(std::memory_order_relaxed)) {
+        if (trace && clicked) {
+            std::printf("Menu pointer: list %p click waits (pad steering)\n",
+                        static_cast<void*>(component));
+        }
         return;
     }
     std::uint64_t slot = 0;
     const int index = list.ItemAt(x, y, slot);
     if (index < 0) {
+        if (trace && clicked) {
+            std::printf("Menu pointer: list %p click at %.0f,%.0f, on none of its items\n",
+                        static_cast<void*>(component), x, y);
+        }
         return;
     }
     if (clicked) {
         click.store(false, std::memory_order_relaxed);
     }
-    static const bool trace = bb_env("BB_MENU_POINTER_FILE") != nullptr;
     if (trace) {
         std::printf("Menu pointer: list %p item %d (cursor %d)%s\n", static_cast<void*>(component),
                     index, list.CursorIndex(), clicked ? " click" : "");
     }
     if (list.MoveTo(index, slot) && clicked) {
         const std::uint32_t button = list.ClickButton(slot, x, y, ConfirmButton());
+        if (trace) {
+            std::printf("Menu pointer: list %p presses %#x\n", static_cast<void*>(component), button);
+        }
         presses.fetch_or(button, std::memory_order_relaxed);
         // A held click on a slider's arrow keeps moving it.
         if (button == Left || button == Right) {
@@ -602,11 +614,27 @@ int OnEvent(const void* sdl_event, void* sdl_window) {
     default:
         break;
     }
-    const bool ours = !bbgpu_mouse_captured() && !BbOverlay::MenuOpen() && InMenu();
+    // Not BbOverlay::MenuOpen(): that is also true while Hunter's Atlas's tile shows in the game's
+    // quick menu, and then no click reached the game's own items (only the tile's Map opened).
+    // A click on the tile itself is left to it (BbAtlasMenu::HandleMouse, after this filter),
+    // and so is its release, on which it opens the map.
+    const bool atlas_tile = BbAtlasMenu::Visible() && BbAtlasMenu::Hovered();
+    const bool ours =
+        !bbgpu_mouse_captured() && !BbOverlay::CapturesInput() && !atlas_tile && InMenu();
+    static const bool trace = bb_env("BB_MENU_POINTER_FILE") != nullptr;
+    if (trace && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        std::printf("Menu pointer: button %d down (taken %d: captured %d, overlay %d, Atlas tile %d, "
+                    "menu %d)\n",
+                    int(event.button.button), ours ? 1 : 0, bbgpu_mouse_captured() ? 1 : 0,
+                    BbOverlay::CapturesInput() ? 1 : 0, atlas_tile ? 1 : 0, InMenu() ? 1 : 0);
+    }
+    static bool left_taken = false; ///< the left button's press was the pointer's: so is its release
     if (event.type == SDL_EVENT_MOUSE_BUTTON_UP && event.button.button == SDL_BUTTON_LEFT) {
         left_held.store(false, std::memory_order_relaxed);
         repeat_press.store(0, std::memory_order_relaxed);
-        return ours ? 1 : 0;
+        const bool taken = left_taken;
+        left_taken = false;
+        return taken ? 1 : 0;
     }
     if (!ours) {
         return 0;
@@ -620,6 +648,7 @@ int OnEvent(const void* sdl_event, void* sdl_window) {
         left_held.store(true, std::memory_order_relaxed);
         click_ms.store(NowMs(), std::memory_order_relaxed);
         click.store(true, std::memory_order_relaxed);
+        left_taken = true;
         return 1;
     }
     if (event.type == SDL_EVENT_MOUSE_WHEEL) {
