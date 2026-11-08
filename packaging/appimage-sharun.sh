@@ -90,11 +90,12 @@ chmod +x "$appdir/bin/bloodborne"
 sed -e 's|@LAUNCHER@|bloodborne|' -e 's|@ICON@|bloodborne|' \
     launcher/io.github.bbport.Launcher.desktop.in > "$work/bloodborne.desktop"
 # The version and a description for AppImage managers (Gear Lever showed "UNKNOWN", #49): the
-# desktop entry's X-AppImage-Version and AppStream metainfo named after the desktop entry. The
-# version is the launcher's own (bbport_update.py), so it is kept in one place.
+# desktop entry's X-AppImage-Version, which appimagetool writes from VERSION (it replaces one in
+# the entry), and AppStream metainfo named after the desktop entry. The version is the
+# launcher's own (bbport_update.py), so it is kept in one place.
 version=$(sed -n 's/^VERSION = "\(.*\)"$/\1/p' launcher/bbport_update.py)
 [[ -n $version ]] || { echo "No VERSION in launcher/bbport_update.py" >&2; exit 1; }
-echo "X-AppImage-Version=$version" >> "$work/bloodborne.desktop"
+export VERSION=$version
 mkdir -p "$appdir/share/metainfo"
 cat > "$appdir/share/metainfo/bloodborne.appdata.xml" <<METAINFO
 <?xml version="1.0" encoding="UTF-8"?>
