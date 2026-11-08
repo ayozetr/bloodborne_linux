@@ -89,6 +89,42 @@ EOF
 chmod +x "$appdir/bin/bloodborne"
 sed -e 's|@LAUNCHER@|bloodborne|' -e 's|@ICON@|bloodborne|' \
     launcher/io.github.bbport.Launcher.desktop.in > "$work/bloodborne.desktop"
+# The version and a description for AppImage managers (Gear Lever showed "UNKNOWN", #49): the
+# desktop entry's X-AppImage-Version and AppStream metainfo named after the desktop entry. The
+# version is the launcher's own (bbport_update.py), so it is kept in one place.
+version=$(sed -n 's/^VERSION = "\(.*\)"$/\1/p' launcher/bbport_update.py)
+[[ -n $version ]] || { echo "No VERSION in launcher/bbport_update.py" >&2; exit 1; }
+echo "X-AppImage-Version=$version" >> "$work/bloodborne.desktop"
+mkdir -p "$appdir/share/metainfo"
+cat > "$appdir/share/metainfo/bloodborne.appdata.xml" <<METAINFO
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.ayozetr.bloodborne_linux</id>
+  <name>Bloodborne (bbport)</name>
+  <developer id="io.github.ayozetr">
+    <name>bloodborne_linux contributors</name>
+  </developer>
+  <summary>Native Linux port launcher for your own copy of Bloodborne</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>Runs Bloodborne natively on Linux from your own decrypted dump of the PS4 game with update
+    1.09. No game files are included. Upscaling (DLSS, FSR), online play, mods and the community
+    patches are set up from the launcher, which also updates itself.</p>
+  </description>
+  <launchable type="desktop-id">bloodborne.desktop</launchable>
+  <url type="homepage">https://github.com/ayozetr/bloodborne_linux</url>
+  <url type="bugtracker">https://github.com/ayozetr/bloodborne_linux/issues</url>
+  <categories><category>Game</category></categories>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">intense</content_attribute>
+    <content_attribute id="violence-bloodshed">intense</content_attribute>
+  </content_rating>
+  <releases>
+    <release version="$version" date="$(date +%F)"/>
+  </releases>
+</component>
+METAINFO
 
 # GTK, libadwaita and their typelibs are loaded by PyGObject at run time (not linked): named here.
 # So are Python's ssl and hashlib modules, which quick-sharun leaves out by default: the launcher's
