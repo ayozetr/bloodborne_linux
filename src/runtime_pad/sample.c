@@ -101,7 +101,12 @@ static void sample_host(PadData *d) {
      * it) and sample_atlas() gives the game the neutral input. */
     if (bbgpu_overlay_captures_input() && !atlas_on()) { apply_mouse_look(d,0,0,d->timestamp,0); return; }
     const bool *k=SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetKeyboardState(NULL) : NULL;
-    mouse_buttons=captured && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
+    /* In a game's pointer menu (the mouse released) the buttons count too, but the left one, which
+     * is the pointer's click (gpu/games/bloodborne_menu_pointer.cpp): the right one is L2 there as
+     * the game's prompts show it (the storage box's pages, #44). */
+    const int pointer_menu=!captured && bbgpu_pointer_wanted();
+    mouse_buttons=(captured || pointer_menu) && SDL_WasInit(SDL_INIT_VIDEO) ? SDL_GetMouseState(NULL,NULL) : 0;
+    if (!captured) mouse_buttons&=~SDL_BUTTON_LMASK;
     const int pad_only=steam_pad_only(g) || !keyboard_enabled();
     atomic_store_explicit(&steam_only_now,pad_only,memory_order_relaxed);
     if (pad_only) {

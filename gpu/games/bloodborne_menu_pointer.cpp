@@ -611,18 +611,15 @@ int OnEvent(const void* sdl_event, void* sdl_window) {
     if (!ours) {
         return 0;
     }
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+    // Only the left button is the pointer's. The others keep their bindings in a menu too
+    // (runtime_pad/sample.c), as the game's own prompts show them: the right button is L2, which
+    // switches the storage box's pages (#44); it used to be the way back, and with it nothing
+    // could press L2 in a menu. Escape is the way back.
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
         SetPointer(window, event.button.x, event.button.y);
-        if (event.button.button == SDL_BUTTON_LEFT) {
-            left_held.store(true, std::memory_order_relaxed);
-            click_ms.store(NowMs(), std::memory_order_relaxed);
-            click.store(true, std::memory_order_relaxed);
-        } else if (event.button.button == SDL_BUTTON_RIGHT) {
-            presses.fetch_or(BackButton(), std::memory_order_relaxed);
-        }
-        return 1;
-    }
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        left_held.store(true, std::memory_order_relaxed);
+        click_ms.store(NowMs(), std::memory_order_relaxed);
+        click.store(true, std::memory_order_relaxed);
         return 1;
     }
     if (event.type == SDL_EVENT_MOUSE_WHEEL) {
@@ -636,7 +633,7 @@ int OnEvent(const void* sdl_event, void* sdl_window) {
     return 0;
 }
 
-/// BB_MENU_POINTER_FILE=<file> (tests): "x y [click|right|up|down]" in stage pixels, applied
+/// BB_MENU_POINTER_FILE=<file> (tests): "x y [click|back|up|down]" in stage pixels, applied
 /// when the file changes, as the mouse would.
 void ReadTestFile() {
     static const char* path = bb_env("BB_MENU_POINTER_FILE");
@@ -668,7 +665,7 @@ void ReadTestFile() {
     if (!std::strcmp(action, "click")) {
         click_ms.store(now, std::memory_order_relaxed);
         click.store(true, std::memory_order_relaxed);
-    } else if (!std::strcmp(action, "right")) {
+    } else if (!std::strcmp(action, "back")) {
         presses.fetch_or(BackButton(), std::memory_order_relaxed);
     } else if (!std::strcmp(action, "up") || !std::strcmp(action, "down")) {
         presses.fetch_or(action[0] == 'u' ? Up : Down, std::memory_order_relaxed);
