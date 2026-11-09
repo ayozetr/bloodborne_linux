@@ -337,6 +337,13 @@ add_executable(camera-matrices-test EXCLUDE_FROM_ALL ../tests/test_camera_matric
 target_compile_options(camera-matrices-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
 target_include_directories(camera-matrices-test PRIVATE ..)
 
+# When a mirror is made again over its valid blocks only (gpu/layer/layer_mirror_policy.h). Pure,
+# no Vulkan device: the regression test for the default run of 0.7 that compacted nothing at all.
+# From the SrShadowy fork.
+add_executable(layer-mirror-policy-test EXCLUDE_FROM_ALL ../tests/test_layer_mirror_policy.cpp)
+target_compile_options(layer-mirror-policy-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
+target_include_directories(layer-mirror-policy-test PRIVATE .)
+
 add_executable(scene-resolution-test EXCLUDE_FROM_ALL ../tests/test_scene_resolution.cpp ../tests/test_gpu_runtime_stubs.cpp)
 target_include_directories(scene-resolution-test PRIVATE . shim ${SHADER_INCLUDE} third_party/gcn/include)
 # The test's Vulkan-Hpp inline methods have a different set of platform extensions

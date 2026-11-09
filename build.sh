@@ -149,4 +149,7 @@ if [[ ${1:-} == --test ]]; then
     rm -rf out/atlas-features && out/atlas-features-test out/atlas-features
     "${CXX:-c++}" "${atlas_cxx[@]}" tests/test_atlas_i18n.cpp -o out/atlas-i18n-test
     out/atlas-i18n-test
+    # When a mirror is made again over its valid blocks only (gpu/layer/layer_mirror_policy.h).
+    "${CXX:-c++}" -std=c++20 -O2 -g -UNDEBUG -Wall -Wextra -Werror -Igpu tests/test_layer_mirror_policy.cpp -o out/layer-mirror-policy-test
+    out/layer-mirror-policy-test
 fi
