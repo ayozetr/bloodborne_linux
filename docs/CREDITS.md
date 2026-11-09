@@ -67,7 +67,8 @@ Obrikash and noelmiller. What each one did:
 - **[Mrsuss60](https://github.com/Mrsuss60)**: the gestures menu from the keyboard, a deleted
   image's slot, and the log of failed memory reservations.
 - **[SrShadowy](https://github.com/SrShadowy)**: the on-screen keyboard for the character's name,
-  and the shader compiling notice.
+  the shader compiling notice, and compacting the memory copies in VRAM.
+- **[Wooloomooloo2](https://github.com/Wooloomooloo2)**: the game starting on integrated Intel Arc/Xe GPUs.
 - **[Qiming-Liu](https://github.com/Qiming-Liu)**: the Simplified Chinese translation.
 - **[andrecabralgit](https://github.com/andrecabralgit)**: the game's audio at full level.
 - **[Jgamrot](https://github.com/Jgamrot)**: the in-game menu's checkboxes and sliders.
@@ -98,7 +99,7 @@ Obrikash and noelmiller. What each one did:
 - **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.
 - **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
 - **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
-- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures and crashes in the game's memory manager.
+- **[Nahnahchi](https://github.com/Nahnahchi)**: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures, crashes in the game's memory manager, frame rate drops on NVIDIA, and Exit to Desktop with online play.
 - **[thomasgarafano1](https://github.com/thomasgarafano1)**: Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix.
 - **[TacticalBill](https://github.com/TacticalBill)**: marking trophies already earned on the PS4.
 - **[holydingus](https://github.com/holydingus)**: BBSC's items not given to a new character.
@@ -107,3 +108,6 @@ Obrikash and noelmiller. What each one did:
 - **[BlazinKarp](https://github.com/BlazinKarp)**: the Steam overlay in the game.
 - **[molnar-a](https://github.com/molnar-a)**: a crash on the Steam Deck after lamp travel, and testing the fix.
 - **[Aman9das](https://github.com/Aman9das)**: asking for bbport 0.6's keyboard layout.
+- **[eberhardweber](https://github.com/eberhardweber)**: logs and tests of AMD FX processors, fullscreen on Wayland with several monitors, and the AppImage's version in Gear Lever.
+- **[GitBire](https://github.com/GitBire)**: the storage box with keyboard and mouse.
+- **[npc-xc](https://github.com/npc-xc)**: logs of frame rate drops on NVIDIA.
