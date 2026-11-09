@@ -51,6 +51,27 @@ On a 6 GB card the texture cache can run out of video memory: the log then repea
 a lower output resolution, lower **Model detail** in the game's *Display* settings, and close
 other programs that use the GPU (browsers, video players, other games).
 
+## The frame rate drops in some places and stays low until a reload
+
+Seen mostly on NVIDIA cards (#42): the game runs at its usual rate, then in some places drops
+(to 17-35 FPS) and stays there until a lamp travel or a restart. When video memory was full, a
+copy of the game's memory could land in system memory and stay there, and the GPU read it over
+the bus. From 0.70-linux.4, on cards with more than 4 GB those copies stay in video memory, and
+one that does not fit is made again later; the log says so at start (`Layer memory: mirrors in
+VRAM only`). `BB_MIRROR_VRAM_ONLY=0` under **Advanced → Developer → Extra variables** brings the
+old behaviour back, and `=1` turns it on for a card of 4 GB or less.
+
+A place that is simply heavy is different: it is slower from the moment you get there, and the
+same after a reload. If a drop stays until a reload, turn on **Save the log and statistics to a
+file** and attach the log of that whole session to the issue.
+
+## Keyboard and mouse in the game's menus
+
+In the game's menus the mouse points at items and the **left button** chooses them. The other
+buttons keep what they do in play, as the game's own prompts show: the **right button** is L2
+(the storage box switches to the storage with it), the side buttons R2 and L1. **Escape** goes
+back.
+
 ## The picture is stretched on an ultrawide screen
 
 Choose the screen's shape in **Graphics → Display → Aspect ratio** (*Auto* follows the output
