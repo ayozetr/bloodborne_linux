@@ -62,6 +62,7 @@ EFFECTS={
     'tweak_no_camera_rotation':(None,'Disable Camera Auto Rotation via Movement'),
     'tweak_easy_run':(None,'Sensitive Analog Input (easier to run)'),
     'tweak_ragdoll':(None,'DS1-like physics'),
+    'tweak_l3_run_jump':(None,'L3 Run-Jump'),
     # Loading and smoothness (from droogie/bbhost); the first two are on unless turned off.
     'tweak_quick_reentry':(None,'Quick Re-entry'),
     'tweak_fast_deflate':(None,'Fast Run-time Deflate'),

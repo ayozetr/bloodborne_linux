@@ -759,6 +759,13 @@ inline const char* MenuTranslation(MenuLanguage language, const char* english) {
       "Ragdoll-Physik wie in Dark Souls",
       "Física ragdoll de Dark Souls",
       "黑暗之魂的布娃娃物理"}},
+    {"L3 jumps while running",
+     {"L3 salta al correr",
+      "L3 salta durante la corsa",
+      "L3 saute en courant",
+      "L3 springt beim Rennen",
+      "L3 pula ao correr",
+      "奔跑时按 L3 跳跃"}},
     // The game's System menu pages (bbport_game_menu.cpp).
     {"Display",
      {"Imagen",

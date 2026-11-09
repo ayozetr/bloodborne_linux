@@ -3492,4 +3492,16 @@
             <Line Type="bytes" Address="0x018281A8" Value="C783500E000002000000"/>
         </PatchList>
     </Metadata>
+    <Metadata Title="Bloodborne" Name="L3 Run-Jump" Note="While running with Circle held, L3 jumps as letting go of Circle and pressing it again does; Circle is unchanged. Works with any c0000.hks that keeps the game's run-jump (vanilla, Hyperborne); not with the Nightreign Movement scripts. Uses one byte at 0x05AD3D00 in the zeroed tail of .bss as a 3-frame window." Author="Kyo (from droogie/bbhost)" PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <!-- PadManipulator::Update: the call of ActionRequest::Update goes through the new code; was E8 BA 71 4E 00 -->
+            <Line Type="bytes" Address="0x01928751" Value="E8AA68B903"/>
+            <!-- the script's SpEffect query (env 56) goes through the new code; was 48 8B 8B C8 01 00 00 -->
+            <Line Type="bytes" Address="0x01E142F1" Value="E98AAD6A039090"/>
+            <!-- new code in the zero tail of the code segment: L3 pressed while running adds the Rolling request; was zeros -->
+            <Line Type="bytes" Address="0x054BF000" Value="803DF94C6100007406FE0DF14C6100F64711207444F6471920753EF64710207438488B47084885C0742F488B80C80100004885C07423488B40084885C0741A817840870100007406488B4058EBEC804F1202C605A74C610003E9B20895FC"/>
+            <!-- new code: SpEffect 390 counts as on for 3 frames after it; was zeros -->
+            <Line Type="bytes" Address="0x054BF080" Value="3D86010000752C803D724C6100007423488B0DE1F747004885C97417483B59607511488B3D374B3200BE01000000E9976695FC488B8BC8010000E9395295FC"/>
+        </PatchList>
+    </Metadata>
 </Patch>

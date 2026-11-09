@@ -84,6 +84,7 @@ inline constexpr Effect Effects[] = {
     {"tweak_no_camera_rotation", "No camera auto-rotation", "Без автоповорота камеры", false},
     {"tweak_easy_run", "Run with less stick tilt", "Бег с меньшим наклоном стика", false},
     {"tweak_ragdoll", "Dark Souls ragdoll physics", "Физика тел как в Dark Souls", false},
+    {"tweak_l3_run_jump", "L3 jumps while running", "L3: прыжок на бегу", false},
 };
 inline constexpr int EffectCount = int(sizeof(Effects) / sizeof(Effects[0]));
 /// The game's own anti-aliasing effect (Effects index), derived from anti_aliasing.
