@@ -319,7 +319,7 @@ Defaults to change on a machine where they misbehave, workarounds, and switches 
 | `BB_MIRROR_POOL_MB` | =N: retired mirrors kept for new ones |
 | `BB_MIRROR_REPROMOTE_SECONDS` | =N (default 0): blocks sent back are not copied again that soon |
 | `BB_MIRROR_UNBOUND_SECONDS` | =N (0 never): blocks no binding named for N seconds leave VRAM |
-| `BB_MIRROR_VRAM_ONLY` | =1: mirrors in VRAM or not at all |
+| `BB_MIRROR_VRAM_ONLY` | =1 / 0: mirrors in VRAM or not at all, or in system memory too when VRAM is full (default: VRAM only on cards over 4 GiB) |
 | `BB_MOTION_LARGE` | =0: bone palettes of 16-64 KiB (the large beasts) get camera motion vectors only, not object motion |
 | `BB_MOTION_VERTICES_MI` | =N (1-8): object motion vertex buffer in Mi vertices |
 | `BB_NET_MODULE` | =path: the online module to load (default gpu/libbbnet20.so beside bb-probe) |

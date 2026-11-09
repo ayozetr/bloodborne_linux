@@ -641,10 +641,22 @@ std::unique_ptr<Buffer> BufferCache::LayerNewMirror(VAddr start, u64 bytes) {
         }
         ++mirror_pool_misses;
     }
-    // BB_MIRROR_VRAM_ONLY=1: VRAM or none (VMA puts "mirrors" in system memory when VRAM is full).
-    // Off by default: VMA's budget check refused them at 1.5-1.65 GB of a 1.77-1.83 GB budget on
-    // the 2 GB laptop, the geometry was read over the bus and the game fell to 8-29 FPS (2026-10-26).
-    static const bool system_ok = !bb_env_on("BB_MIRROR_VRAM_ONLY");
+    // VRAM or none: without it VMA puts a mirror in system memory when VRAM is full, and there it
+    // stays until its blocks are retired, so the GPU reads that geometry over the bus until a
+    // reload (#42: an RTX 4060 at 17-27 FPS in the same places; BB_MIRROR_VRAM_ONLY=1 fixed it).
+    // A mirror refused instead is made again later, when there is room. On by default on cards
+    // with more than 4 GiB; small cards keep the fallback: VMA's budget check refused mirrors at
+    // 1.5-1.65 GB of a 1.77-1.83 GB budget on the 2 GB laptop, the geometry was read over the bus
+    // and the game fell to 8-29 FPS (2026-10-26). BB_MIRROR_VRAM_ONLY=1 / 0 forces either.
+    static const bool system_ok = [this] {
+        const bool vram_only = bb_env_on("BB_MIRROR_VRAM_ONLY")    ? true
+                               : bb_env_off("BB_MIRROR_VRAM_ONLY") ? false
+                               : instance.GetTotalMemoryBudget() > (u64{4} << 30);
+        std::printf("Layer memory: mirrors %s (BB_MIRROR_VRAM_ONLY)\n",
+                    vram_only ? "in VRAM only, made again later when it is full"
+                              : "in system memory too when VRAM is full");
+        return !vram_only;
+    }();
     std::optional<VramOnlyScope> vram_only;
     if (!system_ok) {
         vram_only.emplace();
