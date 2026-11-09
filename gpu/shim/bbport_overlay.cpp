@@ -313,11 +313,13 @@ std::string FpsText() {
         std::snprintf(text, sizeof(text), BbSettings::MenuText("%.0f FPS  %.1f ms", "%.0f FPS  %.1f мс"),
                       shown, frame_ms_avg);
     }
-    // Other programs took video memory from the game (BufferCache::VramPromotionsPaused).
+    // Other programs took video memory from the game (BufferCache::VramPromotionsPaused): how much
+    // less the budget is than the most it was this session. It read "VRAM -552 MB", which looked
+    // like a negative figure.
     if (const u32 lost = BbStats::vram_budget_lost_mb.load(std::memory_order_relaxed); lost >= 150) {
         const size_t used = std::strlen(text);
         std::snprintf(text + used, sizeof(text) - used,
-                      BbSettings::MenuText("  VRAM -%u MB (other apps)", "  VRAM −%u МБ (другие программы)"),
+                      BbSettings::MenuText("  VRAM: %u MB taken by other apps", "  VRAM: %u МБ заняты другими программами"),
                       lost);
     }
     return text;
