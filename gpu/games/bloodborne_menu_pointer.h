@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Bloodborne (1.09): the mouse as a pointer in the game's own menus (Scaleform lists: the title
 // menu, the inventory, the shops, the options). The item under the pointer gets the game's cursor,
-// a click presses the confirm button on it (or the slider's arrow it is on), the right button goes
-// back, the wheel moves up and down. bloodborne_menu_pointer.cpp has the reverse engineering.
+// a click presses the confirm button on it (or the slider's arrow it is on), the other buttons keep
+// their bindings (the right one L2), the wheel moves up and down. bloodborne_menu_pointer.cpp has the reverse engineering.
 #pragma once
 
 namespace BbMenuPointer {

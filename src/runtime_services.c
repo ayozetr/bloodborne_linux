@@ -135,8 +135,10 @@ static ABI int32_t hide_splash(void) { note("SystemService: splash screen hidden
 static ABI int32_t launch_browser(void) { note("SystemService: web browser request ignored (offline)"); return 0; }
 /* Exit to desktop in the world (gpu/shim/bbport_game_menu.cpp): the System menu's entry runs the
  * game's Exit Game, which saves and leaves the world, and arms the quit here. The game closes
- * once it is back at the title: when the intro logos start loading (a menu/logo_ file opens) or
- * the title menu is built (its texts: runtime_quit_at_title), with no save data mounted, or after
+ * once it is back at the title: when the intro logos start loading (a menu/logo_ file opens), the
+ * title menu is built (its texts) or the game's menu flow says its title menu is up (online play
+ * comes back without either: gpu/games/bloodborne_menu_pointer.cpp, #46; all three call
+ * runtime_quit_at_title), with no save data mounted, or after
  * the last save unmounts. The game's own Exit Game disarms it, and so do two minutes without
  * getting there (the question answered No). Closing is the window's own close (SDL_EVENT_QUIT:
  * the window thread ends the process with exit code 0). */

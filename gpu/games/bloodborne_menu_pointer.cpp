@@ -46,6 +46,9 @@
 #include "bbport_toggles.h"
 #include "common/types.h"
 
+// bb-probe (runtime_services.c); weak: the GPU library's tests link without it.
+extern "C" void runtime_quit_at_title(void) __attribute__((weak));
+
 namespace BbMenuPointer {
 namespace {
 
@@ -437,6 +440,12 @@ bool InputBlocked() {
     return block && Get<std::uint32_t>(block + 0x2e4);
 }
 
+/// The game's title menu (the menu flow's +0xb11 zero), as InMenu reads it.
+bool AtTitle() {
+    const Addr flow = Get<Addr>(At(MenuFlow));
+    return flow && !Get<std::uint8_t>(flow + 0xb11, 1);
+}
+
 bool InMenu() {
     const Addr flow = Get<Addr>(At(MenuFlow));
     const bool title = flow && !Get<std::uint8_t>(flow + 0xb11, 1);
@@ -705,6 +714,17 @@ void ReadTestFile() {
 /// The pad state the game reads (pad thread): the pointer's presses, each held long enough for
 /// the game to see it, with a gap after.
 void OnPad(std::uint32_t* buttons, const std::uint8_t* sticks) {
+    // Exit to desktop (runtime_services.c): the game going from the world to its title menu is the
+    // title it waits for. Issue #46: with online play on, the game came back to the title without
+    // opening the intro logos or looking its title menu's texts up again, and closed only when a
+    // new game was started from there. Only the change counts (the flag is also set at start);
+    // runtime_quit_at_title does nothing unless Exit to desktop is armed.
+    static bool was_title = true;
+    const bool title = AtTitle();
+    if (title && !was_title && runtime_quit_at_title) {
+        runtime_quit_at_title();
+    }
+    was_title = title;
     const auto off_centre = [](std::uint8_t v) { return v < 64 || v > 192; };
     pad_steering.store((*buttons & (Up | Right | Down | Left)) || off_centre(sticks[0]) ||
                            off_centre(sticks[1]),
