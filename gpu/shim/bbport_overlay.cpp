@@ -1398,6 +1398,10 @@ bool MenuOpen() {
     return menu_open || (AtlasOn() && initialized && BbAtlasMenu::Interacting());
 }
 
+bool TextPromptOpen() {
+    return prompt_active.load(std::memory_order_relaxed);
+}
+
 bool CapturesInput() {
     // The text dialog too: keys typed into it (Backspace is the touchpad) stay out of the game.
     // Hunter's Atlas: its open map and its controller shortcut while it is being held.

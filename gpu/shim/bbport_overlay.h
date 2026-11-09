@@ -51,6 +51,8 @@ uint32_t RoutePad(uint32_t buttons, uint8_t lx, uint8_t ly, uint8_t rx, uint8_t 
 /// The settings menu is open, or Hunter's Atlas's map or quick-menu tile uses the pointer: the
 /// window lets the mouse go and shows the system cursor over it.
 bool MenuOpen();
+/// Any thread: the game's text dialog (ImeDialog, the character's name) is open.
+bool TextPromptOpen();
 
 /// Window thread: the game's text dialog (ImeDialog) state, drawn as a box over the frame.
 void SetTextPrompt(bool active, const std::string& prompt, const std::string& text);

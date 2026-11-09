@@ -27,7 +27,11 @@ std::array<std::atomic<BbGpuEventFilter>, 4> event_filters{};
 extern "C" int runtime_pad_steam_only(void) __attribute__((weak));
 
 /// A keyboard or mouse event the game must not take (runtime_pad_steam_only): the gamepad's own
-/// presses again. The port's menu (the overlay) keeps them, the trackpad as its pointer.
+/// presses again. The port's menu (the overlay) keeps them, the trackpad as its pointer, and so
+/// does the game's text dialog (the character's name): Steam's on-screen keyboard types into it
+/// as text input and a keyboard plugged into the Deck as keys, and both were dropped there, so the
+/// name could not be typed in Game Mode (upstream issue #443). The port's own on-screen keyboard
+/// (bbport_overlay.cpp) still takes the gamepad.
 bool SteamPadEcho(const SDL_Event& event) {
     switch (event.type) {
     case SDL_EVENT_KEY_DOWN:
@@ -37,7 +41,8 @@ bool SteamPadEcho(const SDL_Event& event) {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     case SDL_EVENT_MOUSE_BUTTON_UP:
     case SDL_EVENT_MOUSE_WHEEL:
-        return runtime_pad_steam_only && runtime_pad_steam_only() && !BbOverlay::MenuOpen();
+        return runtime_pad_steam_only && runtime_pad_steam_only() && !BbOverlay::MenuOpen() &&
+               !BbOverlay::TextPromptOpen();
     default:
         return false;
     }
