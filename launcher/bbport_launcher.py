@@ -28,6 +28,7 @@ from bbport_i18n import language, set_language, system_game_language, tr
 import bbport_cache
 import bbport_atlas_maps
 import bbport_coop
+import bbport_shortcut
 import bbport_steam
 import bbport_update
 
@@ -1358,6 +1359,16 @@ class LauncherWindow(Adw.ApplicationWindow):
         steam.add_prefix(themed_icon("steam-symbolic"))
         steam.add_suffix(steam_button)
         game.add(steam)
+        # A menu entry (and one on the desktop) for the AppImage or this checkout: an AppImage
+        # has none unless an AppImage manager makes it (bbport_shortcut.py).
+        shortcut = Adw.ActionRow(title=tr("Ярлык"),
+                                 subtitle=tr("Лаунчер в меню приложений или на рабочем столе"))
+        shortcut.add_prefix(themed_icon("application-x-executable-symbolic"))
+        for label, where in ((tr("Меню приложений"), "menu"), (tr("Рабочий стол"), "desktop")):
+            button = Gtk.Button(label=label, valign=Gtk.Align.CENTER)
+            button.connect("clicked", self.on_create_shortcut, where)
+            shortcut.add_suffix(button)
+        game.add(shortcut)
         self.steam_overlay_row = Adw.SwitchRow(
             title=tr("Оверлей Steam"),
             subtitle=tr("Кнопка Steam, счётчик FPS и снимки экрана Steam, когда игра запущена из Steam"),
@@ -2632,6 +2643,29 @@ class LauncherWindow(Adw.ApplicationWindow):
             GLib.timeout_add(1000, lambda: self.add_to_steam(steam, configs, restart=True) and False)
             return False
         GLib.timeout_add(500, poll)
+
+    def on_create_shortcut(self, _button, where):
+        appimage = os.environ.get("APPIMAGE")
+        target = appimage or str(PORT_DIR / "launcher" / "bb-launcher.sh")
+        icon = PORT_DIR / "launcher" / "bloodborne.png"
+        if appimage:
+            # The AppImage's mount is gone once it closes: the icon is kept in the data folder.
+            try:
+                kept = DATA_DIR / "bloodborne.png"
+                kept.write_bytes(icon.read_bytes())
+                icon = kept
+            except OSError:
+                pass
+        desktop = where == "desktop"
+        folder = bbport_shortcut.desktop_dir() if desktop else bbport_shortcut.applications_dir()
+        try:
+            path = bbport_shortcut.write_entry(folder, target, str(icon), trusted=desktop)
+        except OSError as error:
+            self.alert(tr("Ярлык"), tr("Не удалось создать ярлык: {}").format(error))
+            return
+        message = tr("Ярлык создан на рабочем столе") if desktop else tr("Bloodborne добавлен в меню приложений")
+        print(f"Launcher: shortcut written to {path}")
+        self.toasts.add_toast(Adw.Toast(title=message, timeout=6))
 
     def add_to_steam(self, steam, configs, restart):
         # Packaged: the AppImage itself; from a checkout: the launcher script.

@@ -18,6 +18,10 @@
 3. In the launcher, choose your **game folder**: the one with `eboot.bin` in it.
 4. Press **Play**.
 
+The launcher can put itself in your applications menu or on your desktop: **Shortcut**, under
+**Add to Steam** in its settings (an AppImage manager such as Gear Lever does the same for the
+menu).
+
 !!! tip "The first minutes"
     The first time, the game builds its shaders as it meets them, so it can stutter for a few
     minutes. The next sessions start with them ready.
