@@ -559,7 +559,10 @@ static uint8_t look_axis(float value, uint8_t stick, int deadzone) {
 /* While the mouse turns the camera, the game's own camera auto-rotation (it swings the camera
  * behind the character on strafes, made for a stick) fights it: its three stores (1.09) are NOPs
  * then, put back when the mouse is let go (#352). Only where the bytes are the game's own.
- * BB_MOUSE_AUTO_ROTATE=1: left as the game does it. */
+ * BB_MOUSE_AUTO_ROTATE=1: left as the game does it. Not while the gamepad is what is being played
+ * with (gamepad_playing, sample.c): the window holds the mouse whenever it has the focus, and a
+ * player on a controller lost the camera following the character (#51). */
+static int gamepad_playing; /* the gamepad was used last, not the keyboard or the mouse */
 static void mouse_auto_rotation_hold(int hold) {
     static int held=-1, off=-1;
     if (off<0) { const char *e=bb_env("BB_MOUSE_AUTO_ROTATE"); off=e && e[0]=='1'; }
@@ -588,7 +591,7 @@ static void mouse_auto_rotation_hold(int hold) {
     held=hold;
 }
 static void apply_mouse_look(PadData *d, double dx, double dy, uint64_t now, int captured) {
-    mouse_auto_rotation_hold(mouse_look && captured && !bbgpu_free_camera());
+    mouse_auto_rotation_hold(mouse_look && captured && !gamepad_playing && !bbgpu_free_camera());
     /* The free camera (patch) takes the mouse through the right stick below. */
     if (captured && (dx!=0 || dy!=0) && !bbgpu_free_camera()) {
         const float k=MOUSE_RAD_PER_PIXEL*mouse_sensitivity;

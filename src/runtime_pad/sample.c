@@ -190,6 +190,8 @@ static void sample_host(PadData *d) {
                          (mouse_buttons!=0));
     for (int i=0;i<IN_COUNT && !keyboard_active;++i) keyboard_active=key_down(k,i);
     prompt_note(g,pad_active,keyboard_active);
+    if (keyboard_active) gamepad_playing=0;
+    else if (pad_active) gamepad_playing=1;
     apply_keyboard(d,k); /* the bound mouse buttons too */
     video_skip(d,k);
     if (motion_on()) {
