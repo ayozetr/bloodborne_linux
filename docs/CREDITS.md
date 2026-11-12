@@ -99,7 +99,8 @@ Obrikash and noelmiller. What each one did:
 - **[bruxis](https://github.com/bruxis)**: the log that showed why Steam Input did not reach the game.
 - **[shauryasagar](https://github.com/shauryasagar)** and **[ZeroSTF](https://github.com/ZeroSTF)**: the Hunter's Dream going black after long sessions.
 - **[popcar2](https://github.com/popcar2)**: ideas for the launcher.
-- **[shaneo88](https://github.com/shaneo88)**: shadPS4's patch file in the patches folder.
+- **[shaneo88](https://github.com/shaneo88)**: shadPS4's patch file in the patches folder, and the camera not following the character on a controller.
+- **[brenki1](https://github.com/brenki1)**: FSR 4 stopping after lamp travels.
 - **[n3vrs0ft](https://github.com/n3vrs0ft)**: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.
 - **[cappp](https://github.com/cappp)**: the "Transaction failed" crash on Seamless Hunt.
 - **[simo1730](https://github.com/simo1730)**: the Trophies page not finding the dump's files.
