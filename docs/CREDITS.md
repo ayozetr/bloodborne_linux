@@ -50,9 +50,10 @@ Obrikash and noelmiller. What each one did:
 - **[Classmg22](https://github.com/Classmg22)** (CLS_AMG): BBSC, Seamless Co-op.
 - **[Wozzardman](https://github.com/Wozzardman)**: the server for a group's own co-op, and BBSC's seamless summon.
 - **[droogie](https://github.com/droogie)**: The Hunter's Dream server, fast loading, and the L3 run-jump patch (Kyo's) as bbhost carries it.
-- **[Asanilo](https://github.com/Asanilo)**: two GPU fixes: work submission counts, and samplers freed after the frame that uses them.
+- **[Asanilo](https://github.com/Asanilo)**: two GPU fixes: work submission counts, and samplers freed after the frame that uses them; and the preset file's upscaler with four fields.
 - **[AlexanderDzhoganov](https://github.com/AlexanderDzhoganov)**: BBSC: the guest no longer stays a spectator after a boss wipe.
 - **[nullsumlabs](https://github.com/nullsumlabs)**: an unknown system value (sysctl) no longer stops the game.
+- **[The-Fool-cmd](https://github.com/The-Fool-cmd)**: DLSS and the launcher's folder chooser when running from source on NixOS.
 - **[fhody125-web](https://github.com/fhody125-web)**: NoDreamForHunter, the base of BBSC's game server.
 - **[MikeTat1988](https://github.com/MikeTat1988)**: Hunter's Atlas, the fullscreen in-game map.
 - **[IFreemz](https://github.com/IFreemz)**: the FSR 4 model without trails.
