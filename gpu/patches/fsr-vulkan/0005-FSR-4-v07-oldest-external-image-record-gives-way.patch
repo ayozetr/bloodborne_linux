@@ -1,0 +1,46 @@
+From: bbport
+Subject: [PATCH] FSR 4 v07: a full external image table gives up its least used record
+
+External image records are matched by view and were never removed, and the
+table holds eight. The caller makes new views whenever it recreates its
+images (an area load, a resolution change), so after a few of those every
+ffxFsr4VkSetExternalImageState failed with VK_ERROR_OUT_OF_POOL_MEMORY and
+the upscaler stopped (bbport Linux #50). The table is now kept in order of
+use, a registration moving its record to the end, and a full table drops
+the record unused the longest: the images of the frame being recorded are
+the ones registered last.
+
+---
+diff --git a/src/ffx_vk_fsr4_v07.c b/src/ffx_vk_fsr4_v07.c
+--- a/src/ffx_vk_fsr4_v07.c
++++ b/src/ffx_vk_fsr4_v07.c
+@@ -2013,14 +2013,26 @@
+         return VK_ERROR_VALIDATION_FAILED_EXT;
+ 
+     FfxFsr4VkContext* c = (FfxFsr4VkContext*)iface->device;
++    /* bbport: the table is kept in order of use, the record registered last at
++     * its end, and a full table gives up the record unused the longest.
++     * Records are matched by view and were never removed, and the caller makes
++     * new views whenever it recreates its images (an area load, a resolution
++     * change): after a few of those every registration failed with
++     * VK_ERROR_OUT_OF_POOL_MEMORY and the upscaler stopped.  The images of the
++     * frame being recorded are the ones registered last. */
+     for (uint32_t i = 0; i < c->externalImageCount; ++i) {
+         if (c->externalImages[i].state.view == state->view) {
+-            c->externalImages[i].state = *state;
++            memmove(&c->externalImages[i], &c->externalImages[i + 1],
++                    (c->externalImageCount - i - 1) * sizeof(c->externalImages[0]));
++            c->externalImages[c->externalImageCount - 1].state = *state;
+             return VK_SUCCESS;
+         }
+     }
+-    if (c->externalImageCount >= MAX_EXTERNAL_IMAGES)
+-        return VK_ERROR_OUT_OF_POOL_MEMORY;
++    if (c->externalImageCount >= MAX_EXTERNAL_IMAGES) {
++        memmove(&c->externalImages[0], &c->externalImages[1],
++                (MAX_EXTERNAL_IMAGES - 1) * sizeof(c->externalImages[0]));
++        --c->externalImageCount;
++    }
+     c->externalImages[c->externalImageCount++].state = *state;
+     return VK_SUCCESS;
+ }

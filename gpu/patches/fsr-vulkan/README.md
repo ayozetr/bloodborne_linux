@@ -16,3 +16,7 @@ patches here to its working tree when they are not applied yet:
 - `0004-...`: `aspectMask` in `FfxFsr4VkExternalImageState` (0 = color). The layout barriers of a
   registered external image named the color aspect, which is invalid for a depth image (the
   Linux fork's 0002).
+- `0005-...`: the FSR 4 provider's table of external images (eight, matched by view) never let
+  a record go, and the port makes new views whenever it recreates its images: after a few area
+  loads every registration failed with `VK_ERROR_OUT_OF_POOL_MEMORY` and FSR 4 stopped (#50).
+  The table is kept in order of use and a full one drops the record unused the longest.
