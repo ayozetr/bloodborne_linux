@@ -14,7 +14,7 @@ import re
 import tempfile
 import urllib.request
 
-VERSION = "0.70-linux.5"
+VERSION = "0.70-linux.6"
 
 
 def _build():
