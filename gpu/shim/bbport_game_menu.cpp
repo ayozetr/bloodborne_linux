@@ -89,6 +89,9 @@ constexpr u64 SystemMenu = 0x1bb3ad0;
 /// (menu, name+help texts, {vtable, fn} function, 0): an item that runs `fn` like a page factory
 /// (Exit Game's, 0x1bb436d).
 constexpr u64 AddActionItem = 0x1b4c9a0;
+/// Where SystemMenu's call that adds Exit Game returns (the call is at 0x1bb436d): Exit to desktop
+/// goes right after it, at the bottom of the world's System menu, as before 0.7 (#46).
+constexpr u64 ExitGameAdded = 0x1bb4372;
 /// Exit Game's (out, arg): its question (dialog text ExitQuestion), then a save and the title.
 constexpr u64 ExitGame = 0x1c0c9f0;
 constexpr u32 ExitQuestion = 110000;
@@ -99,6 +102,7 @@ const u8 MsgLookupPrologue[] = {0x89, 0xf0, 0x48, 0x8b, 0x77, 0x08, 0x48, 0x8b, 
 const u8 AddPageItemPrologue[] = {0x55, 0x48, 0x89, 0xe5, 0x41, 0x57};
 const u8 RowInputPrologue[] = {0x55, 0x48, 0x89, 0xe5, 0x41, 0x57};
 const u8 SystemMenuPrologue[] = {0x55, 0x48, 0x89, 0xe5, 0x41, 0x57};
+const u8 AddActionItemPrologue[] = {0x55, 0x48, 0x89, 0xe5, 0x41, 0x57};
 
 u64 image_base = 0;
 template <typename F>
@@ -705,6 +709,8 @@ using LookupFn = const char16_t* (PS4_SYSV_ABI*)(void*, u32, u32, u32);
 using AddFn = void* (PS4_SYSV_ABI*)(void*, void*, void*, void*);
 LookupFn lookup_original = nullptr;
 AddFn add_original = nullptr;
+/// AddActionItem's original, once hooked (Exit to desktop then follows Exit Game).
+AddFn action_original = nullptr;
 std::atomic<const void*> screen_sound_text{nullptr};
 
 const char16_t* PS4_SYSV_ABI LookupHook(void* repository, u32 table, u32 category, u32 id) {
@@ -819,7 +825,7 @@ void AddActionEntry(void* menu, u32 name, u32 help, void* factory) {
     *reinterpret_cast<u64*>(function) = image_base + FactoryVtable;
     *reinterpret_cast<void**>(function + 8) = factory;
     *reinterpret_cast<void**>(function + 0x20) = function;
-    Game<AddFn>(AddActionItem)(menu, pair, function, nullptr);
+    (action_original ? action_original : Game<AddFn>(AddActionItem))(menu, pair, function, nullptr);
     DestroyFunction(function);
     DestroyTexts(pair);
 }
@@ -842,11 +848,23 @@ void* PS4_SYSV_ABI AddHook(void* menu, void* pair, void* function, void* out) {
         for (std::size_t i = 0; i < pages.size() && i < MaxPages; ++i) {
             AddItem(menu, pages[i].name, pages[i].help, factories[i]);
         }
-        if (exit_name && building_in_world) {
+        // In the world it follows Exit Game (ActionHook), unless that hook is not in.
+        if (exit_name && building_in_world && !action_original) {
             AddActionEntry(menu, exit_name, exit_help_world, reinterpret_cast<void*>(&SaveQuitFactory));
-        } else if (exit_name) {
+        } else if (exit_name && !building_in_world) {
             AddItem(menu, exit_name, exit_help, reinterpret_cast<void*>(&QuitFactory));
         }
+    }
+    return result;
+}
+
+/// AddActionItem: the item SystemMenu adds from ExitGameAdded is Exit Game, the world menu's
+/// last; Exit to desktop goes right under it. It returns the menu, which SystemMenu reads again.
+void* PS4_SYSV_ABI ActionHook(void* menu, void* pair, void* function, void* out) {
+    void* result = action_original(menu, pair, function, out);
+    const u64 from = reinterpret_cast<u64>(__builtin_return_address(0)) - image_base;
+    if (exit_name && building_in_world && from == ExitGameAdded) {
+        AddActionEntry(menu, exit_name, exit_help_world, reinterpret_cast<void*>(&SaveQuitFactory));
     }
     return result;
 }
@@ -932,6 +950,12 @@ void PatchImage(unsigned char* image, std::uint64_t size) {
                reinterpret_cast<void*>(&RowInputHook), reinterpret_cast<void**>(&row_input_original), cursor) &&
         Detour(image, SystemMenu, SystemMenuPrologue, sizeof(SystemMenuPrologue),
                reinterpret_cast<void*>(&SystemMenuHook), reinterpret_cast<void**>(&system_menu_original), cursor);
+    // Without it Exit to desktop stays after the port's pages (AddHook).
+    if (ok && !Detour(image, AddActionItem, AddActionItemPrologue, sizeof(AddActionItemPrologue),
+                      reinterpret_cast<void*>(&ActionHook), reinterpret_cast<void**>(&action_original),
+                      cursor)) {
+        action_original = nullptr;
+    }
     mprotect(stubs, page, PROT_READ | PROT_EXEC);
     std::printf("Game menu: %s (%zu pages in System)\n", ok ? "the port's pages are in" : "hooks failed, off",
                 pages.size());

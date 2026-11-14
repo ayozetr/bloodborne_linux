@@ -93,9 +93,9 @@ Xwayland the window places itself.
 
 ## Exit to desktop
 
-**Exit to desktop** is in the game's System menu and on the title screen, from bbport 0.7. The
-*Quit to Desktop* switch of earlier Linux versions is gone with it, and a third-party *Exit Game*
-patch is no longer needed. In the world it asks first and goes through the game's own Quit Game,
+**Exit to desktop** is in the game's System menu (under *Exit Game* in the world) and on the title
+screen, from bbport 0.7. The *Quit to Desktop* switch of earlier Linux versions is gone with it,
+and a third-party *Exit Game* patch is no longer needed. In the world it asks first and goes through the game's own Quit Game,
 so your progress is saved, and the game closes once it is back at the title.
 
 ## The port's menu opens by accident with L3 + R3
