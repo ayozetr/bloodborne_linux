@@ -262,6 +262,15 @@ bool Rasterizer::IsComputeImageClear(const Pipeline* pipeline) {
         image.info.num_bits != bits || image.info.props.is_depth) {
         return RejectClear(++reason, cs.dim_x);
     }
+    // vkCmdClearColorImage writes the color in the image's create format, and the image found can
+    // have been created in another format of the same size: R32Sfloat or R16G16Sfloat where the
+    // game now clears its R8G8B8A8Unorm SSR mask (ps 749e4f9e, 428x240). The mask was then garbage
+    // and the blur chain reading it smeared the world for the whole load. Only a clear in the
+    // image's own format is replaced; otherwise the game's shader runs. From godlyfast's fork.
+    const vk::Format written = GcnToVk::TrySurfaceFormat(target.GetDataFmt(), target.GetNumberFmt());
+    if (written == vk::Format::eUndefined || written != image.info.pixel_format) {
+        return RejectClear(7, cs.dim_x); // its own number: `reason` is still 0 here
+    }
     const auto* color = reinterpret_cast<const float*>(value.base_address);
     const vk::ClearValue clear{
         .color = {.float32 = std::array<float, 4>{color[0], color[1], color[2], color[3]}},
