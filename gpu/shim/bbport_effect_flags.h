@@ -30,4 +30,35 @@ inline bool SsaoEnabled(std::span<const std::uint8_t> context, bool requested) {
     return resource != 0;
 }
 
+// Setup (0x22c39f0) runs after the constructor whose tail reports the context, so these say
+// only whether a live preference may turn a pass back on; a context without support keeps
+// the switch the game left.
+
+// 0x22c3d8f builds the half-size velocity maps (+0xce0, +0xd38; 0x2266420 keeps each resource
+// at +0x18) and the motion blur object (+0x28b0) only with capability 0x420, and 0x22c3e62
+// clears motion blur otherwise. 0x229ef1b and 0x22ab35b take [+0xcf8] and [+0xd50] unchecked.
+inline bool MotionBlurSupported(std::span<const std::uint8_t> context) {
+    if (context.size() < 0xd58) {
+        return false;
+    }
+    std::uint64_t capabilities = 0;
+    std::uint64_t velocity = 0;
+    std::uint64_t velocity_other = 0;
+    std::memcpy(&capabilities, context.data() + 0x48, sizeof(capabilities));
+    std::memcpy(&velocity, context.data() + 0xcf8, sizeof(velocity));
+    std::memcpy(&velocity_other, context.data() + 0xd50, sizeof(velocity_other));
+    return (capabilities & 0x420) && velocity != 0 && velocity_other != 0;
+}
+
+// 0x22c4e36 builds the game's anti-aliasing (FXAA, +0x1bc8 via 0xe58b00) only with capability
+// 0x10, and 0x22c4e75 clears it otherwise.
+inline bool GameAaSupported(std::span<const std::uint8_t> context) {
+    if (context.size() < 0x50) {
+        return false;
+    }
+    std::uint64_t capabilities = 0;
+    std::memcpy(&capabilities, context.data() + 0x48, sizeof(capabilities));
+    return (capabilities & 0x10) != 0;
+}
+
 } // namespace BbEffectFlags

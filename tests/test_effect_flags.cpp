@@ -30,4 +30,35 @@ int main() {
     assert(!BbEffectFlags::SsaoEnabled(context, true));
     assert(!BbEffectFlags::SsaoEnabled(std::span(context).first(0x1288), true));
     std::puts("effect-flags: SSAO context capability and target selection OK");
+
+    // Motion blur: only where setup built both velocity maps (capability 0x420).
+    context = {};
+    assert(!BbEffectFlags::MotionBlurSupported(context));
+    put(0xcf8, 0x1042000000ull);
+    put(0xd50, 0x1043000000ull);
+    assert(!BbEffectFlags::MotionBlurSupported(context));
+    put(0x48, 0x2207); // the game's 128x128 context: no 0x420
+    assert(!BbEffectFlags::MotionBlurSupported(context));
+    put(0x48, 0x20);
+    assert(BbEffectFlags::MotionBlurSupported(context));
+    put(0x48, 0x400);
+    assert(BbEffectFlags::MotionBlurSupported(context));
+    // Capability without the maps (setup not done, or released): not yet.
+    put(0xd50, 0);
+    assert(!BbEffectFlags::MotionBlurSupported(context));
+    put(0xd50, 0x1043000000ull);
+    put(0xcf8, 0);
+    assert(!BbEffectFlags::MotionBlurSupported(context));
+    assert(!BbEffectFlags::MotionBlurSupported(std::span(context).first(0xd50)));
+    std::puts("effect-flags: motion blur context capability and velocity maps OK");
+
+    // The game's anti-aliasing: capability 0x10 only.
+    context = {};
+    assert(!BbEffectFlags::GameAaSupported(context));
+    put(0x48, 0x2207 & ~0x10ull);
+    assert(!BbEffectFlags::GameAaSupported(context));
+    put(0x48, 0x10);
+    assert(BbEffectFlags::GameAaSupported(context));
+    assert(!BbEffectFlags::GameAaSupported(std::span(context).first(0x48)));
+    std::puts("effect-flags: game AA context capability OK");
 }

@@ -136,6 +136,25 @@ void WriteHotCode(u64 address, const u8* bytes, std::size_t size, bool data) {
     mprotect(page, span, Core::GuestCodeProtection());
 }
 
+/// Still the options object: its switches look like switches (every byte 0 or 1,
+/// +0x2968..+0x2970) and the block of constants the constructor copies from the game's data
+/// (32 bytes at +0x2980) is still whole. The game frees these objects; the memory is reused, and
+/// a block of zeros has passed for switches: a write there damaged the game's heap (Havok's job
+/// queue stopped, a black screen). `block` gets the 64 bytes from +0x2960 when it is mapped.
+bool OptionsObjectAlive(u64 object, u8 (&block)[0x40]) {
+    // process_vm_readv fails on the game's memory (its pages are protected for the kernel's copy);
+    // the runtime's own map says whether the range is still mapped.
+    if (!object || !runtime_memory_is_mapped(object + 0x2960, sizeof(block))) {
+        return false; // not mapped any more
+    }
+    std::memcpy(block, reinterpret_cast<const void*>(object + 0x2960), sizeof(block));
+    bool plausible = std::memcmp(block + 0x20, reinterpret_cast<const void*>(ImageBase + 0x5128a40), 32) == 0;
+    for (int b = 8; b <= 0x10; ++b) {
+        plausible &= block[b] <= 1;
+    }
+    return plausible;
+}
+
 void ApplyHotEffects(bool force, u64 fresh = 0) {
     auto& settings = BbSettings::Get();
     BbSettings::SyncAntiAliasing(); // the game's AA and FXAA from anti_aliasing and the upscaler
@@ -166,24 +185,11 @@ void ApplyHotEffects(bool force, u64 fresh = 0) {
     for (std::size_t i = 0; i < count; ++i) {
         const u64 object = effects_objects[i].load(std::memory_order_relaxed);
         const bool is_fresh = object == fresh; // just built: certainly an options object
-        // An object the game has freed since may hold anything: it is written only while its
-        // switches still look like switches (every byte 0 or 1, +0x2968..+0x2970).
-        // Still the options object: its switches look like switches, and the block of constants the
-        // constructor copies from the game's data (32 bytes at +0x2980) is still whole. The game frees
-        // these objects; the memory is reused, and a block of zeros has passed for switches: a write
-        // there damaged the game's heap (Havok's job queue stopped, a black screen).
+        // An object the game has freed since may hold anything: it is written only while it is
+        // still an options object (OptionsObjectAlive).
         u8 block[0x40]{};
-        // process_vm_readv fails on the game's memory (its pages are protected for the kernel's copy);
-        // the runtime's own map says whether the range is still mapped.
-        if (!runtime_memory_is_mapped(object + 0x2960, sizeof(block))) {
-            continue; // not mapped any more
-        }
-        std::memcpy(block, reinterpret_cast<const void*>(object + 0x2960), sizeof(block));
-        bool plausible = std::memcmp(block + 0x20, reinterpret_cast<const void*>(ImageBase + 0x5128a40), 32) == 0;
-        for (int b = 8; b <= 0x10; ++b) {
-            plausible &= block[b] <= 1;
-        }
-        if (!plausible && !is_fresh) {
+        const bool alive = OptionsObjectAlive(object, block);
+        if (!alive && !(is_fresh && runtime_memory_is_mapped(object + 0x2960, sizeof(block)))) {
             continue;
         }
         ++live_objects;
@@ -198,13 +204,20 @@ void ApplyHotEffects(bool force, u64 fresh = 0) {
                         (unsigned long long)caps, (unsigned long long)target_a,
                         (unsigned long long)target_b);
         }
+        const std::span<const u8> context{reinterpret_cast<const u8*>(object), 0x29a0};
         for (const auto& flag : hot_flags) {
             int want = settings.effects[flag.effect].load(std::memory_order_relaxed) ? 1 : 0;
             if (flag.effect == 3) {
                 // Menus and auxiliary contexts can deliberately have no SSAO target.
                 // Preserve that restriction instead of overriding the game's safety flag.
-                want = BbEffectFlags::SsaoEnabled(
-                    {reinterpret_cast<const u8*>(object), 0x29a0}, want != 0);
+                want = BbEffectFlags::SsaoEnabled(context, want != 0);
+            } else if (want != 0 && ((flag.effect == 2 && !BbEffectFlags::MotionBlurSupported(context)) ||
+                                     (flag.effect == 4 && !BbEffectFlags::GameAaSupported(context)))) {
+                // Motion blur and the game's AA where the game built no resources for them (or
+                // has not yet): the switch stays as the game has it. Forced on, their passes ran
+                // over null velocity maps and an uninitialised motion blur object. From
+                // godlyfast's fork.
+                continue;
             }
             auto* byte = reinterpret_cast<volatile u8*>(object + flag.offset);
             if (force || *byte != want) {
@@ -234,6 +247,24 @@ void PS4_SYSV_ABI EffectsConstructed(u64 object) {
             effects_objects[at].store(object, std::memory_order_release);
         } else {
             effects_object_count.store(MaxEffectObjects);
+            // Full (about six loads): the slot of an object the game has freed takes it, else the
+            // oldest. Dropped, the contexts of every later area kept the effects of the startup
+            // settings: the menu's switches no longer reached the scene. From godlyfast's fork.
+            static std::atomic<std::size_t> oldest{0};
+            std::size_t slot = MaxEffectObjects;
+            for (std::size_t i = 0; i < MaxEffectObjects && slot == MaxEffectObjects; ++i) {
+                u64 old = effects_objects[i].load(std::memory_order_relaxed);
+                u8 block[0x40]{};
+                // Claimed, so two contexts built at once do not take the same slot.
+                if (!OptionsObjectAlive(old, block) &&
+                    effects_objects[i].compare_exchange_strong(old, object, std::memory_order_acq_rel)) {
+                    slot = i;
+                }
+            }
+            if (slot == MaxEffectObjects) {
+                slot = oldest.fetch_add(1) % MaxEffectObjects;
+                effects_objects[slot].store(object, std::memory_order_release);
+            }
         }
         static std::atomic<int> told{0};
         if (told.fetch_add(1) < 3) {
