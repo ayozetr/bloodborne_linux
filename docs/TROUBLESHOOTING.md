@@ -48,7 +48,7 @@ text you want in **Setup → Game text language**: *Español* for Spanish from S
 
 On a 6 GB card the texture cache can run out of video memory: the log then repeats
 `Texture cache: memory pressure, ... (critical ...)`. Lower what uses VRAM: a 60 FPS limit,
-a lower output resolution, lower **Model detail** in the game's *Display* settings, and close
+a lower output resolution, lower **Model detail** in the game's *Detail* settings, and close
 other programs that use the GPU (browsers, video players, other games).
 
 ## The frame rate drops in some places and stays low until a reload
