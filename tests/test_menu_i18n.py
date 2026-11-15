@@ -64,10 +64,35 @@ def menu_texts():
     return texts
 
 
+def effect_help_texts():
+    """The help lines the game menu's Effects page shows (bbport_game_menu.cpp): each effect's
+    short help, with " (after a restart)" when BbSettings::IsHotEffect() says the effect does not
+    change live. These are built at run time, so menu_texts() does not see them."""
+    settings = (SHIM / 'bbport_settings.h').read_text(encoding='utf-8')
+    keys = re.findall(r'\{"(\w+)", "(?:[^"\\]|\\.)*", "(?:[^"\\]|\\.)*", (?:true|false)\}', settings)
+    body = re.search(r'IsHotEffect\(int effect\) \{\s*return ([^;]+);', settings).group(1)
+    hot = lambda effect: eval(body.replace('&&', ' and ').replace('||', ' or '), {}, {'effect': effect})
+    menu = (SHIM / 'bbport_game_menu.cpp').read_text(encoding='utf-8')
+    texts = {}
+    text = r'"((?:[^"\\]|\\.)*)"'
+    for match in re.finditer(r'\{"(\w+)"' + (r',\s*' + text) * 4 + r'(?:,\s*(true|false))?\}', menu):
+        key, help_en, graphics = match.group(1), match.group(4), match.group(6)
+        if key in keys and graphics != 'false':
+            index = keys.index(key)
+            texts[help_en + ('' if hot(index) else ' (after a restart)')] = f'effect {key}'
+    return texts
+
+
 class MenuTranslationTests(unittest.TestCase):
     def test_every_menu_text_is_translated(self):
         texts, rows = menu_texts(), translations()
         self.assertGreater(len(texts), 80)
+        self.assertEqual(sorted(f'{where}: {text}' for text, where in texts.items()
+                                if text not in rows), [])
+
+    def test_every_effect_help_is_translated(self):
+        texts, rows = effect_help_texts(), translations()
+        self.assertGreaterEqual(len(texts), 6)
         self.assertEqual(sorted(f'{where}: {text}' for text, where in texts.items()
                                 if text not in rows), [])
 
