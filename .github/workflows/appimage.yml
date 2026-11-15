@@ -1,0 +1,43 @@
+# Builds the AppImage the way the releases are made (packaging/appimage-in-arch.sh: plain Arch
+# Linux in Docker) and checks it (packaging/check-appimage.py). Started by hand from the Actions
+# tab, on the branch or tag chosen there. The AppImage is the run's artifact; its SHA-256 is in the
+# run's summary. Publishing the release stays a manual step, after the build is tried in the game.
+name: AppImage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  appimage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Build in Arch Linux
+        run: bash packaging/appimage-in-arch.sh
+
+      - name: Check
+        run: python3 packaging/check-appimage.py dist/Bloodborne-bbport-x86_64.AppImage
+
+      - name: Summary
+        run: |
+          {
+            echo "### Bloodborne-bbport-x86_64.AppImage"
+            echo
+            echo "Version: \`$(sed -nE 's/^VERSION = "([^"]+)"/\1/p' launcher/bbport_update.py)\`, commit \`${GITHUB_SHA}\`"
+            echo
+            echo "SHA-256: \`$(sha256sum dist/Bloodborne-bbport-x86_64.AppImage | cut -d' ' -f1)\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Bloodborne-bbport-x86_64.AppImage
+          path: dist/Bloodborne-bbport-x86_64.AppImage
+          retention-days: 14
+          compression-level: 0

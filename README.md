@@ -118,7 +118,9 @@ With [Nix](https://nixos.org), `bash build.sh` gets every dependency by itself. 
 `bash tools/build_dlss.sh` once; the AppImage is `bash packaging/appimage-sharun.sh`, which bundles
 the libraries of the PC it runs on. Releases are built with `bash packaging/appimage-in-arch.sh`
 (Docker, plain Arch Linux): on distributions built for newer processors (CachyOS's x86-64-v3
-repositories, for example) the AppImage would otherwise not start on CPUs without AVX2. Environment
+repositories, for example) the AppImage would otherwise not start on CPUs without AVX2;
+`python3 packaging/check-appimage.py dist/Bloodborne-bbport-x86_64.AppImage` checks that. The
+*AppImage* workflow on GitHub does both, started by hand from the Actions tab. Environment
 variables for the launcher's **Advanced → Developer → Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 

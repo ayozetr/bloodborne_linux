@@ -6,7 +6,10 @@ changes since the previous release. Third-party work is credited in the line tha
 
 - Tag: `<upstream bbport version>-linux.<n>` (e.g. `0.4-linux.1`).
 - Title: `bbport Linux <tag>`.
-- Asset: `dist/Bloodborne-bbport-x86_64.AppImage` (`bash build.sh && bash packaging/appimage-sharun.sh`).
+- Asset: `dist/Bloodborne-bbport-x86_64.AppImage`, built with `bash packaging/appimage-in-arch.sh` or by
+  the *AppImage* workflow (Actions tab, *Run workflow*; the file is the run's artifact, its SHA-256 in
+  the run's summary), and checked with `python3 packaging/check-appimage.py <AppImage>` (the
+  workflow does it): the version, the port's files, and BMI2 only in `packaging/bmi2-allowed.txt`.
 
 ```markdown
 <One or two sentences: what this release is and which upstream bbport it is based on.>

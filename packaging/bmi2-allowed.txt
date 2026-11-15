@@ -1,0 +1,24 @@
+# Programs and libraries in the AppImage that may contain BMI2 instructions (shell patterns of the
+# file name), read by packaging/check-appimage.py. Each one picks its code by the CPU at run time,
+# so a CPU without BMI2 runs other code. Checked by hand on 0.70-linux.7 for glibc (its avx2/evex
+# string functions, chosen by ifunc) and GTK (CRoaring's bitset_* calls croaring_hardware_support()
+# first); the others are libraries known to choose their code at run time.
+# A file that is not listed and has BMI2 fails the check: find out why before adding it here
+# (issue #39: libraries built for x86-64-v3 have BMI2 everywhere and stop at once on older CPUs).
+libc.so.6                # glibc: ifunc
+libgtk-4.so.*            # CRoaring: croaring_hardware_support()
+libcrypto.so.*           # OpenSSL: OPENSSL_ia32cap
+libleancrypto.so.*       # leancrypto: CPU feature checks
+libgnutls.so.*           # GnuTLS: CPU feature checks
+libgmp.so.*              # GMP: built --enable-fat on Arch
+libzstd.so.*             # zstd: DYNAMIC_BMI2
+libdav1d.so.*            # dav1d: its assembly by CPU flags
+libjxl.so.*              # libjxl: Highway's dynamic dispatch
+libx264.so.*             # x264: its assembly by CPU flags
+libx265.so.*             # x265: its assembly by CPU flags
+libdeflate.so.*          # libdeflate: CPU feature checks
+librav1e.so.*            # rav1e: CPU feature checks
+libswscale.so.*          # FFmpeg: av_get_cpu_flags()
+libavcodec.so.*          # FFmpeg: av_get_cpu_flags()
+libFLAC.so.*             # FLAC: FLAC__cpu_info()
+glycin-image-rs          # Rust image decoders: is_x86_feature_detected!
