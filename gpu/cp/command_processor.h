@@ -194,6 +194,8 @@ private:
         u64 stamp = 0; ///< BbStats::guest_submit_stamp when made
         bool started = false;
         bool ce_started = false;
+        /// The draw engine is through: the constant engine waits for it no longer (EndGraphics).
+        bool de_finished = false;
         std::shared_ptr<SubmittedCopy> copy;
         /// The packet that waited, tried again next time (its registers are applied already).
         const u32* waiting_at = nullptr;

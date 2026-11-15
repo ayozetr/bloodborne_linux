@@ -168,7 +168,10 @@ void CommandProcessor::BeginGraphics(Work& work) {
 }
 
 void CommandProcessor::EndGraphics(Work& work) {
-    // The constant engine's buffer to its end.
+    // The constant engine's buffer to its end. The draw engine is through, so a wait for its
+    // counter can no longer be met: it ends (Supermedo 1.9.8.5; it waited forever, a frozen game,
+    // when the increments it waited for were lost to a bad packet).
+    work.de_finished = true;
     while (work.ce_started && RunConstantEngine(work) == Status::Wait) {
     }
     if (work.seq == NoSeq) {
@@ -644,8 +647,17 @@ CommandProcessor::Step CommandProcessor::Graphics(Work& work, Level& level, cons
         }
         break;
     }
-    default:
-        UNREACHABLE_MSG("PM4 opcode {:#x} ({} dwords) not handled", u32(op), body_words);
+    default: {
+        // An opcode the port does not know is stepped over by its length (its header's count),
+        // as the draw preparation's scanner does, instead of stopping the game (Supermedo
+        // 1.9.8.5). The first few are logged.
+        static std::atomic<u32> reported{0};
+        if (reported.fetch_add(1, std::memory_order_relaxed) < 16) {
+            LOG_ERROR(Render, "PM4 opcode {:#x} ({} dwords) not handled: stepped over", u32(op),
+                      body_words);
+        }
+        break;
+    }
     }
     return Step::Next;
 }
@@ -980,7 +992,17 @@ CommandProcessor::Status CommandProcessor::RunConstantEngine(Work& work) {
         }
         const u32 header = *level.at;
         if ((header >> 30) != 3) {
-            UNREACHABLE_MSG("constant engine: PM4 type {} packet", header >> 30);
+            // A header that is no packet: the rest of the constant engine's buffer is garbage (a
+            // buffer the game was already reusing). It is dropped, which costs the constants of
+            // this submission, instead of stopping the game (Supermedo 1.9.8.5).
+            static std::atomic<u32> reported{0};
+            if (reported.fetch_add(1, std::memory_order_relaxed) < 16) {
+                LOG_ERROR(Render, "constant engine: PM4 header {:#010x} (type {}) at +{:#x}: the rest of "
+                          "the buffer dropped", header, header >> 30,
+                          (level.at - level.begin) * sizeof(u32));
+            }
+            walk.top = -1;
+            break;
         }
         const u32 body_words = Header{header}.BodyWords();
         const u32* body = level.at + 1;
@@ -1016,7 +1038,7 @@ CommandProcessor::Status CommandProcessor::RunConstantEngine(Work& work) {
             ++cblock.ce_count;
             break;
         case Op::WaitOnDeCounterDiff:
-            if (cblock.de_count - cblock.ce_count >= body[0]) {
+            if (!work.de_finished && cblock.de_count - cblock.ce_count >= body[0]) {
                 return Status::Wait; // the draw engine catches up
             }
             break;
@@ -1026,9 +1048,15 @@ CommandProcessor::Status CommandProcessor::RunConstantEngine(Work& work) {
             walk.Push({ib.Address(), ib.Dwords()}, level.depth + 1);
             continue;
         }
-        default:
-            UNREACHABLE_MSG("constant engine: PM4 opcode {:#x} not handled",
-                            u32(Header{header}.Opcode()));
+        default: {
+            // Stepped over by its length, as in the draw engine (Supermedo 1.9.8.5).
+            static std::atomic<u32> reported{0};
+            if (reported.fetch_add(1, std::memory_order_relaxed) < 16) {
+                LOG_ERROR(Render, "constant engine: PM4 opcode {:#x} not handled: stepped over",
+                          u32(Header{header}.Opcode()));
+            }
+            break;
+        }
         }
         level.at += 1 + body_words;
     }
