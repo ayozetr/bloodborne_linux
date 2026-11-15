@@ -1,0 +1,34 @@
+# Issues labelled waiting-for-reporter (information was asked for): after 14 days without any
+# activity a reminder, after 7 more the issue closes as not planned. An answer takes the labels
+# off. Other issues and pull requests are never touched.
+name: Issues waiting for an answer
+
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  remind-and-close:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/stale@v11
+        with:
+          only-issue-labels: waiting-for-reporter
+          days-before-issue-stale: 14
+          days-before-issue-close: 7
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          stale-issue-label: no-answer
+          labels-to-remove-when-unstale: waiting-for-reporter,no-answer
+          close-issue-reason: not_planned
+          stale-issue-message: >
+            There has been no answer here for two weeks. If this still happens with the latest
+            release, please reply with what was asked above (a log helps the most). Without an
+            answer, this issue closes in a week; it can be reopened at any time.
+          close-issue-message: >
+            Closing for now, as there was no answer. If it still happens with the latest release,
+            reply here or open a new issue with the log, and it will be looked at again.
