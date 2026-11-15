@@ -390,6 +390,10 @@ s32 PS4_SYSV_ABI sceVideoOutGetBufferLabelAddress(s32 handle, uintptr_t* label_a
     return s32(MaxDisplayBuffers);
 }
 
+s32 SubmitCpuFlip(s32 handle, s32 index, s32 flip_mode, s64 flip_arg) {
+    return sceVideoOutSubmitFlip(handle, index, flip_mode, flip_arg);
+}
+
 s32 sceVideoOutSubmitEopFlip(s32 handle, u32 buf_id, u32, s64 flip_arg, void**) {
     Port* port = display->GetPort(handle);
     if (!port) {

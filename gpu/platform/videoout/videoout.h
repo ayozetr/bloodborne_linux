@@ -148,6 +148,9 @@ struct Port {
 
 /// The address of the 16 buffer labels (returns 16, the count, as the console does).
 s32 PS4_SYSV_ABI sceVideoOutGetBufferLabelAddress(s32 handle, uintptr_t* label_addr);
+/// Queues a flip from the CPU, as the game's own sceVideoOutSubmitFlip does; Gnm calls it for a
+/// flip submission that came without its prepareFlip packet.
+s32 SubmitCpuFlip(s32 handle, s32 index, s32 flip_mode, s64 flip_arg);
 /// Queues a flip that happens at the end of the GPU frame (the flip interrupt); Gnm calls it
 /// for sceGnmSubmitAndFlipCommandBuffers.
 s32 sceVideoOutSubmitEopFlip(s32 handle, u32 buf_id, u32 mode, s64 flip_arg, void** unk);

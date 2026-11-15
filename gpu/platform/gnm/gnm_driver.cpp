@@ -513,8 +513,28 @@ s32 PS4_SYSV_ABI sceGnmSubmitAndFlipCommandBuffers(u32 count, u32* dcbs[], u32* 
     }
     std::scoped_lock lock{submit_mutex};
     WaitBeforeSubmit();
-    const s32 patched = PatchFlip(dcbs[count - 1], dcb_sizes[count - 1] / 4, vo_handle, buf_idx,
-                                  flip_mode, flip_arg);
+    // A flip submission whose last buffer does not end with the prepareFlip packet stopped the
+    // game ("no prepareFlip packet"; seen in Yharnam Together the frame after The Old Hunters'
+    // grab cutscene). It is submitted as it is and the flip goes from the CPU instead: at worst
+    // one frame shows before the GPU is through with it. From Yharnam Together (8d106f40).
+    const u32 last_dwords = dcb_sizes[count - 1] / 4;
+    if (last_dwords < 64 || dcbs[count - 1][last_dwords - 64] != Header(Op::Nop, 63)) {
+        static std::atomic<u32> missing{0};
+        const u32 n = missing.fetch_add(1, std::memory_order_relaxed) + 1;
+        if (n <= 5 || n % 600 == 0) {
+            LOG_ERROR(Lib_GnmDriver,
+                      "flip submission without its prepareFlip packet ({} so far, {} dwords): "
+                      "display buffer {} flipped from the CPU", n, last_dwords, buf_idx);
+        }
+        Submit(count, const_cast<const u32* const*>(dcbs), dcb_sizes,
+               const_cast<const u32* const*>(ccbs), ccb_sizes);
+        if (SubmitLockOnDecode()) {
+            WaitAfterSubmit();
+        }
+        return BbVideoOut::SubmitCpuFlip(s32(vo_handle), s32(buf_idx), s32(flip_mode), flip_arg);
+    }
+    const s32 patched = PatchFlip(dcbs[count - 1], last_dwords, vo_handle, buf_idx, flip_mode,
+                                  flip_arg);
     if (patched != BbErr::Ok) {
         return patched;
     }
