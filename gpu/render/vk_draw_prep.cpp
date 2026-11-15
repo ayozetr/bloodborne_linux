@@ -179,12 +179,18 @@ void PrepareVertexInputs(const Shader::Info& vs, const Shader::Gcn::FetchShaderD
         // The V# may come from user data the guest is still writing: an unknown format leaves
         // the inputs to the GPU thread, which reads them once the draw is submitted (the
         // assertion in SurfaceFormat stopped the process here).
-        const vk::Format format =
-            GcnToVk::TrySurfaceFormat(buffer.GetDataFmt(), buffer.GetNumberFmt());
+        vk::Format format = GcnToVk::TrySurfaceFormat(buffer.GetDataFmt(), buffer.GetNumberFmt());
         if (format == vk::Format::eUndefined &&
             buffer.GetDataFmt() != Gcn::DataFormat::FormatInvalid) {
             out.valid = false;
             return;
+        }
+        // A zeroed V# (data format 0, no memory): VK_FORMAT_UNDEFINED is invalid for a vertex
+        // input, and a driver may fault on it (NVIDIA: "Device lost during submit" after a map
+        // load, Yharnam Together 21c29eb9). It reads as 32-bit floats from the null buffer bound
+        // for a stream without memory, so as zeros, as GraphicsPipeline::GetVertexInputs does.
+        if (format == vk::Format::eUndefined) {
+            format = vk::Format::eR32G32B32A32Sfloat;
         }
         attributes.push_back({
             .location = attrib.semantic,
