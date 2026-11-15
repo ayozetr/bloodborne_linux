@@ -122,6 +122,11 @@ repositories, for example) the AppImage would otherwise not start on CPUs withou
 variables for the launcher's **Advanced → Developer → Extra variables**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
+Tests: `python3 -m unittest discover -s tests -p 'test_*.py'`, `bash build.sh --test` (it builds
+first) and then `bash .github/cxx-tests.sh`. GitHub runs all three on every push to `main` and on
+every pull request, in the same Arch Linux image the releases are built in
+([.github/workflows/tests.yml](.github/workflows/tests.yml)).
+
 ## On Windows
 
 If you need a Windows version, I recommend

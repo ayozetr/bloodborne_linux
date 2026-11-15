@@ -1,0 +1,51 @@
+# Every push to main and every pull request: the Python tests, the build, and the C and C++ tests,
+# in the plain Arch Linux image the releases are built in (packaging/appimage-arch.Dockerfile).
+# Pull requests from forks run here with a read-only token and no secrets.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Arch Linux image
+        uses: docker/build-push-action@v7
+        with:
+          context: packaging
+          file: packaging/appimage-arch.Dockerfile
+          tags: bbport-arch
+          load: true
+          cache-from: type=gha,scope=arch
+          cache-to: type=gha,scope=arch,mode=max
+
+      - name: Python tests
+        run: ./.github/in-arch.sh python3 -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Build, and the C tests
+        run: ./.github/in-arch.sh bash build.sh --test
+
+      - name: C++ tests
+        run: ./.github/in-arch.sh bash .github/cxx-tests.sh
+
+      - name: Build log
+        if: failure()
+        run: tail -n 200 out/gpu-build.log 2>/dev/null || true
