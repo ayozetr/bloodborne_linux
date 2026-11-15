@@ -9,6 +9,7 @@ under *People* and *Help and testing* also appears in the launcher's **About** s
 |---|---|
 | [deadinside28/bloodborne_pc](https://github.com/deadinside28/bloodborne_pc) | **bbport**, the native Linux port everything here is built on. Its README is [here](../BBPORT.md). |
 | [Supermedo/bloodborne_pc](https://github.com/Supermedo/bloodborne_pc) | The Windows port: online play, the cheats page, Add to Steam, the field of view, the game's audio at full level and many fixes. |
+| [Amanises-Yharnam-Together/BBSC-Yharnam-Together](https://github.com/Amanises-Yharnam-Together/BBSC-Yharnam-Together) | Yharnam Together, a seamless co-op for the Windows port: the fixes found in its copy of bbport and brought over here (Jin-Gu's game crash fixes by way of Supermedo, and others noted in the commits). |
 | [Awakenchan/LanternEngine](https://github.com/Awakenchan/LanternEngine) (formerly BloodBorneButPc) | Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): crash fixes, stick options, the controller in use, save import, the version selector, and renderer fixes (vertex inputs, index buffers, camera motion vectors). |
 | [shadPS4](https://github.com/shadps4-emu/shadPS4) | The renderer and shader recompiler they started from, and the online code: shadPS4 0.20's network, NP and shadNet libraries, put together for bbport by Awaken ([gpu/bbnet20](../gpu/bbnet20)). |
 | [Wozzardman/shadnet-p2p](https://github.com/Wozzardman/shadnet-p2p) | The shadNet server for a group's own co-op server ([hosting your own server](SERVER.md)). |
@@ -56,6 +57,7 @@ Obrikash and noelmiller. What each one did:
 - **[The-Fool-cmd](https://github.com/The-Fool-cmd)**: DLSS and the launcher's folder chooser when running from source on NixOS.
 - **[godlyfast](https://github.com/godlyfast)**: the game's clear shader kept where the texture cache holds another format (a smear after loads), and motion blur and the game's AA left off where the game built nothing for them.
 - **[Mcm190](https://github.com/Mcm190)**: the in-game Display page split in two, so its names and values no longer drift apart.
+- **Jin-Gu**: two of the game's own crashes fixed in its code: the full per-frame render command list, and NPC talk without its target (by way of Supermedo's 1.9.8.5).
 - **[chozandrias76](https://github.com/chozandrias76)**: the GX workers' crash with a null instruction pointer, a race in the game's own code, now taken with a lock.
 - **[fhody125-web](https://github.com/fhody125-web)**: NoDreamForHunter, the base of BBSC's game server.
 - **[MikeTat1988](https://github.com/MikeTat1988)**: Hunter's Atlas, the fullscreen in-game map.

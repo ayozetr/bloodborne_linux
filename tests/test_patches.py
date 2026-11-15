@@ -259,11 +259,49 @@ class IntelTonemapTests(unittest.TestCase):
 
 
 class GxCommandHeapTests(unittest.TestCase):
-    def test_compiled_patch_changes_only_the_two_heap_size_operands(self):
+    def test_compiled_patch_changes_the_two_heap_sizes_and_the_gfx_heap_they_come_from(self):
         writes = dict(compile_patches(XML, [patches.GX_COMMAND_HEAP], '01.09', SEGMENTS))
         expected = {0x2195c0a: struct.pack('<I', 1024 * 1024),
-                    0x2195c47: struct.pack('<I', 1024 * 1024)}
+                    0x2195c47: struct.pack('<I', 1024 * 1024),
+                    0x4736dc8: struct.pack('<I', 278 << 20)}
         self.assertEqual(writes, expected)
+
+    def test_the_gfx_heap_is_not_one_of_the_graphics_heaps(self):
+        self.assertNotIn(0x04b36dc8, [address for address, _, _ in patches.GRAPHICS_HEAPS])
+
+
+class GameCrashFixTests(unittest.TestCase):
+    """Jin-Gu's eboot crash fixes (Supermedo 1.9.8.5): on by default, BB_GAME_CRASH_FIXES=0 off,
+    More Render Commands only with the larger GX heaps."""
+
+    def test_switches(self):
+        both = [patches.RENDER_COMMANDS, patches.NPC_TALK_FIX]
+        self.assertEqual(patches.game_crash_fixes({}), both)
+        self.assertEqual(patches.game_crash_fixes({'BB_GAME_CRASH_FIXES': '0'}), [])
+        self.assertEqual(patches.game_crash_fixes({'BB_GX_COMMAND_HEAP': '0'}), [patches.NPC_TALK_FIX])
+
+    def test_patches_are_in_the_file_and_off_there(self):
+        root = ET.parse(XML).getroot()
+        for name in (patches.RENDER_COMMANDS, patches.NPC_TALK_FIX):
+            meta = [m for m in root.iter('Metadata') if m.get('Name') == name]
+            self.assertEqual(len(meta), 1, name)
+            self.assertEqual(meta[0].get('isEnabled'), 'false')
+
+    def test_writes(self):
+        writes = compile_patches(XML, [patches.RENDER_COMMANDS, patches.NPC_TALK_FIX], '01.09', SEGMENTS)
+        self.assertEqual(writes, [(0x1d96b26, struct.pack('<I', 864)),
+                                  (0x17bcb33, bytes.fromhex('EB0B4885C07406488B08EB1D90')),
+                                  (0x17bcb59, bytes.fromhex('EBDA90'))])
+
+    def test_the_npc_check_jumps_where_it_should(self):
+        # 0x1bbcb33 (the loop's 13-byte nop): jmp to the loop top 0x1bbcb40; the check at
+        # 0x1bbcb35: test rax, rax; jz the loop top; mov rcx, [rax]; jmp 0x1bbcb5c (past the
+        # original load). 0x1bbcb59 (mov rcx, [rax] after the lookup's call): jmp to the check.
+        site = bytes.fromhex('EB0B4885C07406488B08EB1D90')
+        self.assertEqual(0x1BBCB33 + 2 + site[1], 0x1BBCB40)
+        self.assertEqual(0x1BBCB38 + 2 + site[6], 0x1BBCB40)
+        self.assertEqual(0x1BBCB3D + 2 + site[11], 0x1BBCB5C)
+        self.assertEqual(0x1BBCB59 + 2 + (0xDA - 0x100), 0x1BBCB35)
 
 
 class GraphicsHeapTests(unittest.TestCase):

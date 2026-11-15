@@ -3466,10 +3466,22 @@
             <Line Type="bytes" Address="0x01f39030" Value="554889e5534883ec184889fb488d053d2e80034889042448897424084889e6e85c0e01004889d84883c4185b5dc3"/>
         </PatchList>
     </Metadata>
-    <Metadata Title="Bloodborne" Name="Larger GX Per-Frame Command Heap" Author="bbport" Note="Each GX swap-chain command buffer gets a 1 MiB per-frame heap instead of 256 KiB, covering the unchecked NULL command allocations at guest 0x2199310 and 0x21d5b40 (#162, PR #224)." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+    <Metadata Title="Bloodborne" Name="Larger GX Per-Frame Command Heap" Author="bbport" Note="Each GX swap-chain command buffer gets a 1 MiB per-frame heap instead of 256 KiB, covering the unchecked NULL command allocations at guest 0x2199310 and 0x21d5b40 (#162, PR #224). They come out of the GFX heap, which grows by 2 MiB (276 to 278 MiB) to cover them (Supermedo 1.9.8.5)." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
         <PatchList>
             <Line Type="bytes" Address="0x02595c0a" Value="00001000"/>
             <Line Type="bytes" Address="0x02595c47" Value="00001000"/>
+            <Line Type="bytes32" Address="0x04b36dc8" Value="0x11600000"/>
+        </PatchList>
+    </Metadata>
+    <Metadata Title="Bloodborne" Name="More Render Commands" Author="Jin-Gu (Supermedo 1.9.8.5)" Note="The renderer's per-frame command list holds 216 commands. When it is full the game writes the next one through a null pointer (write access to 0x0 at guest offset 0x21b4bb4). This raises it to 864, in line with the 1 MiB GX heaps (Larger GX Per-Frame Command Heap)." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <Line Type="bytes32" Address="0x02196b26" Value="0x00000360"/>
+        </PatchList>
+    </Metadata>
+    <Metadata Title="Bloodborne" Name="NPC Talk Crash Fix" Author="Jin-Gu (Supermedo 1.9.8.5)" Note="An event and NPC talk routine looks up its talk targets and calls a method on each without checking the lookup found one (read access to 0x0 at guest offset 0x17bcb59). A missing target now counts as not matching and the loop goes on; the check sits in the loop's own alignment padding (0x1bbcb33)." PatchVer="1.0" AppVer="01.09" AppElf="eboot.bin" isEnabled="false">
+        <PatchList>
+            <Line Type="bytes" Address="0x01BBCB33" Value="EB0B4885C07406488B08EB1D90"/>
+            <Line Type="bytes" Address="0x01BBCB59" Value="EBDA90"/>
         </PatchList>
     </Metadata>
     <!-- From droogie/bbhost (patches/*.toml), where each site is checked against its original

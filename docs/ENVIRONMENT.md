@@ -232,6 +232,7 @@ Defaults to change on a machine where they misbehave, workarounds, and switches 
 | `BB_FSR4_LINEAR` | =0: FSR 4 gets the encoded frame as before |
 | `BB_FSR4_OPT` | =0: FSR 4 v07 passes without the optimized set (opt/) |
 | `BB_FX_INIT_CLEAR` | =0: the effect buffers' initialization clears through the game's path |
+| `BB_GAME_CRASH_FIXES` | =0: without Jin-Gu's two eboot crash fixes (More Render Commands, with the larger GX heaps; NPC Talk Crash Fix) |
 | `BB_GARLIC_VRAM` | =0 / 1: VRAM copies of the game's GPU memory off / on (default: on discrete GPUs) |
 | `BB_GC_BUDGET_MB` | =N: texture cache budget in MiB, as on integrated GPUs |
 | `BB_GC_IDLE_SECONDS` | =N (default 20): unused textures evicted after N seconds |

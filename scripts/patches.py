@@ -114,6 +114,22 @@ def gx_command_heap(env=os.environ):
     return env.get('BB_GX_COMMAND_HEAP','1')!='0'
 
 
+# Two crashes in the game's own code (Jin-Gu, from Supermedo's bloodborne_pc 1.9.8.5): the
+# renderer's per-frame command list (216 entries) written through NULL when full, and an event/NPC
+# talk routine calling a method on a talk target its lookup did not find. On by default;
+# BB_GAME_CRASH_FIXES=0 leaves them out. More Render Commands goes in only with the larger GX heaps
+# (its 864 commands are sized for them).
+RENDER_COMMANDS='More Render Commands'
+NPC_TALK_FIX='NPC Talk Crash Fix'
+
+
+def game_crash_fixes(env=os.environ):
+    """The crash fix patches for this run."""
+    if env.get('BB_GAME_CRASH_FIXES','1')=='0':
+        return []
+    return ([RENDER_COMMANDS] if gx_command_heap(env) else [])+[NPC_TALK_FIX]
+
+
 # The community patch that grows the game's two graphics heaps (2287 and 886 MiB) to 3952 and
 # 2560 MiB (the fallback of graphics_heap_writes below).
 GRAPHICS_HEAP_PATCH='Increased Graphics Heap Sizes'
@@ -572,6 +588,7 @@ def main():
         names.append(skip)
     if gx_command_heap() and GX_COMMAND_HEAP not in names:
         names.append(GX_COMMAND_HEAP)
+    names+=[n for n in game_crash_fixes() if n not in names]
     names=validate_patch_requirements(names,a.game_dir)
     elf=(a.out/'eboot.elf').read_bytes()
     segments=eboot_segments(elf)
