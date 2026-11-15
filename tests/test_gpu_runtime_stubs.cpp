@@ -74,3 +74,19 @@ void runtime_memory_set_host_only_allocations(uint64_t) {}
 void runtime_memory_trap_stats(uint64_t* a, uint64_t* b, uint64_t* c, uint64_t* d) { *a = *b = *c = *d = 0; }
 int runtime_savedata_active_slot(char*, size_t) { return -1; }
 }
+// Hunter's Atlas and the menu sounds (src/runtime_map.c, src/runtime_atlas_state.c,
+// src/runtime_menu_sound.c): no map menu, no travel, no sounds. The structures are only passed on,
+// so a plain pointer stands for each (C linkage: the names alone link).
+extern "C" {
+int runtime_map_menu_open(void) { return 0; }
+int runtime_map_menu_state(void*) { return 0; }
+int runtime_map_location(void*) { return 0; }
+uint32_t runtime_map_confirm_button(void) { return 0; }
+int runtime_atlas_flag(uint32_t) { return 0; }
+uintptr_t runtime_atlas_player_token(void) { return 0; }
+int runtime_atlas_travel_request(const void*) { return 0; }
+int runtime_atlas_travel_status(void) { return 0; }
+int runtime_atlas_travel_supported(void) { return 0; }
+void runtime_audio_menu_event(int) {}
+void runtime_audio_menu_stats(void*) {}
+}

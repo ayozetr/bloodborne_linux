@@ -216,7 +216,7 @@ struct Values {
     std::atomic<int> live_resolution{1};
     /// Frame generation (upscale/vk_frame_generation): frames generated between each two of
     /// the game's, shown between them (needs the upscaler's scaled path). Live. FrameGenFsr3 is
-    /// hidden in the menu until its artifacts are fixed (only BB_FRAME_GEN turns it on).
+    /// offered as experimental in the launcher and the menu, and saved like the others.
     std::atomic<int> frame_generation{FrameGenOff};
     /// Frames on screen per game frame with DLSS: 2 (RTX 40), up to 4 (RTX 50). FSR 3.1: 2.
     std::atomic<int> frame_generation_multiplier{2};

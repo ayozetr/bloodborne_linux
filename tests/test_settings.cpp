@@ -76,9 +76,13 @@ int main() {
     write_frame_gen("frame_generation=dlss\nframe_generation_multiplier=3\n");
     BbSettings::Load();
     assert(s.frame_generation == BbSettings::FrameGenDlss && s.frame_generation_multiplier == 3);
+    // FSR 3.1 is chosen in the launcher or the menu and saved (since 0.7); the multiplier is 2-4.
     write_frame_gen("frame_generation=fsr3\nframe_generation_multiplier=9\n");
     BbSettings::Load();
-    assert(s.frame_generation == BbSettings::FrameGenOff && s.frame_generation_multiplier == 4);
+    assert(s.frame_generation == BbSettings::FrameGenFsr3 && s.frame_generation_multiplier == 4);
+    write_frame_gen("frame_generation=xess\n");
+    BbSettings::Load();
+    assert(s.frame_generation == BbSettings::FrameGenOff); // an unknown name
     setenv("BB_FRAME_GEN", "1", 1);
     BbSettings::Load();
     assert(s.frame_generation == BbSettings::FrameGenFsr3);
@@ -93,7 +97,7 @@ int main() {
     unsetenv("BB_FRAME_GEN_MULTIPLIER");
     write_frame_gen("frame_generation=1\n");
     BbSettings::Load();
-    assert(s.frame_generation == BbSettings::FrameGenOff); // FSR 3.1 without BB_FRAME_GEN
+    assert(s.frame_generation == BbSettings::FrameGenFsr3); // "1" from earlier versions: FSR 3.1
     s.frame_generation = BbSettings::FrameGenDlss;
     s.frame_generation_multiplier = 4;
     BbSettings::Save();

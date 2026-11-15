@@ -330,7 +330,7 @@ target_compile_options(effect-flags-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
 target_include_directories(effect-flags-test PRIVATE shim)
 add_executable(settings-test EXCLUDE_FROM_ALL ../tests/test_settings.cpp shim/bbport_settings.cpp)
 target_compile_options(settings-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
-target_include_directories(settings-test PRIVATE .. shim)
+target_include_directories(settings-test PRIVATE .. . shim)
 
 # The clip-space matrices DLSS Frame Generation gets (upscale/camera_matrices.h): no GPU.
 add_executable(camera-matrices-test EXCLUDE_FROM_ALL ../tests/test_camera_matrices.cpp)
@@ -385,7 +385,7 @@ target_link_libraries(image-spares-test PRIVATE Vulkan::Headers GPUOpen::VulkanM
 # bbport: FSR 4 benchmark outside the game (tools/fsr4_bench.cpp): ninja -C out/gpu fsr4-bench.
 add_executable(upscaler-support-test EXCLUDE_FROM_ALL ../tests/test_upscaler_support.cpp
     shim/bbport_settings.cpp)
-target_include_directories(upscaler-support-test PRIVATE shim)
+target_include_directories(upscaler-support-test PRIVATE . shim)
 target_compile_options(upscaler-support-test PRIVATE -UNDEBUG)
 
 add_executable(fsr4-bench EXCLUDE_FROM_ALL tools/fsr4_bench.cpp
