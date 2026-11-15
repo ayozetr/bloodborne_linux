@@ -51,6 +51,15 @@ On a 6 GB card the texture cache can run out of video memory: the log then repea
 a lower output resolution, lower **Model detail** in the game's *Detail* settings, and close
 other programs that use the GPU (browsers, video players, other games).
 
+## The game closes in the middle of play with `Fault (signal 11) at RIP (nil)`
+
+When the log's last lines show that fault on a `GXWorker` thread, two of the game's GPU workers
+took the same piece of a list at once, a race in the game's own code that faster PC cores hit far
+more often than the console. From 0.70-linux.7 the launcher patches the game to take it with a
+lock (`Patches: crash guards (... the GX workers' LOD slot claim)` at start). `BB_CRASH_GUARDS=0`
+under **Advanced → Developer → Extra variables** leaves out every crash guard. If it still happens,
+attach the log of that session to an issue.
+
 ## The frame rate drops in some places and stays low until a reload
 
 Seen mostly on NVIDIA cards (#42): the game runs at its usual rate, then in some places drops

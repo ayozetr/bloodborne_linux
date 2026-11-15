@@ -56,6 +56,7 @@ Obrikash and noelmiller. What each one did:
 - **[The-Fool-cmd](https://github.com/The-Fool-cmd)**: DLSS and the launcher's folder chooser when running from source on NixOS.
 - **[godlyfast](https://github.com/godlyfast)**: the game's clear shader kept where the texture cache holds another format (a smear after loads), and motion blur and the game's AA left off where the game built nothing for them.
 - **[Mcm190](https://github.com/Mcm190)**: the in-game Display page split in two, so its names and values no longer drift apart.
+- **[chozandrias76](https://github.com/chozandrias76)**: the GX workers' crash with a null instruction pointer, a race in the game's own code, now taken with a lock.
 - **[fhody125-web](https://github.com/fhody125-web)**: NoDreamForHunter, the base of BBSC's game server.
 - **[MikeTat1988](https://github.com/MikeTat1988)**: Hunter's Atlas, the fullscreen in-game map.
 - **[IFreemz](https://github.com/IFreemz)**: the FSR 4 model without trails.
