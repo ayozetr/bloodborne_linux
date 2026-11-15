@@ -420,7 +420,7 @@ def eboot_bytes(elf,start,end):
 
 
 def crash_guard_writes(elf,env=os.environ):
-    """The game's own unchecked pointers that crashed players (scripts/crash_guards.py), unless
+    """The game's own unchecked pointers and races that crashed players (scripts/crash_guards.py), unless
     BB_CRASH_GUARDS=0; none, with a line, when the executable is not the 01.09 code they were found in."""
     if env.get('BB_CRASH_GUARDS')=='0':
         return []
@@ -429,7 +429,7 @@ def crash_guard_writes(elf,env=os.environ):
     if not crash_guards.applies(lambda offset,size: eboot_bytes(elf,offset,offset+size)):
         print('Patches: crash guards skipped: the game\'s code differs from 01.09')
         return []
-    print('Patches: crash guards (an online event without its data)')
+    print('Patches: crash guards (an online event without its data; the GX workers\' LOD slot claim)')
     return crash_guards.code_writes()
 
 

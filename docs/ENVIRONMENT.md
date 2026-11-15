@@ -205,7 +205,7 @@ Defaults to change on a machine where they misbehave, workarounds, and switches 
 | `BB_COPY_SKIP_SAME` | =0: off (default on): of the game's copy shader calls only the copies that change their destinations run (checked on thread bb:CopyFilter) |
 | `BB_COPY_THREADS` | =N (0-16): threads for large guest memory copies |
 | `BB_CORE_RESERVE` | =0 / 1: keep the game's threads off a reserved core (Linux, SMT CPUs with 6+ cores) |
-| `BB_CRASH_GUARDS` | =0: without the guards of the game's own unchecked pointers that crashed players (scripts/crash_guards.py) |
+| `BB_CRASH_GUARDS` | =0: without the guards of the game's own unchecked pointers and races that crashed players (scripts/crash_guards.py) |
 | `BB_DEAD_IMAGES` | =0: images of freed memory left to the collector instead of dropped on the GPU thread |
 | `BB_DEAD_IMAGES_LATE` | set: dead images dropped at the frame's end only, as before |
 | `BB_DETILE_SKIPPED` | =1: texture levels the quality setting leaves out are still detiled and read |
