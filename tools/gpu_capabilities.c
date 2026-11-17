@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /* Check whether native-size depth/stencil images can be blitted to reduced
  * renderer targets. The renderer needs both directions for live presets.
- * --gamepads: the connected gamepads, "GUID<tab>name" per line (the launcher's controller list,
- * BB_GAMEPAD). --displays: the monitors, "name<tab>WxH<tab>primary (1 or 0)" per line in SDL's
- * order (the launcher's monitor list, BB_DISPLAY; issue #69). --read-input: one key or button for the
+ * --gamepads: the connected gamepads, "GUID<tab>name<tab>type<tab>path" per line (the launcher's
+ * controller list, BB_GAMEPAD; type is SDL's: xbox360, xboxone, ps4, switchpro, ..., empty for a
+ * generic gamepad; the device path tells two of one model apart, local co-op). --displays: the
+ * monitors, "name<tab>WxH<tab>primary (1 or 0)" per line in SDL's order (the launcher's monitor
+ * list, BB_DISPLAY; issue #69). --read-input: one key or button for the
  * launcher's controls (below). --device: "vendorID<tab>name" of the GPU the game takes (run.sh:
  * memory model and driver workarounds by vendor and chip). --gpus: every GPU in Vulkan's order
  * (BB_GPU_ID is the index), "index<tab>vendorID<tab>type<tab>name<tab>1 for the one the port takes
@@ -90,7 +92,11 @@ static int list_gamepads(void) {
         char guid[33];
         SDL_GUIDToString(SDL_GetGamepadGUIDForID(ids[i]), guid, sizeof guid);
         const char *name = SDL_GetGamepadNameForID(ids[i]);
-        printf("%s\t%s\n", guid, name ? name : "?");
+        const char *type = SDL_GetGamepadStringForType(SDL_GetGamepadTypeForID(ids[i]));
+        /* The device path tells two controllers of the same model apart (local co-op: one per
+         * player, BB_GAMEPAD=<path>); the launcher's co-op list leaves out a pad without one. */
+        const char *path = SDL_GetGamepadPathForID(ids[i]);
+        printf("%s\t%s\t%s\t%s\n", guid, name ? name : "?", type ? type : "", path ? path : "");
     }
     SDL_free(ids);
     SDL_Quit();

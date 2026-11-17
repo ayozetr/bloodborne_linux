@@ -67,3 +67,33 @@ class LauncherGpuTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+PADS = ("03000000de280000ff11000001000000\tSteam Virtual Gamepad\txbox360\t/dev/input/event21\n"
+        "050000004c050000e60c000000810000\tDualSense Wireless Controller\tps5\t/dev/hidraw4\n"
+        "050000004c050000e60c000000810000\tDualSense Wireless Controller\tps5\t/dev/hidraw7\n")
+
+
+class LauncherGamepadTests(unittest.TestCase):
+    """Local co-op picks each player's controller by device path (issue #58: the 0.7 tool printed
+    only GUID and name, so the co-op list had no controller at all)."""
+
+    def setUp(self):
+        launcher._gamepads = (0.0, None)
+        run = mock.patch.object(launcher.subprocess, "run", return_value=subprocess.CompletedProcess(
+            [], 0, stdout=PADS, stderr=""))
+        self.run = run.start()
+        self.addCleanup(run.stop)
+
+    def test_paths_tell_two_of_one_model_apart(self):
+        pads = launcher.connected_gamepads(paths=True, fresh=True)
+        self.assertEqual([path for *_rest, path in pads],
+                         ["/dev/input/event21", "/dev/hidraw4", "/dev/hidraw7"])
+        self.assertEqual([kind for _guid, _name, kind in launcher.connected_gamepads(types=True)],
+                         ["xbox360", "ps5", "ps5"])
+
+    def test_tool_prints_type_and_path(self):
+        source = (ROOT / "tools/gpu_capabilities.c").read_text()
+        listing = source[source.index("static int list_gamepads"):source.index("static int list_displays")]
+        self.assertIn("SDL_GetGamepadPathForID", listing)
+        self.assertIn('printf("%s\\t%s\\t%s\\t%s\\n"', listing)
