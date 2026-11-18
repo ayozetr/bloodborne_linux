@@ -2,6 +2,7 @@
 # shadNet server with its UDP port (STUN) and the Bloodborne summon broker. Debian 13 for Qt 6.8:
 # shadnet-p2p does not build with older Qt (Ubuntu 24.04 has 6.4). See docs/SERVER.md.
 #
+#   Published as ghcr.io/ayozetr/bbport-shadnet (.github/workflows/server-images.yml); or:
 #   docker build -t bbport-shadnet tools/shadnet-server
 #   docker run -d --name shadnet --restart unless-stopped -v shadnet-data:/data \
 #       -e SHADNET_REGISTRATION_KEY=<your signup code> \

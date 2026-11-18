@@ -2,6 +2,7 @@
 # NoDreamForHunter, MIT): messages, bloodstains, the server list and BBSC's relay, for seamless
 # co-op next to a shadNet server (tools/shadnet-server). Python 3, nothing else. See docs/SERVER.md.
 #
+#   Published as ghcr.io/ayozetr/bbport-bbsc-server (.github/workflows/server-images.yml); or:
 #   docker build -t bbport-bbsc-server tools/bbsc-server
 #   docker run -d --name bbsc-server --restart unless-stopped --network host -v bbsc-data:/data \
 #       -e BBSC_HOST=100.x.y.z -e BBSC_SHADNET=100.x.y.z bbport-bbsc-server

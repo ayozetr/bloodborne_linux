@@ -55,10 +55,19 @@ tailscale status   # every player's computer should be listed
 
 ### With Docker (any Linux)
 
-This repository has a Docker image for it: [tools/shadnet-server](../tools/shadnet-server). It
-builds shadnet-p2p on Debian 13, because shadnet-p2p needs Qt 6.8 or newer and some
+This repository has a Docker image for it, ready to download from its
+[Packages](https://github.com/ayozetr?tab=packages&repo_name=bloodborne_linux):
+`ghcr.io/ayozetr/bbport-shadnet`, made from [tools/shadnet-server](../tools/shadnet-server). It
+has shadnet-p2p built on Debian 13, because shadnet-p2p needs Qt 6.8 or newer and some
 distributions are older (Ubuntu 24.04 has Qt 6.4). It runs on any Linux with Docker, Ubuntu 24.04
 included.
+
+```sh
+docker pull ghcr.io/ayozetr/bbport-shadnet
+```
+
+To build it yourself instead (a few minutes), then use `bbport-shadnet` in place of the image's
+name below:
 
 ```sh
 mkdir shadnet-server && cd shadnet-server
@@ -76,7 +85,7 @@ docker run -d --name shadnet --restart unless-stopped --network host \
     -v shadnet-data:/data \
     -e SHADNET_HOST=100.x.y.z \
     -e SHADNET_REGISTRATION_KEY=a-long-code-of-your-own \
-    bbport-shadnet
+    ghcr.io/ayozetr/bbport-shadnet
 docker logs shadnet
 ```
 
@@ -94,7 +103,7 @@ Tailscale is up. The configuration (`shadnet.cfg`) and the accounts (`db/shadnet
 
 ```sh
 docker stop shadnet && docker rm shadnet    # the volume, with the accounts, stays
-docker build -t bbport-shadnet .            # after downloading a newer Dockerfile
+docker pull ghcr.io/ayozetr/bbport-shadnet  # or, built yourself: docker build -t bbport-shadnet .
 ```
 
 Then run the same `docker run` again.
@@ -162,16 +171,13 @@ place of The Hunter's Dream for messages, bloodstains and the server list.
 
 1. Turn on shadNet's seamless mode: run the shadNet container again with
    `-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1` (it is kept in its `shadnet.cfg`).
-2. Build and start the game server on the same computer, with the same Tailscale address:
+2. Start the game server on the same computer, with the same Tailscale address (its image,
+   `ghcr.io/ayozetr/bbport-bbsc-server`, is in the Packages too; to build it yourself, download
+   [tools/bbsc-server](../tools/bbsc-server)'s two files and run `docker build -t bbport-bbsc-server .`):
 
    ```sh
-   mkdir bbsc-server && cd bbsc-server
-   for f in Dockerfile entrypoint.sh; do
-       curl -fsSLO "https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/bbsc-server/$f"
-   done
-   docker build -t bbport-bbsc-server .
    docker run -d --name bbsc-server --restart unless-stopped --network host \
-       -v bbsc-data:/data -e BBSC_HOST=100.x.y.z bbport-bbsc-server
+       -v bbsc-data:/data -e BBSC_HOST=100.x.y.z ghcr.io/ayozetr/bbport-bbsc-server
    docker logs bbsc-server
    ```
 
