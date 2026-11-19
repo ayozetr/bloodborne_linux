@@ -71,6 +71,23 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(ini["button_prompts"], "xbox")
 
 
+class AddBindingTests(unittest.TestCase):
+    """Another key or button for an input (issue #59), as runtime_pad/bindings.c reads them."""
+
+    def test_adds_after_the_binding_it_has(self):
+        self.assertEqual(launcher.add_binding("b", "paddle3"), "b, paddle3")
+        self.assertEqual(launcher.add_binding("F, Return", "Space"), "F, Return, Space")
+
+    def test_an_unbound_input_gets_it_alone(self):
+        self.assertEqual(launcher.add_binding("", "paddle1"), "paddle1")
+        self.assertEqual(launcher.add_binding(None, "a"), "a")
+
+    def test_nothing_twice_and_no_more_than_the_game_takes(self):
+        self.assertIsNone(launcher.add_binding("b, paddle3", "Paddle3"))
+        self.assertIsNone(launcher.add_binding("a, b, x, y", "paddle1"))
+        self.assertEqual(launcher.MAX_BINDINGS, 4)
+
+
 class FrameGenerationTests(unittest.TestCase):
     def test_choices_and_bbport_ini(self):
         for choice, ini in (("off", {"frame_generation": "off"}), ("fsr3", {"frame_generation": "fsr3"}),

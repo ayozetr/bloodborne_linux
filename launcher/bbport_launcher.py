@@ -902,6 +902,20 @@ KEY_DEFAULTS_07 = {
     "look_up": "I", "look_down": "K", "look_left": "J", "look_right": "L",
     "walk": "Left Alt", "sprint": "Left Shift", "dodge": "Space",
 }
+# How many keys or buttons one input takes (runtime_pad/bindings.c MAX_BIND).
+MAX_BINDINGS = 4
+
+
+def add_binding(binding, new):
+    """`binding` (comma-separated keys or buttons) with `new` added at the end: a key or button
+    more for the same input (issue #59: a paddle that dodges as B does). None when `new` is in it
+    already or it has MAX_BINDINGS."""
+    names = [name.strip() for name in (binding or "").split(",") if name.strip()]
+    if new.casefold() in [name.casefold() for name in names] or len(names) >= MAX_BINDINGS:
+        return None
+    return ", ".join(names + [new])
+
+
 KEYBOARD_LAYOUTS = [
     ("bbport 0.7 (как в Dark Souls III на ПК)", "0.7",
      "Пробел — уклонение, Shift — бег, Shift + Пробел — прыжок, F — действие, Escape — меню "
@@ -1619,6 +1633,9 @@ class LauncherWindow(Adw.ApplicationWindow):
                 # The control's name in the tooltips too: a screen reader says which one they are for.
                 row.add_suffix(flat_button(icon, f'{tr("Назначить")}: {tr(label)}',
                                            lambda _b, k=kind, n=name: self.assign_control(k, n)))
+                # Another key or button for the same input, next to the ones it has (issue #59).
+                row.add_suffix(flat_button("list-add-symbolic", f'{tr("Добавить ещё")}: {tr(label)}',
+                                           lambda _b, k=kind, n=name: self.assign_control(k, n, add=True)))
                 row.add_suffix(flat_button("edit-undo-symbolic", f'{tr("Сбросить")}: {tr(label)}',
                                            lambda _b, k=kind, n=name: self.set_control(k, n, None)))
                 expander.add_row(row)
@@ -2352,10 +2369,16 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self.show_control("key", name)
         self.store()
 
-    def show_control(self, kind, name):
-        row, default = self.control_rows[(kind, name)]
+    def control_default(self, kind, name):
+        """An input's default binding: the keyboard's as the chosen layout has it."""
+        default = self.control_rows[(kind, name)][1]
         if kind == "key" and combo_value(self.keyboard_layout_row) != "classic":
             default = KEY_DEFAULTS_07.get(name, default)
+        return default
+
+    def show_control(self, kind, name):
+        row = self.control_rows[(kind, name)][0]
+        default = self.control_default(kind, name)
         value = self.ini.get(f"{kind}.{name}")
         if value is None:
             row.set_subtitle(tr("{} (по умолчанию)").format(default) if default else tr("не назначено"))
@@ -2385,7 +2408,8 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.set_control("pad", "cross", "b" if swap else None)
         self.set_control("pad", "circle", "a" if swap else None)
 
-    def assign_control(self, kind, name):
+    def assign_control(self, kind, name, add=False):
+        """Waits for a key or button and binds the input to it; `add`: next to what it has."""
         tool = PORT_DIR / ("bin" if PACKAGED else "out") / "bb-gpu-capabilities"
         try:
             process = Gio.Subprocess.new([str(tool), "--read-input", kind],
@@ -2402,10 +2426,20 @@ class LauncherWindow(Adw.ApplicationWindow):
             except GLib.Error:
                 out = ""
             words = (out or "").strip().split(" ", 1)
-            if len(words) == 2 and words[0] == kind:
-                self.set_control(kind, name, words[1])
-            else:
+            if len(words) != 2 or words[0] != kind:
                 self.show_control(kind, name)
+                return
+            if not add:
+                self.set_control(kind, name, words[1])
+                return
+            current = self.ini.get(f"{kind}.{name}")
+            value = add_binding(self.control_default(kind, name) if current is None else current, words[1])
+            if value is None:
+                self.toasts.add_toast(Adw.Toast(title=tr(
+                    "Уже назначено, или достигнут предел ({}): сначала сбросьте").format(MAX_BINDINGS)))
+                self.show_control(kind, name)
+            else:
+                self.set_control(kind, name, value)
         process.communicate_utf8_async(None, None, done)
 
     def fill_gamepads(self):
