@@ -5,6 +5,8 @@
 - **Your own dump of Bloodborne with update 1.09**, from your PS4: any retail release (US, Europe,
   UK, Japan, Asia, and the editions with The Old Hunters). No game files are included, and other
   versions of the game's executable start and then crash. [Which releases work](COMPATIBILITY.md).
+  Use a clean dump: one whose files another emulator (such as shadPS4) has changed can break the
+  HUD and the button prompts.
 - **Linux x86-64** and a GPU with **Vulkan 1.3**: AMD or Intel with Mesa, or NVIDIA with NVIDIA's
   driver. The Steam Deck works too.
 - About **6 GB of free memory**, 10 GB for 1440p or 4K.

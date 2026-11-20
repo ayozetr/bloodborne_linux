@@ -14,7 +14,8 @@ adds improvements of its own, and others from the community, taken from pull req
 projects ([credits](docs/CREDITS.md)).
 
 > **No game files are included.** You need your own decrypted dump of Bloodborne with update
-> 1.09, from a retail release ([which ones](docs/COMPATIBILITY.md)). This project is not
+> 1.09, from a retail release ([which ones](docs/COMPATIBILITY.md)). Use a clean dump: one that
+> another emulator has changed can break the HUD and the button prompts. This project is not
 > affiliated with Sony Interactive Entertainment or FromSoftware.
 
 **[The players' guide](https://ayozetr.github.io/bloodborne_linux/)**: installing, playing online and
