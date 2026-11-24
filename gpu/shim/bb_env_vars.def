@@ -35,6 +35,7 @@ BB_ENV(BB_FRAME_STATS, SETTING, "set: frame statistics in the log every 5 s and 
 BB_ENV(BB_FFX_DIR, SETTING, "the folder with AMD's FSR DLLs for Vulkan, amd_fidelityfx_loader_vk.dll and amd_fidelityfx_upscaler_vk.dll (upscaler fsr_amd; default <user>/fsr, then beside the game)")
 BB_ENV(BB_FFX_FG_VERSION, SETTING, "=<part of a name>: the frame generation AMD's DLL runs, from those the log lists (default: theirs)")
 BB_ENV(BB_FFX_FG_ML, SETTING, "=1: AMD's ML frame generation (4.0.x) accepts any GPU (AMD ships it for RDNA4); =0: refuses it (FSR 3.1)")
+BB_ENV(BB_EFFECT_TIME, DEBUG, "=0: the effects step by each frame's time, not in whole 1/60 s steps (above 60 FPS some particles never expire)")
 BB_ENV(BB_FFX_FG_DEBUG, DEBUG, "=1: AMD's frame generation draws its tear lines and reset marks")
 BB_ENV(BB_ATLAS_ENABLED, SETTING, "=1 / 0: Hunter's Atlas, the in-game map, on or off (the launcher's Map switch; unset: the map's own settings.ini)")
 BB_ENV(BB_CJK_FONT, SETTING, "=path: a font file with Chinese characters for the menu in Simplified Chinese (default: fontconfig's choice for zh-cn)")

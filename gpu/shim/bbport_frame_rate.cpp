@@ -20,6 +20,7 @@
 #include "shim/bb_env.h"
 #include "common/types.h"
 #include "bbport_frame_rate.h"
+#include "bbport_effect_time.h"
 #include "render/vk_low_latency.h"
 #include "bbport_guest_code.h"
 #include "bbport_toggles.h"
@@ -65,6 +66,7 @@ struct alignas(64) Live {
     float decay08 = 0.8f;             ///< 0.8 per 30 FPS frame
     float cloth = 1.0f;               ///< cloth constraints' stiffness
     float model_turn = 0.0f;          ///< the model preview's turn per 30 FPS frame (radians per stick unit)
+    float effects_dt = Frame30;       ///< particles: complete 1/60 s steps only
 };
 Live* live = nullptr;
 float model_turn_base = 0.0f;         ///< the game's own model_turn (its constant, read at start)
@@ -316,6 +318,19 @@ bool HookPacerLate() {
     return Detour(0x2034d96, code, sizeof(code), e);
 }
 
+EffectTime effect_time;
+void PS4_SYSV_ABI AdvanceEffects() {
+    live->effects_dt = effect_time.Advance(live->dt);
+}
+
+bool HookEffectTime() {
+    constexpr u8 code[] = {0x75, 0x08, 0xc5, 0xfa, 0x10, 0x05, 0x1e, 0x14, 0x9b, 0x02};
+    const auto e = EffectTimeStub(reinterpret_cast<const void*>(&AdvanceEffects),
+                                  &live->effects_dt, image_base + 0x1f77d52,
+                                  image_base + 0x1f77d54);
+    return Detour(0x1f77d48, code, sizeof(code), e);
+}
+
 /// The main loop's step (0x2018e36: `mov dword [rbp - 0x38], 1/30`, its time; rbx the pacer):
 /// FrameStep, then the frame's time.
 bool HookStep() {
@@ -404,6 +419,7 @@ void PatchImage(unsigned char* image, std::uint64_t) {
         return;
     }
     live = new (data) Live{};
+    effect_time = EffectTime{};
     std::memcpy(&model_turn_base, image + 0x4928dfc, sizeof(model_turn_base));
     live->model_turn = model_turn_base;
     // The mode's rate and BB_FPS_LIMIT (the launcher's frame rate limit): the game's pacer waits for
@@ -425,8 +441,13 @@ void PatchImage(unsigned char* image, std::uint64_t) {
     int steps = HookFixedStep(0x17f9b71, -0x48) + HookFixedStep(0x1572a7d, -0x30);
     const int run = HookRunSpeed();
     const bool cloth = HookClothStiffness();
+    const bool effects = !bb_env_off("BB_EFFECT_TIME") && HookEffectTime();
     int redirected = 0;
     for (const Redirect& r : Redirects) {
+        if (effects && r.site == 0x1f77d4a) {
+            ++redirected;
+            continue; // The effects stub owns this load and the preceding flag branch.
+        }
         if (RedirectOperand(r)) {
             ++redirected;
         } else {
@@ -434,6 +455,7 @@ void PatchImage(unsigned char* image, std::uint64_t) {
         }
     }
     mprotect(stub_page, StubPageSize, PROT_READ | PROT_EXEC);
+    std::printf("Frame rate: particle time %s\n", effects ? "whole 60 Hz steps" : "per-frame fallback");
     std::printf("Frame rate: the model preview turns %.5f rad per stick unit per 30 FPS frame\n",
                 model_turn_base);
     std::printf("Frame rate: free (hooks, no patches): the game steps by each frame's time "

@@ -473,6 +473,7 @@ Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame t
 | `BB_DYNAMIC_STATE_ALWAYS` | =1: all dynamic state set again at every draw |
 | `BB_DYNSTATE_CHECK` | =1: the scissor each command buffer really has, and who set it |
 | `BB_EFFECT_DUMP` | set: the game's effect options objects every 10 s |
+| `BB_EFFECT_TIME` | =0: the effects step by each frame's time, not in whole 1/60 s steps (above 60 FPS some particles never expire) |
 | `BB_EXPERIMENT_CYCLE` | =bits,bits,...:seconds: the experiment bits step through the list, over and over (test builds) |
 | `BB_EXP_BARRIER_ALL` | set (experiment): a full memory barrier before every draw and dispatch |
 | `BB_EXP_BARRIER_TARGET` | =hex address (experiment): a full barrier before each draw into that target |
