@@ -1264,10 +1264,16 @@ tailscale<span class="w"> </span>status<span class="w">   </span><span class="c1
 </code></pre></div>
 <h2 id="2-the-server">2. The server<a class="headerlink" href="#2-the-server" title="Permanent link">&para;</a></h2>
 <h3 id="with-docker-any-linux">With Docker (any Linux)<a class="headerlink" href="#with-docker-any-linux" title="Permanent link">&para;</a></h3>
-<p>This repository has a Docker image for it: <a href="https://github.com/ayozetr/bloodborne_linux/tree/main/tools/shadnet-server">tools/shadnet-server</a>. It
-builds shadnet-p2p on Debian 13, because shadnet-p2p needs Qt 6.8 or newer and some
+<p>This repository has a Docker image for it, ready to download from its
+<a href="https://github.com/ayozetr?tab=packages&amp;repo_name=bloodborne_linux">Packages</a>:
+<code>ghcr.io/ayozetr/bbport-shadnet</code>, made from <a href="https://github.com/ayozetr/bloodborne_linux/tree/main/tools/shadnet-server">tools/shadnet-server</a>. It
+has shadnet-p2p built on Debian 13, because shadnet-p2p needs Qt 6.8 or newer and some
 distributions are older (Ubuntu 24.04 has Qt 6.4). It runs on any Linux with Docker, Ubuntu 24.04
 included.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/ayozetr/bbport-shadnet
+</code></pre></div>
+<p>To build it yourself instead (a few minutes), then use <code>bbport-shadnet</code> in place of the image's
+name below:</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>shadnet-server<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>shadnet-server
 <span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>Dockerfile<span class="w"> </span>entrypoint.sh<span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">    </span>curl<span class="w"> </span>-fsSLO<span class="w"> </span><span class="s2">"https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/shadnet-server/</span><span class="nv">$f</span><span class="s2">"</span>
@@ -1280,7 +1286,7 @@ digits, <code>-</code> and <code>_</code>; the players never need it, only you, 
 <span class="w">    </span>-v<span class="w"> </span>shadnet-data:/data<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-e<span class="w"> </span><span class="nv">SHADNET_HOST</span><span class="o">=</span><span class="m">100</span>.x.y.z<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-e<span class="w"> </span><span class="nv">SHADNET_REGISTRATION_KEY</span><span class="o">=</span>a-long-code-of-your-own<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bbport-shadnet
+<span class="w">    </span>ghcr.io/ayozetr/bbport-shadnet
 docker<span class="w"> </span>logs<span class="w"> </span>shadnet
 </code></pre></div>
 <p>The log should end with the three listeners on the Tailscale address:</p>
@@ -1292,7 +1298,7 @@ WebApiServer listening on: 100.x.y.z:31315
 Tailscale is up. The configuration (<code>shadnet.cfg</code>) and the accounts (<code>db/shadnet.db</code>) live in the
 <code>shadnet-data</code> volume. To stop or update the server:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>stop<span class="w"> </span>shadnet<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>rm<span class="w"> </span>shadnet<span class="w">    </span><span class="c1"># the volume, with the accounts, stays</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bbport-shadnet<span class="w"> </span>.<span class="w">            </span><span class="c1"># after downloading a newer Dockerfile</span>
+docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/ayozetr/bbport-shadnet<span class="w">  </span><span class="c1"># or, built yourself: docker build -t bbport-shadnet .</span>
 </code></pre></div>
 <p>Then run the same <code>docker run</code> again.</p>
 <h3 id="without-docker">Without Docker<a class="headerlink" href="#without-docker" title="Permanent link">&para;</a></h3>
@@ -1365,15 +1371,12 @@ place of The Hunter's Dream for messages, bloodstains and the server list.</p>
 <ol>
 <li>Turn on shadNet's seamless mode: run the shadNet container again with
    <code>-e SHADNET_BLOODBORNE_SEAMLESS_COOP=1</code> (it is kept in its <code>shadnet.cfg</code>).</li>
-<li>Build and start the game server on the same computer, with the same Tailscale address:</li>
+<li>Start the game server on the same computer, with the same Tailscale address (its image,
+   <code>ghcr.io/ayozetr/bbport-bbsc-server</code>, is in the Packages too; to build it yourself, download
+   <a href="https://github.com/ayozetr/bloodborne_linux/tree/main/tools/bbsc-server">tools/bbsc-server</a>'s two files and run <code>docker build -t bbport-bbsc-server .</code>):</li>
 </ol>
-<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bbsc-server<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>bbsc-server
-<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>Dockerfile<span class="w"> </span>entrypoint.sh<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span>curl<span class="w"> </span>-fsSLO<span class="w"> </span><span class="s2">"https://raw.githubusercontent.com/ayozetr/bloodborne_linux/main/tools/bbsc-server/</span><span class="nv">$f</span><span class="s2">"</span>
-<span class="k">done</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bbport-bbsc-server<span class="w"> </span>.
-docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>bbsc-server<span class="w"> </span>--restart<span class="w"> </span>unless-stopped<span class="w"> </span>--network<span class="w"> </span>host<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>bbsc-data:/data<span class="w"> </span>-e<span class="w"> </span><span class="nv">BBSC_HOST</span><span class="o">=</span><span class="m">100</span>.x.y.z<span class="w"> </span>bbport-bbsc-server
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>bbsc-server<span class="w"> </span>--restart<span class="w"> </span>unless-stopped<span class="w"> </span>--network<span class="w"> </span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bbsc-data:/data<span class="w"> </span>-e<span class="w"> </span><span class="nv">BBSC_HOST</span><span class="o">=</span><span class="m">100</span>.x.y.z<span class="w"> </span>ghcr.io/ayozetr/bbport-bbsc-server
 docker<span class="w"> </span>logs<span class="w"> </span>bbsc-server
 </code></pre></div>
 <p><code>BBSC_SHADNET</code> is the shadNet server's address when it is on another computer. Messages,

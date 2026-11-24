@@ -597,10 +597,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-game-closes-in-the-middle-of-play-with-fault-signal-11-at-rip-nil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The game closes in the middle of play with Fault (signal 11) at RIP (nil)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-frame-rate-drops-in-some-places-and-stays-low-until-a-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frame rate drops in some places and stays low until a reload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-and-mouse-in-the-games-menus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyboard and mouse in the game's menus
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-picture-is-stretched-on-an-ultrawide-screen" class="md-nav__link">
     <span class="md-ellipsis">
       
         The picture is stretched on an ultrawide screen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fullscreen-opens-on-the-wrong-monitor-or-drops-back-to-a-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fullscreen opens on the wrong monitor, or drops back to a window
       
     </span>
   </a>
@@ -1147,10 +1191,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-game-closes-in-the-middle-of-play-with-fault-signal-11-at-rip-nil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The game closes in the middle of play with Fault (signal 11) at RIP (nil)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-frame-rate-drops-in-some-places-and-stays-low-until-a-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frame rate drops in some places and stays low until a reload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-and-mouse-in-the-games-menus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyboard and mouse in the game's menus
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-picture-is-stretched-on-an-ultrawide-screen" class="md-nav__link">
     <span class="md-ellipsis">
       
         The picture is stretched on an ultrawide screen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fullscreen-opens-on-the-wrong-monitor-or-drops-back-to-a-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fullscreen opens on the wrong monitor, or drops back to a window
       
     </span>
   </a>
@@ -1319,18 +1407,51 @@ text you want in <strong>Setup → Game text language</strong>: <em>Español</em
 <h2 id="the-game-crashes-after-playing-a-while-on-a-card-with-little-vram">The game crashes after playing a while, on a card with little VRAM<a class="headerlink" href="#the-game-crashes-after-playing-a-while-on-a-card-with-little-vram" title="Permanent link">&para;</a></h2>
 <p>On a 6 GB card the texture cache can run out of video memory: the log then repeats
 <code>Texture cache: memory pressure, ... (critical ...)</code>. Lower what uses VRAM: a 60 FPS limit,
-a lower output resolution, lower <strong>Model detail</strong> in the game's <em>Display</em> settings, and close
+a lower output resolution, lower <strong>Model detail</strong> in the game's <em>Detail</em> settings, and close
 other programs that use the GPU (browsers, video players, other games).</p>
+<h2 id="the-game-closes-in-the-middle-of-play-with-fault-signal-11-at-rip-nil">The game closes in the middle of play with <code>Fault (signal 11) at RIP (nil)</code><a class="headerlink" href="#the-game-closes-in-the-middle-of-play-with-fault-signal-11-at-rip-nil" title="Permanent link">&para;</a></h2>
+<p>When the log's last lines show that fault on a <code>GXWorker</code> thread, two of the game's GPU workers
+took the same piece of a list at once, a race in the game's own code that faster PC cores hit far
+more often than the console. From 0.70-linux.7 the launcher patches the game to take it with a
+lock (<code>Patches: crash guards (... the GX workers' LOD slot claim)</code> at start). <code>BB_CRASH_GUARDS=0</code>
+under <strong>Advanced → Developer → Extra variables</strong> leaves out every crash guard. If it still happens,
+attach the log of that session to an issue.</p>
+<h2 id="the-frame-rate-drops-in-some-places-and-stays-low-until-a-reload">The frame rate drops in some places and stays low until a reload<a class="headerlink" href="#the-frame-rate-drops-in-some-places-and-stays-low-until-a-reload" title="Permanent link">&para;</a></h2>
+<p>Seen mostly on NVIDIA cards (#42): the game runs at its usual rate, then in some places drops
+(to 17-35 FPS) and stays there until a lamp travel or a restart. When video memory was full, a
+copy of the game's memory could land in system memory and stay there, and the GPU read it over
+the bus. From 0.70-linux.4, on cards with more than 4 GB those copies stay in video memory, and
+one that does not fit is made again later; the log says so at start (<code>Layer memory: mirrors in
+VRAM only</code>). <code>BB_MIRROR_VRAM_ONLY=0</code> under <strong>Advanced → Developer → Extra variables</strong> brings the
+old behaviour back, and <code>=1</code> turns it on for a card of 4 GB or less.</p>
+<p>A place that is simply heavy is different: it is slower from the moment you get there, and the
+same after a reload. If a drop stays until a reload, turn on <strong>Save the log and statistics to a
+file</strong> and attach the log of that whole session to the issue.</p>
+<h2 id="keyboard-and-mouse-in-the-games-menus">Keyboard and mouse in the game's menus<a class="headerlink" href="#keyboard-and-mouse-in-the-games-menus" title="Permanent link">&para;</a></h2>
+<p>In the game's menus the mouse points at items and the <strong>left button</strong> chooses them. The other
+buttons keep what they do in play, as the game's own prompts show: the <strong>right button</strong> is L2
+(the storage box switches to the storage with it), the side buttons R2 and L1. <strong>Escape</strong> goes
+back.</p>
 <h2 id="the-picture-is-stretched-on-an-ultrawide-screen">The picture is stretched on an ultrawide screen<a class="headerlink" href="#the-picture-is-stretched-on-an-ultrawide-screen" title="Permanent link">&para;</a></h2>
 <p>Choose the screen's shape in <strong>Graphics → Display → Aspect ratio</strong> (<em>Auto</em> follows the output
 resolution): 4:3, 16:10, 16:9, 21:9 or 32:9. The view gets wider (or taller) instead of stretched,
 and the HUD keeps to the screen's edges; it changes live, in the game's <em>Display</em> menu too.
 <strong>Output resolution</strong> <em>Auto</em> is the monitor's own; any other size written as <code>output_res=WxH</code> in
 bbport.ini works too.</p>
+<h2 id="fullscreen-opens-on-the-wrong-monitor-or-drops-back-to-a-window">Fullscreen opens on the wrong monitor, or drops back to a window<a class="headerlink" href="#fullscreen-opens-on-the-wrong-monitor-or-drops-back-to-a-window" title="Permanent link">&para;</a></h2>
+<p>With several monitors, choose the one to play on in <strong>Display → Monitor</strong>: the port's <em>Primary</em>
+is the one the system reports first, which on Wayland is not always the one KDE or GNOME show as
+primary. On Wayland a program cannot place its own window, so the compositor may open it on
+another monitor first and then move it; when that leaves it as a plain window, the port asks for
+fullscreen again during the first seconds (the log says
+<code>Display: the compositor left the window out of fullscreen, asked again</code>). If it still ends up
+windowed, add <code>SDL_VIDEO_DRIVER=x11</code> under <strong>Advanced → Developer → Extra variables</strong>: through
+Xwayland the window places itself.</p>
 <h2 id="exit-to-desktop">Exit to desktop<a class="headerlink" href="#exit-to-desktop" title="Permanent link">&para;</a></h2>
-<p><strong>Exit to desktop</strong> is in the game's System menu and on the title screen, from bbport 0.7. The
-<em>Quit to Desktop</em> switch of earlier Linux versions is gone with it, and a third-party <em>Exit Game</em>
-patch is no longer needed.</p>
+<p><strong>Exit to desktop</strong> is in the game's System menu (under <em>Exit Game</em> in the world) and on the title
+screen, from bbport 0.7. The <em>Quit to Desktop</em> switch of earlier Linux versions is gone with it,
+and a third-party <em>Exit Game</em> patch is no longer needed. In the world it asks first and goes through the game's own Quit Game,
+so your progress is saved, and the game closes once it is back at the title.</p>
 <h2 id="the-ports-menu-opens-by-accident-with-l3-r3">The port's menu opens by accident with L3 + R3<a class="headerlink" href="#the-ports-menu-opens-by-accident-with-l3-r3" title="Permanent link">&para;</a></h2>
 <p>From bbport 0.7, L3 + R3 opens the port's menu only when both are held for 0.8 seconds, so pressing
 them in a fight (lock-on and camera reset) no longer opens it. <strong>Controls → Port menu from the

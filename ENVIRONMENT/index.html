@@ -789,10 +789,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#settings-106" class="md-nav__link">
+  <a href="#settings-107" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Settings (106)
+        Settings (107)
       
     </span>
   </a>
@@ -811,10 +811,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#diagnostics-281" class="md-nav__link">
+  <a href="#diagnostics-282" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Diagnostics (281)
+        Diagnostics (282)
       
     </span>
   </a>
@@ -1048,10 +1048,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#settings-106" class="md-nav__link">
+  <a href="#settings-107" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Settings (106)
+        Settings (107)
       
     </span>
   </a>
@@ -1070,10 +1070,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#diagnostics-281" class="md-nav__link">
+  <a href="#diagnostics-282" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Diagnostics (281)
+        Diagnostics (282)
       
     </span>
   </a>
@@ -1170,7 +1170,7 @@ environment. A few variables override those keys at start: <code>BB_UPSCALER</co
 at its start (<code>Environment:</code> in the log) and warns about <code>BB_*</code> names it does not know.</p>
 <p><code>=1: ...</code> / <code>=0: ...</code> / <code>=N: ...</code> say what that value does; <code>set: ...</code> means any value
 turns it on (even <code>0</code>).</p>
-<h2 id="settings-106">Settings (106)<a class="headerlink" href="#settings-106" title="Permanent link">&para;</a></h2>
+<h2 id="settings-107">Settings (107)<a class="headerlink" href="#settings-107" title="Permanent link">&para;</a></h2>
 <p>What players and the launchers set. The menu, bbport.ini and the launcher write most of them; set one by hand to override them.</p>
 <table>
 <thead>
@@ -1327,6 +1327,10 @@ turns it on (even <code>0</code>).</p>
 <tr>
 <td><code>BB_GAME_MENU</code></td>
 <td>=0: no port pages in the game's System menu</td>
+</tr>
+<tr>
+<td><code>BB_GESTURES_NO_MOTION</code></td>
+<td>=1: the gestures menu without the motion-control icons (Dommo's mod; the launcher's switch)</td>
 </tr>
 <tr>
 <td><code>BB_GPU_ID</code></td>
@@ -1558,7 +1562,7 @@ turns it on (even <code>0</code>).</p>
 </tr>
 <tr>
 <td><code>BB_SKIP_CPU_CHECK</code></td>
-<td>=1: skip the check of the CPU's bsr/bsf behaviour before the game starts</td>
+<td>=1: skip the check of the processor's instructions (AVX, BMI1, LZCNT...) before the game starts</td>
 </tr>
 <tr>
 <td><code>BB_SKIP_GAME_CHECK</code></td>
@@ -1738,7 +1742,7 @@ turns it on (even <code>0</code>).</p>
 </tr>
 <tr>
 <td><code>BB_CRASH_GUARDS</code></td>
-<td>=0: without the guards of the game's own unchecked pointers that crashed players (scripts/crash_guards.py)</td>
+<td>=0: without the guards of the game's own unchecked pointers and races that crashed players (scripts/crash_guards.py)</td>
 </tr>
 <tr>
 <td><code>BB_DEAD_IMAGES</code></td>
@@ -1843,6 +1847,10 @@ turns it on (even <code>0</code>).</p>
 <tr>
 <td><code>BB_FX_INIT_CLEAR</code></td>
 <td>=0: the effect buffers' initialization clears through the game's path</td>
+</tr>
+<tr>
+<td><code>BB_GAME_CRASH_FIXES</code></td>
+<td>=0: without Jin-Gu's two eboot crash fixes (More Render Commands, with the larger GX heaps; NPC Talk Crash Fix)</td>
 </tr>
 <tr>
 <td><code>BB_GARLIC_VRAM</code></td>
@@ -2194,7 +2202,7 @@ turns it on (even <code>0</code>).</p>
 </tr>
 <tr>
 <td><code>BB_MIRROR_VRAM_ONLY</code></td>
-<td>=1: mirrors in VRAM or not at all</td>
+<td>=1 / 0: mirrors in VRAM or not at all, or in system memory too when VRAM is full (default: VRAM only on cards over 4 GiB)</td>
 </tr>
 <tr>
 <td><code>BB_MOTION_LARGE</code></td>
@@ -2558,7 +2566,7 @@ turns it on (even <code>0</code>).</p>
 </tr>
 </tbody>
 </table>
-<h2 id="diagnostics-281">Diagnostics (281)<a class="headerlink" href="#diagnostics-281" title="Permanent link">&para;</a></h2>
+<h2 id="diagnostics-282">Diagnostics (282)<a class="headerlink" href="#diagnostics-282" title="Permanent link">&para;</a></h2>
 <p>Logs, dumps, traces, probes and experiments, for finding bugs. Most cost frame time; none is meant for playing.</p>
 <table>
 <thead>
@@ -2787,6 +2795,10 @@ turns it on (even <code>0</code>).</p>
 <tr>
 <td><code>BB_EFFECT_DUMP</code></td>
 <td>set: the game's effect options objects every 10 s</td>
+</tr>
+<tr>
+<td><code>BB_EFFECT_TIME</code></td>
+<td>=0: the effects step by each frame's time, not in whole 1/60 s steps (above 60 FPS some particles never expire)</td>
 </tr>
 <tr>
 <td><code>BB_EXPERIMENT_CYCLE</code></td>
@@ -3191,6 +3203,10 @@ turns it on (even <code>0</code>).</p>
 <tr>
 <td><code>BB_MOTION_TRACE</code></td>
 <td>=file: the frame after the file appears prints its motion draws</td>
+</tr>
+<tr>
+<td><code>BB_MOVBE_TRAP</code></td>
+<td>=file: the movbe at the image offsets listed there (tools/movbe_sites.py) made ud2 and run by the port, as on a processor without MOVBE</td>
 </tr>
 <tr>
 <td><code>BB_MSG_TRACE</code></td>

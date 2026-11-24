@@ -1075,8 +1075,16 @@ under <em>People</em> and <em>Help and testing</em> also appears in the launcher
 <td>The Windows port: online play, the cheats page, Add to Steam, the field of view, the game's audio at full level and many fixes.</td>
 </tr>
 <tr>
+<td><a href="https://github.com/Amanises-Yharnam-Together/BBSC-Yharnam-Together">Amanises-Yharnam-Together/BBSC-Yharnam-Together</a></td>
+<td>Yharnam Together, a seamless co-op for the Windows port: the fixes found in its copy of bbport and brought over here (Jin-Gu's game crash fixes by way of Supermedo, and others noted in the commits).</td>
+</tr>
+<tr>
 <td><a href="https://github.com/Awakenchan/LanternEngine">Awakenchan/LanternEngine</a> (formerly BloodBorneButPc)</td>
 <td>Lantern Engine by Awaken (https://github.com/Awakenchan/LanternEngine) (GPL-3.0-or-later): crash fixes, stick options, the controller in use, save import, the version selector, and renderer fixes (vertex inputs, index buffers, camera motion vectors).</td>
+</tr>
+<tr>
+<td><a href="https://github.com/SSParzival/cachyborne">SSParzival/cachyborne</a></td>
+<td>Cachyborne: the effects in whole 1/60 s steps on the 0.7 engine, so particles above 60 FPS expire (Ebrietas' fight).</td>
 </tr>
 <tr>
 <td><a href="https://github.com/shadps4-emu/shadPS4">shadPS4</a></td>
@@ -1158,7 +1166,15 @@ Obrikash and noelmiller. What each one did:
   motion vectors without NaN.</li>
 <li><strong><a href="https://github.com/Classmg22">Classmg22</a></strong> (CLS_AMG): BBSC, Seamless Co-op.</li>
 <li><strong><a href="https://github.com/Wozzardman">Wozzardman</a></strong>: the server for a group's own co-op, and BBSC's seamless summon.</li>
-<li><strong><a href="https://github.com/droogie">droogie</a></strong>: The Hunter's Dream server, and fast loading (bbhost).</li>
+<li><strong><a href="https://github.com/droogie">droogie</a></strong>: The Hunter's Dream server, fast loading, and the L3 run-jump patch (Kyo's) as bbhost carries it.</li>
+<li><strong><a href="https://github.com/Asanilo">Asanilo</a></strong>: two GPU fixes: work submission counts, and samplers freed after the frame that uses them; and the preset file's upscaler with four fields.</li>
+<li><strong><a href="https://github.com/AlexanderDzhoganov">AlexanderDzhoganov</a></strong>: BBSC: the guest no longer stays a spectator after a boss wipe.</li>
+<li><strong><a href="https://github.com/nullsumlabs">nullsumlabs</a></strong>: an unknown system value (sysctl) no longer stops the game.</li>
+<li><strong><a href="https://github.com/The-Fool-cmd">The-Fool-cmd</a></strong>: DLSS and the launcher's folder chooser when running from source on NixOS.</li>
+<li><strong><a href="https://github.com/godlyfast">godlyfast</a></strong>: the game's clear shader kept where the texture cache holds another format (a smear after loads), and motion blur and the game's AA left off where the game built nothing for them.</li>
+<li><strong><a href="https://github.com/Mcm190">Mcm190</a></strong>: the in-game Display page split in two, so its names and values no longer drift apart.</li>
+<li><strong>Jin-Gu</strong>: two of the game's own crashes fixed in its code: the full per-frame render command list, and NPC talk without its target (by way of Supermedo's 1.9.8.5).</li>
+<li><strong><a href="https://github.com/chozandrias76">chozandrias76</a></strong>: the GX workers' crash with a null instruction pointer, a race in the game's own code, now taken with a lock.</li>
 <li><strong><a href="https://github.com/fhody125-web">fhody125-web</a></strong>: NoDreamForHunter, the base of BBSC's game server.</li>
 <li><strong><a href="https://github.com/MikeTat1988">MikeTat1988</a></strong>: Hunter's Atlas, the fullscreen in-game map.</li>
 <li><strong><a href="https://github.com/IFreemz">IFreemz</a></strong>: the FSR 4 model without trails.</li>
@@ -1176,7 +1192,8 @@ Obrikash and noelmiller. What each one did:
 <li><strong><a href="https://github.com/Mrsuss60">Mrsuss60</a></strong>: the gestures menu from the keyboard, a deleted
   image's slot, and the log of failed memory reservations.</li>
 <li><strong><a href="https://github.com/SrShadowy">SrShadowy</a></strong>: the on-screen keyboard for the character's name,
-  and the shader compiling notice.</li>
+  the shader compiling notice, and compacting the memory copies in VRAM.</li>
+<li><strong><a href="https://github.com/Wooloomooloo2">Wooloomooloo2</a></strong>: the game starting on integrated Intel Arc/Xe GPUs.</li>
 <li><strong><a href="https://github.com/Qiming-Liu">Qiming-Liu</a></strong>: the Simplified Chinese translation.</li>
 <li><strong><a href="https://github.com/andrecabralgit">andrecabralgit</a></strong>: the game's audio at full level.</li>
 <li><strong><a href="https://github.com/Jgamrot">Jgamrot</a></strong>: the in-game menu's checkboxes and sliders.</li>
@@ -1203,11 +1220,12 @@ Obrikash and noelmiller. What each one did:
 <li><strong><a href="https://github.com/bruxis">bruxis</a></strong>: the log that showed why Steam Input did not reach the game.</li>
 <li><strong><a href="https://github.com/shauryasagar">shauryasagar</a></strong> and <strong><a href="https://github.com/ZeroSTF">ZeroSTF</a></strong>: the Hunter's Dream going black after long sessions.</li>
 <li><strong><a href="https://github.com/popcar2">popcar2</a></strong>: ideas for the launcher.</li>
-<li><strong><a href="https://github.com/shaneo88">shaneo88</a></strong>: shadPS4's patch file in the patches folder.</li>
+<li><strong><a href="https://github.com/shaneo88">shaneo88</a></strong>: shadPS4's patch file in the patches folder, and the camera not following the character on a controller.</li>
+<li><strong><a href="https://github.com/brenki1">brenki1</a></strong>: FSR 4 stopping after lamp travels.</li>
 <li><strong><a href="https://github.com/n3vrs0ft">n3vrs0ft</a></strong>: the "Transaction failed" crash on Seamless Hunt, the logs that stopped a BBSC guest from following a stranger's world, and testing BBSC 0.0.2 with a Windows player.</li>
 <li><strong><a href="https://github.com/cappp">cappp</a></strong>: the "Transaction failed" crash on Seamless Hunt.</li>
 <li><strong><a href="https://github.com/simo1730">simo1730</a></strong>: the Trophies page not finding the dump's files.</li>
-<li><strong><a href="https://github.com/Nahnahchi">Nahnahchi</a></strong>: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures and crashes in the game's memory manager.</li>
+<li><strong><a href="https://github.com/Nahnahchi">Nahnahchi</a></strong>: logs and tests of a GPU freeze in a boss fight on NVIDIA, a crash in Yahar'gul, stretched models, a crash on the Steam Deck, effects turning black, rainbow textures, crashes in the game's memory manager, frame rate drops on NVIDIA, and Exit to Desktop with online play.</li>
 <li><strong><a href="https://github.com/thomasgarafano1">thomasgarafano1</a></strong>: Hunter's Atlas not preparing the map with a GOTY dump, and testing the fix.</li>
 <li><strong><a href="https://github.com/TacticalBill">TacticalBill</a></strong>: marking trophies already earned on the PS4.</li>
 <li><strong><a href="https://github.com/holydingus">holydingus</a></strong>: BBSC's items not given to a new character.</li>
@@ -1216,6 +1234,9 @@ Obrikash and noelmiller. What each one did:
 <li><strong><a href="https://github.com/BlazinKarp">BlazinKarp</a></strong>: the Steam overlay in the game.</li>
 <li><strong><a href="https://github.com/molnar-a">molnar-a</a></strong>: a crash on the Steam Deck after lamp travel, and testing the fix.</li>
 <li><strong><a href="https://github.com/Aman9das">Aman9das</a></strong>: asking for bbport 0.6's keyboard layout.</li>
+<li><strong><a href="https://github.com/eberhardweber">eberhardweber</a></strong>: logs and tests of AMD FX processors, fullscreen on Wayland with several monitors, and the AppImage's version in Gear Lever.</li>
+<li><strong><a href="https://github.com/GitBire">GitBire</a></strong>: the storage box with keyboard and mouse.</li>
+<li><strong><a href="https://github.com/npc-xc">npc-xc</a></strong>: logs of frame rate drops on NVIDIA.</li>
 </ul>
 
 
