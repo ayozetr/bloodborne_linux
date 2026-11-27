@@ -281,7 +281,9 @@ the passes are translated to SPIR-V, and FSR 4.1.1 is selected. The Proton build
 automatically — the first under which the DLL enables FSR 4.1: GE-Proton 10 or newer (also the
 AUR's `proton-ge-custom` in `/usr/share/steam/compatibilitytools.d`),
 Proton-CachyOS, Proton Experimental (tested: GE-Proton 11, Proton-CachyOS 11, Experimental of
-October 2026; Steam's Proton 11.0 and GE-Proton 9 do not). It runs in the Steam runtime it
+October 2026; Steam's Proton 11.0 and GE-Proton 9 do not). The AppImage carries the tools the
+build uses (dxil-spirv, fsr4cap.exe, SPIRV-Tools), so it installs nothing on the system: it also
+works on image-based systems such as Bazzite. It runs in the Steam runtime it
 requires (Steam installs it the first time any game runs with that Proton), or through
 umu-launcher when installed. On NixOS umu-launcher comes from `nix-shell` (downloaded the first
 time, ~1.7 GB); the AppImage runs the recording on the system itself, through the user's systemd

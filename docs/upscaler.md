@@ -294,7 +294,8 @@ the upscaler takes 4.12 ms against 4.32 ms for the accelerated v07.
 
 Needs nix-shell (or MinGW, cmake, ninja, python3, SPIRV-Tools, git), network access for dxil-spirv, and
 Proton (PROTONPATH, or GE-Proton 10+ / Proton-CachyOS / Proton Experimental; umu-run or Steam's runtime).
-In the AppImage the tools are prebuilt (`BB_FSR4CAP_TOOLS`). The DLLs are available, for example, from OptiScaler
+The AppImage and the Nix package carry the tools prebuilt (dxil-spirv, fsr4cap.exe, SPIRV-Tools; `BB_FSR4CAP_TOOLS`): there
+the build needs only Proton, nothing installed on the system (Bazzite and other image-based systems). The DLLs are available, for example, from OptiScaler
 (`FSR4_LATEST/`) and in games with FSR 3.1/4. A build from scratch produces the same files; `VERIFY=1` at the end
 compares against the DLL.
 

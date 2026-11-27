@@ -21,7 +21,8 @@
 #      not needs the loader (given, or amd_fidelityfx_loader_dx12.dll / OptiScaler's
 #      amd_fidelityfx_dx12.dll next to it or one folder up);
 #   1. builds dxil-spirv (pinned commit + dxil-spirv-class-bindings.patch) and fsr4cap.exe
-#      (MinGW), unless BB_FSR4CAP_TOOLS names a folder holding both (the AppImage);
+#      (MinGW) with build_tools.sh, unless BB_FSR4CAP_TOOLS names a folder holding both (the
+#      AppImage and the Nix package);
 #   2. runs fsr4cap.exe under Proton for every output size class and quality ratio, recording the
 #      D3D12 frames (capture_all.sh; proton.sh: umu-run, or Steam's runtime of that Proton);
 #   3. extract.py translates them, checks the replay rules and writes the set; it replaces the
@@ -130,26 +131,8 @@ if [[ -n $tools ]]; then
     dxil_spirv=$tools/dxil-spirv
     copy_in "$tools/fsr4cap.exe" "$work/fsr4cap.exe"
 else
-    # dxil-spirv: DXIL -> SPIR-V as vkd3d-proton translates it.
-    dx=$work/dxil-spirv
-    # A build that no longer starts (127: its library path names the tree where it was built,
-    # before the tree moved) is built again.
-    status=0
-    "$dx/build/dxil-spirv" --help >/dev/null 2>&1 || status=$?
-    if [[ ! -x $dx/build/dxil-spirv || $status == 126 || $status == 127 ]]; then
-        rm -rf "$dx"
-        git clone -q https://github.com/HansKristian-Work/dxil-spirv.git "$dx"
-        git -C "$dx" checkout -q 7dc52786cdb1f53c54dd5c5c2698dff00ea5f0a3
-        git -C "$dx" submodule update -q --init --recursive
-        git -C "$dx" apply "$here/dxil-spirv-class-bindings.patch"
-        cmake -S "$dx" -B "$dx/build" -G Ninja -DCMAKE_BUILD_TYPE=Release >/dev/null
-        ninja -C "$dx/build" dxil-spirv >/dev/null
-    fi
-    dxil_spirv=$dx/build/dxil-spirv
-    # The FidelityFX API headers (MIT) are in tools/fsr4cap/ffx.
-    x86_64-w64-mingw32-gcc -std=c11 -O1 -Wall -I"$here/ffx/api/include" -I"$here/ffx/upscalers/include" \
-        "$here/fsr4cap.c" "$here/capture.c" "$here/rootsig.c" \
-        -o "$work/fsr4cap.exe" -ld3d12 -ldxguid -static
+    bash "$here/build_tools.sh" "$work"
+    dxil_spirv=$work/dxil-spirv/build/dxil-spirv
 fi
 # (The driver form may name the copy already there.)
 [[ $upscaler -ef $work/amd_fidelityfx_upscaler_dx12.dll ]] ||

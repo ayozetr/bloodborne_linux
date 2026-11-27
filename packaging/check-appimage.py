@@ -9,7 +9,7 @@
   at run time. Anything else with BMI2 stops at once ("illegal instruction") on CPUs without it:
   AMD FX and Phenom, Intel before Haswell (issue #39, when the AppImage took CachyOS's x86-64-v3
   libraries);
-- the port's own files are there (bb-probe, libbbgpu, the launcher).
+- the port's own files are there (bb-probe, libbbgpu, the launcher, the FSR 4.1.1 build's tools).
 
     python3 packaging/check-appimage.py dist/Bloodborne-bbport-x86_64.AppImage
 
@@ -26,7 +26,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BMI2 = re.compile(rb'\s(shlx|sarx|shrx|rorx|pdep|pext|mulx)\s')
-NEEDED = ['bb-probe', 'libbbgpu.so', 'bbport_launcher.py']
+NEEDED = ['bb-probe', 'libbbgpu.so', 'bbport_launcher.py',
+          'dxil-spirv', 'fsr4cap.exe', 'spirv-dis', 'spirv-as']
 
 
 def allowed_patterns():

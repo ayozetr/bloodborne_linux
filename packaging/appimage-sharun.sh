@@ -146,8 +146,14 @@ export OUTPUT_APPIMAGE=0
 net=$(ls "$root/out/gpu/libbbnet20.so" 2>/dev/null || true)
 # Install from PKG (scripts/pkg_install.py): pkgextract (Unlicense), when the build has it.
 pkgextract=$(ls "$root/out/pkgextract/bin/pkgextract" 2>/dev/null || true)
+# The FSR 4.1.1 build's tools (the launcher's button, tools/fsr4cap/build_assets.sh): dxil-spirv
+# and fsr4cap.exe built here, SPIRV-Tools' spirv-dis/spirv-as from this system. Without them the
+# button asked for a compiler, CMake, SPIRV-Tools and git, which an image-based system (Bazzite,
+# SteamOS) does not let the user install without layering packages onto it.
+bash "$root/tools/fsr4cap/build_tools.sh" "$root/out/fsr4cap-tools"
 "$quick" \
     "$root/out/bb-probe" "$root/out/bb-gpu-capabilities" ${net:+"$net"} ${pkgextract:+"$pkgextract"} \
+    "$root/out/fsr4cap-tools/dxil-spirv/build/dxil-spirv" "$(command -v spirv-dis)" "$(command -v spirv-as)" \
     "$(command -v python3)" "$(command -v vulkaninfo)" \
     /usr/lib/libgtk-4.so* /usr/lib/libadwaita-1.so* /usr/lib/libgirepository-*.so* \
     "$pydyn"/_ssl.*.so "$pydyn"/_hashlib.*.so "$pil"/_imaging.*.so "$pil"/_imagingft.*.so
@@ -178,6 +184,13 @@ if [[ -f $root/out/libbbport_dlss.so ]]; then
         [[ -f $library ]] && cp "$library" "$appdir/share/bbport/dlss/"
     done
 fi
+# Where the launcher looks for them (BB_FSR4CAP_TOOLS): dxil-spirv through bin/ (sharun's entry,
+# which starts it with its libraries), fsr4cap.exe (a Windows program, run by Proton) as a file.
+[[ -x $appdir/bin/dxil-spirv && -x $appdir/bin/spirv-dis && -x $appdir/bin/spirv-as ]] ||
+    { echo "The FSR 4.1.1 build's tools are missing from the AppDir" >&2; exit 1; }
+mkdir -p "$d/tools/fsr4cap/bin"
+ln -s ../../../bin/dxil-spirv "$d/tools/fsr4cap/bin/dxil-spirv"
+install -m644 "$root/out/fsr4cap-tools/fsr4cap.exe" "$d/tools/fsr4cap/bin/fsr4cap.exe"
 if [[ -n $net ]]; then
     module=$(find "$appdir/lib" -name libbbnet20.so -print -quit)
     [[ -n $module ]] || { echo 'libbbnet20.so is missing from the AppDir' >&2; exit 1; }
